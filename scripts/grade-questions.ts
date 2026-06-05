@@ -13,6 +13,8 @@ const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
 interface QuestionGrade {
   text: string
+  type: 'open' | 'multiple_choice'
+  options?: string[]
   convergenceGrade: 'A' | 'B' | 'C'
   convergenceGroupSize: number
   simulatedAnswers: string[]
@@ -21,6 +23,41 @@ interface QuestionGrade {
   revealDrama: number
   retellability: number
   compositeLabel: string
+}
+
+interface BankQuestion {
+  text: string
+  type?: 'open' | 'multiple_choice'
+  options?: string[]
+}
+
+/**
+ * MC questions don't need Gemini to simulate -- options constrain the answer space.
+ * Pick weighted by a rough heuristic: first option gets slight edge (cultural default),
+ * but all are plausible. Returns a randomly-drawn set of 7 answers + largest group size.
+ */
+function simulateMcConvergence(q: BankQuestion): { answers: string[]; largestGroup: number } {
+  const options = q.options ?? []
+  if (options.length === 0) return { answers: [], largestGroup: 0 }
+
+  // Weighted toward first option (typically the "default" for binaries)
+  const weights = options.length === 2 ? [0.6, 0.4] : [0.5, 0.3, 0.2]
+  const answers: string[] = []
+  for (let i = 0; i < 7; i++) {
+    const r = Math.random()
+    let acc = 0
+    for (let j = 0; j < options.length; j++) {
+      acc += weights[j] ?? 1 / options.length
+      if (r < acc) {
+        answers.push(options[j])
+        break
+      }
+    }
+  }
+  const counts = new Map<string, number>()
+  for (const a of answers) counts.set(a, (counts.get(a) ?? 0) + 1)
+  const largestGroup = Math.max(...counts.values())
+  return { answers, largestGroup }
 }
 
 const BATCH_SIZE = 5
@@ -126,18 +163,69 @@ function compositeLabel(convGrade: string, entScore: number): string {
 
 async function main() {
   const questionsPath = path.resolve(__dirname, '../functions/src/data/questions.json')
-  const rawQuestions: { text: string }[] = JSON.parse(fs.readFileSync(questionsPath, 'utf-8'))
-  const questionTexts = rawQuestions.map((q) => q.text)
+  const rawQuestions: BankQuestion[] = JSON.parse(fs.readFileSync(questionsPath, 'utf-8'))
 
-  console.log(`Grading ${questionTexts.length} questions in batches of ${BATCH_SIZE}...`)
+  // Partition: MC gets deterministic simulation, open-ended needs Gemini
+  const openQuestions = rawQuestions.filter((q) => (q.type ?? 'open') === 'open')
+  const mcQuestions = rawQuestions.filter((q) => q.type === 'multiple_choice')
+
+  console.log(
+    `Grading ${rawQuestions.length} questions (${openQuestions.length} open via Gemini, ${mcQuestions.length} MC via local simulation)...`,
+  )
 
   const grades: QuestionGrade[] = []
-  const totalBatches = Math.ceil(questionTexts.length / BATCH_SIZE)
 
-  for (let i = 0; i < questionTexts.length; i += BATCH_SIZE) {
+  // Handle MC questions locally -- no Gemini needed
+  for (const q of mcQuestions) {
+    const conv = simulateMcConvergence(q)
+    // MC convergence is structurally guaranteed; entertainment still needs Gemini.
+    grades.push({
+      text: q.text,
+      type: 'multiple_choice',
+      options: q.options,
+      convergenceGrade: gradeConvergence(conv.largestGroup),
+      convergenceGroupSize: conv.largestGroup,
+      simulatedAnswers: conv.answers,
+      entertainmentScore: 0, // Will be populated below
+      laughFactor: 0,
+      revealDrama: 0,
+      retellability: 0,
+      compositeLabel: 'PENDING',
+    })
+  }
+
+  // Rate entertainment for MC questions in one pass (convergence already known)
+  if (mcQuestions.length > 0) {
+    for (let i = 0; i < mcQuestions.length; i += BATCH_SIZE) {
+      const batch = mcQuestions.slice(i, i + BATCH_SIZE).map((q) => q.text)
+      try {
+        const ents = await rateEntertainment(batch)
+        for (let j = 0; j < batch.length; j++) {
+          const grade = grades.find((g) => g.text === batch[j])
+          if (!grade) continue
+          const ent = ents[j] ?? { laugh: 0, reveal: 0, retell: 0 }
+          const entAvg = +((ent.laugh + ent.reveal + ent.retell) / 3).toFixed(1)
+          grade.entertainmentScore = entAvg
+          grade.laughFactor = ent.laugh
+          grade.revealDrama = ent.reveal
+          grade.retellability = ent.retell
+          grade.compositeLabel = compositeLabel(grade.convergenceGrade, entAvg)
+        }
+      } catch (err) {
+        console.error(`  MC entertainment batch failed: ${err}`)
+      }
+      if (i + BATCH_SIZE < mcQuestions.length) await sleep(DELAY_MS)
+    }
+  }
+
+  // Open-ended questions: full Gemini flow
+  const openTexts = openQuestions.map((q) => q.text)
+  const totalBatches = Math.ceil(openTexts.length / BATCH_SIZE)
+
+  for (let i = 0; i < openTexts.length; i += BATCH_SIZE) {
     const batchNum = Math.floor(i / BATCH_SIZE) + 1
-    const batch = questionTexts.slice(i, i + BATCH_SIZE)
-    console.log(`  Batch ${batchNum}/${totalBatches} (questions ${i + 1}-${i + batch.length})...`)
+    const batch = openTexts.slice(i, i + BATCH_SIZE)
+    console.log(`  Open batch ${batchNum}/${totalBatches} (questions ${i + 1}-${i + batch.length})...`)
 
     let convergenceResults: { answers: string[]; largestGroup: number }[]
     let entertainmentResults: { laugh: number; reveal: number; retell: number }[]
@@ -152,6 +240,7 @@ async function main() {
       for (const q of batch) {
         grades.push({
           text: q,
+          type: 'open',
           convergenceGrade: 'C',
           convergenceGroupSize: 0,
           simulatedAnswers: [],
@@ -174,6 +263,7 @@ async function main() {
 
       grades.push({
         text: batch[j],
+        type: 'open',
         convergenceGrade: convGrade,
         convergenceGroupSize: conv.largestGroup,
         simulatedAnswers: conv.answers,
@@ -185,7 +275,7 @@ async function main() {
       })
     }
 
-    if (i + BATCH_SIZE < questionTexts.length) {
+    if (i + BATCH_SIZE < openTexts.length) {
       await sleep(DELAY_MS)
     }
   }

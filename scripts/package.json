@@ -5,7 +5,13 @@
   "scripts": {
     "grade": "npx tsx grade-questions.ts",
     "generate": "npx tsx generate-questions.ts",
-    "assemble": "npx tsx assemble-bank.ts"
+    "assemble": "npx tsx assemble-bank.ts",
+    "validate": "npx tsx validate-questions.ts",
+    "add": "npx tsx add-question.ts",
+    "csv:export": "npx tsx questions-csv.ts export",
+    "csv:import": "npx tsx questions-csv.ts import",
+    "csv:apply-suggestions": "npx tsx apply-suggestions.ts",
+    "csv:rewrite": "npx tsx rewrite-options.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1"
