@@ -1,299 +1,1913 @@
 [
-  { "text": "What is a food that should never be put on pizza?" },
-  { "text": "Name a pizza topping everyone argues about" },
-  { "text": "What is the most awkward social situation?" },
-  { "text": "What is the most overrated holiday?" },
-  { "text": "What is the biggest lie everyone tells?" },
-  { "text": "What is something people need to stop bragging about?" },
-  { "text": "What would be the worst thing to hear a doctor say?" },
-  { "text": "Is cereal a soup?" },
-  { "text": "What is the universal sign that a party is boring?" },
-  { "text": "If you could make one food zero calories, what would it be?" },
-  { "text": "What is the best guilty pleasure TV show?" },
-  { "text": "What would you bring to a deserted island?" },
-  { "text": "Toilet paper: over or under?" },
-  { "text": "Name something adults do that they tell kids not to" },
-  { "text": "If you could ban one thing from existing, what would it be?" },
-  { "text": "What is the least attractive accent?" },
-  { "text": "If your pet could talk, what would they say about you?" },
-  { "text": "What do you pretend to understand but actually don't?" },
-  { "text": "What would be the worst superpower?" },
-  { "text": "Name something nobody looks cool doing" },
-  { "text": "What is the most overrated food?" },
-  { "text": "What is something you would never do for a million dollars?" },
-  { "text": "What is the worst thing to step on barefoot?" },
-  { "text": "What is the worst fashion trend of all time?" },
-  { "text": "Name something people always say they'll do but never do" },
-  { "text": "What is the best thing about being home alone?" },
-  { "text": "What would be the worst job in the world?" },
-  { "text": "What is a socially acceptable thing that is actually weird?" },
-  { "text": "What is the worst food combination people actually eat?" },
-  { "text": "What would be the worst theme for a party?" },
-  { "text": "What is the most controversial condiment?" },
-  { "text": "What is the most overrated fast food chain?" },
-  { "text": "What is the most bougie thing you do regularly?" },
-  { "text": "What small thing makes you unreasonably angry?" },
-  { "text": "What is the most ridiculous thing you believed as a kid?" },
-  { "text": "What is the worst way to break up with someone?" },
-  { "text": "What is the one food everyone thinks they make well but don't?" },
-  { "text": "What is the worst part of a wedding?" },
-  { "text": "What fictional character would be the worst coworker?" },
-  { "text": "What would you never name your child?" },
-  { "text": "What word is impossible to say in an angry voice?" },
-  { "text": "What everyday activity would be the funniest Olympic sport?" },
-  { "text": "What is the weirdest thing that is considered normal?" },
-  { "text": "Name a skill that is impressive but completely useless" },
-  { "text": "What would be the worst name for a restaurant?" },
-  { "text": "What would be on the menu at the world's worst restaurant?" },
-  { "text": "What would you absolutely not do for $100?" },
-  { "text": "If you were a ghost, who would you haunt?" },
-  { "text": "What is the most suspicious thing you could buy at a hardware store?" },
-  { "text": "What is the cringiest thing you did as a teenager?" },
-  { "text": "What would you never admit on a first date?" },
-  { "text": "What is one thing you do that you know is wrong but keep doing?" },
-  { "text": "What is the best hot dog topping?" },
-  { "text": "Name something people argue about in the car" },
-  { "text": "What is the worst household smell?" },
-  { "text": "What is the most embarrassing song on your playlist?" },
-  { "text": "Name something that is only fun the first time" },
-  { "text": "What is the worst name for a pet?" },
-  { "text": "What did you think was cool as a kid that is actually embarrassing?" },
-  { "text": "Name an actor who plays the same character in every movie" },
-  { "text": "What is the most overhyped city?" },
-  { "text": "What is the most unromantic thing ever?" },
-  { "text": "What job would you be terrible at?" },
-  { "text": "What two foods should never be combined?" },
-  { "text": "What should you never say to your in-laws?" },
-  { "text": "What is the most passive aggressive thing someone can do?" },
-  { "text": "Name something everyone has but nobody talks about" },
-  { "text": "Name a trend you fell for and now regret" },
-  { "text": "What is a totally reasonable fear that people make fun of?" },
-  { "text": "What is the worst thing about buffets?" },
-  { "text": "What is the worst thing to hear at a restaurant?" },
-  { "text": "What sounds like a compliment but is actually an insult?" },
-  { "text": "Name a celebrity who would be terrible at a party" },
-  { "text": "What job title would make the worst superhero name?" },
-  { "text": "What is the grossest thing that is totally normal?" },
-  { "text": "What is the best response to 'we need to talk'?" },
-  { "text": "What is the worst possible song to play at a gym?" },
-  { "text": "What is the best fast food restaurant?" },
-  { "text": "If you could live in any fictional world, which one?" },
-  { "text": "What is the best condiment?" },
-  { "text": "What is the most overplayed song of all time?" },
-  { "text": "What is the worst movie sequel?" },
-  { "text": "What is the worst pizza topping?" },
-  { "text": "Name a New Year's resolution nobody actually keeps" },
-  { "text": "What is the hardest thing about being an adult?" },
-  { "text": "What is the most useless school subject?" },
-  { "text": "If aliens landed tomorrow, what would we show them first?" },
-  { "text": "What animal would be the rudest if it could talk?" },
-  { "text": "If you could uninvent one thing, what would it be?" },
-  { "text": "What age does someone become 'old'?" },
-  { "text": "What is the worst candy?" },
-  { "text": "What is the most divisive Thanksgiving food?" },
-  { "text": "What movie do people quote too much?" },
-  { "text": "What is something expensive that feels cheap?" },
-  { "text": "What is the worst thing to be allergic to?" },
-  { "text": "What is a sign that someone grew up wealthy?" },
-  { "text": "What is the worst advice people give all the time?" },
-  { "text": "Name something you could say at a dinner party and in a courtroom" },
-  { "text": "If animals could talk, which would be the most annoying?" },
-  { "text": "What is the most pointless meeting you could imagine?" },
-  { "text": "What is the most dramatic way to quit a job?" },
-  { "text": "What is the worst thing about potlucks?" },
-  { "text": "What would be on your tombstone if it had to be funny?" },
-  { "text": "If you had a warning label, what would it say?" },
-  { "text": "Dogs or cats — and you have to pick one." },
-  { "text": "What is the best gas station snack?" },
-  { "text": "What is the best dip for chips?" },
-  { "text": "What is the best stadium food?" },
-  { "text": "What is the best movie for family night?" },
-  { "text": "Name a song everyone knows the words to" },
-  { "text": "What is the worst school subject?" },
-  { "text": "What is the best type of french fry?" },
-  { "text": "What is the best type of donut?" },
-  { "text": "What would be the hardest food to give up?" },
-  { "text": "What is a hill you will die on?" },
-  { "text": "Name something that is way harder than it looks" },
-  { "text": "Thick crust or thin crust — which is better?" },
-  { "text": "Which holiday has the best food?" },
-  { "text": "What is the best comfort show to rewatch?" },
-  { "text": "What is the most iconic movie quote?" },
-  { "text": "What is the worst movie you have ever sat through?" },
-  { "text": "What is the most overused excuse?" },
-  { "text": "What is the most American food?" },
-  { "text": "What is the best fast food breakfast?" },
-  { "text": "What is the best Girl Scout cookie?" },
-  { "text": "What is the most useless emoji?" },
-  { "text": "What is the best thing to do on a first date?" },
-  { "text": "What is the most stressful thing about the holidays?" },
-  { "text": "What should they start teaching in school?" },
-  { "text": "If you could eliminate one minor inconvenience forever, what?" },
-  { "text": "What is the best guilty pleasure snack?" },
-  { "text": "What song would play every time you entered a room?" },
-  { "text": "What is the worst possible Wi-Fi password?" },
-  { "text": "What is the most embarrassing thing in your search history?" },
-  { "text": "What is the worst text to accidentally send to your boss?" },
-  { "text": "Is a hot dog a sandwich? Yes or no." },
-  { "text": "What is the ideal number of pillows on a bed?" },
-  { "text": "Diagonal or straight — how do you cut a sandwich?" },
-  { "text": "Ketchup on eggs — acceptable or criminal?" },
-  { "text": "What is the correct cheese for a grilled cheese?" },
-  { "text": "Cake or pie?" },
-  { "text": "Boneless wings or bone-in wings?" },
-  { "text": "What item of clothing should have stayed in the early 2000s?" },
-  { "text": "What food texture instantly triggers your gag reflex?" },
-  { "text": "What TV show went on at least two seasons too long?" },
-  { "text": "Name a social media trend that needs to die" },
-  { "text": "Which children's character is secretly insufferable?" },
-  { "text": "What is the worst thing to find in a shared fridge at work?" },
-  { "text": "What is the most annoying 'quirk' people pass off as a personality?" },
-  { "text": "What is the most universally ignored piece of etiquette?" },
-  { "text": "Name a celebrity everyone pretends to like but finds annoying" },
-  { "text": "What is the most overrated vacation destination?" },
-  { "text": "What is the most common lie people tell about their weekend?" },
-  { "text": "Name a food everyone pretends to like for health reasons" },
-  { "text": "Pineapple on pizza: masterpiece or crime against humanity?" },
-  { "text": "Milk before cereal or after? Your decision defines your worldview." },
-  { "text": "Is it 'gif' with a hard G or a soft G?" },
-  { "text": "Leaving voicemails: thoughtful or a waste of everyone's time?" },
-  { "text": "What is the worst public display of affection?" },
-  { "text": "What is the most questionable stain in a hotel room?" },
-  { "text": "What is the worst thing to find floating in a public pool?" },
-  { "text": "What is the most unsettling thing for a smart speaker to say at 3 AM?" },
-  { "text": "What is the worst animal sound to make during a job interview?" },
-  { "text": "What is the worst thing to accidentally step in while barefoot outside?" },
-  { "text": "What is the most infuriating thing in a public bathroom?" },
-  { "text": "What is the most aggressively basic fall drink order?" },
-  { "text": "Which celebrity is undeniably famous for absolutely nothing?" },
-  { "text": "What is the worst Christmas gift to unwrap?" },
-  { "text": "What is the most suspicious neighborly favor to be asked?" },
-  { "text": "What is the most inappropriate place to fall asleep in public?" },
-
-  { "text": "Who in this room would be the worst roommate?" },
-  { "text": "Who in this room would be the worst at keeping a secret?" },
-  { "text": "Who in this room would cry first during a sad movie?" },
-  { "text": "Who in this room would last the longest without their phone?" },
-  { "text": "Who in this room is most likely to start a fight over Monopoly?" },
-  { "text": "Who in this room is most likely to go viral?" },
-  { "text": "Who in this room would survive the longest in a horror movie?" },
-  { "text": "Who in this room would be the most dramatic over a paper cut?" },
-  { "text": "Who in this room has the worst taste in music?" },
-  { "text": "Who in this room has the most suspicious browser history?" },
-  { "text": "Who in this room would hoard toilet paper during a crisis?" },
-  { "text": "Who in this room would accidentally join a pyramid scheme?" },
-  { "text": "Who in this room would ruin a surprise party?" },
-  { "text": "Who in this room would be caught singing off-key at a wedding?" },
-  { "text": "Who in this room would panic and call 911 for a minor inconvenience?" },
-  { "text": "Who in this room would be the last to notice a fire in the building?" },
-  { "text": "Who in this room would win a hot dog eating contest?" },
-  { "text": "Who in this room would try to haggle at a fancy restaurant?" },
-  { "text": "Who in this room would sneak snacks into a movie theater the worst way?" },
-
-  { "text": "Would you rather fight one horse-sized duck or a hundred duck-sized horses?" },
-  { "text": "Would you rather be the funniest person in the room or the smartest?" },
-  { "text": "Would you rather be famous for something embarrassing or unknown forever?" },
-  { "text": "Would you rather always be 10 minutes late or 20 minutes early?" },
-  { "text": "Would you rather live without music or without movies?" },
-  { "text": "Would you rather have unlimited money or unlimited time?" },
-  { "text": "Would you rather always speak your mind or never speak again?" },
-  { "text": "Would you rather sweat mayonnaise or cry hot sauce?" },
-  { "text": "Would you rather your phone always be at 5% or your Wi-Fi always be 2G?" },
-  { "text": "Would you rather give up cheese forever or chocolate forever?" },
-  { "text": "Would you rather never use the internet again or never eat pizza again?" },
-  { "text": "Would you rather have no taste buds or be colorblind?" },
-  { "text": "Would you rather never age physically or never age mentally?" },
-  { "text": "Would you rather your sweat smell like bleu cheese or your breath smell like tuna?" },
-  { "text": "Would you rather only communicate through dance or through opera singing?" },
-  { "text": "Would you rather have knees that bend both ways or elbows that only bend forward?" },
-  { "text": "Would you rather your bed always feel sandy or your shower always run ice cold?" },
-
-  { "text": "If you were abducted, who would you choose: Aliens, Pirates, or Ghosts?" },
-  { "text": "Pick your permanent body scent: old library books, fresh cut grass, or new car smell?" },
-  { "text": "You can only eat one cuisine forever: Mexican, Italian, or Japanese?" },
-  { "text": "Pick your nightmare roommate: a loud chewer, a sleep talker, or a thermostat dictator?" },
-  { "text": "You're stuck in an elevator with one celebrity: The Rock, Oprah, or Gordon Ramsay?" },
-  { "text": "Your shower now only dispenses one liquid: lukewarm gravy, flat soda, or dish soap?" },
-  { "text": "Pick your useless superpower: you can talk to ants, you glow in the dark, or you can taste colors?" },
-  { "text": "You must wear one costume to work every day: hot dog suit, banana suit, or inflatable dinosaur?" },
-  { "text": "Pick your worst tattoo: a toilet, your ex's face, or a QR code to a Rick Roll?" },
-  { "text": "You can only listen to one artist forever: Nickelback, Kidz Bop, or the Frozen soundtrack?" },
-  { "text": "Zombie apocalypse weapon: a frying pan, a golf club, or a bag of doorknobs?" },
-  { "text": "Your car horn is replaced with one sound: a goat scream, a fart, or the Macarena?" },
-  { "text": "Pick your new neighbor: someone who mows at 6 AM, a loud drummer, or a guy with 12 cats?" },
-  { "text": "You must get a face tattoo: a tiny mustache, a third eyebrow, or a permanent teardrop?" },
-  { "text": "Pick your prison cellmate: a close talker, a loud snorer, or someone who narrates everything?" },
-  { "text": "Your voice permanently changes to: Morgan Freeman, Gilbert Gottfried, or Siri?" },
-  { "text": "You can only drink one thing forever: room temperature milk, black coffee, or pickle juice?" },
-  { "text": "Pick your haunted house ghost: one that moves your furniture, hides your keys, or eats your leftovers?" },
-  { "text": "You time travel but can only visit: the dinosaurs, ancient Rome, or the year 3000?" },
-  { "text": "You get one free crime with no consequences: what do you do?" },
-  { "text": "Pick your apocalypse buddy: a doctor, a mechanic, or a chef?" },
-  { "text": "You can add one ridiculous rule to any sport — what is it?" },
-  { "text": "You must rename yourself after a food — what's your new name?" },
-  { "text": "Which fictional villain actually had a point?" },
-  { "text": "Pick your worst way to travel: riding a donkey, a tandem bike with a stranger, or a pogo stick?" },
-  { "text": "Your life gets a laugh track — which situation would be the most annoying?" },
-  { "text": "You have to fight one animal: a kangaroo, an ostrich, or a very angry goose?" },
-  { "text": "Pick your personal hell: eternal hold music, permanent wet socks, or never-ending hiccups?" },
-  { "text": "You wake up as an animal for a day: a house cat, a dolphin, or an eagle?" },
-  { "text": "Which mythical creature would be the most annoying roommate: a goblin, a unicorn, or Bigfoot?" },
-  { "text": "Celebrity narrating your life: David Attenborough, Snoop Dogg, or your mom?" },
-  { "text": "You can only use one condiment for the rest of your life — which one?" },
-  { "text": "Which fast food mascot would win in a fight?" },
-  { "text": "Pick your new ringtone that you can never change: a baby crying, a dial-up modem, or the Macarena?" },
-  { "text": "You must eat one weird combo every day: ketchup on ice cream, mayo on cookies, or mustard on cereal?" },
-  { "text": "Trapped in a movie for a week: Jurassic Park, Titanic, or The Hunger Games?" },
-  { "text": "Pick your supervillain name based on your worst habit" },
-  { "text": "If your life was a reality show, what would it be called?" },
-  { "text": "You can only watch one movie for the rest of your life — what is it?" },
-  { "text": "If you could only shop at one store forever, which one?" },
-  { "text": "What is the most chaotic thing a kid has ever said to you?" },
-  { "text": "If this group started a band, what would the name be?" },
-  { "text": "What is the most irrational thing you get competitive about?" },
-  { "text": "What is the worst possible song to walk down the aisle to?" },
-  { "text": "What expired food would you still eat?" },
-  { "text": "What is the most random thing you know way too much about?" },
-  { "text": "Name a food that people eat wrong" },
-  { "text": "What is a scam that we have all just agreed is fine?" },
-  { "text": "What is a dealbreaker on a road trip?" },
-  { "text": "What fictional character do you relate to the most?" },
-  { "text": "What is the worst thing about group projects?" },
-  { "text": "What is the funniest word in the English language?" },
-  { "text": "What is the best decade for music?" },
-  { "text": "What is the one thing in your home you would save in a fire?" },
-  { "text": "If you could relive one day of your life, which would it be?" },
-  { "text": "What is the worst thing about living with someone?" },
-  { "text": "What is the most toxic reality TV show?" },
-  { "text": "What common phrase makes absolutely no sense?" },
-  { "text": "What is the best free thing in life?" },
-  { "text": "What makes someone immediately likeable?" },
-  { "text": "What is the most satisfying sound?" },
-  { "text": "What is the best excuse for being late?" },
-  { "text": "What is the most nostalgic smell?" },
-  { "text": "What is the first app you check in the morning?" },
-  { "text": "What childhood snack do you still eat as an adult?" },
-  { "text": "What is the biggest first world problem?" },
-  { "text": "What is everyone's biggest pet peeve?" },
-  { "text": "What is the best midnight snack?" },
-  { "text": "What is the scariest animal?" },
-  { "text": "What is the most annoying sound?" },
-  { "text": "What is the best ice cream flavor?" },
-  { "text": "What is the best pizza topping?" },
-  { "text": "What is the best breakfast food?" },
-  { "text": "If you won the lottery, what would you buy first?" },
-  { "text": "What is the best dessert?" },
-  { "text": "What is everyone's favorite comfort food?" },
-  { "text": "Name a Disney movie everyone has seen" },
-  { "text": "What is the best sandwich?" },
-  { "text": "What is the most annoying household chore?" },
-  { "text": "If you could eat one food forever, what would it be?" },
-  { "text": "Name a superhero everyone knows" },
-  { "text": "What is everyone's go-to karaoke song?" },
-  { "text": "What is the best Thanksgiving side dish?" },
-  { "text": "What is the best Halloween candy?" },
-  { "text": "What is the most important invention ever?" },
-  { "text": "What is the best thing about dogs?" },
-  { "text": "What is the best thing about cats?" },
-  { "text": "What is the best emoji?" }
+  {
+    "text": "What is a food that should never be put on pizza?",
+    "type": "multiple_choice",
+    "options": [
+      "Pineapple",
+      "Anchovies",
+      "Olives"
+    ]
+  },
+  {
+    "text": "Name a pizza topping everyone argues about",
+    "type": "multiple_choice",
+    "options": [
+      "Pineapple",
+      "Anchovies",
+      "Olives"
+    ]
+  },
+  {
+    "text": "What is the most awkward social situation?",
+    "type": "multiple_choice",
+    "options": [
+      "Forgetting someone's name",
+      "Awkward silence",
+      "Running into an ex"
+    ]
+  },
+  {
+    "text": "What is the most overrated holiday?",
+    "type": "multiple_choice",
+    "options": [
+      "Valentine's Day",
+      "New Year's Eve",
+      "Valentine's"
+    ]
+  },
+  {
+    "text": "What is the biggest lie everyone tells?",
+    "type": "multiple_choice",
+    "options": [
+      "I'm fine",
+      "I'm on my way",
+      "I read the terms and conditions"
+    ]
+  },
+  {
+    "text": "What is something people need to stop bragging about?",
+    "type": "multiple_choice",
+    "options": [
+      "Money",
+      "How busy they are",
+      "Social media followers"
+    ]
+  },
+  {
+    "text": "What would be the worst thing to hear a doctor say?",
+    "type": "multiple_choice",
+    "options": [
+      "It's cancer",
+      "It's terminal",
+      "We made a mistake"
+    ]
+  },
+  {
+    "text": "Is cereal a soup?",
+    "type": "multiple_choice",
+    "options": [
+      "Yes",
+      "No"
+    ]
+  },
+  {
+    "text": "What is the universal sign that a party is boring?",
+    "type": "multiple_choice",
+    "options": [
+      "Everyone on their phone",
+      "People looking at their phones",
+      "Awkward silence"
+    ]
+  },
+  {
+    "text": "If you could make one food zero calories, what would it be?",
+    "type": "multiple_choice",
+    "options": [
+      "Pizza",
+      "Chocolate",
+      "Ice cream"
+    ]
+  },
+  {
+    "text": "What is the best guilty pleasure TV show?",
+    "type": "multiple_choice",
+    "options": [
+      "The Bachelor",
+      "The Bachelorette",
+      "Real Housewives of Beverly Hills"
+    ]
+  },
+  {
+    "text": "What would you bring to a deserted island?",
+    "type": "multiple_choice",
+    "options": [
+      "Water filter",
+      "Knife",
+      "Lighter"
+    ]
+  },
+  {
+    "text": "Toilet paper:",
+    "type": "multiple_choice",
+    "options": [
+      "Over",
+      "Under"
+    ]
+  },
+  {
+    "text": "Name something adults do that they tell kids not to",
+    "type": "multiple_choice",
+    "options": [
+      "Swearing",
+      "Swear",
+      "Interrupting"
+    ]
+  },
+  {
+    "text": "If you could ban one thing from existing, what would it be?",
+    "type": "multiple_choice",
+    "options": [
+      "Mosquitoes",
+      "War",
+      "Hate"
+    ]
+  },
+  {
+    "text": "What is the least attractive accent?",
+    "type": "multiple_choice",
+    "options": [
+      "Southern American",
+      "Bostonian",
+      "Southern drawl"
+    ]
+  },
+  {
+    "text": "If your pet could talk, what would they say about you?",
+    "type": "multiple_choice",
+    "options": [
+      "Feed Me Now!",
+      "More Belly Rubs!",
+      "Let's Go Outside!",
+      "You're My Favorite"
+    ]
+  },
+  {
+    "text": "What do you pretend to understand but actually don't?",
+    "type": "multiple_choice",
+    "options": [
+      "The Stock Market",
+      "Fine Art",
+      "Cryptocurrency",
+      "Sports Rules"
+    ]
+  },
+  {
+    "text": "What would be the worst superpower?",
+    "type": "multiple_choice",
+    "options": [
+      "Read peoples thoughts�All of them",
+      "See through clothes�All of them",
+      "Super smell�All the smells"
+    ]
+  },
+  {
+    "text": "Name something nobody looks cool doing",
+    "type": "multiple_choice",
+    "options": [
+      "Eating a banana",
+      "Running for the bus",
+      "Applying sunscreen"
+    ]
+  },
+  {
+    "text": "What is the most overrated food?",
+    "type": "multiple_choice",
+    "options": [
+      "Avocado Toast",
+      "Sushi",
+      "Truffle Fries"
+    ]
+  },
+  {
+    "text": "What is something you would never do for a million dollars?",
+    "type": "multiple_choice",
+    "options": [
+      "Harm an innocent person",
+      "Kill an animal",
+      "Betray my family",
+      "Eat human waste"
+    ]
+  },
+  {
+    "text": "What is the worst thing to step on barefoot?",
+    "type": "multiple_choice",
+    "options": [
+      "Lego",
+      "Glass shard",
+      "Dog poop"
+    ]
+  },
+  {
+    "text": "What is the worst fashion trend of all time?",
+    "type": "multiple_choice",
+    "options": [
+      "Bell bottoms",
+      "Mullets",
+      "Crocs"
+    ]
+  },
+  {
+    "text": "Name something people always say they'll do but never do",
+    "type": "multiple_choice",
+    "options": [
+      "Go to the gym",
+      "Stick to a diet",
+      "Clean the house"
+    ]
+  },
+  {
+    "text": "What is the best thing about being home alone?",
+    "type": "multiple_choice",
+    "options": [
+      "Peace and quiet",
+      "Doing whatever I want",
+      "No judgment"
+    ]
+  },
+  {
+    "text": "What would be the worst job in the world?",
+    "type": "multiple_choice",
+    "options": [
+      "Porta-potty cleaner",
+      "Sewer worker",
+      "Garbage collector"
+    ]
+  },
+  {
+    "text": "What is a socially acceptable thing that is actually weird?",
+    "type": "multiple_choice",
+    "options": [
+      "Saying \"bless you\"",
+      "Tipping culture",
+      "Talking to pets like humans",
+      "Shaking hands when meeting someone"
+    ]
+  },
+  {
+    "text": "What is the worst food combination people actually eat?",
+    "type": "multiple_choice",
+    "options": [
+      "Pineapple on pizza",
+      "Ketchup on eggs",
+      "Pickles and peanut butter"
+    ]
+  },
+  {
+    "text": "What would be the worst theme for a party?",
+    "type": "multiple_choice",
+    "options": [
+      "Funeral",
+      "Tax Audit",
+      "Hospital"
+    ]
+  },
+  {
+    "text": "What is the most controversial condiment?",
+    "type": "multiple_choice",
+    "options": [
+      "Mayonnaise",
+      "Ranch",
+      "Mayo"
+    ]
+  },
+  {
+    "text": "What is the most overrated fast food chain?",
+    "type": "multiple_choice",
+    "options": [
+      "McDonald's",
+      "Starbucks",
+      "Subway"
+    ]
+  },
+  {
+    "text": "What small thing makes you unreasonably angry?",
+    "type": "multiple_choice",
+    "options": [
+      "Loud chewing",
+      "People who don't use turn signals",
+      "Not replacing the toilet paper roll"
+    ]
+  },
+  {
+    "text": "What is the most ridiculous thing you believed as a kid?",
+    "type": "multiple_choice",
+    "options": [
+      "Swallowed Gum Stays",
+      "Quick Sand Everywhere",
+      "TV People Live Inside",
+      "Seeds Grow In Stomach"
+    ]
+  },
+  {
+    "text": "What is the worst way to break up with someone?",
+    "type": "multiple_choice",
+    "options": [
+      "Ghosting",
+      "Via text message",
+      "Through a friend"
+    ]
+  },
+  {
+    "text": "What is the one food everyone thinks they make well but don't?",
+    "type": "multiple_choice",
+    "options": [
+      "Scrambled eggs",
+      "Mac and cheese",
+      "Grilled cheese"
+    ]
+  },
+  {
+    "text": "What fictional character would be the worst coworker?",
+    "type": "multiple_choice",
+    "options": [
+      "The Joker",
+      "Michael Scott",
+      "Michael Scott from The Office",
+      "Sheldon Cooper"
+    ]
+  },
+  {
+    "text": "What would you never name your child?",
+    "type": "multiple_choice",
+    "options": [
+      "Karen",
+      "Adolf",
+      "Lucifer"
+    ]
+  },
+  {
+    "text": "What word is impossible to say in an angry voice?",
+    "type": "multiple_choice",
+    "options": [
+      "Bubbles",
+      "Marshmallow",
+      "Giggles"
+    ]
+  },
+  {
+    "text": "What everyday activity would be the funniest Olympic sport?",
+    "type": "open"
+  },
+  {
+    "text": "What is the weirdest thing that is considered normal?",
+    "type": "multiple_choice",
+    "options": [
+      "Small Talk",
+      "Paying To Live",
+      "Shaking Hands",
+      "Saying 'Bless You'"
+    ]
+  },
+  {
+    "text": "Name a skill that is impressive but completely useless",
+    "type": "multiple_choice",
+    "options": [
+      "Solving A Rubik's Cube",
+      "Expert Juggling",
+      "Unicycling",
+      "Card Flourishes"
+    ]
+  },
+  {
+    "text": "If you were a ghost, who would you haunt?",
+    "type": "multiple_choice",
+    "options": [
+      "Donald Trump",
+      "My ex-boss",
+      "My high school bully"
+    ]
+  },
+  {
+    "text": "What is the most suspicious thing you could buy at a hardware store?",
+    "type": "multiple_choice",
+    "options": [
+      "Duct tape and zip ties",
+      "A large tarp and shovel",
+      "Bleach (gallons of it)"
+    ]
+  },
+  {
+    "text": "What is the cringiest thing you did as a teenager?",
+    "type": "multiple_choice",
+    "options": [
+      "Terrible fashion choices",
+      "Trying too hard to be cool",
+      "Awkward attempts at flirting"
+    ]
+  },
+  {
+    "text": "Name something people argue about in the car",
+    "type": "open"
+  },
+  {
+    "text": "What is the worst household smell?",
+    "type": "multiple_choice",
+    "options": [
+      "Rotten Food",
+      "Garbage",
+      "Sewage",
+      "Vomit"
+    ]
+  },
+  {
+    "text": "Name an actor who plays the same character in every movie",
+    "type": "multiple_choice",
+    "options": [
+      "Dwayne Johnson",
+      "Jason Statham",
+      "Adam Sandler",
+      "Liam Neeson"
+    ]
+  },
+  {
+    "text": "What is the most overhyped city?",
+    "type": "multiple_choice",
+    "options": [
+      "Los Angeles",
+      "New York City",
+      "Paris",
+      "Las Vegas"
+    ]
+  },
+  {
+    "text": "What is the most unromantic thing ever?",
+    "type": "multiple_choice",
+    "options": [
+      "Doing Taxes Together",
+      "Cleaning The Toilet",
+      "Complaining Constantly",
+      "Loud Snoring"
+    ]
+  },
+  {
+    "text": "What job would you be terrible at?",
+    "type": "multiple_choice",
+    "options": [
+      "Customer service",
+      "Accountant",
+      "Surgeon",
+      "Door to door sales"
+    ]
+  },
+  {
+    "text": "What two foods should never be combined?",
+    "type": "multiple_choice",
+    "options": [
+      "Pickles And Chocolate",
+      "Sardines And Caramel",
+      "Cereal And Orange Juice",
+      "Ketchup And Ice Cream"
+    ]
+  },
+  {
+    "text": "What is a totally reasonable fear that people make fun of?",
+    "type": "multiple_choice",
+    "options": [
+      "Spiders",
+      "Bugs",
+      "Clowns"
+    ]
+  },
+  {
+    "text": "Name a celebrity who would be terrible at a party",
+    "type": "multiple_choice",
+    "options": [
+      "Kanye West",
+      "Elon Musk",
+      "Gordon Ramsay",
+      "Ben Shapiro"
+    ]
+  },
+  {
+    "text": "What is the best fast food restaurant?",
+    "type": "multiple_choice",
+    "options": [
+      "Chick-fil-A",
+      "McDonald's",
+      "In-N-Out Burger",
+      "Wendy's"
+    ]
+  },
+  {
+    "text": "If you could live in any fictional world, which one?",
+    "type": "multiple_choice",
+    "options": [
+      "Marvel Universe",
+      "Middle-earth",
+      "Star Wars",
+      "Pokemon World"
+    ]
+  },
+  {
+    "text": "What is the most overplayed song of all time?",
+    "type": "multiple_choice",
+    "options": [
+      "Don't Stop Believin'",
+      "Sweet Caroline",
+      "Bohemian Rhapsody",
+      "Happy"
+    ]
+  },
+  {
+    "text": "What is the worst movie sequel?",
+    "type": "multiple_choice",
+    "options": [
+      "Speed 2: Cruise Control",
+      "Jaws: The Revenge",
+      "Matrix Revolutions",
+      "Star Wars: Episode I"
+    ]
+  },
+  {
+    "text": "What is the worst pizza topping?",
+    "type": "multiple_choice",
+    "options": [
+      "Pineapple",
+      "Anchovies",
+      "Black Olives",
+      "Mushrooms"
+    ]
+  },
+  {
+    "text": "Name a New Year's resolution nobody actually keeps",
+    "type": "open"
+  },
+  {
+    "text": "What is the hardest thing about being an adult?",
+    "type": "multiple_choice",
+    "options": [
+      "Bills",
+      "Responsibility",
+      "Financial stress"
+    ]
+  },
+  {
+    "text": "What is the most useless school subject?",
+    "type": "open"
+  },
+  {
+    "text": "If aliens landed tomorrow, what would we show them first?",
+    "type": "multiple_choice",
+    "options": [
+      "A Smartphone",
+      "A Map Of Earth",
+      "The Internet",
+      "Human Art"
+    ]
+  },
+  {
+    "text": "What animal would be the rudest if it could talk?",
+    "type": "multiple_choice",
+    "options": [
+      "Cat",
+      "Goose",
+      "Honey Badger",
+      "Llama"
+    ]
+  },
+  {
+    "text": "If you could uninvent one thing, what would it be?",
+    "type": "multiple_choice",
+    "options": [
+      "Social media",
+      "Nuclear weapons",
+      "Single-use plastics"
+    ]
+  },
+  {
+    "text": "What age does someone become 'old'?",
+    "type": "multiple_choice",
+    "options": [
+      "65",
+      "70",
+      "60"
+    ]
+  },
+  {
+    "text": "What is the worst candy?",
+    "type": "multiple_choice",
+    "options": [
+      "Black Licorice",
+      "Candy Corn",
+      "Circus Peanuts",
+      "Necco Wafers"
+    ]
+  },
+  {
+    "text": "What is the most divisive Thanksgiving food?",
+    "type": "multiple_choice",
+    "options": [
+      "Green Bean Casserole",
+      "Cranberry sauce",
+      "Sweet Potato Casserole"
+    ]
+  },
+  {
+    "text": "What movie do people quote too much?",
+    "type": "multiple_choice",
+    "options": [
+      "Forrest Gump",
+      "Star Wars",
+      "Zoolander"
+    ]
+  },
+  {
+    "text": "What is something expensive that feels cheap?",
+    "type": "multiple_choice",
+    "options": [
+      "Designer Clothing",
+      "Printer Ink",
+      "College Textbooks",
+      "Theme Park Food"
+    ]
+  },
+  {
+    "text": "What is the worst thing to be allergic to?",
+    "type": "multiple_choice",
+    "options": [
+      "Peanuts",
+      "Shellfish",
+      "Gluten",
+      "Bees"
+    ]
+  },
+  {
+    "text": "If animals could talk, which would be the most annoying?",
+    "type": "multiple_choice",
+    "options": [
+      "Parrot",
+      "Chihuahua",
+      "Mosquito",
+      "Seagull"
+    ]
+  },
+  {
+    "text": "What would you put on your tombstone?",
+    "type": "multiple_choice",
+    "options": [
+      "Still Loading...",
+      "Worth The Wait",
+      "Gone Fishing",
+      "I Told You I Was Sick"
+    ]
+  },
+  {
+    "text": "Dogs or cats?",
+    "type": "multiple_choice",
+    "options": [
+      "Dogs",
+      "Cats"
+    ]
+  },
+  {
+    "text": "What is the best gas station snack?",
+    "type": "multiple_choice",
+    "options": [
+      "Chips",
+      "Candy bar",
+      "Beef jerky"
+    ]
+  },
+  {
+    "text": "What is the best dip for chips?",
+    "type": "multiple_choice",
+    "options": [
+      "Salsa",
+      "French Onion Dip",
+      "Guacamole"
+    ]
+  },
+  {
+    "text": "What is the best stadium food?",
+    "type": "multiple_choice",
+    "options": [
+      "Hot Dog",
+      "Nachos",
+      "Popcorn"
+    ]
+  },
+  {
+    "text": "What is the best movie for family night?",
+    "type": "multiple_choice",
+    "options": [
+      "Toy Story",
+      "The Lion King",
+      "Home Alone"
+    ]
+  },
+  {
+    "text": "What is the best type of french fry?",
+    "type": "multiple_choice",
+    "options": [
+      "Shoestring",
+      "Waffle",
+      "Curly",
+      "Crinkle Cut"
+    ]
+  },
+  {
+    "text": "What is the best type of donut?",
+    "type": "multiple_choice",
+    "options": [
+      "Glazed",
+      "Chocolate",
+      "Jelly"
+    ]
+  },
+  {
+    "text": "What would be the hardest food to give up?",
+    "type": "multiple_choice",
+    "options": [
+      "Pizza",
+      "Coffee",
+      "Chocolate",
+      "Cheese"
+    ]
+  },
+  {
+    "text": "Name something that is way harder than it looks",
+    "type": "multiple_choice",
+    "options": [
+      "Juggling",
+      "Golf",
+      "Parenting",
+      "Learning A Language"
+    ]
+  },
+  {
+    "text": "Which holiday has the best food?",
+    "type": "multiple_choice",
+    "options": [
+      "Thanksgiving",
+      "Christmas",
+      "Halloween",
+      "New Year's Eve"
+    ]
+  },
+  {
+    "text": "What is the best comfort show to rewatch?",
+    "type": "multiple_choice",
+    "options": [
+      "The Office",
+      "Friends",
+      "Parks and Rec",
+      "Seinfeld"
+    ]
+  },
+  {
+    "text": "What is the most overused excuse?",
+    "type": "multiple_choice",
+    "options": [
+      "Traffic",
+      "My Alarm Didn't Go Off",
+      "I Forgot",
+      "I Didn't See The Email"
+    ]
+  },
+  {
+    "text": "What is the best fast food breakfast?",
+    "type": "multiple_choice",
+    "options": [
+      "Egg McMuffin",
+      "Chicken Biscuit",
+      "Breakfast Crunchwrap",
+      "Sausage Biscuit"
+    ]
+  },
+  {
+    "text": "What is the best Girl Scout cookie?",
+    "type": "multiple_choice",
+    "options": [
+      "Thin Mints",
+      "Samoas",
+      "Tagalongs",
+      "Do-si-dos"
+    ]
+  },
+  {
+    "text": "What is the most stressful thing about the holidays?",
+    "type": "multiple_choice",
+    "options": [
+      "Gift Shopping",
+      "Family Gatherings",
+      "Travel",
+      "Cooking"
+    ]
+  },
+  {
+    "text": "If you could eliminate one minor inconvenience forever, what?",
+    "type": "multiple_choice",
+    "options": [
+      "Traffic Jams",
+      "Slow Wi-Fi",
+      "Wet Socks",
+      "Long Lines"
+    ]
+  },
+  {
+    "text": "What song would play every time you entered a room?",
+    "type": "multiple_choice",
+    "options": [
+      "Eye of the Tiger",
+      "Welcome to the Jungle",
+      "Seven Nation Army",
+      "Thunderstruck"
+    ]
+  },
+  {
+    "text": "Is a hot dog a sandwich?",
+    "type": "multiple_choice",
+    "options": [
+      "Yes",
+      "No"
+    ]
+  },
+  {
+    "text": "What is the ideal number of pillows on a bed?",
+    "type": "multiple_choice",
+    "options": [
+      "4",
+      "2",
+      "3",
+      "1"
+    ]
+  },
+  {
+    "text": "Right way to cut a sandwich?",
+    "type": "multiple_choice",
+    "options": [
+      "Diagonal",
+      "Straight"
+    ]
+  },
+  {
+    "text": "What is the correct cheese for a grilled cheese?",
+    "type": "multiple_choice",
+    "options": [
+      "Cheddar",
+      "American",
+      "Swiss",
+      "Provolone"
+    ]
+  },
+  {
+    "text": "Cake or pie?",
+    "type": "multiple_choice",
+    "options": [
+      "Cake",
+      "Pie"
+    ]
+  },
+  {
+    "text": "Boneless wings or bone-in wings?",
+    "type": "multiple_choice",
+    "options": [
+      "Bone-in",
+      "Boneless"
+    ]
+  },
+  {
+    "text": "What TV show went on at least two seasons too long?",
+    "type": "open"
+  },
+  {
+    "text": "Which children's character is secretly insufferable?",
+    "type": "multiple_choice",
+    "options": [
+      "Caillou",
+      "Peppa Pig",
+      "Dora The Explorer",
+      "Elmo"
+    ]
+  },
+  {
+    "text": "Is it 'gif' with a hard G or a soft G?",
+    "type": "multiple_choice",
+    "options": [
+      "Hard G",
+      "Soft G"
+    ]
+  },
+  {
+    "text": "Leaving voicemails:",
+    "type": "multiple_choice",
+    "options": [
+      "Thoughtful",
+      "Waste Of Time"
+    ]
+  },
+  {
+    "text": "What is the worst public display of affection?",
+    "type": "multiple_choice",
+    "options": [
+      "Deep Kissing",
+      "Baby Talk",
+      "Feeding Each Other",
+      "Touching Butts"
+    ]
+  },
+  {
+    "text": "What is the most suspicious neighborly favor to be asked?",
+    "type": "multiple_choice",
+    "options": [
+      "Help Me Bury Something",
+      "Watch My House For Months",
+      "Drive Me Far Away",
+      "Hold This Briefcase"
+    ]
+  },
+  {
+    "text": "What is the most inappropriate place to fall asleep in public?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room would be the worst roommate?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room would be the worst at keeping a secret?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room would cry first during a sad movie?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room would last the longest without their phone?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room is most likely to start a fight over a board game?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room would survive the longest in a horror movie?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room would be the most dramatic over a paper cut?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room has the worst taste in music?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room would accidentally join a pyramid scheme?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room would ruin a surprise party?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room would panic and call 911 for a minor inconvenience?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room would be the last to notice a fire in the building?",
+    "type": "open"
+  },
+  {
+    "text": "Who in this room would win a hot dog eating contest?",
+    "type": "open"
+  },
+  {
+    "text": "Would you rather fight one horse-sized duck or a hundred duck-sized horses?",
+    "type": "multiple_choice",
+    "options": [
+      "Fight One Horse-sized Duck",
+      "A Hundred Duck-sized Horses"
+    ]
+  },
+  {
+    "text": "Would you rather be the funniest person in the room or the smartest?",
+    "type": "multiple_choice",
+    "options": [
+      "The Funniest Person In The Room",
+      "The Smartest"
+    ]
+  },
+  {
+    "text": "Would you rather be famous for something embarrassing or unknown forever?",
+    "type": "multiple_choice",
+    "options": [
+      "Famous For Something Embarrassing",
+      "Unknown Forever"
+    ]
+  },
+  {
+    "text": "Would you rather always be 10 minutes late or 20 minutes early?",
+    "type": "multiple_choice",
+    "options": [
+      "Always Be 10 Minutes Late",
+      "20 Minutes Early"
+    ]
+  },
+  {
+    "text": "Would you rather live without music or without movies?",
+    "type": "multiple_choice",
+    "options": [
+      "Without Music",
+      "Without Movies"
+    ]
+  },
+  {
+    "text": "Would you rather have unlimited money or unlimited time?",
+    "type": "multiple_choice",
+    "options": [
+      "Unlimited Money",
+      "Unlimited Time"
+    ]
+  },
+  {
+    "text": "Would you rather always speak your mind or never speak again?",
+    "type": "multiple_choice",
+    "options": [
+      "Always Speak Your Mind",
+      "Never Speak Again"
+    ]
+  },
+  {
+    "text": "Would you rather sweat mayonnaise or cry hot sauce?",
+    "type": "multiple_choice",
+    "options": [
+      "Sweat Mayonnaise",
+      "Cry Hot Sauce"
+    ]
+  },
+  {
+    "text": "Would you rather have no taste buds or be colorblind?",
+    "type": "multiple_choice",
+    "options": [
+      "No Taste Buds",
+      "Be Colorblind"
+    ]
+  },
+  {
+    "text": "Would you rather never age physically or never age mentally?",
+    "type": "multiple_choice",
+    "options": [
+      "Never Age Physically",
+      "Never Age Mentally"
+    ]
+  },
+  {
+    "text": "Would you rather your sweat smell like bleu cheese or your breath smell like tuna?",
+    "type": "multiple_choice",
+    "options": [
+      "Your Sweat Smell Like Bleu Cheese",
+      "Your Breath Smell Like Tuna"
+    ]
+  },
+  {
+    "text": "Would you rather only communicate through dance or through opera singing?",
+    "type": "multiple_choice",
+    "options": [
+      "Only Communicate Through Dance",
+      "Through Opera Singing"
+    ]
+  },
+  {
+    "text": "Would you rather have knees that bend both ways or elbows that only bend forward?",
+    "type": "multiple_choice",
+    "options": [
+      "Knees That Bend Both Ways",
+      "Elbows That Only Bend Forward"
+    ]
+  },
+  {
+    "text": "Would you rather your bed always feel sandy or your shower always run ice cold?",
+    "type": "multiple_choice",
+    "options": [
+      "Your Bed Always Feel Sandy",
+      "Your Shower Always Run Ice Cold"
+    ]
+  },
+  {
+    "text": "If you were abducted, who would you choose?",
+    "type": "multiple_choice",
+    "options": [
+      "Aliens",
+      "Pirates",
+      "Ghosts",
+      "Vampires"
+    ]
+  },
+  {
+    "text": "Pick your permanent body scent:",
+    "type": "multiple_choice",
+    "options": [
+      "Old Library Books",
+      "Fresh Cut Grass",
+      "New Car Smell",
+      "Fresh Baked Bread"
+    ]
+  },
+  {
+    "text": "You can only eat one cuisine forever?",
+    "type": "multiple_choice",
+    "options": [
+      "Mexican",
+      "Italian",
+      "Japanese",
+      "Indian"
+    ]
+  },
+  {
+    "text": "Pick your nightmare roommate:",
+    "type": "multiple_choice",
+    "options": [
+      "A Loud Chewer",
+      "A Sleep Talker",
+      "A Thermostat Dictator",
+      "A Food Thief"
+    ]
+  },
+  {
+    "text": "You're stuck in an elevator with one celebrity?",
+    "type": "multiple_choice",
+    "options": [
+      "The Rock",
+      "Oprah Winfrey",
+      "Gordon Ramsay",
+      "Tom Hanks"
+    ]
+  },
+  {
+    "text": "Your shower now only dispenses one liquid:",
+    "type": "multiple_choice",
+    "options": [
+      "Lukewarm Gravy",
+      "Flat Soda",
+      "Dish Soap",
+      "Maple Syrup"
+    ]
+  },
+  {
+    "text": "Pick your useless superpower:",
+    "type": "multiple_choice",
+    "options": [
+      "Talk To Ants",
+      "Glow In The Dark",
+      "Taste Colors",
+      "Summon A Single Pigeon"
+    ]
+  },
+  {
+    "text": "You must wear one costume to work every day:",
+    "type": "multiple_choice",
+    "options": [
+      "Hot Dog Suit",
+      "Banana Suit",
+      "Inflatable Dinosaur",
+      "Chicken Suit"
+    ]
+  },
+  {
+    "text": "Pick your worst tattoo:",
+    "type": "multiple_choice",
+    "options": [
+      "A Toilet",
+      "Your Ex's Face",
+      "A QR Code To A Rick Roll",
+      "A Misspelled Word"
+    ]
+  },
+  {
+    "text": "You can only listen to one artist forever?",
+    "type": "multiple_choice",
+    "options": [
+      "Elevator Music",
+      "Autotuned Pop",
+      "Commercial Jingles"
+    ]
+  },
+  {
+    "text": "Zombie apocalypse weapon?",
+    "type": "multiple_choice",
+    "options": [
+      "Baseball Bat",
+      "Crowbar",
+      "Garden Hoe",
+      "Fire Poker"
+    ]
+  },
+  {
+    "text": "Your car horn is replaced with one sound?",
+    "type": "multiple_choice",
+    "options": [
+      "Vuvuzela Blast",
+      "Baby Crying",
+      "Kazoo Solo",
+      "Laugh Track"
+    ]
+  },
+  {
+    "text": "Pick your new neighbor:",
+    "type": "multiple_choice",
+    "options": [
+      "Constant Party Host",
+      "Barking Dog Owner",
+      "Early Morning Builder",
+      "Conspiracy Theorist"
+    ]
+  },
+  {
+    "text": "You must get a face tattoo?",
+    "type": "multiple_choice",
+    "options": [
+      "Forehead Target",
+      "Giant Mole",
+      "Barcode",
+      "Permanent Unibrow"
+    ]
+  },
+  {
+    "text": "Pick your prison cellmate:",
+    "type": "multiple_choice",
+    "options": [
+      "Constant Hummer",
+      "Nail Clipper",
+      "Finger Tapper",
+      "Never Talks"
+    ]
+  },
+  {
+    "text": "Your voice permanently changes to?",
+    "type": "multiple_choice",
+    "options": [
+      "Darth Vader",
+      "A Chipmunk",
+      "Game Show Announcer",
+      "Pirate Accent"
+    ]
+  },
+  {
+    "text": "You can only drink one thing forever?",
+    "type": "multiple_choice",
+    "options": [
+      "Flat Soda",
+      "Warm Water",
+      "Unsweetened Tea",
+      "Tomato Juice"
+    ]
+  },
+  {
+    "text": "Worst haunted house ghost?",
+    "type": "multiple_choice",
+    "options": [
+      "Replaces Sugar With Salt",
+      "Changes TV Channel",
+      "Leaves Wet Towels",
+      "Unties Your Shoes"
+    ]
+  },
+  {
+    "text": "You time travel but can only visit?",
+    "type": "multiple_choice",
+    "options": [
+      "Medieval Times",
+      "Wild West",
+      "Roaring Twenties",
+      "Stone Age"
+    ]
+  },
+  {
+    "text": "You get one free crime with no consequences: what do you do?",
+    "type": "multiple_choice",
+    "options": [
+      "Rob A Bank",
+      "Steal A Sports Car",
+      "Free Zoo Animals",
+      "Prank A Leader"
+    ]
+  },
+  {
+    "text": "Pick your apocalypse buddy:",
+    "type": "multiple_choice",
+    "options": [
+      "Doctor",
+      "Mechanic",
+      "Farmer",
+      "Engineer"
+    ]
+  },
+  {
+    "text": "You can add one ridiculous rule to any sport — what is it?",
+    "type": "multiple_choice",
+    "options": [
+      "Wear Silly Hats",
+      "Animal On Field",
+      "Rubber Chicken Ball",
+      "Must Play Blindfolded"
+    ]
+  },
+  {
+    "text": "You must rename yourself after a food — what's your new name?",
+    "type": "multiple_choice",
+    "options": [
+      "Muffin",
+      "Noodle",
+      "Potato",
+      "Cookie"
+    ]
+  },
+  {
+    "text": "Which fictional villain actually had a point?",
+    "type": "multiple_choice",
+    "options": [
+      "Thanos",
+      "Magneto",
+      "Killmonger",
+      "Syndrome"
+    ]
+  },
+  {
+    "text": "Pick your worst way to travel:",
+    "type": "multiple_choice",
+    "options": [
+      "Pogo Stick",
+      "Unicycle",
+      "Roller Skates Uphill",
+      "Tandem With Stranger"
+    ]
+  },
+  {
+    "text": "Your life gets a laugh track — which situation would be the most annoying?",
+    "type": "multiple_choice",
+    "options": [
+      "During An Argument",
+      "At A Funeral",
+      "Job Interview",
+      "First Date"
+    ]
+  },
+  {
+    "text": "You have to fight one animal:",
+    "type": "multiple_choice",
+    "options": [
+      "Kangaroo",
+      "Ostrich",
+      "Angry Goose",
+      "Badger"
+    ]
+  },
+  {
+    "text": "Pick your personal hell:",
+    "type": "multiple_choice",
+    "options": [
+      "Eternal Hold Music",
+      "Permanent Wet Socks",
+      "Never-Ending Hiccups",
+      "Always Slow Wifi"
+    ]
+  },
+  {
+    "text": "You wake up as an animal for a day?",
+    "type": "multiple_choice",
+    "options": [
+      "House Cat",
+      "Dolphin",
+      "Eagle",
+      "Dog"
+    ]
+  },
+  {
+    "text": "Which mythical creature would be the most annoying roommate?",
+    "type": "multiple_choice",
+    "options": [
+      "Goblin",
+      "Vampire",
+      "Werewolf",
+      "Unicorn"
+    ]
+  },
+  {
+    "text": "Celebrity narrating your life?",
+    "type": "multiple_choice",
+    "options": [
+      "Morgan Freeman",
+      "David Attenborough",
+      "Ryan Reynolds",
+      "Kristen Bell"
+    ]
+  },
+  {
+    "text": "You can only use one condiment for the rest of your life — which one?",
+    "type": "multiple_choice",
+    "options": [
+      "Ketchup",
+      "Mayonnaise",
+      "Hot Sauce",
+      "Soy Sauce"
+    ]
+  },
+  {
+    "text": "Which fast food mascot would win in a fight?",
+    "type": "multiple_choice",
+    "options": [
+      "The Burger King",
+      "Ronald McDonald",
+      "Jack In The Box",
+      "Colonel Sanders"
+    ]
+  },
+  {
+    "text": "Pick your new ringtone that you can never change.",
+    "type": "multiple_choice",
+    "options": [
+      "Baby Crying",
+      "Dial-Up Modem",
+      "The Macarena",
+      "Bagpipes"
+    ]
+  },
+  {
+    "text": "You must eat one weird combo every day?",
+    "type": "multiple_choice",
+    "options": [
+      "Ketchup On Ice Cream",
+      "Mustard On Cereal",
+      "Mayonnaise On Cookies",
+      "Hot Sauce On Yogurt"
+    ]
+  },
+  {
+    "text": "Trapped in a movie for a week?",
+    "type": "multiple_choice",
+    "options": [
+      "Jurassic Park",
+      "The Hunger Games",
+      "Titanic",
+      "A Quiet Place"
+    ]
+  },
+  {
+    "text": "Name a food that people eat wrong",
+    "type": "multiple_choice",
+    "options": [
+      "Cupcakes",
+      "Sushi",
+      "Pizza",
+      "Tacos"
+    ]
+  },
+  {
+    "text": "What is a scam that we have all just agreed is fine?",
+    "type": "multiple_choice",
+    "options": [
+      "Bottled Water",
+      "Printer Ink",
+      "Movie Popcorn",
+      "Extended Warranties"
+    ]
+  },
+  {
+    "text": "What is a dealbreaker on a road trip?",
+    "type": "multiple_choice",
+    "options": [
+      "Bad Music Choices",
+      "Constant Complaining",
+      "Not Sharing Driving",
+      "Messy Car"
+    ]
+  },
+  {
+    "text": "What fictional character do you relate to the most?",
+    "type": "multiple_choice",
+    "options": [
+      "Harry Potter",
+      "Hermione Granger",
+      "SpongeBob SquarePants",
+      "Simba"
+    ]
+  },
+  {
+    "text": "What is the funniest word in the English language?",
+    "type": "multiple_choice",
+    "options": [
+      "Fart",
+      "Giggle",
+      "Poop",
+      "Wobbly"
+    ]
+  },
+  {
+    "text": "What is the best decade for music?",
+    "type": "multiple_choice",
+    "options": [
+      "1980s",
+      "1990s",
+      "2000s",
+      "1970s"
+    ]
+  },
+  {
+    "text": "What is the one thing in your home you would save in a fire?",
+    "type": "multiple_choice",
+    "options": [
+      "Photo Album",
+      "Pet",
+      "Important Documents",
+      "Sentimental Item"
+    ]
+  },
+  {
+    "text": "What common phrase makes absolutely no sense?",
+    "type": "multiple_choice",
+    "options": [
+      "Break A Leg",
+      "Raining Cats And Dogs",
+      "Spill The Beans",
+      "Bite The Bullet"
+    ]
+  },
+  {
+    "text": "What is the best free thing in life?",
+    "type": "multiple_choice",
+    "options": [
+      "Laughter",
+      "Sunshine",
+      "A Good Night's Sleep",
+      "Hugs"
+    ]
+  },
+  {
+    "text": "What makes someone immediately likeable?",
+    "type": "multiple_choice",
+    "options": [
+      "Genuine Smile",
+      "Good Listener",
+      "Kindness",
+      "Sense Of Humor"
+    ]
+  },
+  {
+    "text": "What is the most satisfying sound?",
+    "type": "multiple_choice",
+    "options": [
+      "Crackling Fire",
+      "Fresh Snow Crunch",
+      "Pen Clicking",
+      "Pouring Coffee"
+    ]
+  },
+  {
+    "text": "What is the most nostalgic smell?",
+    "type": "multiple_choice",
+    "options": [
+      "Freshly Baked Cookies",
+      "Rain",
+      "Freshly Cut Grass",
+      "Campfire Smoke"
+    ]
+  },
+  {
+    "text": "What is the first app you check in the morning?",
+    "type": "open"
+  },
+  {
+    "text": "What childhood snack do you still eat as an adult?",
+    "type": "open"
+  },
+  {
+    "text": "What is the best midnight snack?",
+    "type": "multiple_choice",
+    "options": [
+      "Cereal",
+      "Chips",
+      "Ice Cream",
+      "Toast"
+    ]
+  },
+  {
+    "text": "What is the scariest animal?",
+    "type": "multiple_choice",
+    "options": [
+      "Shark",
+      "Snake",
+      "Spider"
+    ]
+  },
+  {
+    "text": "What is the most annoying sound?",
+    "type": "multiple_choice",
+    "options": [
+      "Nails on a chalkboard",
+      "Mosquito buzzing",
+      "Baby crying"
+    ]
+  },
+  {
+    "text": "What is the best ice cream flavor?",
+    "type": "multiple_choice",
+    "options": [
+      "Vanilla",
+      "Chocolate",
+      "Strawberry",
+      "Cookies And Cream"
+    ]
+  },
+  {
+    "text": "What is the best breakfast food?",
+    "type": "multiple_choice",
+    "options": [
+      "Bacon",
+      "Pancakes",
+      "Eggs"
+    ]
+  },
+  {
+    "text": "If you won the lottery, what would you buy first?",
+    "type": "open"
+  },
+  {
+    "text": "Name a Disney movie everyone has seen",
+    "type": "multiple_choice",
+    "options": [
+      "The Lion King",
+      "Frozen",
+      "Toy Story",
+      "Aladdin"
+    ]
+  },
+  {
+    "text": "What is the most annoying household chore?",
+    "type": "multiple_choice",
+    "options": [
+      "Cleaning the bathroom",
+      "Doing dishes",
+      "Laundry"
+    ]
+  },
+  {
+    "text": "If you could eat one food forever, what would it be?",
+    "type": "open"
+  },
+  {
+    "text": "Name a superhero everyone knows",
+    "type": "open"
+  },
+  {
+    "text": "What is the best Thanksgiving side dish?",
+    "type": "multiple_choice",
+    "options": [
+      "Mashed Potatoes",
+      "Stuffing",
+      "Green Bean Casserole"
+    ]
+  },
+  {
+    "text": "What is the best Halloween candy?",
+    "type": "open"
+  },
+  {
+    "text": "What is the most important invention ever?",
+    "type": "open"
+  },
+  {
+    "text": "What is the best thing about dogs?",
+    "type": "multiple_choice",
+    "options": [
+      "Loyalty",
+      "Companionship",
+      "Nothing. Dogs are overrated"
+    ]
+  },
+  {
+    "text": "Name something you'd see at a Fourth of July parade.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a famous American landmark.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name something red, white, and blue.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name something you'd grill on Independence Day.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a patriotic song Americans know by heart.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a symbol of the United States.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name something you'd find at a Fourth of July cookout.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a US state people always want to visit.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a famous American invention.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a president that everyone knows.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "What do Americans watch on TV for Independence Day?",
+    "type": "multiple_choice",
+    "options": [
+      "Fireworks",
+      "Parades",
+      "Baseball"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Name something with stars and stripes on it.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "What patriotic color appears on the American flag?",
+    "type": "multiple_choice",
+    "options": [
+      "Red",
+      "Blue",
+      "White"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a famous battle from American history.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "What year did America declare independence?",
+    "type": "multiple_choice",
+    "options": [
+      "1776",
+      "1787",
+      "1865"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a statue or monument in America.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name something that represents American freedom.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "What do people do at Fourth of July fireworks?",
+    "type": "multiple_choice",
+    "options": [
+      "Watch them",
+      "Set them off",
+      "Celebrate"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Name an American city tourists want to visit.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name something that was invented in America.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "What flag waves over American government buildings?",
+    "type": "multiple_choice",
+    "options": [
+      "Stars and Stripes",
+      "Pledge flag",
+      "Freedom flag"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a song that celebrates America.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "What food is most associated with Independence Day?",
+    "type": "multiple_choice",
+    "options": [
+      "Hot dogs",
+      "Hamburgers",
+      "Apple pie"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Name something patriotic to wear.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a state known for something special.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "What happens on July 4th?",
+    "type": "multiple_choice",
+    "options": [
+      "Independence Day",
+      "National holiday",
+      "Fireworks night"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a famous American landmark on a postcard.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name something you hear at Independence Day celebrations.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "What are American ideals based on?",
+    "type": "multiple_choice",
+    "options": [
+      "Freedom",
+      "Liberty",
+      "Equality"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a patriotic decoration.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a famous national park.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "What is the home of the President of the United States?",
+    "type": "multiple_choice",
+    "options": [
+      "The White House",
+      "The Capitol",
+      "The Pentagon"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a Native American tribe.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a document from American history.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "What are the colors of the American flag?",
+    "type": "multiple_choice",
+    "options": [
+      "Red, white, and blue",
+      "Red and white",
+      "Blue and white"
+    ],
+    "source": "patriotic"
+  }
 ]

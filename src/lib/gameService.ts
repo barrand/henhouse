@@ -19,6 +19,7 @@ const skipQuestionFn = httpsCallable<{ gameId: string }, void>(functions, 'skipQ
 const advanceRoundFn = httpsCallable<{ gameId: string }, void>(functions, 'advanceRound')
 const forceEndRoundFn = httpsCallable<{ gameId: string }, void>(functions, 'forceEndRound')
 const updateCategoriesFn = httpsCallable<{ gameId: string; categories: string[] }, void>(functions, 'updateCategories')
+const setPatrioticModeFn = httpsCallable<{ gameId: string; enabled: boolean }, void>(functions, 'setPatrioticMode')
 const submitCustomQuestionFn = httpsCallable<{ gameId: string; text: string }, void>(functions, 'submitCustomQuestion')
 
 export async function createGame(playerName: string) {
@@ -53,6 +54,10 @@ export async function forceEndRound(gameId: string) {
 
 export async function updateCategories(gameId: string, categories: string[]) {
   await updateCategoriesFn({ gameId, categories })
+}
+
+export async function setPatrioticMode(gameId: string, enabled: boolean) {
+  await setPatrioticModeFn({ gameId, enabled })
 }
 
 export async function submitCustomQuestion(gameId: string, text: string) {

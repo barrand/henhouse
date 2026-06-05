@@ -65,6 +65,7 @@ export const createGame = onCall(async (request) => {
     categories: [],
     playerIds: [uid],
     settings: { totalRounds: 15, secondsPerRound: 45, autoAdvanceSeconds: 10 },
+    includePatrioticQuestions: false,
   })
 
   await gameRef.collection('players').doc(uid).set({
@@ -72,8 +73,6 @@ export const createGame = onCall(async (request) => {
     eggs: 0,
     connected: true,
   })
-
-  await seedQuestionPool(gameId)
 
   return { gameId, code }
 })
@@ -127,13 +126,19 @@ export const startGame = onCall(async (request) => {
   if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can start')
   if (game.status !== 'lobby') throw new HttpsError('failed-precondition', 'Game already started')
 
+  // Seed the question pool with the current patriotic setting
+  await seedQuestionPool(gameId, game.includePatrioticQuestions ?? false)
+
   if (game.categories?.length > 0) {
     try {
       const aiQuestions = await generateQuestionsFromCategories(game.categories)
       for (const q of aiQuestions) {
+        const type = q.type === 'multiple_choice' ? 'multiple_choice' : 'open'
         await gameRef.collection('questionPool').add({
           text: q.text,
           source: 'ai-generated',
+          type,
+          options: type === 'multiple_choice' ? q.options ?? null : null,
           used: false,
           submittedBy: null,
           category: q.category,
@@ -155,6 +160,8 @@ export const startGame = onCall(async (request) => {
     tag: question.tag ?? null,
     submittedBy: question.submittedBy ?? null,
     questionPoolId: question.poolDocId,
+    type: question.type,
+    options: question.options,
     status: 'answering',
     deadline: Timestamp.fromDate(deadline),
     answerCount: 0,
@@ -178,11 +185,23 @@ export const submitAnswer = onCall(async (request) => {
   const roundRef = db.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
   const roundSnap = await roundRef.get()
   if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
-  if (roundSnap.data()!.status !== 'answering') throw new HttpsError('failed-precondition', 'Round not accepting answers')
+  const roundData = roundSnap.data()!
+  if (roundData.status !== 'answering') throw new HttpsError('failed-precondition', 'Round not accepting answers')
 
-  const deadline = roundSnap.data()!.deadline?.toDate()
+  const deadline = roundData.deadline?.toDate()
   if (deadline && Date.now() > deadline.getTime()) {
     throw new HttpsError('deadline-exceeded', 'Time is up')
+  }
+
+  const trimmed = answer.trim()
+
+  // Multiple-choice rounds only accept answers that exactly match one of the server-side options.
+  // This prevents clients from smuggling arbitrary text and keeps scoring deterministic.
+  if (roundData.type === 'multiple_choice') {
+    const validOptions: string[] = Array.isArray(roundData.options) ? roundData.options : []
+    if (!validOptions.includes(trimmed)) {
+      throw new HttpsError('invalid-argument', 'Answer must match one of the provided options')
+    }
   }
 
   const answerRef = roundRef.collection('answers').doc(uid)
@@ -190,7 +209,7 @@ export const submitAnswer = onCall(async (request) => {
   if (existingAnswer.exists) throw new HttpsError('already-exists', 'Already answered')
 
   await answerRef.set({
-    text: answer.trim(),
+    text: trimmed,
     submittedAt: FieldValue.serverTimestamp(),
   })
 
@@ -265,6 +284,8 @@ export const skipQuestion = onCall(async (request) => {
     tag: newQuestion.tag ?? null,
     submittedBy: newQuestion.submittedBy ?? null,
     questionPoolId: newQuestion.poolDocId,
+    type: newQuestion.type,
+    options: newQuestion.options,
     status: 'answering',
     deadline: Timestamp.fromDate(deadline),
     answerCount: 0,
@@ -296,6 +317,24 @@ export const updateCategories = onCall(async (request) => {
   await gameRef.update({ categories })
 })
 
+// -- SET PATRIOTIC MODE --
+export const setPatrioticMode = onCall(async (request) => {
+  const uid = request.auth?.uid
+  if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
+
+  const { gameId, enabled } = request.data as { gameId: string; enabled: boolean }
+  if (typeof enabled !== 'boolean') throw new HttpsError('invalid-argument', 'Enabled must be a boolean')
+
+  const gameRef = db.collection('games').doc(gameId)
+  const gameSnap = await gameRef.get()
+
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+  if (gameSnap.data()!.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can set patriotic mode')
+  if (gameSnap.data()!.status !== 'lobby') throw new HttpsError('failed-precondition', 'Game already started')
+
+  await gameRef.update({ includePatrioticQuestions: enabled })
+})
+
 // -- SUBMIT CUSTOM QUESTION --
 export const submitCustomQuestion = onCall(async (request) => {
   const uid = request.auth?.uid
@@ -315,6 +354,8 @@ export const submitCustomQuestion = onCall(async (request) => {
   await gameRef.collection('questionPool').add({
     text: text.trim(),
     source: 'custom',
+    type: 'open',
+    options: null,
     used: false,
     submittedBy: uid,
     category: null,
@@ -412,7 +453,9 @@ async function triggerScoring(gameId: string, roundNum: number) {
   })
 
   const roundSnap = await roundRef.get()
-  const questionText = roundSnap.data()!.question
+  const roundData = roundSnap.data()!
+  const questionText = roundData.question
+  const roundType: 'open' | 'multiple_choice' = roundData.type === 'multiple_choice' ? 'multiple_choice' : 'open'
   const gameSnap = await db.collection('games').doc(gameId).get()
   const game = gameSnap.data()!
 
@@ -422,19 +465,27 @@ async function triggerScoring(gameId: string, roundNum: number) {
   let commentary = ''
   let groupSource = 'fallback'
 
-  const quickGroups = fallbackGrouping(uniqueNormalized)
-  if (quickGroups.length <= 1) {
-    groups = quickGroups
-    groupSource = 'normalization-match'
+  if (roundType === 'multiple_choice') {
+    // Answers are guaranteed to equal one of round.options exactly (enforced in submitAnswer).
+    // After normalization they collapse on identical strings; a simple frequency bucket is the ground truth.
+    // No Gemini call, no commentary.
+    groups = fallbackGrouping(uniqueNormalized)
+    groupSource = 'multiple-choice'
   } else {
-    try {
-      const geminiResult: GeminiGroupResult = await groupAnswersWithGemini(questionText, uniqueNormalized)
-      groups = validateGeminiGroups(geminiResult.groups, uniqueNormalized)
-      commentary = geminiResult.commentary
-      groupSource = 'gemini'
-    } catch (err) {
-      console.error('Gemini failed, using fallback:', err)
+    const quickGroups = fallbackGrouping(uniqueNormalized)
+    if (quickGroups.length <= 1) {
       groups = quickGroups
+      groupSource = 'normalization-match'
+    } else {
+      try {
+        const geminiResult: GeminiGroupResult = await groupAnswersWithGemini(questionText, uniqueNormalized)
+        groups = validateGeminiGroups(geminiResult.groups, uniqueNormalized)
+        commentary = geminiResult.commentary
+        groupSource = 'gemini'
+      } catch (err) {
+        console.error('Gemini failed, using fallback:', err)
+        groups = quickGroups
+      }
     }
   }
 
@@ -544,6 +595,8 @@ async function doAdvanceRound(gameId: string) {
     tag: question.tag ?? null,
     submittedBy: question.submittedBy ?? null,
     questionPoolId: question.poolDocId,
+    type: question.type,
+    options: question.options,
     status: 'answering',
     deadline: Timestamp.fromDate(deadline),
     answerCount: 0,

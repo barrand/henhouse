@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { GameData, PlayerData } from '../types'
-import { startGame, updateCategories, submitCustomQuestion, onCustomQuestionsUpdate } from '../lib/gameService'
+import { startGame, updateCategories, setPatrioticMode, submitCustomQuestion, onCustomQuestionsUpdate } from '../lib/gameService'
 import CategoryInput from './CategoryInput'
 import QuestionSubmission from './QuestionSubmission'
 
@@ -47,6 +47,14 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
       await updateCategories(game.id, game.categories.filter((c) => c !== category))
     } catch (err: any) {
       setError(err.message ?? 'Failed to remove category')
+    }
+  }
+
+  const handleTogglePatrioticMode = async () => {
+    try {
+      await setPatrioticMode(game.id, !game.includePatrioticQuestions)
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to update patriotic mode')
     }
   }
 
@@ -100,6 +108,13 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
           </div>
         </div>
 
+        {/* Patriotic Edition Banner */}
+        {game.includePatrioticQuestions && (
+          <div className="mb-6 bg-gradient-to-r from-red-50 to-blue-50 border-2 border-red-200 rounded-xl p-4 text-center">
+            <p className="font-headline text-lg font-bold text-primary">🎆 Patriotic Edition is ON</p>
+          </div>
+        )}
+
         {/* The Henhouse */}
         <section className="mb-8">
           <div className="flex justify-between items-end mb-3 px-1">
@@ -147,6 +162,30 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
                 <span className="font-label text-[10px] uppercase tracking-wider text-secondary">Timer</span>
                 <span className="font-headline text-xl font-bold">{game.settings.secondsPerRound}s</span>
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* Patriotic Mode Toggle */}
+        {isHost && (
+          <section className="mb-8">
+            <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 flex items-center justify-between">
+              <div className="flex-1">
+                <h4 className="font-headline text-base font-semibold text-on-surface mb-1">🎆 Add patriotic flavor to the game</h4>
+                <p className="text-xs text-on-surface-variant">Include America's 250th anniversary questions</p>
+              </div>
+              <button
+                onClick={handleTogglePatrioticMode}
+                className={`ml-4 w-12 h-6 rounded-full transition-colors flex items-center ${
+                  game.includePatrioticQuestions
+                    ? 'bg-primary'
+                    : 'bg-outline-variant'
+                }`}
+              >
+                <div className={`w-5 h-5 rounded-full bg-surface-container transition-transform ${
+                  game.includePatrioticQuestions ? 'translate-x-6' : 'translate-x-0.5'
+                }`} />
+              </button>
             </div>
           </section>
         )}

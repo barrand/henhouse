@@ -56,12 +56,13 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
     }
   }, [expired, isHost, game.id])
 
-  const handleSubmit = async () => {
-    if (!answer.trim() || submitted || expired) return
+  const handleSubmit = async (rawAnswer?: string) => {
+    const finalAnswer = (rawAnswer ?? answer).trim()
+    if (!finalAnswer || submitted || submitting || expired) return
     setSubmitting(true)
     try {
-      await submitAnswer(game.id, game.currentRound, answer.trim())
-      setAnswer('')
+      await submitAnswer(game.id, game.currentRound, finalAnswer)
+      setAnswer(finalAnswer)
       setSubmitted(true)
     } catch (err) {
       console.error('Failed to submit answer:', err)
@@ -109,7 +110,14 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
         </div>
       </div>
 
-      <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-6 text-center shadow-sm">
+      <div className={`rounded-2xl border-2 p-6 text-center shadow-sm relative ${
+        round.source === 'patriotic'
+          ? 'bg-gradient-to-br from-red-50 to-blue-50 border-red-200'
+          : 'bg-surface-container-lowest border-outline-variant/30'
+      }`}>
+        {round.source === 'patriotic' && (
+          <div className="absolute top-3 right-3 text-2xl">🇺🇸</div>
+        )}
         <p className="font-headline text-xl font-bold text-on-surface leading-relaxed">
           {round.question}
         </p>
@@ -136,6 +144,28 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
             <p className="text-outline mt-1 font-body">You didn't answer in time.</p>
           </div>
         ) : !submitted ? (
+          round.type === 'multiple_choice' && round.options && round.options.length >= 2 ? (
+            <div
+              className={
+                round.options.length === 2
+                  ? 'grid grid-cols-1 sm:grid-cols-2 gap-3'
+                  : round.options.length === 4
+                  ? 'grid grid-cols-2 gap-3'
+                  : 'flex flex-col gap-3'
+              }
+            >
+              {round.options.map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => handleSubmit(opt)}
+                  disabled={submitting}
+                  className="bg-surface-container-lowest border-2 border-outline-variant/40 hover:border-primary hover:bg-primary/10 active:scale-95 disabled:opacity-50 rounded-xl px-4 py-4 text-lg font-body font-semibold text-on-surface transition-all text-center leading-snug"
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          ) : (
           <>
             <input
               type="text"
@@ -148,16 +178,22 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
               autoFocus
             />
             <button
-              onClick={handleSubmit}
+              onClick={() => handleSubmit()}
               disabled={!answer.trim() || submitting}
               className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-semibold tracking-wide shadow-[0_12px_32px_rgba(0,0,0,0.4)] hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all"
             >
               {submitting ? 'Clucking in...' : 'CLUCK IN'}
             </button>
           </>
+          )
         ) : (
           <div className="text-center py-4 rounded-xl border border-outline-variant/20 bg-surface-container-low/50 px-4">
             <p className="font-headline text-lg font-semibold text-on-surface">You&apos;re clucked in</p>
+            {round.type === 'multiple_choice' && answer && (
+              <p className="mt-2 inline-block rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-sm font-body font-semibold text-primary">
+                {answer}
+              </p>
+            )}
             <p className="text-on-surface-variant text-sm font-body mt-2">
               Waiting for the rest of the flock. Your answer only appears at the reveal.
             </p>

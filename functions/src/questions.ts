@@ -4,20 +4,37 @@ function getDb() {
   return admin.firestore()
 }
 
-export async function seedQuestionPool(gameId: string) {
+type PresetQuestion = {
+  text: string
+  tag?: string
+  type?: 'open' | 'multiple_choice'
+  options?: string[]
+  source?: 'preset' | 'patriotic'
+}
+
+export async function seedQuestionPool(gameId: string, includePatrioticQuestions: boolean = false) {
   const db = getDb()
-  const questions = (await import('./data/questions.json')).default as { text: string; tag?: string }[]
+  const questions = (await import('./data/questions.json')).default as PresetQuestion[]
+
+  // Filter out patriotic questions if not enabled
+  const filtered = includePatrioticQuestions
+    ? questions
+    : questions.filter((q) => q.source !== 'patriotic')
 
   const BATCH_SIZE = 400
-  for (let i = 0; i < questions.length; i += BATCH_SIZE) {
+  for (let i = 0; i < filtered.length; i += BATCH_SIZE) {
     const batch = db.batch()
-    const chunk = questions.slice(i, i + BATCH_SIZE)
+    const chunk = filtered.slice(i, i + BATCH_SIZE)
     for (const q of chunk) {
       const ref = db.collection('games').doc(gameId).collection('questionPool').doc()
+      const type = q.type ?? 'open'
+      const source = q.source ?? 'preset'
       batch.set(ref, {
         text: q.text,
-        source: 'preset',
+        source,
         tag: q.tag ?? null,
+        type,
+        options: type === 'multiple_choice' ? q.options ?? null : null,
         used: false,
         submittedBy: null,
         category: null,
@@ -31,11 +48,13 @@ const SOURCE_WEIGHTS: Record<string, number> = {
   'ai-generated': 3,
   'custom': 3,
   'preset': 1,
+  'patriotic': 0.5,
 }
 
 const TAG_COOLDOWNS: Record<string, number> = {
   'who-in-room': 4,
   'mildly-unhinged': 3,
+  'patriotic': 2,
 }
 
 export type DrawnQuestion = {
@@ -44,6 +63,8 @@ export type DrawnQuestion = {
   tag: string | null
   submittedBy: string | null
   poolDocId: string
+  type: 'open' | 'multiple_choice'
+  options: string[] | null
 }
 
 export async function drawQuestion(
@@ -118,11 +139,15 @@ async function weightedDraw(
   const chosen = pool[Math.floor(Math.random() * pool.length)]
 
   await chosen.ref.update({ used: true })
+  const data = chosen.data()
+  const type: 'open' | 'multiple_choice' = data.type === 'multiple_choice' ? 'multiple_choice' : 'open'
   return {
-    text: chosen.data().text,
-    source: chosen.data().source,
-    tag: chosen.data().tag ?? null,
-    submittedBy: chosen.data().submittedBy ?? null,
+    text: data.text,
+    source: data.source,
+    tag: data.tag ?? null,
+    submittedBy: data.submittedBy ?? null,
     poolDocId: chosen.id,
+    type,
+    options: type === 'multiple_choice' && Array.isArray(data.options) ? data.options : null,
   }
 }
