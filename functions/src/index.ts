@@ -330,6 +330,31 @@ export const setPatrioticMode = onCall(async (request) => {
   await gameRef.update({ includePatrioticQuestions: enabled })
 })
 
+// -- RESET QUESTION COOLDOWNS --
+export const resetQuestionCooldowns = onCall(async (request) => {
+  const uid = request.auth?.uid
+  if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
+
+  const { gameId } = request.data as { gameId: string }
+  const gameRef = db.collection('games').doc(gameId)
+  const gameSnap = await gameRef.get()
+
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+  if (gameSnap.data()!.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can reset cooldowns')
+
+  // Nuke all global cooldowns
+  const cooldownSnap = await db.collection('questionCooldowns').get()
+  const batch = db.batch()
+  cooldownSnap.docs.forEach((doc) => batch.delete(doc.ref))
+  await batch.commit()
+
+  // Reset the used flag on this game's pool so questions are immediately drawable again
+  const poolSnap = await gameRef.collection('questionPool').get()
+  const resetBatch = db.batch()
+  poolSnap.docs.forEach((doc) => resetBatch.update(doc.ref, { used: false }))
+  await resetBatch.commit()
+})
+
 // -- SUBMIT CUSTOM QUESTION --
 export const submitCustomQuestion = onCall(async (request) => {
   const uid = request.auth?.uid

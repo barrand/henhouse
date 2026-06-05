@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { GameData, PlayerData } from '../types'
-import { startGame, updateCategories, setPatrioticMode, submitCustomQuestion, onCustomQuestionsUpdate } from '../lib/gameService'
+import { startGame, updateCategories, setPatrioticMode, resetQuestionCooldowns, submitCustomQuestion, onCustomQuestionsUpdate } from '../lib/gameService'
 import CategoryInput from './CategoryInput'
 import QuestionSubmission from './QuestionSubmission'
 
@@ -55,6 +55,15 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
       await setPatrioticMode(game.id, !game.includePatrioticQuestions)
     } catch (err: any) {
       setError(err.message ?? 'Failed to update patriotic mode')
+    }
+  }
+
+  const handleResetQuestionCooldowns = async () => {
+    try {
+      await resetQuestionCooldowns(game.id)
+      setError('') // Clear any previous errors
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to reset question cooldowns')
     }
   }
 
@@ -168,7 +177,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
 
         {/* Patriotic Mode Toggle */}
         {isHost && (
-          <section className="mb-8">
+          <section className="mb-8 space-y-3">
             <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 flex items-center justify-between">
               <div className="flex-1">
                 <h4 className="font-headline text-base font-semibold text-on-surface mb-1">🎆 Add patriotic flavor to the game</h4>
@@ -187,6 +196,13 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
                 }`} />
               </button>
             </div>
+            <button
+              onClick={handleResetQuestionCooldowns}
+              className="w-full bg-surface-container-low hover:bg-surface-container p-3 rounded-xl border border-outline-variant/10 transition-colors flex items-center justify-center gap-2 text-on-surface text-sm font-medium"
+            >
+              <span className="material-symbols-outlined text-lg">refresh</span>
+              Reset Question Cooldowns
+            </button>
           </section>
         )}
 
