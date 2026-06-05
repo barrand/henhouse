@@ -4,7 +4,7 @@ import * as admin from 'firebase-admin'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { scoreRoundAnswers, ScoringResult } from './scoring'
 import { groupAnswersWithGemini, generateQuestionsFromCategories, GeminiGroupResult } from './gemini'
-import { drawQuestion, seedQuestionPool } from './questions'
+import { drawQuestion, seedQuestionPool, questionKey } from './questions'
 
 admin.initializeApp()
 
@@ -142,6 +142,7 @@ export const startGame = onCall(async (request) => {
           used: false,
           submittedBy: null,
           category: q.category,
+          questionKey: questionKey(q.text),
         })
       }
     } catch (err) {
@@ -149,7 +150,7 @@ export const startGame = onCall(async (request) => {
     }
   }
 
-  const question = await drawQuestion(gameId, [])
+  const question = await drawQuestion(gameId, [], game.includePatrioticQuestions ?? false)
   if (!question) throw new HttpsError('internal', 'No questions available')
 
   const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
@@ -263,17 +264,10 @@ export const skipQuestion = onCall(async (request) => {
   answersSnap.docs.forEach((doc) => delBatch.delete(doc.ref))
   await delBatch.commit()
 
-  // Put the skipped question back in the pool so skips do not burn through the bank
-  // (otherwise each skip consumes an extra "used" slot and the game can end before totalRounds).
-  if (prevPoolId) {
-    try {
-      await gameRef.collection('questionPool').doc(prevPoolId).update({ used: false })
-    } catch (err) {
-      console.warn('skipQuestion: could not release question to pool', prevPoolId, err)
-    }
-  }
+  // Skipped questions are intentionally left as "used" — they count against the 48hr cooldown
+  // so the same question doesn't show up again in subsequent games at the same event.
 
-  const newQuestion = await drawQuestion(gameId, recentTags)
+  const newQuestion = await drawQuestion(gameId, recentTags, game.includePatrioticQuestions ?? false)
   if (!newQuestion) throw new HttpsError('internal', 'No more questions available')
 
   const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
@@ -581,7 +575,7 @@ async function doAdvanceRound(gameId: string) {
     if (tag) recentTags.push(tag)
   }
 
-  const question = await drawQuestion(gameId, recentTags)
+  const question = await drawQuestion(gameId, recentTags, game.includePatrioticQuestions ?? false)
   if (!question) {
     await gameRef.update({ status: 'finished' })
     return
