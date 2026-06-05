@@ -1696,37 +1696,7 @@
     "source": "patriotic"
   },
   {
-    "text": "Name something red, white, and blue.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name something you'd grill on Independence Day.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a patriotic song Americans know by heart.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a symbol of the United States.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
     "text": "Name something you'd find at a Fourth of July cookout.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a US state people always want to visit.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a famous American invention.",
     "type": "open",
     "source": "patriotic"
   },
@@ -1736,43 +1706,8 @@
     "source": "patriotic"
   },
   {
-    "text": "What do Americans watch on TV for Independence Day?",
-    "type": "multiple_choice",
-    "options": [
-      "Fireworks",
-      "Parades",
-      "Baseball"
-    ],
-    "source": "patriotic"
-  },
-  {
-    "text": "Name something with stars and stripes on it.",
+    "text": "Name a symbol of the United States.",
     "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "What patriotic color appears on the American flag?",
-    "type": "multiple_choice",
-    "options": [
-      "Red",
-      "Blue",
-      "White"
-    ],
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a famous battle from American history.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "What year did America declare independence?",
-    "type": "multiple_choice",
-    "options": [
-      "1776",
-      "1787",
-      "1865"
-    ],
     "source": "patriotic"
   },
   {
@@ -1786,77 +1721,52 @@
     "source": "patriotic"
   },
   {
-    "text": "What do people do at Fourth of July fireworks?",
-    "type": "multiple_choice",
-    "options": [
-      "Watch them",
-      "Set them off",
-      "Celebrate"
-    ],
-    "source": "patriotic"
-  },
-  {
-    "text": "Name an American city tourists want to visit.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name something that was invented in America.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "What flag waves over American government buildings?",
-    "type": "multiple_choice",
-    "options": [
-      "Stars and Stripes",
-      "Pledge flag",
-      "Freedom flag"
-    ],
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a song that celebrates America.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "What food is most associated with Independence Day?",
-    "type": "multiple_choice",
-    "options": [
-      "Hot dogs",
-      "Hamburgers",
-      "Apple pie"
-    ],
-    "source": "patriotic"
-  },
-  {
     "text": "Name something patriotic to wear.",
     "type": "open",
     "source": "patriotic"
   },
   {
-    "text": "Name a state known for something special.",
+    "text": "Name a famous national park.",
     "type": "open",
     "source": "patriotic"
   },
   {
-    "text": "What happens on July 4th?",
-    "type": "multiple_choice",
-    "options": [
-      "Independence Day",
-      "National holiday",
-      "Fireworks night"
-    ],
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a famous American landmark on a postcard.",
+    "text": "Name a document from American history.",
     "type": "open",
     "source": "patriotic"
   },
   {
-    "text": "Name something you hear at Independence Day celebrations.",
+    "text": "Name an American patriotic song.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a Founding Father.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a Revolutionary War hero other than George Washington.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a right protected by the Bill of Rights.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name something Benjamin Franklin was known for.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a state named after a historical figure.",
+    "type": "open",
+    "source": "patriotic"
+  },
+  {
+    "text": "Name a key document from America's founding.",
     "type": "open",
     "source": "patriotic"
   },
@@ -1871,17 +1781,7 @@
     "source": "patriotic"
   },
   {
-    "text": "Name a patriotic decoration.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a famous national park.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "What is the home of the President of the United States?",
+    "text": "Where would you like to spend a day?",
     "type": "multiple_choice",
     "options": [
       "The White House",
@@ -1891,22 +1791,294 @@
     "source": "patriotic"
   },
   {
-    "text": "Name a Native American tribe.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a document from American history.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "What are the colors of the American flag?",
+    "text": "Where would you put America's capital?",
     "type": "multiple_choice",
     "options": [
-      "Red, white, and blue",
-      "Red and white",
-      "Blue and white"
+      "Philadelphia",
+      "Washington D.C.",
+      "New York City",
+      "Hawaii"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "What would be the worst part of fighting in the Revolutionary War?",
+    "type": "multiple_choice",
+    "options": [
+      "Marching barefoot in winter",
+      "Sleeping in mud and snow",
+      "Charging at British cannons",
+      "Eating hardtack and rotten meat"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "What would be the worst job during the Revolutionary War?",
+    "type": "multiple_choice",
+    "options": [
+      "Cannon loader",
+      "Latrine digger",
+      "Surgeon with no anesthesia",
+      "Drummer boy leading the charge"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "If your face had to be on American currency, which would you pick?",
+    "type": "multiple_choice",
+    "options": [
+      "The penny (everyone hates it)",
+      "The $1 bill (most common)",
+      "The quarter (most recognized)",
+      "The $100 bill (most prestigious)"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "When another country is being crushed by a brutal dictator, should America step in?",
+    "type": "multiple_choice",
+    "options": [
+      "Yes! We're the good guys — we stick up for the little guy!",
+      "No way, we can't solve everyone's problems",
+      "Only if things get really, really bad"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Should every state get to make its own rules, or should America have one rulebook for everyone?",
+    "type": "multiple_choice",
+    "options": [
+      "Each state decides — they know their people best!",
+      "One set of rules for everyone — fairer that way!",
+      "Some national rules, but states get a say too"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "If giving up a little privacy (like cameras everywhere) made everyone safer, would it be worth it?",
+    "type": "multiple_choice",
+    "options": [
+      "Yes — safety first!",
+      "No — freedom is more important!",
+      "Depends how much privacy we're giving up"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "America was built by people from everywhere. How open should the doors be?",
+    "type": "multiple_choice",
+    "options": [
+      "Wide open — everyone deserves a shot!",
+      "Controlled — rules and limits make it fair",
+      "Closed until we fix things at home first"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Your teacher keeps adding unfair rules and won't listen to anyone. What do you do?",
+    "type": "multiple_choice",
+    "options": [
+      "Protest loudly until they change it!",
+      "Write a petition and get everyone to sign",
+      "Just follow the rules and deal with it",
+      "Rebellion! Flip the desks!"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Rich people should pay…",
+    "type": "multiple_choice",
+    "options": [
+      "Way more — they can afford it!",
+      "The same percentage as everyone else — fair is fair!",
+      "Less — they built businesses and hired people!"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Should news channels be allowed to roast the President on live TV?",
+    "type": "multiple_choice",
+    "options": [
+      "Absolutely — that's literally what a free press is for",
+      "Only if they can back it up with facts",
+      "No — there have to be some limits"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Your town votes 7-3 to ban a religion from meeting in public. Legal?",
+    "type": "multiple_choice",
+    "options": [
+      "Yes — majority rules, that's democracy",
+      "No — some things aren't up for a vote, period"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "America is trillions in debt. Should the government keep spending?",
+    "type": "multiple_choice",
+    "options": [
+      "Yes — programs like Social Security and Medicare are worth it",
+      "No — we're just handing our kids the bill"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "A new factory would create 1,000 jobs but pollute a nearby river. Build it?",
+    "type": "multiple_choice",
+    "options": [
+      "Yes — those families need jobs!",
+      "No — you can't drink money",
+      "Only if they pinky promise to keep the river clean"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Your neighbor is caught on camera robbing a store. Should they still get a full trial and a lawyer?",
+    "type": "multiple_choice",
+    "options": [
+      "Yes — the moment we skip trials, anyone can be called \"obviously guilty\"",
+      "No — we literally have them on camera, what's the trial for?"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Should a politician who's been in office for 40 years be allowed to run again?",
+    "type": "multiple_choice",
+    "options": [
+      "Yes — if people keep voting for them, democracy works!",
+      "No — give someone else a turn already",
+      "Two terms max, like the President"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "The Founders said Americans have the right to own a gun. In today's world, that means…",
+    "type": "multiple_choice",
+    "options": [
+      "Anyone who wants one should be able to get one — period",
+      "Strict rules — background checks, waiting periods, the works",
+      "Hunting rifles? Sure. Military-style weapons? Come on."
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "What is the greatest American landmark?",
+    "type": "multiple_choice",
+    "options": [
+      "Statue of Liberty",
+      "Grand Canyon",
+      "Mount Rushmore",
+      "Golden Gate Bridge"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "What best represents the American spirit?",
+    "type": "multiple_choice",
+    "options": [
+      "Bald Eagle",
+      "Liberty Bell",
+      "The Flag",
+      "Uncle Sam"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Who was the greatest American president?",
+    "type": "multiple_choice",
+    "options": [
+      "George Washington",
+      "Abraham Lincoln",
+      "Ronald Reagan",
+      "Donald Trump"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "What's the greatest American song?",
+    "type": "multiple_choice",
+    "options": [
+      "Star Spangled Banner",
+      "America the Beautiful",
+      "Born in the USA",
+      "God Bless America"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Who was the most important Founding Father?",
+    "type": "multiple_choice",
+    "options": [
+      "George Washington",
+      "Benjamin Franklin",
+      "Thomas Jefferson",
+      "Alexander Hamilton"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Which American right matters most?",
+    "type": "multiple_choice",
+    "options": [
+      "Freedom of speech",
+      "Right to own a gun",
+      "Freedom from unlawful search",
+      "Right to a fair trial"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "What was Benjamin Franklin's coolest achievement?",
+    "type": "multiple_choice",
+    "options": [
+      "Discovered electricity",
+      "Invented bifocals",
+      "Outsmarted the British in Paris",
+      "Helped write the Constitution"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "What's America's most important founding document?",
+    "type": "multiple_choice",
+    "options": [
+      "Declaration of Independence",
+      "The Constitution",
+      "The Bill of Rights"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "Which Founding Father had the best life story?",
+    "type": "multiple_choice",
+    "options": [
+      "George Washington",
+      "Benjamin Franklin",
+      "Alexander Hamilton",
+      "Thomas Jefferson"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "If the Founding Fathers had a group chat, who would send the most messages?",
+    "type": "multiple_choice",
+    "options": [
+      "Benjamin Franklin",
+      "Alexander Hamilton",
+      "John Adams",
+      "Thomas Jefferson"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "What would George Washington think of America today?",
+    "type": "multiple_choice",
+    "options": [
+      "Proud",
+      "Confused",
+      "Amazed",
+      "Deeply concerned"
     ],
     "source": "patriotic"
   }
