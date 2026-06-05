@@ -137,6 +137,7 @@ export const startGame = onCall(async (request) => {
         await gameRef.collection('questionPool').add({
           text: q.text,
           source: 'ai-generated',
+          tag: null,
           type,
           options: type === 'multiple_choice' ? q.options ?? null : null,
           used: false,
@@ -348,6 +349,7 @@ export const submitCustomQuestion = onCall(async (request) => {
   await gameRef.collection('questionPool').add({
     text: text.trim(),
     source: 'custom',
+    tag: null,
     type: 'open',
     options: null,
     used: false,

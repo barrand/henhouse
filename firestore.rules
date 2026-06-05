@@ -38,5 +38,11 @@ service cloud.firestore {
         && request.auth.uid in get(/databases/$(database)/documents/games/$(gameId)).data.playerIds;
       allow write: if false;
     }
+
+    // Written and read exclusively by Cloud Functions via Admin SDK.
+    // No client access needed or permitted.
+    match /questionCooldowns/{key} {
+      allow read, write: if false;
+    }
   }
 }

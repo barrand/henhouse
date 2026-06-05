@@ -56,7 +56,8 @@ const SOURCE_WEIGHTS: Record<string, number> = {
   'ai-generated': 3,
   'custom': 3,
   'preset': 1,
-  'patriotic': 0.5,
+  // 'patriotic' is intentionally excluded: patriotic questions are drawn
+  // exclusively via the patrioticModeOnly path and never enter the weighted draw.
 }
 
 const TAG_COOLDOWNS: Record<string, number> = {
@@ -122,7 +123,10 @@ export async function drawQuestion(
   allSnap.docs.forEach((d) => resetBatch.update(d.ref, { used: false }))
   await resetBatch.commit()
 
-  return weightedDraw(poolRef, recentTags, new Set(), patrioticModeOnly)
+  // Re-use the original cooldowns so recently-played questions are still avoided
+  // even after the reset. Only truly fresh questions (or the least-recently-used
+  // ones whose 48hr window has expired) will be drawn.
+  return weightedDraw(poolRef, recentTags, cooldowns, patrioticModeOnly)
 }
 
 function isTagOnCooldown(tag: string | null, recentTags: string[]): boolean {
@@ -181,14 +185,18 @@ async function weightedDraw(
 
   if (!candidateDocs || candidateDocs.length === 0) return null
 
-  // Apply tag cooldowns for variety within a session
+  // Apply tag cooldowns for variety within a session.
+  // Skip tag filtering in patriotic mode — every question carries the 'patriotic'
+  // tag, so the cooldown would fire constantly and add no value.
   const lastTag = recentTags.length > 0 ? recentTags[recentTags.length - 1] : null
-  const tagFiltered = candidateDocs.filter((d) => {
-    const tag = d.data().tag ?? null
-    if (tag && tag === lastTag) return false
-    if (isTagOnCooldown(tag, recentTags)) return false
-    return true
-  })
+  const tagFiltered = patrioticModeOnly
+    ? candidateDocs
+    : candidateDocs.filter((d) => {
+        const tag = d.data().tag ?? null
+        if (tag && tag === lastTag) return false
+        if (isTagOnCooldown(tag, recentTags)) return false
+        return true
+      })
 
   const pool = tagFiltered.length > 0 ? tagFiltered : candidateDocs
   const chosen = pool[Math.floor(Math.random() * pool.length)]
