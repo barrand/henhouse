@@ -56,6 +56,14 @@ export default function Game() {
     }
   }, [game?.rematchCode, navigate])
 
+  // Auto-redirect to home if game doesn't exist (refresh after game ended)
+  useEffect(() => {
+    if (lookupError) {
+      const timer = setTimeout(() => navigate('/'), 500)
+      return () => clearTimeout(timer)
+    }
+  }, [lookupError, navigate])
+
   if (authLoading || gameLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface linen-texture">

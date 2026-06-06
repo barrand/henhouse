@@ -117,4 +117,7 @@ export {
   submitGuess,
   fowlWordsAdvanceRound,
   fowlWordsForceDedup,
+  fowlWordsSubmitWordVote,
+  fowlWordsFinalizeWordSelection,
+  fowlWordsUnlockFirst,
 } from './games/fowl-words/index'

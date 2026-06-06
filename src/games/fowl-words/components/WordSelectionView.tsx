@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
 import { submitWordVote, finalizeWordSelection } from '../service'
 
@@ -14,6 +14,7 @@ export default function WordSelectionView({ game, round, players, isGuesser, isH
   const [myVote, setMyVote] = useState<number | null>(null)
   const [voting, setVoting] = useState(false)
   const [timeLeft, setTimeLeft] = useState(15)
+  const finalizedRef = useRef(false)
 
   const guesserPlayer = players.find((p) => p.id === game.currentGuesser)
   const totalVotes = Object.keys(round.wordVotes ?? {}).length
@@ -22,14 +23,15 @@ export default function WordSelectionView({ game, round, players, isGuesser, isH
   // Countdown timer
   useEffect(() => {
     if (!round.wordSelectionDeadline) return
+    finalizedRef.current = false
 
     const deadlineMs = round.wordSelectionDeadline.seconds * 1000
 
     const tick = () => {
       const remaining = Math.max(0, Math.ceil((deadlineMs - Date.now()) / 1000))
       setTimeLeft(remaining)
-      if (remaining === 0) {
-        // Timer expired — finalize (everyone tries, backend dedupes with transaction)
+      if (remaining === 0 && !finalizedRef.current) {
+        finalizedRef.current = true
         finalizeWordSelection(game.id, round.id ? parseInt(round.id) : game.currentRound).catch(() => {})
       }
     }
@@ -61,7 +63,7 @@ export default function WordSelectionView({ game, round, players, isGuesser, isH
     return (
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-10">
         <div className="max-w-md w-full text-center space-y-5">
-          <div className="text-6xl">🎲</div>
+          <div className="text-6xl">🤔</div>
           <h2 className="font-headline text-2xl font-bold text-on-surface">
             Picking your word…
           </h2>
