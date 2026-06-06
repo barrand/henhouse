@@ -48,9 +48,17 @@ export async function runDeduplication(gameId: string, roundNum: number): Promis
   const cluesByPlayer: Record<string, string> = roundData.cluesByPlayer ?? {}
   const secretWord: string = roundData.secretWord
 
+  console.log('[runDeduplication] Game:', gameId, 'Round:', roundNum, 'Secret word:', secretWord)
+  console.log('[runDeduplication] Clues by player:', JSON.stringify(cluesByPlayer))
+
   const result = await detectDuplicateClues(secretWord, cluesByPlayer)
+  console.log('[runDeduplication] detectDuplicateClues returned:', JSON.stringify(result))
+
   const clueGroups = buildClueGroups(result.groups, cluesByPlayer)
+  console.log('[runDeduplication] Built clue groups:', JSON.stringify(clueGroups))
+
   const visibleGroupIndexes = initialVisibleGroupIndexes(clueGroups)
+  console.log('[runDeduplication] Initial visible group indexes:', visibleGroupIndexes)
 
   // maxAttempts = min(MAX_ATTEMPTS, max(1, totalClueGroups))
   // — one attempt per clue group, capped at MAX_ATTEMPTS

@@ -217,8 +217,11 @@ export interface DuplicateClueResult {
 function fastExactMatchGrouping(
   clues: Record<string, string>,
 ): { hasGrouped: boolean; groups: string[][]; reason: string } {
+  console.log('[Tier1] Starting fast exact-match grouping with clues:', JSON.stringify(clues))
+
   // Normalize each clue: lowercase + trim + remove accents + normalize plurals
   const normalizedToIds: Record<string, string[]> = {}
+  const normalizationMap: Record<string, string> = {} // for logging
 
   for (const [playerId, rawClue] of Object.entries(clues)) {
     let normalized = rawClue
@@ -242,6 +245,7 @@ function fastExactMatchGrouping(
 
     // Use the singular form as the key (so "cat" and "cats" both map to "cat")
     const key = singular
+    normalizationMap[playerId] = `${rawClue} → ${key}`
 
     if (!normalizedToIds[key]) {
       normalizedToIds[key] = []
@@ -249,12 +253,18 @@ function fastExactMatchGrouping(
     normalizedToIds[key].push(playerId)
   }
 
+  console.log('[Tier1] Normalization results:', normalizationMap)
+  console.log('[Tier1] Grouped by normalized key:', JSON.stringify(normalizedToIds))
+
   // Build groups from the normalized map
   const groups = Object.values(normalizedToIds)
   const hasGrouped = groups.some((g) => g.length > 1)
 
+  console.log('[Tier1] Groups found:', JSON.stringify(groups), 'hasGrouped:', hasGrouped)
+
   if (!hasGrouped) {
     // All clues are unique — skip Gemini entirely
+    console.log('[Tier1] No duplicates found, skipping Gemini')
     return {
       hasGrouped: false,
       groups: groups, // still return groups (all size-1), but signal to skip Gemini
@@ -263,6 +273,7 @@ function fastExactMatchGrouping(
   }
 
   // Found duplicates — return them without calling Gemini
+  console.log('[Tier1] Duplicates found! Skipping Gemini entirely')
   return {
     hasGrouped: true,
     groups: groups.sort((a, b) => b.length - a.length), // largest groups first
@@ -274,18 +285,24 @@ export async function detectDuplicateClues(
   secretWord: string,
   clues: Record<string, string>, // playerId -> clue word
 ): Promise<DuplicateClueResult> {
+  console.log('[detectDuplicateClues] Called for secret word:', secretWord, 'with clues:', JSON.stringify(clues))
+
   const playerIds = Object.keys(clues)
   if (playerIds.length === 0) {
+    console.log('[detectDuplicateClues] No clues submitted')
     return { groups: [], reason: 'No clues submitted' }
   }
   if (playerIds.length === 1) {
+    console.log('[detectDuplicateClues] Only one clue submitted')
     return { groups: [[playerIds[0]]], reason: 'Only one clue submitted' }
   }
 
   // TIER 1 — Fast heuristic: catch exact matches + common variations without Gemini
   const tier1Result = fastExactMatchGrouping(clues)
+
   if (tier1Result.hasGrouped) {
     // Found duplicates in tier 1 — return immediately, skip Gemini
+    console.log('[detectDuplicateClues] Tier 1 found duplicates! Returning:', JSON.stringify(tier1Result))
     return {
       groups: tier1Result.groups,
       reason: tier1Result.reason,
@@ -295,6 +312,7 @@ export async function detectDuplicateClues(
   // If tier 1 found no duplicates, we could call Gemini for semantic matching.
   // However: the Gemini prompt is CONSERVATIVE (only exact/spelling/plural variations),
   // so if tier 1 didn't find them, Gemini won't either. Skip Gemini to save cost.
+  console.log('[detectDuplicateClues] Tier 1 found no duplicates. Skipping Gemini. Returning:', JSON.stringify(tier1Result))
   return {
     groups: tier1Result.groups, // all unique (size-1 groups)
     reason: 'All clues unique (tier 1 pass)',

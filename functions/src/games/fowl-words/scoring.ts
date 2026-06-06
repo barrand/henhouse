@@ -137,17 +137,16 @@ export function buildClueGroups(
 
 /**
  * Compute which group indexes are initially visible.
- * Returns indexes of all unique (size-1) groups.
- * Edge case: if there are NO unique groups (everyone duped), reveal the first duplicate group.
+ * Returns indexes of all unique (size-1) groups ONLY.
+ *
+ * Duplicate groups are ALWAYS locked initially, even if there are no unique groups.
+ * If all clues are duplicates, guesser starts with zero visible clues and must guess wrong
+ * to unlock the first duplicate group. This maintains the multi-attempt mechanic and scoring.
  */
 export function initialVisibleGroupIndexes(clueGroups: ClueGroup[]): number[] {
   const uniqueIndexes = clueGroups
     .map((g, i) => (g.isDuplicate ? -1 : i))
     .filter((i) => i >= 0)
 
-  if (uniqueIndexes.length > 0) return uniqueIndexes
-
-  // No unique clues — show the first dupe group so guesser always has something
-  if (clueGroups.length > 0) return [0]
-  return []
+  return uniqueIndexes
 }
