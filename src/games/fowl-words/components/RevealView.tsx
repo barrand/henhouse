@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
-import { submitGuess } from '../service'
+import { submitGuess, unlockFirst } from '../service'
 import PointCounter from './PointCounter'
 
 interface Props {
@@ -14,6 +14,7 @@ interface Props {
 export default function RevealView({ game, round, players, isGuesser }: Props) {
   const [guess, setGuess] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [unlocking, setUnlocking] = useState(false)
   const [error, setError] = useState('')
 
   const playerName = (id: string) => players.find((p) => p.id === id)?.name ?? 'Unknown'
@@ -27,10 +28,22 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
     try {
       await submitGuess(game.id, game.currentRound, guess)
     } catch (err: any) {
-      setError(err.message ?? 'Couldn’t submit your guess')
+      setError(err.message ?? "Couldn't submit your guess")
       setSubmitting(false)
     }
   }
+
+  const handleUnlockFirst = async () => {
+    setUnlocking(true)
+    try {
+      await unlockFirst(game.id, game.currentRound)
+    } catch (err: any) {
+      setError(err.message ?? "Couldn't unlock clue")
+      setUnlocking(false)
+    }
+  }
+
+  const allDuplicates = visibleSet.size === 0 && round.clueGroups.length > 0
 
   return (
     <main className="flex-1 flex flex-col px-4 py-6">
@@ -54,15 +67,15 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
         {isGuesser ? (
           <div className="text-center">
             <h2 className="font-headline text-2xl font-bold text-on-surface">
-              {visibleSet.size === 0
-                ? 'Duplicates only'
+              {allDuplicates
+                ? 'All clues are duplicates!'
                 : round.currentAttempt === 1
                 ? 'Your clues'
                 : 'New clue unlocked!'}
             </h2>
             <p className="text-on-surface-variant text-sm mt-1 font-body">
-              {visibleSet.size === 0
-                ? 'All the clues match each other. What do you think?'
+              {allDuplicates
+                ? 'Everyone thought of the same thing. Unlock one to see it.'
                 : round.currentAttempt === 1
                 ? 'Take a beat. Then guess.'
                 : 'Try again — points just dropped.'}
@@ -71,32 +84,63 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
         ) : (
           <div className="text-center">
             <h2 className="font-headline text-lg font-bold text-on-surface">
-              <span className="text-primary">{guesserPlayer?.name}</span> is thinking…
+              {allDuplicates
+                ? <><span className="text-error">All duplicates!</span></>
+                : <><span className="text-primary">{guesserPlayer?.name}</span> is thinking…</>}
             </h2>
-            {round.eliminationReason && round.currentAttempt === 1 && (
-              <p className="text-xs text-outline mt-1 italic font-body">
-                {round.eliminationReason}
+            <p className="text-xs text-outline mt-1 italic font-body">
+              {allDuplicates
+                ? `Every clue matched — ${guesserPlayer?.name} is unlocking the first one`
+                : round.eliminationReason && round.currentAttempt === 1
+                ? round.eliminationReason
+                : null}
+            </p>
+          </div>
+        )}
+
+        {/* All-duplicates state — shown instead of clue list */}
+        {allDuplicates && (
+          <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-6 text-center space-y-4 shadow-sm">
+            <p className="text-4xl">🔒</p>
+            <div>
+              <p className="font-headline text-lg font-bold text-on-surface">
+                Every clue matched
+              </p>
+              <p className="text-on-surface-variant text-sm mt-1 font-body">
+                {isGuesser
+                  ? 'No unique clues to see. Unlock the first duplicate to get a hint — but you\'ll be guessing for 5 pts.'
+                  : 'All clues were duplicates. The guesser needs to unlock one to continue.'}
+              </p>
+            </div>
+
+            {/* Locked clue count for non-guessers */}
+            {!isGuesser && (
+              <p className="text-xs text-outline font-body">
+                {round.clueGroups.length} duplicate group{round.clueGroups.length !== 1 ? 's' : ''} locked
+              </p>
+            )}
+
+            {/* Unlock button — guesser only */}
+            {isGuesser && (
+              <button
+                onClick={handleUnlockFirst}
+                disabled={unlocking}
+                className="w-full bg-tertiary-container text-on-tertiary-container h-12 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
+              >
+                {unlocking ? 'Unlocking…' : 'Unlock first clue → 5 pts'}
+              </button>
+            )}
+
+            {!isGuesser && (
+              <p className="text-xs text-outline animate-pulse font-body">
+                Waiting for {guesserPlayer?.name} to unlock…
               </p>
             )}
           </div>
         )}
 
-        {/* Clue groups - or placeholder if all duplicates */}
-        <div className="space-y-3">
-          {isGuesser && visibleSet.size === 0 && (
-            <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-6 text-center">
-              <p className="font-headline text-lg font-bold text-on-surface mb-2">
-                🔒 No unique clues!
-              </p>
-              <p className="text-on-surface-variant text-sm mb-3 font-body">
-                All the clues are duplicates — they're locked. Make your best guess to unlock them.
-              </p>
-              <p className="text-xs text-outline italic font-body">
-                Guess wrong → unlock one duplicate on attempt 2 for 5 pts
-              </p>
-            </div>
-          )}
-
+        {/* Clue groups — only shown when there are visible clues */}
+        {!allDuplicates && <div className="space-y-3">
           {round.clueGroups.map((group, idx) => {
             const isVisible = visibleSet.has(idx)
 
@@ -160,10 +204,10 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
               </div>
             )
           })}
-        </div>
+        </div>}
 
-        {/* Guesser's input */}
-        {isGuesser && (
+        {/* Guesser's input — only shown when there are visible clues to guess from */}
+        {isGuesser && !allDuplicates && (
           <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-5 space-y-3 shadow-sm mt-2">
             <label className="block">
               <span className="font-label text-[10px] uppercase tracking-wider text-secondary font-bold">
@@ -192,7 +236,7 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
           </div>
         )}
 
-        {!isGuesser && (
+        {!isGuesser && !allDuplicates && (
           <p className="text-center text-outline text-sm animate-pulse mt-2 font-body">
             Watching {guesserPlayer?.name} think…
           </p>

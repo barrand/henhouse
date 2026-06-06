@@ -2,7 +2,7 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import * as admin from 'firebase-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import { claimRoomCode, releaseRoomCode } from '../../shared/roomCodes'
-import { runDeduplication, handleGuess, advanceToNextRound } from './roundFlow'
+import { runDeduplication, handleGuess, advanceToNextRound, skipToNextAttempt } from './roundFlow'
 
 const db = admin.firestore
 
@@ -241,6 +241,23 @@ export const fowlWordsAdvanceRound = onCall(async (request) => {
   }
 
   await advanceToNextRound(gameId)
+})
+
+// -- UNLOCK FIRST CLUE (when all clues are duplicates, guesser has no visible clues) --
+export const fowlWordsUnlockFirst = onCall(async (request) => {
+  const uid = request.auth?.uid
+  if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
+
+  const { gameId, roundNum } = request.data as { gameId: string; roundNum: number }
+  const firestore = db()
+  const gameSnap = await firestore.collection('games').doc(gameId).get()
+  const game = gameSnap.data()!
+
+  if (game.currentGuesser !== uid) {
+    throw new HttpsError('permission-denied', 'Only the guesser can unlock the first clue')
+  }
+
+  await skipToNextAttempt(gameId, roundNum)
 })
 
 // -- FORCE START DEDUP (manual escalation if a player is AFK) --

@@ -225,6 +225,69 @@ export async function handleGuess(
 }
 
 /**
+ * Skip the current attempt when there are no visible clues (all duplicates).
+ * Unlocks the first duplicate group and drops to the next point tier.
+ * Only valid when visibleGroupIndexes is empty.
+ */
+export async function skipToNextAttempt(gameId: string, roundNum: number): Promise<void> {
+  const firestore = db()
+  const roundRef = firestore
+    .collection('games')
+    .doc(gameId)
+    .collection('rounds')
+    .doc(String(roundNum))
+
+  const roundSnap = await roundRef.get()
+  if (!roundSnap.exists) throw new Error('Round not found')
+  const roundData = roundSnap.data()!
+
+  // Only allowed when there are no visible clues
+  const visibleGroupIndexes: number[] = roundData.visibleGroupIndexes ?? []
+  if (visibleGroupIndexes.length > 0) throw new Error('Cannot skip — there are visible clues')
+
+  const clueGroups = (roundData.clueGroups ?? []) as ClueGroup[]
+  const currentAttempt: number = roundData.currentAttempt ?? 1
+  const maxAttempts: number = roundData.maxAttempts ?? 1
+  const guesserId: string = await getGuesserId(gameId)
+  const clueTimestamps = normalizeTimestamps(roundData.clueTimestamps ?? {})
+  const playerScores = await fetchPlayerScores(gameId)
+
+  const nextUnlockIdx = selectNextUnlockGroup(
+    clueGroups,
+    visibleGroupIndexes,
+    playerScores,
+    clueTimestamps,
+  )
+
+  if (nextUnlockIdx < 0) {
+    // Nothing to unlock — end the round with zero scores
+    const scores = computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, false, currentAttempt)
+    await roundRef.update({
+      status: 'scored',
+      isCorrect: false,
+      pointsThisRound: scores,
+      tentativePoints: scores,
+    })
+    return
+  }
+
+  const newVisible = [nextUnlockIdx]
+  const newAttempt = currentAttempt + 1
+  const newTentative = computeTentativePoints(clueGroups, newVisible, guesserId, newAttempt)
+  const newDeadline = Timestamp.fromMillis(Date.now() + SECONDS_PER_ATTEMPT * 1000)
+
+  await roundRef.update({
+    status: 'reveal',
+    currentAttempt: Math.min(newAttempt, maxAttempts),
+    visibleGroupIndexes: newVisible,
+    tentativePoints: newTentative,
+    attemptDeadline: newDeadline,
+    lastUnlockedGroupIndex: nextUnlockIdx,
+    attemptInProgress: false,
+  })
+}
+
+/**
  * Move to the next round (or end the game).
  */
 export async function advanceToNextRound(gameId: string): Promise<void> {
