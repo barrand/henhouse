@@ -20,6 +20,7 @@
     {
       "target": "default",
       "public": "dist",
+      "predeploy": ["npm run build"],
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -35,6 +36,7 @@
     {
       "target": "live",
       "public": "dist",
+      "predeploy": ["npm run build"],
       "ignore": [
         "firebase.json",
         "**/.*",
