@@ -97,13 +97,23 @@ export const onPresenceChange = onValueWritten(
 export {
   flockCreateGame,
   flockRematch,
-  startGame,
+  startGame as flockStartGame,
   submitAnswer,
   skipQuestion,
   updateCategories,
   setPatrioticMode,
   resetQuestionCooldowns,
   submitCustomQuestion,
-  advanceRound,
+  advanceRound as flockAdvanceRound,
   forceEndRound,
 } from './games/flock-together/index'
+
+// ── Just One ───────────────────────────────────────────────────────────────────
+export {
+  justOneCreateGame,
+  justOneRematch,
+  startGame as justOneStartGame,
+  submitClue,
+  submitGuess,
+  advanceRound as justOneAdvanceRound,
+} from './games/just-one/index'

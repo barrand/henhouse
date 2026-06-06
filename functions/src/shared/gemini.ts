@@ -198,5 +198,81 @@ Return ONLY valid JSON: { "questions": [{ "text": "...", "category": "...", "typ
   return questions
 }
 
-// ── Fowl Words (Just One) ─────────────────────────────────────────────────────
-// detectDuplicateClues() will be added here in Phase 3
+// ── Just One ──────────────────────────────────────────────────────────────────
+
+export interface DuplicateClueResult {
+  eliminatedPlayerIds: string[] // playerIds whose clues matched others
+  reason: string // why they were eliminated
+}
+
+export async function detectDuplicateClues(
+  secretWord: string,
+  clues: Record<string, string>, // playerId -> clue word
+): Promise<DuplicateClueResult> {
+  if (Object.keys(clues).length === 0) {
+    return { eliminatedPlayerIds: [], reason: 'No clues submitted' }
+  }
+
+  const model = getModel()
+  const playerIds = Object.keys(clues)
+  const cluesList = playerIds.map((id) => `${id}: "${clues[id]}"`)
+
+  const prompt = `The secret word for this round of Just One is: "${secretWord}"
+
+Players gave these clues:
+${cluesList.join('\n')}
+
+Your job: identify ANY clues that are identical or too similar to another clue. In Just One, duplicate or matching clues are eliminated to make the game harder.
+
+RULES for when to eliminate a clue:
+- ELIMINATE if two clues are EXACTLY the same word (case-insensitive): "Paris" = "paris" = "PARIS"
+- ELIMINATE if two clues are synonyms that mean the same thing: "big" and "large", "happy" and "joyful"
+- ELIMINATE if two clues are very close variations: "run" and "running", "cat" and "cats"
+- ELIMINATE if both clues are anagrams of the same letters (super rare, but eliminate): "listen" and "silent"
+- DO NOT eliminate just because clues are related to the same topic: "movie" and "actor" both relate to cinema but are different clues
+
+Context matters. For example, if the secret word is "PARIS":
+- "FRANCE" and "CITY" are both different → no elimination
+- "FRANCE" and "FRENCH" are similar enough → ELIMINATE both
+- "EIFFEL" and "FRANCE" are different → no elimination
+
+Return ONLY valid JSON: {"eliminatedPlayerIds":["id1","id2"],"reason":"Explanation of why these were eliminated"}`
+
+  try {
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+      },
+    })
+
+    const text = result.response.text()
+    const parsed = JSON.parse(text)
+    return {
+      eliminatedPlayerIds: Array.isArray(parsed.eliminatedPlayerIds) ? parsed.eliminatedPlayerIds : [],
+      reason: parsed.reason ?? 'Duplicate or similar clues detected',
+    }
+  } catch (err) {
+    console.error('Gemini duplicate detection failed:', err)
+    // Fallback: eliminate exact duplicates only
+    const eliminated: string[] = []
+    const clueToIds: Record<string, string[]> = {}
+
+    for (const [playerId, clue] of Object.entries(clues)) {
+      const normalized = clue.trim().toLowerCase()
+      if (!clueToIds[normalized]) clueToIds[normalized] = []
+      clueToIds[normalized].push(playerId)
+    }
+
+    for (const ids of Object.values(clueToIds)) {
+      if (ids.length > 1) {
+        eliminated.push(...ids)
+      }
+    }
+
+    return {
+      eliminatedPlayerIds: eliminated,
+      reason: 'Exact duplicate clues detected (Gemini unavailable)',
+    }
+  }
+}
