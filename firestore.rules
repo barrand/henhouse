@@ -41,7 +41,7 @@ service cloud.firestore {
 
     // Written and read exclusively by Cloud Functions via Admin SDK.
     // No client access needed or permitted.
-    match /questionCooldowns/{key} {
+    match /flockQuestionCooldowns/{key} {
       allow read, write: if false;
     }
   }

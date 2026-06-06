@@ -11,8 +11,12 @@ import type { GameData, PlayerData, RoundData } from '../types'
 
 // -- Callable Cloud Functions --
 
-const createGameFn = httpsCallable<{ playerName: string }, { gameId: string; code: string }>(functions, 'createGame')
-const joinGameFn = httpsCallable<{ code: string; playerName: string }, { gameId: string }>(functions, 'joinGame')
+// Shared
+const joinGameFn = httpsCallable<{ code: string; playerName: string }, { gameId: string; gameType: string }>(functions, 'joinGame')
+
+// Flock Together
+const flockCreateGameFn = httpsCallable<{ playerName: string }, { gameId: string; code: string }>(functions, 'flockCreateGame')
+const flockRematchFn = httpsCallable<{ gameId: string }, { code: string }>(functions, 'flockRematch')
 const startGameFn = httpsCallable<{ gameId: string }, void>(functions, 'startGame')
 const submitAnswerFn = httpsCallable<{ gameId: string; roundNum: number; answer: string }, void>(functions, 'submitAnswer')
 const skipQuestionFn = httpsCallable<{ gameId: string }, void>(functions, 'skipQuestion')
@@ -20,17 +24,25 @@ const advanceRoundFn = httpsCallable<{ gameId: string }, void>(functions, 'advan
 const forceEndRoundFn = httpsCallable<{ gameId: string }, void>(functions, 'forceEndRound')
 const updateCategoriesFn = httpsCallable<{ gameId: string; categories: string[] }, void>(functions, 'updateCategories')
 const setPatrioticModeFn = httpsCallable<{ gameId: string; enabled: boolean }, void>(functions, 'setPatrioticMode')
-const rematchFn = httpsCallable<{ gameId: string }, { code: string }>(functions, 'rematch')
 const resetQuestionCooldownsFn = httpsCallable<{ gameId: string }, void>(functions, 'resetQuestionCooldowns')
 const submitCustomQuestionFn = httpsCallable<{ gameId: string; text: string }, void>(functions, 'submitCustomQuestion')
 
-export async function createGame(playerName: string) {
-  const result = await createGameFn({ playerName })
-  return result.data
-}
+// -- Shared --
 
 export async function joinGame(code: string, playerName: string) {
   const result = await joinGameFn({ code: code.toUpperCase(), playerName })
+  return result.data
+}
+
+// -- Flock Together --
+
+export async function flockCreateGame(playerName: string) {
+  const result = await flockCreateGameFn({ playerName })
+  return result.data
+}
+
+export async function flockRematch(gameId: string) {
+  const result = await flockRematchFn({ gameId })
   return result.data
 }
 
@@ -60,11 +72,6 @@ export async function updateCategories(gameId: string, categories: string[]) {
 
 export async function setPatrioticMode(gameId: string, enabled: boolean) {
   await setPatrioticModeFn({ gameId, enabled })
-}
-
-export async function rematch(gameId: string) {
-  const result = await rematchFn({ gameId })
-  return result.data
 }
 
 export async function resetQuestionCooldowns(gameId: string) {

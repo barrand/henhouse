@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/usePlayer'
-import { createGame, joinGame } from '../lib/gameService'
+import { flockCreateGame, joinGame } from '../lib/gameService'
 
 export default function Home() {
   const { loading: authLoading } = useAuth()
@@ -22,7 +22,7 @@ export default function Home() {
     setError('')
     setCreating(true)
     try {
-      const { code } = await createGame(name.trim())
+      const { code } = await flockCreateGame(name.trim())
       navigate(`/game/${code}`)
     } catch (err: any) {
       setError(err.message ?? 'Failed to create game')
@@ -39,6 +39,7 @@ export default function Home() {
     try {
       await joinGame(roomCode.trim(), name.trim())
       navigate(`/game/${roomCode.trim().toUpperCase()}`)
+      // Note: gameType-based routing will be added in Phase 2 when Just One is built
     } catch (err: any) {
       setError(err.message ?? 'Failed to join game')
     } finally {

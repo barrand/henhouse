@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
 import RottenEgg from './RottenEgg'
-import { rematch } from '../lib/gameService'
+import { flockRematch } from '../lib/gameService'
 
 interface Props {
   game: GameData
@@ -19,7 +19,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
     setRematching(true)
     setRematchError('')
     try {
-      await rematch(game.id)
+      await flockRematch(game.id)
       // Navigation is handled by the rematchCode effect in Game.tsx
     } catch (err: any) {
       setRematchError(err.message ?? 'Failed to start new game')
