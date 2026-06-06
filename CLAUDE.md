@@ -27,10 +27,8 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 
 | Term | Meaning |
 |------|---------|
-| **guesser** | Guesses the secret word. Blind during word-selection and clue-submission. Sees only unique clues. |
+| **guesser** | Guesses the secret word. Blind during word-selection and clue-submission. Sees only non-duplicate clues. |
 | **givers** | Everyone else. See the secret word, each write one clue. |
-| **locked** | A duplicate clue group — hidden from guesser until unlocked by a wrong guess. |
-| **unique** | A clue no one else matched — visible to guesser from attempt 1. |
 
 ---
 
