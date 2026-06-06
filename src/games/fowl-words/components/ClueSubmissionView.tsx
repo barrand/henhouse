@@ -46,6 +46,8 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
     }
   }
 
+  const givers = players.filter((p) => p.id !== game.currentGuesser)
+
   // GUESSER VIEW: blind, just wait
   if (isGuesser) {
     return (
@@ -56,11 +58,27 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
           <p className="text-on-surface-variant font-body">
             Keep your eyes on your own screen. The flock is writing clues for you.
           </p>
-          <div className="bg-surface-container-lowest border-2 border-outline-variant/30 rounded-2xl p-6 shadow-sm">
-            <p className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary mb-2">Clues in</p>
-            <p className="font-headline text-5xl font-bold text-primary tabular-nums">
-              {cluesCount} <span className="text-on-surface-variant text-3xl">/ {nonGuesserCount}</span>
+          <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 font-label">
+              {cluesCount} of {nonGuesserCount} ready
             </p>
+            <ul className="space-y-2">
+              {givers.map((p) => {
+                const hasClue = !!round.cluesByPlayer[p.id]
+                return (
+                  <li key={p.id} className="flex items-center justify-between">
+                    <span className={`text-sm font-body ${hasClue ? 'text-on-surface' : 'text-outline'}`}>
+                      {p.name}
+                    </span>
+                    {hasClue ? (
+                      <span className="material-symbols-outlined text-primary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    ) : (
+                      <span className="text-xs text-outline italic font-body">writing…</span>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
           </div>
           {isHost && cluesCount > 0 && cluesCount < nonGuesserCount && (
             <button
@@ -131,14 +149,32 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
             </p>
           </div>
         ) : (
-          <div className="bg-surface-container-lowest rounded-2xl border-2 border-primary/30 p-5 text-center shadow-sm">
-            <div className="text-4xl mb-2">✅</div>
-            <p className="font-headline text-lg font-bold text-primary mb-3">Clue locked in!</p>
-            <div className="bg-primary-fixed/30 border border-primary-fixed-dim rounded-xl px-4 py-3">
-              <p className="font-headline text-3xl font-bold text-on-surface tabular-nums">
-                {cluesCount} <span className="text-on-surface-variant text-xl">/ {nonGuesserCount}</span>
+          <div className="bg-surface-container-lowest rounded-2xl border-2 border-primary/30 p-5 shadow-sm space-y-4">
+            <div className="text-center">
+              <div className="text-4xl mb-2">✅</div>
+              <p className="font-headline text-lg font-bold text-primary">Clue locked in!</p>
+            </div>
+            <div className="border-t border-outline-variant/20 pt-3">
+              <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 font-label">
+                {cluesCount} of {nonGuesserCount} ready
               </p>
-              <p className="text-xs text-on-surface-variant mt-1 font-body">clues received</p>
+              <ul className="space-y-2">
+                {givers.map((p) => {
+                  const hasClue = !!round.cluesByPlayer[p.id]
+                  return (
+                    <li key={p.id} className="flex items-center justify-between">
+                      <span className={`text-sm font-body ${hasClue ? 'text-on-surface' : 'text-outline'}`}>
+                        {p.name}
+                      </span>
+                      {hasClue ? (
+                        <span className="material-symbols-outlined text-primary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                      ) : (
+                        <span className="text-xs text-outline italic font-body">writing…</span>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
             </div>
           </div>
         )}
