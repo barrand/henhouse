@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import type { GameData, RoundData, PlayerData } from '../types'
-import { submitAnswer, skipQuestion, forceEndRound } from '../lib/gameService'
+import { submitAnswer, skipQuestion, forceEndRound } from '../service'
 
 interface Props {
   game: GameData

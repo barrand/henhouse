@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { GameData, PlayerData } from '../types'
-import { startGame, updateCategories, setPatrioticMode, resetQuestionCooldowns, submitCustomQuestion, onCustomQuestionsUpdate } from '../lib/gameService'
+import { startGame, updateCategories, setPatrioticMode, resetQuestionCooldowns, submitCustomQuestion, onCustomQuestionsUpdate } from '../service'
 import CategoryInput from './CategoryInput'
 import QuestionSubmission from './QuestionSubmission'
 

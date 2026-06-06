@@ -1,7 +1,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import path from 'path'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      '@shared': path.resolve(__dirname, './src/shared'),
+      '@flock': path.resolve(__dirname, './src/games/flock-together'),
+      '@just-one': path.resolve(__dirname, './src/games/just-one'),
+    },
+  },
 })

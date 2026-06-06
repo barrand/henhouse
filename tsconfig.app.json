@@ -15,6 +15,12 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["src/shared/*"],
+      "@flock/*": ["src/games/flock-together/*"],
+      "@just-one/*": ["src/games/just-one/*"]
+    },
 
     /* Linting */
     "strict": true,

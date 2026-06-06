@@ -1,5 +1,5 @@
 import type { GameData, RoundData, PlayerData } from '../types'
-import { advanceRound } from '../lib/gameService'
+import { advanceRound } from '../service'
 import RottenEgg from './RottenEgg'
 
 interface Props {

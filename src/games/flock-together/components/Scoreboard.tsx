@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
 import RottenEgg from './RottenEgg'
-import { flockRematch } from '../lib/gameService'
+import { flockRematch } from '../service'
 
 interface Props {
   game: GameData

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { onGameUpdate, onPlayersUpdate, onRoundUpdate } from '../lib/gameService'
+import { onGameUpdate, onPlayersUpdate, onRoundUpdate } from '../service'
 import type { GameData, PlayerData, RoundData } from '../types'
 
 export function useGame(gameId: string | null) {
