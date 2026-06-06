@@ -2005,5 +2005,15 @@
       "Deeply concerned"
     ],
     "source": "patriotic"
+  },
+  {
+    "text": "How open should America be to immigration?",
+    "type": "multiple_choice",
+    "options": [
+      "More open — more hands, more ideas",
+      "Keep it the same — don't rock the boat",
+      "Stricter — quality over quantity"
+    ],
+    "source": "patriotic"
   }
 ]
