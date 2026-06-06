@@ -104,13 +104,11 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
                       same word, different spelling
                     </p>
                   )}
-                  {!isGuesser && (
-                    <p className="text-xs text-on-surface-variant text-center mt-2">
-                      {group.playerIds.length === 1
-                        ? `— ${playerName(group.playerIds[0])}`
-                        : `— ${group.playerIds.map(playerName).join(', ')} (${group.playerIds.length})`}
-                    </p>
-                  )}
+                  <p className="text-xs text-on-surface-variant text-center mt-2">
+                    {group.playerIds.length === 1
+                      ? `— ${playerName(group.playerIds[0])}`
+                      : `— ${group.playerIds.map(playerName).join(', ')} (${group.playerIds.length})`}
+                  </p>
                 </div>
               )
             }
