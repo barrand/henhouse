@@ -20,7 +20,7 @@ export type RoundStatus =
 
 export interface ClueGroup {
   playerIds: string[]      // 1+ players who share the same/similar clue
-  clueText: string         // canonical version of the clue
+  clueTexts: string[]      // ALL clue texts (one per player, same order as playerIds)
   isDuplicate: boolean     // true if size >= 2
 }
 

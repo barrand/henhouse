@@ -80,6 +80,12 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
             // Don't show locked groups to the guesser at all
             if (isGuesser && !isVisible) return null
 
+            // Build display text: if all clue texts in the group are identical,
+            // just show it once; otherwise show variants separated by " / ".
+            const uniqueTexts = Array.from(new Set(group.clueTexts.map((t) => t.trim())))
+            const showVariants = uniqueTexts.length > 1
+            const displayText = uniqueTexts.join(' / ')
+
             if (isVisible) {
               return (
                 <div
@@ -91,8 +97,13 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
                   }`}
                 >
                   <p className="font-headline text-2xl font-bold text-on-surface text-center">
-                    {group.clueText}
+                    {displayText}
                   </p>
+                  {showVariants && (
+                    <p className="text-[10px] text-on-surface-variant text-center mt-1 italic">
+                      same word, different spelling
+                    </p>
+                  )}
                   {!isGuesser && (
                     <p className="text-xs text-on-surface-variant text-center mt-2">
                       {group.playerIds.length === 1
@@ -111,7 +122,7 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
                 className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/20 opacity-60"
               >
                 <p className="font-headline text-xl font-medium text-on-surface-variant text-center line-through">
-                  {group.clueText}
+                  {displayText}
                 </p>
                 <p className="text-xs text-error text-center mt-1 font-label uppercase tracking-wider">
                   Eliminated — duplicate

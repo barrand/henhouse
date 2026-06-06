@@ -65,7 +65,9 @@ export function buildClueGroups(
 ): ClueGroup[] {
   const groups: ClueGroup[] = geminiGroups.map((playerIds) => ({
     playerIds,
-    clueText: cluesByPlayer[playerIds[0]] ?? '',
+    // Preserve ALL clue texts — same order as playerIds — so we don't lose
+    // variant info like "cat" vs "cats" when grouped together.
+    clueTexts: playerIds.map((id) => cluesByPlayer[id] ?? ''),
     isDuplicate: playerIds.length >= 2,
   }))
 

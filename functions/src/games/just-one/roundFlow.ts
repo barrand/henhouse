@@ -103,7 +103,7 @@ export async function handleGuess(
   const roundSnap = await roundRef.get()
   const roundData = roundSnap.data()!
   const secretWord: string = roundData.secretWord
-  const clueGroups = (roundData.clueGroups ?? []) as Array<{ playerIds: string[]; clueText: string; isDuplicate: boolean }>
+  const clueGroups = (roundData.clueGroups ?? []) as Array<{ playerIds: string[]; clueTexts: string[]; isDuplicate: boolean }>
   const visibleGroupIndexes: number[] = roundData.visibleGroupIndexes ?? []
   const currentAttempt: number = roundData.currentAttempt ?? 1
 

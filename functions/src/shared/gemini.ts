@@ -228,26 +228,40 @@ export async function detectDuplicateClues(
 Players gave these clues:
 ${cluesList.join('\n')}
 
-Your job: GROUP the clues that mean the same thing or are too similar. Players who share a group are "eliminated" together. Players in a size-1 group (unique clue) survive.
+Your job: GROUP the clues that are essentially the SAME WORD. Be CONSERVATIVE — only merge clues that are the same word with minor variations. Different words that mean similar things should stay SEPARATE.
 
 Every player MUST appear in exactly one group.
 
-RULES for when two clues belong to the same group:
-- SAME GROUP if EXACTLY the same word (case-insensitive): "Paris" = "paris" = "PARIS"
-- SAME GROUP if synonyms that mean the same thing: "big" and "large", "happy" and "joyful"
-- SAME GROUP if very close variations: "run" and "running", "cat" and "cats"
-- SAME GROUP if anagrams of the same letters (super rare): "listen" and "silent"
-- DIFFERENT GROUPS if just related to the same topic: "movie" and "actor" both relate to cinema but are different clues — keep them separate
+ONLY merge clues in these specific cases:
+1. **Exact match** (case-insensitive): "Paris" = "paris" = "PARIS"
+2. **Plurals/singulars**: "cat" = "cats", "child" = "children"
+3. **Verb tenses of the same verb**: "run" = "running" = "ran", "bake" = "baked" = "baking"
+4. **Common misspellings/typos**: "necessary" = "neccessary", "tomato" = "tomatoe"
+5. **Accents/diacritics**: "café" = "cafe", "résumé" = "resume"
+6. **Hyphenation/spacing variants**: "ice cream" = "icecream" = "ice-cream"
 
-Context matters. For example, if the secret word is "PARIS":
-- "FRANCE" and "CITY" → DIFFERENT groups (both unique)
-- "FRANCE" and "FRENCH" → SAME group (similar enough)
-- "EIFFEL" and "FRANCE" → DIFFERENT groups (both unique)
+DO NOT merge these — they are DIFFERENT clues even if related:
+- **Different words even if synonymous**: "Fire" ≠ "Flame", "Big" ≠ "Large", "Happy" ≠ "Joyful", "Car" ≠ "Vehicle"
+- **Related concepts**: "France" ≠ "French" (one is a country, the other an adjective)
+- **Same topic, different word**: "Wolf" ≠ "Dog", "Pizza" ≠ "Pasta"
+- **Anagrams**: "listen" ≠ "silent" (totally different words)
+- **Root word vs derived**: "Sun" ≠ "Sunny", "Hot" ≠ "Heat"
+
+RULE OF THUMB: if you have to think about whether they "mean the same thing," they're DIFFERENT. Only merge when they are clearly the SAME word.
+
+Examples (secret word "PARIS"):
+- "FRANCE" and "CITY" → DIFFERENT groups
+- "FRANCE" and "FRENCH" → DIFFERENT groups (different words)
+- "EIFFEL" and "TOWER" → DIFFERENT groups
+- "city" and "City" → SAME group (just capitalization)
+- "city" and "cities" → SAME group (plural)
+- "love" and "loving" → SAME group (verb tense)
+- "love" and "romance" → DIFFERENT groups (different words)
 
 Return ONLY valid JSON in this exact shape:
 {
   "groups": [["playerId1"], ["playerId2", "playerId3"], ["playerId4"]],
-  "reason": "Brief one-sentence explanation, e.g. 'Bob and Carol both wrote FRANCE'"
+  "reason": "Brief one-sentence explanation, e.g. 'Bob and Carol both wrote CAT/CATS'. Use 'All clues are unique' if nothing was merged."
 }
 
 Every player in the input MUST be in exactly one group in the output. The number of input players must equal the total players across all groups.`

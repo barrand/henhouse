@@ -2,7 +2,7 @@
 
 export interface ClueGroup {
   playerIds: string[]      // 1+ players who share the same/similar clue
-  clueText: string         // canonical version of the clue (first submission's text)
+  clueTexts: string[]      // ALL clue texts in this group (one per player, same order)
   isDuplicate: boolean     // true if playerIds.length >= 2
 }
 
