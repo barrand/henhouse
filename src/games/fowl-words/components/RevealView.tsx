@@ -21,57 +21,54 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
   const guesserPlayer = players.find((p) => p.id === game.currentGuesser)
 
   const handleGuess = async () => {
-    if (!guess.trim()) return setError('Enter a guess')
+    if (!guess.trim()) return setError('Take a guess')
     setError('')
     setSubmitting(true)
     try {
       await submitGuess(game.id, game.currentRound, guess)
     } catch (err: any) {
-      setError(err.message ?? 'Failed to submit guess')
+      setError(err.message ?? 'Couldn’t submit your guess')
       setSubmitting(false)
     }
   }
 
   return (
-    <main className="flex-1 flex flex-col px-6 py-6">
+    <main className="flex-1 flex flex-col px-4 py-6">
       <div className="max-w-md w-full mx-auto space-y-5">
-        {/* Secret word visible to non-guessers only */}
+        {/* Secret word visible to non-guessers only — Flock-style premium card */}
         {!isGuesser && (
-          <div className="bg-tertiary-fixed border-2 border-tertiary rounded-xl p-4 text-center">
-            <p className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary mb-1">
-              Secret word
+          <div className="bg-primary-fixed/50 border-2 border-primary-fixed-dim rounded-2xl p-4 text-center shadow-sm">
+            <p className="font-label text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-1">
+              The secret word
             </p>
-            <p className="font-headline text-3xl font-bold text-secondary tracking-tight">
+            <p className="font-headline text-4xl font-bold text-on-surface tracking-tight">
               {round.secretWord}
             </p>
           </div>
         )}
 
-        {/* Point counter — visible to everyone, animates on attempt change */}
+        {/* Point counter — visible to everyone */}
         <PointCounter currentAttempt={round.currentAttempt} maxAttempts={round.maxAttempts} />
 
-        {/* Guesser heading */}
-        {isGuesser && (
+        {/* Heading */}
+        {isGuesser ? (
           <div className="text-center">
             <h2 className="font-headline text-2xl font-bold text-on-surface">
-              {round.currentAttempt === 1 ? 'Here are your clues' : 'A new clue appeared!'}
+              {round.currentAttempt === 1 ? 'Your clues' : 'New clue unlocked!'}
             </h2>
-            <p className="text-on-surface-variant text-sm mt-1">
+            <p className="text-on-surface-variant text-sm mt-1 font-body">
               {round.currentAttempt === 1
-                ? 'Take a beat, then guess the word.'
-                : 'Try again — points are lower now.'}
+                ? 'Take a beat. Then guess.'
+                : 'Try again — points just dropped.'}
             </p>
           </div>
-        )}
-
-        {/* Non-guesser heading */}
-        {!isGuesser && (
+        ) : (
           <div className="text-center">
-            <h2 className="font-headline text-xl font-bold text-on-surface">
-              {guesserPlayer?.name} is reading the clues
+            <h2 className="font-headline text-lg font-bold text-on-surface">
+              <span className="text-primary">{guesserPlayer?.name}</span> is thinking…
             </h2>
-            {round.eliminationReason && (
-              <p className="text-xs text-on-surface-variant mt-1 italic">
+            {round.eliminationReason && round.currentAttempt === 1 && (
+              <p className="text-xs text-outline mt-1 italic font-body">
                 {round.eliminationReason}
               </p>
             )}
@@ -83,11 +80,9 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
           {round.clueGroups.map((group, idx) => {
             const isVisible = visibleSet.has(idx)
 
-            // Don't show locked groups to the guesser at all
+            // Don't show locked groups to the guesser
             if (isGuesser && !isVisible) return null
 
-            // Build display text: if all clue texts in the group are identical,
-            // just show it once; otherwise show variants separated by " / ".
             const uniqueTexts = Array.from(new Set(group.clueTexts.map((t) => t.trim())))
             const showVariants = uniqueTexts.length > 1
             const displayText = uniqueTexts.join(' / ')
@@ -97,50 +92,50 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
               return (
                 <div
                   key={idx}
-                  className={`bg-surface-container-lowest rounded-xl p-5 border-2 transition-all relative ${
+                  className={`relative bg-surface-container-lowest rounded-2xl border-2 px-5 py-4 shadow-sm transition-all ${
                     justUnlocked
-                      ? 'border-tertiary shadow-[0_8px_24px_rgba(255,200,100,0.4)] scale-[1.02]'
+                      ? 'border-tertiary scale-[1.02] shadow-[0_8px_24px_rgba(255,200,100,0.3)]'
                       : group.isDuplicate
-                      ? 'border-tertiary/60 shadow-[0_4px_16px_rgba(255,200,100,0.15)]'
-                      : 'border-primary/40 shadow-[0_4px_16px_rgba(168,201,169,0.15)]'
+                      ? 'border-tertiary/50'
+                      : 'border-primary/40'
                   }`}
                 >
                   {justUnlocked && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-tertiary text-secondary text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full font-label">
-                      🔓 Just Unlocked
+                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-tertiary-container text-on-tertiary-container text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full font-label">
+                      🔓 Just unlocked
                     </span>
                   )}
                   <p className="font-headline text-2xl font-bold text-on-surface text-center">
                     {displayText}
                   </p>
                   {showVariants && (
-                    <p className="text-[10px] text-on-surface-variant text-center mt-1 italic">
+                    <p className="text-[10px] text-outline text-center mt-1 italic font-body">
                       same word, different spelling
                     </p>
                   )}
-                  <p className="text-xs text-on-surface-variant text-center mt-2">
+                  <p className="text-xs text-on-surface-variant text-center mt-2 font-body">
                     {group.playerIds.length === 1
-                      ? `— ${playerName(group.playerIds[0])}`
-                      : `— ${group.playerIds.map(playerName).join(', ')} (${group.playerIds.length})`}
+                      ? `from ${playerName(group.playerIds[0])}`
+                      : `from ${group.playerIds.map(playerName).join(', ')}`}
                   </p>
                 </div>
               )
             }
 
-            // Locked / eliminated group (shown to non-guessers only)
+            // Locked / eliminated group (non-guessers only)
             return (
               <div
                 key={idx}
-                className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/20 opacity-60"
+                className="bg-surface-container-low rounded-2xl border border-outline-variant/30 px-5 py-3 opacity-70"
               >
-                <p className="font-headline text-xl font-medium text-on-surface-variant text-center line-through">
+                <p className="font-headline text-lg font-medium text-on-surface-variant text-center line-through">
                   {displayText}
                 </p>
-                <p className="text-xs text-error text-center mt-1 font-label uppercase tracking-wider">
+                <p className="text-[10px] text-error text-center mt-1 font-label uppercase tracking-wider font-bold">
                   Eliminated — duplicate
                 </p>
-                <p className="text-xs text-on-surface-variant text-center mt-0.5">
-                  {group.playerIds.map(playerName).join(', ')}
+                <p className="text-xs text-outline text-center mt-1 font-body">
+                  from {group.playerIds.map(playerName).join(', ')}
                 </p>
               </div>
             )
@@ -149,9 +144,9 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
 
         {/* Guesser's input */}
         {isGuesser && (
-          <div className="bg-surface-container-lowest rounded-xl p-5 border border-outline-variant/15 space-y-3 mt-2">
+          <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-5 space-y-3 shadow-sm mt-2">
             <label className="block">
-              <span className="font-label text-[10px] uppercase tracking-wider text-secondary">
+              <span className="font-label text-[10px] uppercase tracking-wider text-secondary font-bold">
                 Your guess
               </span>
               <input
@@ -159,27 +154,27 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
                 value={guess}
                 onChange={(e) => setGuess(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleGuess()}
-                placeholder="The secret word..."
+                placeholder="The secret word…"
                 maxLength={100}
                 autoFocus
                 disabled={submitting}
-                className="mt-2 w-full bg-surface-container px-4 py-3 rounded-xl border border-outline-variant/30 focus:border-primary focus:outline-none font-body text-lg"
+                className="mt-2 w-full bg-surface-container-lowest border-2 border-outline-variant/30 rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-outline/50 font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               />
             </label>
             <button
               onClick={handleGuess}
               disabled={submitting || !guess.trim()}
-              className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-semibold tracking-wide shadow-[0_8px_24px_rgba(0,0,0,0.3)] hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+              className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
             >
-              {submitting ? 'Submitting...' : 'Submit Guess'}
+              {submitting ? 'Checking…' : 'Submit guess'}
             </button>
-            {error && <p className="text-center text-error text-sm">{error}</p>}
+            {error && <p className="text-center text-error text-sm font-body">{error}</p>}
           </div>
         )}
 
         {!isGuesser && (
-          <p className="text-center text-on-surface-variant text-sm animate-pulse mt-4">
-            Watching {guesserPlayer?.name} think...
+          <p className="text-center text-outline text-sm animate-pulse mt-2 font-body">
+            Watching {guesserPlayer?.name} think…
           </p>
         )}
       </div>

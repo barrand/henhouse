@@ -23,26 +23,29 @@ export default function RoundResultView({ game, round, players, isHost, currentP
     try {
       await advanceRound(game.id)
     } catch (err: any) {
-      setError(err.message ?? 'Failed to advance')
+      setError(err.message ?? 'Couldn’t move on')
       setAdvancing(false)
     }
   }
 
   const myPoints = currentPlayerId ? round.pointsThisRound[currentPlayerId] ?? 0 : 0
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
+  const guesserName = guesserPlayer?.name ?? 'The guesser'
 
   return (
-    <main className="flex-1 flex flex-col px-6 py-6">
-      <div className="max-w-md w-full mx-auto space-y-6">
+    <main className="flex-1 flex flex-col px-4 py-6">
+      <div className="max-w-md w-full mx-auto space-y-5">
         {/* Result Banner */}
-        <div className="text-center space-y-3">
+        <div className="text-center space-y-2">
           {round.isCorrect ? (
             <>
               <div className="text-6xl">🎉</div>
-              <h2 className="font-headline text-3xl font-bold text-primary">CORRECT!</h2>
-              <p className="text-on-surface-variant font-body">
-                {guesserPlayer?.name} guessed{' '}
-                <span className="font-semibold text-on-surface">{round.guesserAnswer}</span>
+              <h2 className="font-headline text-4xl font-bold text-primary tracking-tight">
+                NAILED IT!
+              </h2>
+              <p className="text-on-surface-variant font-body text-sm">
+                {guesserName} guessed{' '}
+                <span className="font-bold text-on-surface">{round.guesserAnswer}</span>
                 {round.currentAttempt > 1 && (
                   <span className="block text-xs mt-1 opacity-75">
                     on attempt {round.currentAttempt} of {round.maxAttempts}
@@ -53,12 +56,14 @@ export default function RoundResultView({ game, round, players, isHost, currentP
           ) : (
             <>
               <div className="text-6xl">😬</div>
-              <h2 className="font-headline text-3xl font-bold text-error">Not quite!</h2>
-              <p className="text-on-surface-variant font-body">
-                {guesserPlayer?.name} ran out of guesses.
+              <h2 className="font-headline text-4xl font-bold text-error tracking-tight">
+                NO LUCK
+              </h2>
+              <p className="text-on-surface-variant font-body text-sm">
+                {guesserName} ran out of guesses.
                 {round.guessAttempts.length > 0 && (
                   <span className="block text-xs mt-1 opacity-75">
-                    Last guess: <span className="font-semibold">{round.guesserAnswer}</span>
+                    Last try: <span className="font-bold">{round.guesserAnswer}</span>
                   </span>
                 )}
               </p>
@@ -66,44 +71,54 @@ export default function RoundResultView({ game, round, players, isHost, currentP
           )}
         </div>
 
-        {/* Secret Word */}
-        <div className="bg-tertiary-fixed border-2 border-tertiary rounded-xl p-5 text-center">
-          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary mb-1">
+        {/* Secret Word — Flock-style premium card */}
+        <div className="bg-primary-fixed/50 border-2 border-primary-fixed-dim rounded-2xl p-5 text-center shadow-sm">
+          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-1">
             The word was
           </p>
-          <p className="font-headline text-4xl font-bold text-secondary tracking-tight">
+          <p className="font-headline text-4xl font-bold text-on-surface tracking-tight">
             {round.secretWord}
           </p>
         </div>
 
-        {/* Personal score */}
+        {/* Personal score — only if you scored */}
         {myPoints > 0 && (
-          <div className="bg-primary/15 border-2 border-primary rounded-xl p-4 text-center">
-            <p className="font-headline text-2xl font-bold text-primary">+{myPoints} pts!</p>
+          <div className="bg-primary text-on-primary rounded-2xl p-5 text-center shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+            <p className="font-label text-[10px] uppercase tracking-[0.2em] opacity-80 mb-1 font-bold">
+              You earned
+            </p>
+            <p className="font-headline text-5xl font-bold tabular-nums">
+              +{myPoints} <span className="text-3xl opacity-80">pts</span>
+            </p>
           </div>
         )}
 
         {/* Updated scoreboard */}
         <div>
-          <h3 className="font-label text-xs uppercase tracking-wider text-secondary mb-2 px-1">
+          <h3 className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
             Standings
           </h3>
-          <ul className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 divide-y divide-outline-variant/15">
+          <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 divide-y divide-outline-variant/20 overflow-hidden">
             {sortedPlayers.map((p, i) => {
               const earned = round.pointsThisRound[p.id] ?? 0
+              const isYou = p.id === currentPlayerId
               return (
-                <li key={p.id} className="px-4 py-3 flex items-center justify-between">
-                  <span className="flex items-center gap-2 font-medium text-on-surface font-body">
-                    {i + 1}. {p.name}
-                    {p.id === currentPlayerId && (
-                      <span className="text-xs text-on-surface-variant">(you)</span>
-                    )}
+                <li
+                  key={p.id}
+                  className={`px-4 py-3 flex items-center justify-between font-body ${
+                    isYou ? 'bg-secondary-fixed/20' : ''
+                  }`}
+                >
+                  <span className="flex items-center gap-2 font-medium text-on-surface">
+                    <span className="text-outline w-5 tabular-nums">{i + 1}.</span>
+                    {p.name}
+                    {isYou && <span className="text-xs text-on-surface-variant">← you</span>}
                   </span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     {earned > 0 && (
-                      <span className="text-xs text-primary font-bold">+{earned}</span>
+                      <span className="text-xs text-primary font-bold tabular-nums">+{earned}</span>
                     )}
-                    <span className="font-headline font-bold tabular-nums text-on-surface">
+                    <span className="font-headline text-lg font-bold tabular-nums text-on-surface">
                       {p.score}
                     </span>
                   </div>
@@ -118,17 +133,17 @@ export default function RoundResultView({ game, round, players, isHost, currentP
           <button
             onClick={handleAdvance}
             disabled={advancing}
-            className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-semibold tracking-wide shadow-[0_8px_24px_rgba(0,0,0,0.3)] hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+            className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
           >
-            {advancing ? 'Loading...' : isLastRound ? 'See Final Scores →' : 'Next Round →'}
+            {advancing ? 'Loading…' : isLastRound ? 'See final scores →' : 'Next round →'}
           </button>
         ) : (
-          <p className="text-center text-on-surface-variant text-sm animate-pulse">
-            Waiting for host to continue...
+          <p className="text-center text-outline text-sm animate-pulse font-body">
+            Waiting on the host to deal the next round…
           </p>
         )}
 
-        {error && <p className="text-center text-error text-sm">{error}</p>}
+        {error && <p className="text-center text-error text-sm font-body">{error}</p>}
       </div>
     </main>
   )

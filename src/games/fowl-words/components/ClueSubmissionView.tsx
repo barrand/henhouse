@@ -22,15 +22,15 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
   const guesserPlayer = players.find((p) => p.id === game.currentGuesser)
 
   const handleSubmit = async () => {
-    if (!clue.trim()) return setError('Enter a clue')
-    if (clue.trim().split(/\s+/).length > 3) return setError('Clue must be 1-3 words')
+    if (!clue.trim()) return setError('Pop in a clue first')
+    if (clue.trim().split(/\s+/).length > 3) return setError('Just 1-3 words, please')
     setError('')
     setSubmitting(true)
     try {
       await submitClue(game.id, game.currentRound, clue)
       setClue('')
     } catch (err: any) {
-      setError(err.message ?? 'Failed to submit clue')
+      setError(err.message ?? 'Couldn’t send your clue')
     } finally {
       setSubmitting(false)
     }
@@ -40,7 +40,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
     try {
       await forceDedup(game.id, game.currentRound)
     } catch (err: any) {
-      setError(err.message ?? 'Failed to force dedup')
+      setError(err.message ?? 'Couldn’t skip the wait')
     }
   }
 
@@ -50,22 +50,22 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-10">
         <div className="max-w-md w-full text-center space-y-6">
           <div className="text-7xl">🙈</div>
-          <h2 className="font-headline text-3xl font-bold text-on-surface">Eyes closed!</h2>
+          <h2 className="font-headline text-3xl font-bold text-on-surface">No peeking!</h2>
           <p className="text-on-surface-variant font-body">
-            The others are writing clues for you. No peeking at the screen!
+            Keep your eyes on your own screen. The flock is writing clues for you.
           </p>
-          <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15">
-            <p className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary mb-2">Clues submitted</p>
-            <p className="font-headline text-4xl font-bold text-on-surface">
-              {cluesCount} / {nonGuesserCount}
+          <div className="bg-surface-container-lowest border-2 border-outline-variant/30 rounded-2xl p-6 shadow-sm">
+            <p className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary mb-2">Clues in</p>
+            <p className="font-headline text-5xl font-bold text-primary tabular-nums">
+              {cluesCount} <span className="text-on-surface-variant text-3xl">/ {nonGuesserCount}</span>
             </p>
           </div>
           {isHost && cluesCount > 0 && cluesCount < nonGuesserCount && (
             <button
               onClick={handleForceDedup}
-              className="text-xs text-on-surface-variant underline opacity-60 hover:opacity-100"
+              className="text-xs text-outline underline hover:text-on-surface-variant font-body"
             >
-              Skip waiting (force start)
+              Not waiting for stragglers · Skip ahead
             </button>
           )}
         </div>
@@ -75,60 +75,57 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
 
   // CLUE-GIVER VIEW: secret word + clue input
   return (
-    <main className="flex-1 flex flex-col px-6 py-6">
-      <div className="max-w-md w-full mx-auto space-y-6">
-        {/* Secret Word Banner */}
-        <div className="bg-tertiary-fixed border-2 border-tertiary rounded-xl p-6 text-center">
-          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary mb-2">
-            The secret word for {guesserPlayer?.name ?? 'the guesser'}
+    <main className="flex-1 flex flex-col px-4 py-6">
+      <div className="max-w-md w-full mx-auto space-y-5">
+        {/* Secret Word Banner — uses Flock's premium card pattern */}
+        <div className="bg-primary-fixed/50 border-2 border-primary-fixed-dim rounded-2xl p-6 text-center shadow-sm">
+          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-primary mb-2 font-bold">
+            Secret word for {guesserPlayer?.name ?? 'the guesser'}
           </p>
-          <p className="font-headline text-5xl font-bold text-secondary tracking-tight">
+          <p className="font-headline text-5xl font-bold text-on-surface tracking-tight">
             {round.secretWord}
           </p>
         </div>
 
         {/* Clue Input or Submitted State */}
         {!myClueSubmitted ? (
-          <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15 space-y-4">
+          <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-5 space-y-3 shadow-sm">
             <label className="block">
-              <span className="font-label text-[10px] uppercase tracking-wider text-secondary">
-                Your clue (1-3 words)
+              <span className="font-label text-[10px] uppercase tracking-wider text-secondary font-bold">
+                Your clue · 1-3 words
               </span>
               <input
                 type="text"
                 value={clue}
                 onChange={(e) => setClue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-                placeholder="A helpful hint..."
+                placeholder="One-word hint…"
                 maxLength={50}
                 autoFocus
-                className="mt-2 w-full bg-surface-container px-4 py-3 rounded-xl border border-outline-variant/30 focus:border-primary focus:outline-none font-body text-lg"
+                className="mt-2 w-full bg-surface-container-lowest border-2 border-outline-variant/30 rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-outline/50 font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               />
             </label>
             <button
               onClick={handleSubmit}
               disabled={submitting || !clue.trim()}
-              className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-semibold tracking-wide shadow-[0_8px_24px_rgba(0,0,0,0.3)] hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+              className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
             >
-              {submitting ? 'Submitting...' : 'Submit Clue'}
+              {submitting ? 'Sending…' : 'Submit clue'}
             </button>
-            {error && <p className="text-center text-error text-sm">{error}</p>}
-            <p className="text-xs text-on-surface-variant text-center">
-              Tip: avoid the OBVIOUS clue. Duplicate clues get eliminated.
+            {error && <p className="text-center text-error text-sm font-body">{error}</p>}
+            <p className="text-xs text-outline text-center font-body">
+              Skip the obvious — duplicates get eliminated.
             </p>
           </div>
         ) : (
-          <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15 text-center">
+          <div className="bg-surface-container-lowest rounded-2xl border-2 border-primary/30 p-5 text-center shadow-sm">
             <div className="text-4xl mb-2">✅</div>
-            <p className="font-headline text-lg font-bold text-on-surface mb-2">Clue submitted!</p>
-            <p className="text-on-surface-variant text-sm mb-4">
-              Waiting for others...
-            </p>
-            <div className="bg-surface-container px-4 py-3 rounded-lg">
-              <p className="font-headline text-2xl font-bold text-on-surface">
-                {cluesCount} / {nonGuesserCount}
+            <p className="font-headline text-lg font-bold text-primary mb-3">Clue locked in!</p>
+            <div className="bg-primary-fixed/30 border border-primary-fixed-dim rounded-xl px-4 py-3">
+              <p className="font-headline text-3xl font-bold text-on-surface tabular-nums">
+                {cluesCount} <span className="text-on-surface-variant text-xl">/ {nonGuesserCount}</span>
               </p>
-              <p className="text-xs text-on-surface-variant mt-1">clues in</p>
+              <p className="text-xs text-on-surface-variant mt-1 font-body">clues received</p>
             </div>
           </div>
         )}
@@ -137,9 +134,9 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
           <div className="text-center">
             <button
               onClick={handleForceDedup}
-              className="text-xs text-on-surface-variant underline opacity-60 hover:opacity-100"
+              className="text-xs text-outline underline hover:text-on-surface-variant font-body"
             >
-              Skip waiting (force start)
+              Skip stragglers · Move on
             </button>
           </div>
         )}

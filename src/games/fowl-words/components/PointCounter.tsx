@@ -24,28 +24,28 @@ export default function PointCounter({ currentAttempt, maxAttempts }: Props) {
     }
   }, [points, prevPoints])
 
-  // Color shift as points drop
+  // Color shift as points drop — uses Flock-aligned tokens
   const tint = (() => {
     switch (points) {
-      case 10: return { bg: 'bg-primary/15', border: 'border-primary', text: 'text-primary' }
-      case 5:  return { bg: 'bg-tertiary-fixed/20', border: 'border-tertiary', text: 'text-tertiary' }
-      case 2:  return { bg: 'bg-error/15', border: 'border-error/70', text: 'text-error' }
-      case 1:  return { bg: 'bg-error/20', border: 'border-error', text: 'text-error' }
+      case 10: return { bg: 'bg-primary-fixed/40', border: 'border-primary-fixed-dim', text: 'text-primary' }
+      case 5:  return { bg: 'bg-tertiary-container/60', border: 'border-tertiary', text: 'text-on-tertiary-container' }
+      case 2:  return { bg: 'bg-error-container/40', border: 'border-error/50', text: 'text-error' }
+      case 1:  return { bg: 'bg-error-container/60', border: 'border-error', text: 'text-error' }
       default: return { bg: 'bg-surface-container-low', border: 'border-outline-variant/30', text: 'text-on-surface-variant' }
     }
   })()
 
   return (
     <div
-      className={`rounded-2xl border-2 ${tint.bg} ${tint.border} px-6 py-4 text-center transition-all ${
+      className={`rounded-2xl border-2 ${tint.bg} ${tint.border} px-6 py-3 text-center transition-all shadow-sm ${
         flashing ? 'scale-105 animate-pulse' : 'scale-100'
       }`}
     >
-      <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant mb-1">
-        Attempt {safeAttempt} of {maxAttempts} — Guess for
+      <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">
+        Attempt {safeAttempt} of {maxAttempts} · Guess for
       </p>
-      <p className={`font-headline font-bold tabular-nums leading-none ${tint.text} ${flashing ? 'text-7xl' : 'text-6xl'} transition-all`}>
-        {points} pts
+      <p className={`font-headline font-bold tabular-nums leading-none mt-1 ${tint.text} ${flashing ? 'text-7xl' : 'text-6xl'} transition-all`}>
+        {points} <span className="text-3xl">pts</span>
       </p>
     </div>
   )

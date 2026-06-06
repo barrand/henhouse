@@ -99,7 +99,7 @@ export default function Game() {
 
   return (
     <div className="min-h-screen flex flex-col bg-surface linen-texture">
-      <GameHeader game={game} players={players} round={round} />
+      <GameHeader game={game} players={players} round={round} currentPlayer={currentPlayer} />
 
       {round?.status === 'clue-submission' && (
         <ClueSubmissionView

@@ -17,11 +17,11 @@ export default function GuessView({ game, round, players, isGuesser }: Props) {
       <div className="max-w-md w-full text-center space-y-6">
         <div className="text-6xl animate-pulse">🤔</div>
         <h2 className="font-headline text-2xl font-bold text-on-surface">
-          Checking the guess...
+          Checking that guess…
         </h2>
-        <div className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/15">
-          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary mb-2">
-            {isGuesser ? 'You guessed' : `${guesserPlayer?.name} guessed`}
+        <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-5 shadow-sm">
+          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary mb-2 font-bold">
+            {isGuesser ? 'Your guess' : `${guesserPlayer?.name}’s guess`}
           </p>
           <p className="font-headline text-3xl font-bold text-on-surface">
             {guess}

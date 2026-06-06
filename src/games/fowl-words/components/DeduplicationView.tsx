@@ -11,12 +11,12 @@ export default function DeduplicationView({ isGuesser }: Props) {
       <div className="max-w-md w-full text-center space-y-6">
         <div className="text-6xl animate-pulse">🔍</div>
         <h2 className="font-headline text-2xl font-bold text-on-surface">
-          {isGuesser ? 'Still eyes closed...' : 'Checking for duplicates...'}
+          {isGuesser ? 'Almost ready…' : 'Sorting clues…'}
         </h2>
         <p className="text-on-surface-variant font-body">
           {isGuesser
-            ? 'The others are sorting out their clues.'
-            : 'Comparing everyone\'s clues to find matches.'}
+            ? 'The flock is finalizing what you get to see.'
+            : 'Hunting for matching clues. Survivors will reach the guesser.'}
         </p>
         <div className="flex justify-center gap-2">
           <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
