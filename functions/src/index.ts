@@ -108,13 +108,13 @@ export {
   forceEndRound,
 } from './games/flock-together/index'
 
-// ── Just One ───────────────────────────────────────────────────────────────────
+// ── Fowl Words ────────────────────────────────────────────────────────────────
 export {
-  justOneCreateGame,
-  justOneRematch,
-  justOneStartGame,
+  fowlWordsCreateGame,
+  fowlWordsRematch,
+  fowlWordsStartGame,
   submitClue,
   submitGuess,
-  justOneAdvanceRound,
-  justOneForceDedup,
-} from './games/just-one/index'
+  fowlWordsAdvanceRound,
+  fowlWordsForceDedup,
+} from './games/fowl-words/index'

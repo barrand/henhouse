@@ -198,7 +198,7 @@ Return ONLY valid JSON: { "questions": [{ "text": "...", "category": "...", "typ
   return questions
 }
 
-// ── Just One ──────────────────────────────────────────────────────────────────
+// ── Fowl Words ──────────────────────────────────────────────────────────────────
 
 export interface DuplicateClueResult {
   // ALL clues grouped together. Size-1 groups = unique clues. Size-2+ = duplicates.
@@ -223,7 +223,7 @@ export async function detectDuplicateClues(
   const model = getModel()
   const cluesList = playerIds.map((id) => `${id}: "${clues[id]}"`)
 
-  const prompt = `The secret word for this round of Just One is: "${secretWord}"
+  const prompt = `The secret word for this round of Fowl Words is: "${secretWord}"
 
 Players gave these clues:
 ${cluesList.join('\n')}
@@ -332,7 +332,7 @@ function fallbackExactMatchGrouping(clues: Record<string, string>): DuplicateClu
   }
 }
 
-// ── Just One: Guess Evaluation ────────────────────────────────────────────────
+// ── Fowl Words: Guess Evaluation ────────────────────────────────────────────────
 
 export async function evaluateGuess(secretWord: string, guess: string): Promise<boolean> {
   const trimmedGuess = guess.trim()
@@ -353,7 +353,7 @@ export async function evaluateGuess(secretWord: string, guess: string): Promise<
 
   try {
     const model = getModel()
-    const prompt = `In the party game Just One, the secret word is: "${trimmedSecret}"
+    const prompt = `In the party game Fowl Words, the secret word is: "${trimmedSecret}"
 
 A player guessed: "${trimmedGuess}"
 

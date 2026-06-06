@@ -43,6 +43,11 @@ export default function RoundResultView({ game, round, players, isHost, currentP
               <p className="text-on-surface-variant font-body">
                 {guesserPlayer?.name} guessed{' '}
                 <span className="font-semibold text-on-surface">{round.guesserAnswer}</span>
+                {round.currentAttempt > 1 && (
+                  <span className="block text-xs mt-1 opacity-75">
+                    on attempt {round.currentAttempt} of {round.maxAttempts}
+                  </span>
+                )}
               </p>
             </>
           ) : (
@@ -50,8 +55,12 @@ export default function RoundResultView({ game, round, players, isHost, currentP
               <div className="text-6xl">😬</div>
               <h2 className="font-headline text-3xl font-bold text-error">Not quite!</h2>
               <p className="text-on-surface-variant font-body">
-                {guesserPlayer?.name} guessed{' '}
-                <span className="font-semibold text-on-surface">{round.guesserAnswer}</span>
+                {guesserPlayer?.name} ran out of guesses.
+                {round.guessAttempts.length > 0 && (
+                  <span className="block text-xs mt-1 opacity-75">
+                    Last guess: <span className="font-semibold">{round.guesserAnswer}</span>
+                  </span>
+                )}
               </p>
             </>
           )}

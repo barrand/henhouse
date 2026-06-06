@@ -8,7 +8,7 @@ export interface GameSettings {
 export interface BaseGameData {
   id: string
   code: string
-  gameType: 'flock-together' | 'just-one'
+  gameType: 'flock-together' | 'fowl-words'
   hostId: string
   originalHostId: string
   status: 'lobby' | 'playing' | 'finished'

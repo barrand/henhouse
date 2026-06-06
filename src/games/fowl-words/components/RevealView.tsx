@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
 import { submitGuess } from '../service'
+import PointCounter from './PointCounter'
 
 interface Props {
   game: GameData
@@ -46,14 +47,19 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
           </div>
         )}
 
+        {/* Point counter — visible to everyone, animates on attempt change */}
+        <PointCounter currentAttempt={round.currentAttempt} maxAttempts={round.maxAttempts} />
+
         {/* Guesser heading */}
         {isGuesser && (
           <div className="text-center">
             <h2 className="font-headline text-2xl font-bold text-on-surface">
-              Here are your clues
+              {round.currentAttempt === 1 ? 'Here are your clues' : 'A new clue appeared!'}
             </h2>
             <p className="text-on-surface-variant text-sm mt-1">
-              Take a beat, then guess the word.
+              {round.currentAttempt === 1
+                ? 'Take a beat, then guess the word.'
+                : 'Try again — points are lower now.'}
             </p>
           </div>
         )}
@@ -87,15 +93,23 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
             const displayText = uniqueTexts.join(' / ')
 
             if (isVisible) {
+              const justUnlocked = round.lastUnlockedGroupIndex === idx
               return (
                 <div
                   key={idx}
-                  className={`bg-surface-container-lowest rounded-xl p-5 border-2 ${
-                    group.isDuplicate
+                  className={`bg-surface-container-lowest rounded-xl p-5 border-2 transition-all relative ${
+                    justUnlocked
+                      ? 'border-tertiary shadow-[0_8px_24px_rgba(255,200,100,0.4)] scale-[1.02]'
+                      : group.isDuplicate
                       ? 'border-tertiary/60 shadow-[0_4px_16px_rgba(255,200,100,0.15)]'
                       : 'border-primary/40 shadow-[0_4px_16px_rgba(168,201,169,0.15)]'
                   }`}
                 >
+                  {justUnlocked && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-tertiary text-secondary text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full font-label">
+                      🔓 Just Unlocked
+                    </span>
+                  )}
                   <p className="font-headline text-2xl font-bold text-on-surface text-center">
                     {displayText}
                   </p>

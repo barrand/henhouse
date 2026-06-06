@@ -51,7 +51,7 @@ export default function Game() {
   // Auto-redirect on rematch
   useEffect(() => {
     if (game?.rematchCode) {
-      navigate(`/just-one/${game.rematchCode}`)
+      navigate(`/fowl-words/${game.rematchCode}`)
     }
   }, [game?.rematchCode, navigate])
 

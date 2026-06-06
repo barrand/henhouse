@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
-import { justOneRematch } from '../service'
+import { fowlWordsRematch } from '../service'
 
 interface Props {
   game: GameData
@@ -19,7 +19,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
     setRematching(true)
     setRematchError('')
     try {
-      await justOneRematch(game.id)
+      await fowlWordsRematch(game.id)
     } catch (err: any) {
       setRematchError(err.message ?? 'Failed to start new game')
       setRematching(false)

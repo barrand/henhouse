@@ -1,4 +1,4 @@
-// Just One backend types (mirror of frontend types where relevant)
+// Fowl Words backend types (mirror of frontend types where relevant)
 
 export interface ClueGroup {
   playerIds: string[]      // 1+ players who share the same/similar clue

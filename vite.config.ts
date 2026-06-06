@@ -9,7 +9,7 @@ export default defineConfig({
     alias: {
       '@shared': path.resolve(__dirname, './src/shared'),
       '@flock': path.resolve(__dirname, './src/games/flock-together'),
-      '@just-one': path.resolve(__dirname, './src/games/just-one'),
+      '@fowl-words': path.resolve(__dirname, './src/games/fowl-words'),
     },
   },
 })

@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 
 const FlockGame = lazy(() => import('@flock/pages/Game'))
-const JustOneGame = lazy(() => import('@just-one/pages/Game'))
+const FowlWordsGame = lazy(() => import('@fowl-words/pages/Game'))
 
 const Loading = () => (
   <div className="min-h-screen flex items-center justify-center bg-surface linen-texture">
@@ -24,10 +24,10 @@ export default function App() {
         }
       />
       <Route
-        path="/just-one/:code"
+        path="/fowl-words/:code"
         element={
           <Suspense fallback={<Loading />}>
-            <JustOneGame />
+            <FowlWordsGame />
           </Suspense>
         }
       />

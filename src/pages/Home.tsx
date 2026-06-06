@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/usePlayer'
 import { flockCreateGame } from '@flock/service'
-import { justOneCreateGame } from '@just-one/service'
+import { fowlWordsCreateGame } from '@fowl-words/service'
 import { joinGame } from '@shared/gameService'
 
 export default function Home() {
@@ -12,7 +12,7 @@ export default function Home() {
   const [roomCode, setRoomCode] = useState('')
   const [error, setError] = useState('')
   const [creatingFlock, setCreatingFlock] = useState(false)
-  const [creatingJustOne, setCreatingJustOne] = useState(false)
+  const [creatingFowlWords, setCreatingFowlWords] = useState(false)
   const [joining, setJoining] = useState(false)
 
   const saveName = (n: string) => {
@@ -34,17 +34,17 @@ export default function Home() {
     }
   }
 
-  const handleCreateJustOne = async () => {
+  const handleCreateFowlWords = async () => {
     if (!name.trim()) return setError('Enter your name first')
     setError('')
-    setCreatingJustOne(true)
+    setCreatingFowlWords(true)
     try {
-      const { code } = await justOneCreateGame(name.trim())
-      navigate(`/just-one/${code}`)
+      const { code } = await fowlWordsCreateGame(name.trim())
+      navigate(`/fowl-words/${code}`)
     } catch (err: any) {
       setError(err.message ?? 'Failed to create game')
     } finally {
-      setCreatingJustOne(false)
+      setCreatingFowlWords(false)
     }
   }
 
@@ -56,7 +56,7 @@ export default function Home() {
     try {
       const result = await joinGame(roomCode.trim(), name.trim())
       const upperCode = roomCode.trim().toUpperCase()
-      const route = result.gameType === 'just-one' ? `/just-one/${upperCode}` : `/flock/${upperCode}`
+      const route = result.gameType === 'fowl-words' ? `/fowl-words/${upperCode}` : `/flock/${upperCode}`
       navigate(route)
     } catch (err: any) {
       setError(err.message ?? 'Failed to join game')
@@ -152,7 +152,7 @@ export default function Home() {
           <button
             type="button"
             onClick={handleCreateFlock}
-            disabled={creatingFlock || creatingJustOne}
+            disabled={creatingFlock || creatingFowlWords}
             className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
@@ -170,11 +170,11 @@ export default function Home() {
             </div>
           </button>
 
-          {/* Just One Tile */}
+          {/* Fowl Words Tile */}
           <button
             type="button"
-            onClick={handleCreateJustOne}
-            disabled={creatingFlock || creatingJustOne}
+            onClick={handleCreateFowlWords}
+            disabled={creatingFlock || creatingFowlWords}
             className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
@@ -183,12 +183,12 @@ export default function Home() {
               </div>
               <span className="font-label text-[9px] font-bold uppercase tracking-[0.2em] text-secondary opacity-70">2+ players · new!</span>
             </div>
-            <h3 className="font-headline text-xl font-bold text-on-surface mb-1">Just One</h3>
+            <h3 className="font-headline text-xl font-bold text-on-surface mb-1">Fowl Words</h3>
             <p className="text-on-surface-variant text-xs font-body leading-snug mb-4">
               Give a clever one-word clue. Avoid duplicates. Be unique.
             </p>
             <div className="bg-primary text-on-primary h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
-              {creatingJustOne ? 'CREATING…' : 'CREATE'}
+              {creatingFowlWords ? 'CREATING…' : 'CREATE'}
             </div>
           </button>
         </div>

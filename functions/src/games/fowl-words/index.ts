@@ -8,8 +8,8 @@ const db = admin.firestore
 
 const TOTAL_ROUNDS = 13 // Phase 3A: fixed length
 
-// -- CREATE GAME (Just One) --
-export const justOneCreateGame = onCall(async (request) => {
+// -- CREATE GAME (Fowl Words) --
+export const fowlWordsCreateGame = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -22,7 +22,7 @@ export const justOneCreateGame = onCall(async (request) => {
 
   let code: string
   try {
-    code = await claimRoomCode(gameId, 'just-one')
+    code = await claimRoomCode(gameId, 'fowl-words')
   } catch {
     throw new HttpsError('internal', 'Could not generate room code')
   }
@@ -34,7 +34,7 @@ export const justOneCreateGame = onCall(async (request) => {
 
   await gameRef.set({
     code,
-    gameType: 'just-one',
+    gameType: 'fowl-words',
     hostId: uid,
     originalHostId: uid,
     status: 'lobby',
@@ -54,8 +54,8 @@ export const justOneCreateGame = onCall(async (request) => {
   return { gameId, code }
 })
 
-// -- REMATCH (Just One) --
-export const justOneRematch = onCall(async (request) => {
+// -- REMATCH (Fowl Words) --
+export const fowlWordsRematch = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -76,7 +76,7 @@ export const justOneRematch = onCall(async (request) => {
 
   let newCode: string
   try {
-    newCode = await claimRoomCode(newGameId, 'just-one')
+    newCode = await claimRoomCode(newGameId, 'fowl-words')
   } catch {
     throw new HttpsError('internal', 'Could not generate room code')
   }
@@ -89,7 +89,7 @@ export const justOneRematch = onCall(async (request) => {
 
   await newGameRef.set({
     code: newCode,
-    gameType: 'just-one',
+    gameType: 'fowl-words',
     hostId: uid,
     originalHostId: uid,
     status: 'lobby',
@@ -115,7 +115,7 @@ export const justOneRematch = onCall(async (request) => {
 })
 
 // -- START GAME --
-export const justOneStartGame = onCall(async (request) => {
+export const fowlWordsStartGame = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -229,7 +229,7 @@ export const submitGuess = onCall(async (request) => {
 })
 
 // -- ADVANCE ROUND --
-export const justOneAdvanceRound = onCall(async (request) => {
+export const fowlWordsAdvanceRound = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -244,7 +244,7 @@ export const justOneAdvanceRound = onCall(async (request) => {
 })
 
 // -- FORCE START DEDUP (manual escalation if a player is AFK) --
-export const justOneForceDedup = onCall(async (request) => {
+export const fowlWordsForceDedup = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 

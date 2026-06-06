@@ -1,4 +1,4 @@
-// Just One-specific types, extending shared base types
+// Fowl Words-specific types, extending shared base types
 
 import type { BaseGameData, PlayerData as SharedPlayerData } from '@shared/types'
 
@@ -28,17 +28,23 @@ export interface RoundData {
   id: string
   secretWord: string
   status: RoundStatus
-  currentAttempt: number               // 1–4 (always 1 in Phase 3A)
-  maxAttempts: number                  // always 1 in Phase 3A
-  attemptInProgress: boolean           // true during Gemini guess evaluation
+  currentAttempt: number                // 1–4
+  maxAttempts: number                   // min(4, max(1, totalClueGroups))
+  attemptInProgress: boolean            // true during Gemini guess evaluation
   attemptDeadline?: { seconds: number; nanoseconds: number }
   cluesByPlayer: Record<string, string>
-  clueGroups: ClueGroup[]              // populated after dedup
-  visibleGroupIndexes: number[]        // which groups are visible to the guesser
-  eliminationReason: string            // human-readable from Gemini
-  guessAttempts: string[]              // history of wrong guesses (Phase 3B)
-  guesserAnswer?: string               // final guess
-  isCorrect?: boolean                  // round result
+  clueGroups: ClueGroup[]               // populated after dedup
+  visibleGroupIndexes: number[]         // which groups are visible to the guesser
+  lastUnlockedGroupIndex?: number       // most recently unlocked index (for flash anim)
+  eliminationReason: string             // human-readable from Gemini
+  guessAttempts: string[]               // history of wrong guesses
+  guesserAnswer?: string                // final guess
+  isCorrect?: boolean                   // round result
   tentativePoints: Record<string, number>  // server-computed, not yet final
   pointsThisRound: Record<string, number>  // final scores (written at 'scored')
 }
+
+// Client-side point lookup — only used for the PointCounter display, kept in
+// sync with backend's scoring.ATTEMPT_POINTS. (Source of truth for SCORES is
+// always the server's `tentativePoints` / `pointsThisRound`.)
+export const ATTEMPT_POINTS = [10, 5, 2, 1] as const

@@ -10,6 +10,9 @@
         ],
         "default": [
           "flock-together-game"
+        ],
+        "chickenparty": [
+          "chickenparty"
         ]
       }
     }
