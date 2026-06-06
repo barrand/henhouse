@@ -7,6 +7,7 @@ import { useGame, useRound } from '../hooks/useGame'
 import { setupPresence } from '../../../lib/presence'
 import Lobby from '../components/Lobby'
 import GameHeader from '../components/GameHeader'
+import WordSelectionView from '../components/WordSelectionView'
 import ClueSubmissionView from '../components/ClueSubmissionView'
 import DeduplicationView from '../components/DeduplicationView'
 import RevealView from '../components/RevealView'
@@ -100,6 +101,16 @@ export default function Game() {
   return (
     <div className="min-h-screen flex flex-col bg-surface linen-texture">
       <GameHeader game={game} players={players} round={round} currentPlayer={currentPlayer} />
+
+      {round?.status === 'word-selection' && (
+        <WordSelectionView
+          game={game}
+          round={round}
+          players={players}
+          isGuesser={isGuesser}
+          isHost={isHost}
+        />
+      )}
 
       {round?.status === 'clue-submission' && (
         <ClueSubmissionView

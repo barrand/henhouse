@@ -12,6 +12,7 @@ export interface PlayerData extends SharedPlayerData {
 }
 
 export type RoundStatus =
+  | 'word-selection'
   | 'clue-submission'
   | 'deduplication'
   | 'reveal'
@@ -26,8 +27,12 @@ export interface ClueGroup {
 
 export interface RoundData {
   id: string
-  secretWord: string
+  secretWord: string       // empty string during word-selection, set when finalized
   status: RoundStatus
+  // Word-selection phase
+  wordOptions: string[]                   // 3 candidate words shown to clue-givers
+  wordVotes: Record<string, number>       // playerId → index (0|1|2) of their vote
+  wordSelectionDeadline?: { seconds: number; nanoseconds: number }
   currentAttempt: number                // 1–4
   maxAttempts: number                   // min(4, max(1, totalClueGroups))
   attemptInProgress: boolean            // true during Gemini guess evaluation

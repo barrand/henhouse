@@ -28,6 +28,68 @@ import type { ClueGroup } from './types'
 const db = admin.firestore
 const SECONDS_PER_ATTEMPT = 60
 
+const WORD_SELECTION_SECONDS = 15
+
+/**
+ * Finalize the word-selection vote and transition to clue-submission.
+ * Safe to call multiple times — uses a transaction to only process once.
+ * Called when: timer expires (frontend) OR all non-guessers have voted.
+ */
+export async function finalizeWordSelection(gameId: string, roundNum: number): Promise<void> {
+  const firestore = db()
+  const roundRef = firestore
+    .collection('games')
+    .doc(gameId)
+    .collection('rounds')
+    .doc(String(roundNum))
+
+  // Transaction: only finalize once
+  const finalized = await firestore.runTransaction(async (tx) => {
+    const snap = await tx.get(roundRef)
+    if (!snap.exists) return false
+    const data = snap.data()!
+    if (data.status !== 'word-selection') return false // already finalized
+    tx.update(roundRef, { status: 'clue-submission' }) // placeholder to claim the transition
+    return true
+  })
+  if (!finalized) return
+
+  const roundSnap = await roundRef.get()
+  const data = roundSnap.data()!
+  const wordOptions: string[] = data.wordOptions ?? []
+  const wordVotes: Record<string, number> = data.wordVotes ?? {}
+
+  // Tally votes
+  const tally = [0, 0, 0]
+  const firstVoteTime: Record<number, number> = {}
+  for (const [, idx] of Object.entries(wordVotes)) {
+    if (idx >= 0 && idx <= 2) {
+      tally[idx]++
+    }
+  }
+
+  // Pick winner: most votes; tiebreaker: random among tied (simple for now)
+  let winnerIdx = 0
+  let maxVotes = -1
+  for (let i = 0; i < 3; i++) {
+    if (tally[i] > maxVotes) {
+      maxVotes = tally[i]
+      winnerIdx = i
+    }
+  }
+  // If no votes at all, pick random
+  if (maxVotes === 0) winnerIdx = Math.floor(Math.random() * wordOptions.length)
+
+  const secretWord = wordOptions[winnerIdx] ?? wordOptions[0] ?? ''
+
+  await roundRef.update({
+    status: 'clue-submission',
+    secretWord,
+    cluesByPlayer: {},
+    clueTimestamps: {},
+  })
+}
+
 /**
  * Called after all clues are submitted. Runs Gemini dedup and transitions
  * the round to 'reveal' status with grouped clues + initial visible groups.
@@ -305,8 +367,14 @@ export async function advanceToNextRound(gameId: string): Promise<void> {
   }
 
   const cardsRemaining: string[] = [...(game.cardsRemaining ?? [])]
-  const nextWord = cardsRemaining.shift()
-  if (!nextWord) {
+
+  // Draw 3 words for voting; if fewer than 3 remain, use what we have
+  const wordOptions: string[] = []
+  for (let i = 0; i < 3 && cardsRemaining.length > 0; i++) {
+    wordOptions.push(cardsRemaining.shift()!)
+  }
+
+  if (wordOptions.length === 0) {
     await gameRef.update({ status: 'finished' })
     return
   }
@@ -319,12 +387,16 @@ export async function advanceToNextRound(gameId: string): Promise<void> {
   const nextGuesserIdx = (currentGuesserIdx + 1) % playerIds.length
   const nextGuesser = playerIds[nextGuesserIdx]
 
-  // Create new round doc (multi-attempt-ready)
+  const wordSelectionDeadline = Timestamp.fromMillis(Date.now() + WORD_SELECTION_SECONDS * 1000)
+
   await gameRef.collection('rounds').doc(String(nextRoundNum)).set({
-    secretWord: nextWord,
-    status: 'clue-submission',
+    secretWord: '',           // set after word selection
+    wordOptions,
+    wordVotes: {},
+    wordSelectionDeadline,
+    status: 'word-selection',
     currentAttempt: 1,
-    maxAttempts: 1, // recomputed after dedup
+    maxAttempts: 1,
     attemptInProgress: false,
     cluesByPlayer: {},
     clueTimestamps: {},

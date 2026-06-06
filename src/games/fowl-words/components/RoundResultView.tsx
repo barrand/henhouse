@@ -81,6 +81,61 @@ export default function RoundResultView({ game, round, players, isHost, currentP
           </p>
         </div>
 
+        {/* Clue debrief — show all groups with names */}
+        {round.clueGroups.length > 0 && (
+          <div>
+            <h3 className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
+              What everyone wrote
+            </h3>
+            <div className="space-y-2">
+              {round.clueGroups.map((group, idx) => {
+                const scored = (round.pointsThisRound[group.playerIds[0]] ?? 0) > 0
+                const isYours = group.playerIds.includes(currentPlayerId ?? '')
+                const displayText = Array.from(new Set(group.clueTexts.map((t) => t.trim()))).join(' / ')
+                const names = group.playerIds.map((id) => players.find((p) => p.id === id)?.name ?? '?').join(', ')
+
+                return (
+                  <div
+                    key={idx}
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl border font-body ${
+                      group.isDuplicate
+                        ? 'bg-surface-container-low border-outline-variant/20 opacity-75'
+                        : scored
+                        ? 'bg-primary-fixed/20 border-primary-fixed-dim'
+                        : 'bg-surface-container-lowest border-outline-variant/30'
+                    }`}
+                  >
+                    <div className="flex flex-col">
+                      <span className={`font-headline font-bold text-lg ${group.isDuplicate ? 'text-on-surface-variant line-through' : 'text-on-surface'}`}>
+                        {displayText}
+                      </span>
+                      <span className="text-xs text-outline mt-0.5">
+                        {names}
+                        {isYours && <span className="text-primary font-bold ml-1">← you</span>}
+                      </span>
+                    </div>
+                    <div className="ml-3 flex-shrink-0">
+                      {group.isDuplicate ? (
+                        <span className="text-[10px] text-error font-bold uppercase tracking-wider font-label">
+                          Duped
+                        </span>
+                      ) : scored ? (
+                        <span className="text-[10px] text-primary font-bold uppercase tracking-wider font-label">
+                          ✓ Scored
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-outline font-bold uppercase tracking-wider font-label">
+                          Locked
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Personal score — only if you scored */}
         {myPoints > 0 && (
           <div className="bg-primary text-on-primary rounded-2xl p-5 text-center shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
