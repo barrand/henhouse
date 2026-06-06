@@ -1,4 +1,5 @@
 import * as admin from 'firebase-admin'
+import { Timestamp, FieldValue } from 'firebase-admin/firestore'
 import { createHash } from 'crypto'
 
 function getDb() {
@@ -78,7 +79,7 @@ export type DrawnQuestion = {
 
 // Returns the set of question keys that are still within the 48-hour cooldown window
 async function fetchActiveCooldowns(db: FirebaseFirestore.Firestore): Promise<Set<string>> {
-  const cutoff = admin.firestore.Timestamp.fromMillis(Date.now() - COOLDOWN_MS)
+  const cutoff = Timestamp.fromMillis(Date.now() - COOLDOWN_MS)
   const snap = await db.collection('flockQuestionCooldowns').where('lastUsedAt', '>', cutoff).get()
   const keys = new Set<string>()
   snap.docs.forEach((d) => keys.add(d.id))
@@ -95,7 +96,7 @@ async function markQuestionUsed(
   await Promise.all([
     poolDocRef.update({ used: true }),
     db.collection('flockQuestionCooldowns').doc(qKey).set({
-      lastUsedAt: admin.firestore.FieldValue.serverTimestamp(),
+      lastUsedAt: FieldValue.serverTimestamp(),
       text,
     }),
   ])
