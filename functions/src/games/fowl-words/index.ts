@@ -178,8 +178,8 @@ export const submitClue = onCall(async (request) => {
 
   const { gameId, roundNum, clue } = request.data as { gameId: string; roundNum: number; clue: string }
   if (!clue?.trim()) throw new HttpsError('invalid-argument', 'Clue required')
-  if (clue.trim().length > 50) throw new HttpsError('invalid-argument', 'Clue too long (max 50 chars)')
-  if (clue.trim().split(/\s+/).length > 3) throw new HttpsError('invalid-argument', 'Clue must be 1-3 words')
+  if (clue.trim().split(/\s+/).length > 1) throw new HttpsError('invalid-argument', 'Clue must be ONE word only — that\'s the game!')
+  if (clue.trim().length > 30) throw new HttpsError('invalid-argument', 'Clue too long (max 30 chars)')
 
   const firestore = db()
   const gameRef = firestore.collection('games').doc(gameId)

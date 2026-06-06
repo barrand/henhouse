@@ -21,9 +21,11 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
   const nonGuesserCount = players.length - 1
   const guesserPlayer = players.find((p) => p.id === game.currentGuesser)
 
+  const isMultiWord = clue.trim().split(/\s+/).length > 1
+
   const handleSubmit = async () => {
     if (!clue.trim()) return setError('Pop in a clue first')
-    if (clue.trim().split(/\s+/).length > 3) return setError('Just 1-3 words, please')
+    if (isMultiWord) return setError('One word only — that\'s the whole game!')
     setError('')
     setSubmitting(true)
     try {
@@ -91,26 +93,37 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
         {!myClueSubmitted ? (
           <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-5 space-y-3 shadow-sm">
             <label className="block">
-              <span className="font-label text-[10px] uppercase tracking-wider text-secondary font-bold">
-                Your clue · 1-3 words
-              </span>
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-label text-[10px] uppercase tracking-wider text-secondary font-bold">
+                  Your clue · ONE word only
+                </span>
+                {isMultiWord && (
+                  <span className="font-label text-[10px] uppercase tracking-wider text-error font-bold">
+                    Too many words!
+                  </span>
+                )}
+              </div>
               <input
                 type="text"
                 value={clue}
                 onChange={(e) => setClue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-                placeholder="One-word hint…"
-                maxLength={50}
+                placeholder="One word…"
+                maxLength={30}
                 autoFocus
-                className="mt-2 w-full bg-surface-container-lowest border-2 border-outline-variant/30 rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-outline/50 font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                className={`mt-1 w-full bg-surface-container-lowest border-2 rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-outline/50 font-body focus:ring-2 outline-none transition-all ${
+                  isMultiWord
+                    ? 'border-error focus:ring-error/20 focus:border-error'
+                    : 'border-outline-variant/30 focus:ring-primary/20 focus:border-primary'
+                }`}
               />
             </label>
             <button
               onClick={handleSubmit}
-              disabled={submitting || !clue.trim()}
+              disabled={submitting || !clue.trim() || isMultiWord}
               className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
             >
-              {submitting ? 'Sending…' : 'Submit clue'}
+              {submitting ? 'Sending…' : 'Lock it in'}
             </button>
             {error && <p className="text-center text-error text-sm font-body">{error}</p>}
             <p className="text-xs text-outline text-center font-body">
