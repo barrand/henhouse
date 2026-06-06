@@ -15,6 +15,7 @@ export interface GameData {
   playerIds: string[]
   settings: GameSettings
   includePatrioticQuestions: boolean
+  rematchCode?: string
 }
 
 export interface PlayerData {

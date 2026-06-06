@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
 import RottenEgg from './RottenEgg'
+import { rematch } from '../lib/gameService'
 
 interface Props {
   game: GameData
@@ -9,8 +11,22 @@ interface Props {
   isFinal?: boolean
 }
 
-export default function Scoreboard({ game, players, isHost: _isHost, isFinal }: Props) {
+export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
   const navigate = useNavigate()
+  const [rematching, setRematching] = useState(false)
+  const [rematchError, setRematchError] = useState('')
+  const handleRematch = async () => {
+    setRematching(true)
+    setRematchError('')
+    try {
+      await rematch(game.id)
+      // Navigation is handled by the rematchCode effect in Game.tsx
+    } catch (err: any) {
+      setRematchError(err.message ?? 'Failed to start new game')
+      setRematching(false)
+    }
+  }
+
   const sorted = [...players].sort((a, b) => b.eggs - a.eggs)
   const topScore = sorted[0]?.eggs ?? 0
   const winner = isFinal && topScore > 0 ? sorted[0] : null
@@ -85,18 +101,36 @@ export default function Scoreboard({ game, players, isHost: _isHost, isFinal }: 
 
         {isFinal && (
           <div className="space-y-3">
-            <button
-              onClick={() => navigate('/')}
-              className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-semibold tracking-wide shadow-[0_12px_32px_rgba(0,0,0,0.4)] hover:opacity-90 active:scale-95 transition-all"
-            >
-              PLAY AGAIN
-            </button>
-            <button
-              onClick={() => navigate('/')}
-              className="w-full bg-surface-container-lowest border-2 border-primary text-primary h-14 rounded-xl font-body font-semibold tracking-wide hover:bg-primary-fixed/20 active:scale-95 transition-all"
-            >
-              BACK TO HOME
-            </button>
+            {isHost ? (
+              <>
+                <button
+                  onClick={handleRematch}
+                  disabled={rematching}
+                  className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-semibold tracking-wide shadow-[0_12px_32px_rgba(0,0,0,0.4)] hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {rematching ? 'Starting...' : 'PLAY AGAIN'}
+                </button>
+                <button
+                  onClick={() => navigate('/')}
+                  className="w-full bg-surface-container-lowest border-2 border-primary text-primary h-14 rounded-xl font-body font-semibold tracking-wide hover:bg-primary-fixed/20 active:scale-95 transition-all"
+                >
+                  BACK TO HOME
+                </button>
+                {rematchError && <p className="text-center text-error text-sm">{rematchError}</p>}
+              </>
+            ) : (
+              <>
+                <p className="text-center text-on-surface-variant text-sm animate-pulse">
+                  Waiting for host to start a new game...
+                </p>
+                <button
+                  onClick={() => navigate('/')}
+                  className="w-full bg-surface-container-lowest border-2 border-primary text-primary h-14 rounded-xl font-body font-semibold tracking-wide hover:bg-primary-fixed/20 active:scale-95 transition-all"
+                >
+                  BACK TO HOME
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuth, useCurrentPlayer, useIsHost } from '../hooks/usePlayer'
@@ -14,6 +14,7 @@ import Scoreboard from '../components/Scoreboard'
 export default function Game() {
   const { code } = useParams<{ code: string }>()
   const { uid, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
   const [gameId, setGameId] = useState<string | null>(null)
   const [lookupError, setLookupError] = useState('')
 
@@ -43,6 +44,13 @@ export default function Game() {
       setupPresence(gameId)
     }
   }, [gameId, uid])
+
+  // When host starts a rematch, everyone auto-redirects to the new game
+  useEffect(() => {
+    if (game?.rematchCode) {
+      navigate(`/game/${game.rematchCode}`)
+    }
+  }, [game?.rematchCode, navigate])
 
   if (authLoading || gameLoading) {
     return (

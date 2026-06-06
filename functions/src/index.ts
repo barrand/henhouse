@@ -77,6 +77,84 @@ export const createGame = onCall(async (request) => {
   return { gameId, code }
 })
 
+// -- REMATCH --
+export const rematch = onCall(async (request) => {
+  const uid = request.auth?.uid
+  if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
+
+  const { gameId } = request.data as { gameId: string }
+  const gameRef = db.collection('games').doc(gameId)
+  const gameSnap = await gameRef.get()
+
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+  const game = gameSnap.data()!
+  if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can start a rematch')
+  if (game.status !== 'finished') throw new HttpsError('failed-precondition', 'Game is not finished')
+
+  // Get all players from the finished game
+  const playersSnap = await gameRef.collection('players').get()
+
+  // Claim a new room code
+  const roomWords = (await import('./data/roomWords.json')).default as string[]
+  const newGameRef = db.collection('games').doc()
+  const newGameId = newGameRef.id
+
+  let newCode = ''
+  let attempts = 0
+  while (attempts < 50) {
+    const candidate = roomWords[Math.floor(Math.random() * roomWords.length)].toUpperCase()
+    const roomRef = db.collection('rooms').doc(candidate)
+    try {
+      await db.runTransaction(async (tx) => {
+        const roomSnap = await tx.get(roomRef)
+        if (roomSnap.exists && roomSnap.data()?.active) throw new Error('taken')
+        tx.set(roomRef, { gameId: newGameId, createdAt: FieldValue.serverTimestamp(), active: true })
+      })
+      newCode = candidate
+      break
+    } catch (err: any) {
+      if (err?.message === 'taken') attempts++
+      else { console.error('Room claim error:', err); attempts++ }
+    }
+  }
+
+  if (!newCode) throw new HttpsError('internal', 'Could not generate room code')
+
+  // Deactivate the old room code so it can't be joined again
+  await db.collection('rooms').doc(game.code).update({ active: false })
+
+  // Create the new game, carrying over players, settings, and patriotic mode
+  await newGameRef.set({
+    code: newCode,
+    hostId: uid,
+    originalHostId: uid,
+    status: 'lobby',
+    currentRound: 0,
+    rottenEggHolder: null,
+    categories: game.categories ?? [],
+    playerIds: game.playerIds,
+    settings: game.settings,
+    includePatrioticQuestions: game.includePatrioticQuestions ?? false,
+  })
+
+  // Copy all players into the new game with reset scores
+  const batch = db.batch()
+  playersSnap.docs.forEach((playerDoc) => {
+    batch.set(newGameRef.collection('players').doc(playerDoc.id), {
+      name: playerDoc.data().name,
+      eggs: 0,
+      connected: false,
+    })
+  })
+  await batch.commit()
+
+  // Signal all clients by writing rematchCode onto the finished game —
+  // everyone subscribed to the game doc will see it and auto-redirect.
+  await gameRef.update({ rematchCode: newCode })
+
+  return { code: newCode }
+})
+
 // -- JOIN GAME --
 export const joinGame = onCall(async (request) => {
   const uid = request.auth?.uid
