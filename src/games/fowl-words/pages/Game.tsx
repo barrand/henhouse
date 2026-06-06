@@ -142,6 +142,7 @@ export default function Game() {
           players={players}
           currentPlayer={currentPlayer}
           isGuesser={isGuesser}
+          isHost={isHost}
         />
       )}
 

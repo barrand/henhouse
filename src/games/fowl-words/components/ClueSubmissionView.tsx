@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
-import { submitClue, forceDedup } from '../service'
+import { submitClue, forceDedup, advanceRound } from '../service'
 
 interface Props {
   game: GameData
@@ -38,11 +38,15 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
     }
   }
 
-  const handleForceDedup = async () => {
+  const handleHostSkip = async () => {
     try {
-      await forceDedup(game.id, game.currentRound)
+      if (cluesCount === 0) {
+        await advanceRound(game.id)
+      } else {
+        await forceDedup(game.id, game.currentRound)
+      }
     } catch (err: any) {
-      setError(err.message ?? 'Couldn’t skip the wait')
+      setError(err.message ?? "Couldn’t skip the wait")
     }
   }
 
@@ -80,12 +84,12 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
               })}
             </ul>
           </div>
-          {isHost && cluesCount > 0 && cluesCount < nonGuesserCount && (
+          {isHost && cluesCount < nonGuesserCount && (
             <button
-              onClick={handleForceDedup}
+              onClick={handleHostSkip}
               className="text-xs text-outline underline hover:text-on-surface-variant font-body"
             >
-              Not waiting for stragglers · Skip ahead
+              {cluesCount === 0 ? 'Skip this round' : 'Not waiting for stragglers · Skip ahead'}
             </button>
           )}
         </div>
@@ -179,13 +183,13 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
           </div>
         )}
 
-        {isHost && cluesCount > 0 && cluesCount < nonGuesserCount && (
+        {isHost && cluesCount < nonGuesserCount && (
           <div className="text-center">
             <button
-              onClick={handleForceDedup}
+              onClick={handleHostSkip}
               className="text-xs text-outline underline hover:text-on-surface-variant font-body"
             >
-              Skip stragglers · Move on
+              {cluesCount === 0 ? 'Skip this round' : 'Skip stragglers · Move on'}
             </button>
           </div>
         )}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
-import { submitGuess, unlockFirst } from '../service'
+import { submitGuess, unlockFirst, advanceRound } from '../service'
 import PointCounter from './PointCounter'
 
 interface Props {
@@ -9,9 +9,10 @@ interface Props {
   players: PlayerData[]
   currentPlayer: PlayerData | null
   isGuesser: boolean
+  isHost: boolean
 }
 
-export default function RevealView({ game, round, players, isGuesser }: Props) {
+export default function RevealView({ game, round, players, isGuesser, isHost }: Props) {
   const [guess, setGuess] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [unlocking, setUnlocking] = useState(false)
@@ -132,9 +133,19 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
             )}
 
             {!isGuesser && (
-              <p className="text-xs text-outline animate-pulse font-body">
-                Waiting for {guesserPlayer?.name} to unlock…
-              </p>
+              <div className="space-y-2">
+                <p className="text-xs text-outline animate-pulse font-body">
+                  Waiting for {guesserPlayer?.name} to unlock…
+                </p>
+                {isHost && (
+                  <button
+                    onClick={() => advanceRound(game.id).catch(() => {})}
+                    className="text-xs text-outline underline hover:text-on-surface-variant font-body"
+                  >
+                    Skip this round
+                  </button>
+                )}
+              </div>
             )}
           </div>
         )}
@@ -237,9 +248,19 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
         )}
 
         {!isGuesser && !allDuplicates && (
-          <p className="text-center text-outline text-sm animate-pulse mt-2 font-body">
-            Watching {guesserPlayer?.name} think…
-          </p>
+          <div className="text-center space-y-2 mt-2">
+            <p className="text-outline text-sm animate-pulse font-body">
+              Watching {guesserPlayer?.name} think…
+            </p>
+            {isHost && (
+              <button
+                onClick={() => advanceRound(game.id).catch(() => {})}
+                className="text-xs text-outline underline hover:text-on-surface-variant font-body"
+              >
+                Skip this round
+              </button>
+            )}
+          </div>
         )}
       </div>
     </main>
