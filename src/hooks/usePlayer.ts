@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { initAuth } from '../lib/auth'
-import type { PlayerData } from '../types'
 
 export function useAuth() {
   const [uid, setUid] = useState<string | null>(null)
@@ -21,7 +20,8 @@ export function useAuth() {
   return { uid, loading }
 }
 
-export function useCurrentPlayer(players: PlayerData[], uid: string | null): PlayerData | null {
+// Generic over PlayerData shape — works for Flock (with `eggs`) and Just One (with `score`)
+export function useCurrentPlayer<P extends { id: string }>(players: P[], uid: string | null): P | null {
   if (!uid) return null
   return players.find((p) => p.id === uid) ?? null
 }

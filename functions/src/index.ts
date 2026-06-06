@@ -112,8 +112,9 @@ export {
 export {
   justOneCreateGame,
   justOneRematch,
-  startGame as justOneStartGame,
+  justOneStartGame,
   submitClue,
   submitGuess,
-  advanceRound as justOneAdvanceRound,
+  justOneAdvanceRound,
+  justOneForceDedup,
 } from './games/just-one/index'

@@ -1,10 +1,12 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import * as admin from 'firebase-admin'
-import { FieldValue, Timestamp } from 'firebase-admin/firestore'
-import { detectDuplicateClues } from '../../shared/gemini'
+import { FieldValue } from 'firebase-admin/firestore'
 import { claimRoomCode, releaseRoomCode } from '../../shared/roomCodes'
+import { runDeduplication, handleGuess, advanceToNextRound } from './roundFlow'
 
-const db = admin.firestore()
+const db = admin.firestore
+
+const TOTAL_ROUNDS = 13 // Phase 3A: fixed length
 
 // -- CREATE GAME (Just One) --
 export const justOneCreateGame = onCall(async (request) => {
@@ -14,7 +16,8 @@ export const justOneCreateGame = onCall(async (request) => {
   const { playerName } = request.data as { playerName: string }
   if (!playerName?.trim()) throw new HttpsError('invalid-argument', 'Name required')
 
-  const gameRef = db.collection('games').doc()
+  const firestore = db()
+  const gameRef = firestore.collection('games').doc()
   const gameId = gameRef.id
 
   let code: string
@@ -24,9 +27,10 @@ export const justOneCreateGame = onCall(async (request) => {
     throw new HttpsError('internal', 'Could not generate room code')
   }
 
-  // Load word list
+  // Load and shuffle word list, take first 13 as the game's word stack
   const words = (await import('./data/words.json')).default as string[]
-  const shuffledWords = [...words].sort(() => Math.random() - 0.5)
+  const shuffled = [...words].sort(() => Math.random() - 0.5)
+  const cardsRemaining = shuffled.slice(0, TOTAL_ROUNDS)
 
   await gameRef.set({
     code,
@@ -35,16 +39,15 @@ export const justOneCreateGame = onCall(async (request) => {
     originalHostId: uid,
     status: 'lobby',
     currentRound: 0,
-    currentGuesser: null, // Will be set to first player when game starts
-    teamScore: 0,
-    cardsRemaining: shuffledWords.slice(0, Math.min(13, shuffledWords.length)), // Typically 13 words
-    currentCard: '',
+    currentGuesser: null,
+    cardsRemaining,
     playerIds: [uid],
-    settings: { totalRounds: 13, secondsPerRound: 45, autoAdvanceSeconds: 10 },
+    settings: { totalRounds: TOTAL_ROUNDS, secondsPerRound: 60, autoAdvanceSeconds: 10 },
   })
 
   await gameRef.collection('players').doc(uid).set({
     name: playerName.trim(),
+    score: 0,
     connected: true,
   })
 
@@ -57,7 +60,8 @@ export const justOneRematch = onCall(async (request) => {
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
   const { gameId } = request.data as { gameId: string }
-  const gameRef = db.collection('games').doc(gameId)
+  const firestore = db()
+  const gameRef = firestore.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
 
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
@@ -67,7 +71,7 @@ export const justOneRematch = onCall(async (request) => {
 
   const playersSnap = await gameRef.collection('players').get()
 
-  const newGameRef = db.collection('games').doc()
+  const newGameRef = firestore.collection('games').doc()
   const newGameId = newGameRef.id
 
   let newCode: string
@@ -79,9 +83,9 @@ export const justOneRematch = onCall(async (request) => {
 
   await releaseRoomCode(game.code)
 
-  // Reshuffle words
   const words = (await import('./data/words.json')).default as string[]
-  const shuffledWords = [...words].sort(() => Math.random() - 0.5)
+  const shuffled = [...words].sort(() => Math.random() - 0.5)
+  const cardsRemaining = shuffled.slice(0, TOTAL_ROUNDS)
 
   await newGameRef.set({
     code: newCode,
@@ -91,17 +95,16 @@ export const justOneRematch = onCall(async (request) => {
     status: 'lobby',
     currentRound: 0,
     currentGuesser: null,
-    teamScore: 0,
-    cardsRemaining: shuffledWords.slice(0, Math.min(13, shuffledWords.length)),
-    currentCard: '',
+    cardsRemaining,
     playerIds: game.playerIds,
     settings: game.settings,
   })
 
-  const batch = db.batch()
+  const batch = firestore.batch()
   playersSnap.docs.forEach((playerDoc) => {
     batch.set(newGameRef.collection('players').doc(playerDoc.id), {
       name: playerDoc.data().name,
+      score: 0, // reset score for new game
       connected: false,
     })
   })
@@ -112,36 +115,49 @@ export const justOneRematch = onCall(async (request) => {
 })
 
 // -- START GAME --
-export const startGame = onCall(async (request) => {
+export const justOneStartGame = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
   const { gameId } = request.data as { gameId: string }
-  const gameRef = db.collection('games').doc(gameId)
+  const firestore = db()
+  const gameRef = firestore.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
 
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
   if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can start')
   if (game.status !== 'lobby') throw new HttpsError('failed-precondition', 'Game already started')
+  if (game.playerIds.length < 2) throw new HttpsError('failed-precondition', 'Need at least 2 players')
 
-  // First guesser is the first player in the list
-  const firstGuesser = game.playerIds[0]
-  const secretWord = game.cardsRemaining[0]
-
-  const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
+  // First guesser = host (originalHostId)
+  const firstGuesser = uid
+  const cardsRemaining = [...(game.cardsRemaining ?? [])]
+  const firstWord = cardsRemaining.shift()
+  if (!firstWord) throw new HttpsError('internal', 'No words available')
 
   await gameRef.collection('rounds').doc('1').set({
-    secretWord,
+    secretWord: firstWord,
     status: 'clue-submission',
-    deadline: Timestamp.fromDate(deadline),
+    currentAttempt: 1,
+    maxAttempts: 1, // Phase 3A
+    attemptInProgress: false,
     cluesByPlayer: {},
-    eliminatedPlayerIds: [],
+    clueTimestamps: {},
+    clueGroups: [],
+    visibleGroupIndexes: [],
+    guessAttempts: [],
+    tentativePoints: {},
+    pointsThisRound: {},
     eliminationReason: '',
-    score: 0,
   })
 
-  await gameRef.update({ status: 'playing', currentRound: 1, currentGuesser: firstGuesser })
+  await gameRef.update({
+    status: 'playing',
+    currentRound: 1,
+    currentGuesser: firstGuesser,
+    cardsRemaining,
+  })
 })
 
 // -- SUBMIT CLUE --
@@ -151,44 +167,44 @@ export const submitClue = onCall(async (request) => {
 
   const { gameId, roundNum, clue } = request.data as { gameId: string; roundNum: number; clue: string }
   if (!clue?.trim()) throw new HttpsError('invalid-argument', 'Clue required')
-  if (clue.trim().length > 50) throw new HttpsError('invalid-argument', 'Clue too long')
+  if (clue.trim().length > 50) throw new HttpsError('invalid-argument', 'Clue too long (max 50 chars)')
+  if (clue.trim().split(/\s+/).length > 3) throw new HttpsError('invalid-argument', 'Clue must be 1-3 words')
 
-  const roundRef = db.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
-  const roundSnap = await roundRef.get()
+  const firestore = db()
+  const gameRef = firestore.collection('games').doc(gameId)
+  const roundRef = gameRef.collection('rounds').doc(String(roundNum))
+
+  const [gameSnap, roundSnap] = await Promise.all([gameRef.get(), roundRef.get()])
 
   if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
   if (roundSnap.data()!.status !== 'clue-submission') {
     throw new HttpsError('failed-precondition', 'Round not accepting clues')
   }
 
-  const gameSnap = await db.collection('games').doc(gameId).get()
   const game = gameSnap.data()!
-
-  // Can't submit a clue if you're the guesser
   if (game.currentGuesser === uid) {
     throw new HttpsError('failed-precondition', 'Guesser cannot submit clues')
   }
 
-  // Can't submit a clue if you already did
-  const cluesByPlayer = roundSnap.data()!.cluesByPlayer || {}
-  if (cluesByPlayer[uid]) {
+  const existing = roundSnap.data()!.cluesByPlayer ?? {}
+  if (existing[uid]) {
     throw new HttpsError('already-exists', 'Already submitted a clue')
   }
 
-  // Add the clue
   await roundRef.update({
     [`cluesByPlayer.${uid}`]: clue.trim(),
+    [`clueTimestamps.${uid}`]: FieldValue.serverTimestamp(),
   })
 
   // Check if all non-guesser players have submitted
-  const playersSnap = await db.collection('games').doc(gameId).collection('players').get()
+  const playersSnap = await gameRef.collection('players').get()
   const nonGuesserCount = playersSnap.docs.length - 1
   const updatedRound = await roundRef.get()
-  const cluesCount = Object.keys(updatedRound.data()!.cluesByPlayer || {}).length
+  const cluesCount = Object.keys(updatedRound.data()!.cluesByPlayer ?? {}).length
 
-  if (cluesCount === nonGuesserCount) {
-    // All clues in — detect duplicates
-    await detectAndEliminateDuplicates(gameId, roundNum)
+  if (cluesCount >= nonGuesserCount && nonGuesserCount > 0) {
+    // All clues in — run dedup
+    await runDeduplication(gameId, roundNum)
   }
 })
 
@@ -199,123 +215,56 @@ export const submitGuess = onCall(async (request) => {
 
   const { gameId, roundNum, guess } = request.data as { gameId: string; roundNum: number; guess: string }
   if (!guess?.trim()) throw new HttpsError('invalid-argument', 'Guess required')
+  if (guess.trim().length > 100) throw new HttpsError('invalid-argument', 'Guess too long')
 
-  const gameSnap = await db.collection('games').doc(gameId).get()
+  const firestore = db()
+  const gameSnap = await firestore.collection('games').doc(gameId).get()
   const game = gameSnap.data()!
 
   if (game.currentGuesser !== uid) {
     throw new HttpsError('permission-denied', 'Only the guesser can submit a guess')
   }
 
-  const roundRef = db.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
-  const roundSnap = await roundRef.get()
-
-  if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
-  if (roundSnap.data()!.status !== 'guess') {
-    throw new HttpsError('failed-precondition', 'Round not accepting guesses')
-  }
-
-  const secretWord = roundSnap.data()!.secretWord
-  const isCorrect = guess.trim().toUpperCase() === secretWord.toUpperCase()
-
-  const roundData = roundSnap.data()!
-  const newScore = isCorrect ? roundData.score || 0 : (roundData.score || 0) - 1
-
-  await roundRef.update({
-    guesserAnswer: guess.trim(),
-    isCorrect,
-    score: newScore,
-    status: 'scored',
-  })
-
-  // Update game score
-  await db.collection('games').doc(gameId).update({ teamScore: newScore })
+  await handleGuess(gameId, roundNum, uid, guess)
 })
 
 // -- ADVANCE ROUND --
-export const advanceRound = onCall(async (request) => {
+export const justOneAdvanceRound = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
   const { gameId } = request.data as { gameId: string }
-  const gameSnap = await db.collection('games').doc(gameId).get()
-  if (gameSnap.data()!.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can advance')
+  const firestore = db()
+  const gameSnap = await firestore.collection('games').doc(gameId).get()
+  if (gameSnap.data()!.hostId !== uid) {
+    throw new HttpsError('permission-denied', 'Only host can advance')
+  }
 
-  await doAdvanceRound(gameId)
+  await advanceToNextRound(gameId)
 })
 
-// -- INTERNAL HELPERS --
+// -- FORCE START DEDUP (manual escalation if a player is AFK) --
+export const justOneForceDedup = onCall(async (request) => {
+  const uid = request.auth?.uid
+  if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
-async function detectAndEliminateDuplicates(gameId: string, roundNum: number) {
-  const roundRef = db.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
-  const roundSnap = await roundRef.get()
-  const roundData = roundSnap.data()!
-
-  const secretWord = roundData.secretWord
-  const cluesByPlayer = roundData.cluesByPlayer || {}
-
-  try {
-    const result = await detectDuplicateClues(secretWord, cluesByPlayer)
-    await roundRef.update({
-      eliminatedPlayerIds: result.eliminatedPlayerIds,
-      eliminationReason: result.reason,
-      status: 'reveal',
-    })
-  } catch (err) {
-    console.error('Duplicate detection failed:', err)
-    // Continue with no eliminations if Gemini fails
-    await roundRef.update({
-      eliminatedPlayerIds: [],
-      eliminationReason: 'Duplicate detection unavailable',
-      status: 'reveal',
-    })
-  }
-}
-
-async function doAdvanceRound(gameId: string) {
-  const gameRef = db.collection('games').doc(gameId)
-  const gameSnap = await gameRef.get()
+  const { gameId, roundNum } = request.data as { gameId: string; roundNum: number }
+  const firestore = db()
+  const gameSnap = await firestore.collection('games').doc(gameId).get()
   const game = gameSnap.data()!
+  if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can force dedup')
 
-  // Check if game is over
-  const roundNum = game.currentRound
-  if (roundNum >= game.settings.totalRounds) {
-    await gameRef.update({ status: 'finished' })
-    return
+  const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
+  const roundSnap = await roundRef.get()
+  if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
+  if (roundSnap.data()!.status !== 'clue-submission') {
+    throw new HttpsError('failed-precondition', 'Already past clue submission')
   }
 
-  const nextRound = roundNum + 1
-  const playerIds = game.playerIds
-
-  // Rotate guesser: next player in the list
-  const currentGuesserIndex = playerIds.indexOf(game.currentGuesser)
-  const nextGuesserIndex = (currentGuesserIndex + 1) % playerIds.length
-  const nextGuesser = playerIds[nextGuesserIndex]
-
-  // Pop a word from remaining cards
-  const cardsRemaining = [...(game.cardsRemaining || [])]
-  const secretWord = cardsRemaining.shift()
-
-  if (!secretWord) {
-    await gameRef.update({ status: 'finished' })
-    return
+  const clues = roundSnap.data()!.cluesByPlayer ?? {}
+  if (Object.keys(clues).length === 0) {
+    throw new HttpsError('failed-precondition', 'No clues submitted yet')
   }
 
-  const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
-
-  await gameRef.collection('rounds').doc(String(nextRound)).set({
-    secretWord,
-    status: 'clue-submission',
-    deadline: Timestamp.fromDate(deadline),
-    cluesByPlayer: {},
-    eliminatedPlayerIds: [],
-    eliminationReason: '',
-    score: 0,
-  })
-
-  await gameRef.update({
-    currentRound: nextRound,
-    currentGuesser: nextGuesser,
-    cardsRemaining,
-  })
-}
+  await runDeduplication(gameId, roundNum)
+})

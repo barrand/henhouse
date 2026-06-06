@@ -1,10 +1,9 @@
 // Just One-specific game service functions
 
 import { httpsCallable } from 'firebase/functions'
-import { functions } from '../../lib/firebase'
+import { functions, db } from '../../lib/firebase'
 import type { RoundData, GameData, PlayerData } from './types'
 import { doc, onSnapshot } from 'firebase/firestore'
-import { db } from '../../lib/firebase'
 
 // -- Just One Callable Functions --
 
@@ -14,6 +13,7 @@ const justOneStartGameFn = httpsCallable<{ gameId: string }, void>(functions, 'j
 const submitClueFn = httpsCallable<{ gameId: string; roundNum: number; clue: string }, void>(functions, 'submitClue')
 const submitGuessFn = httpsCallable<{ gameId: string; roundNum: number; guess: string }, void>(functions, 'submitGuess')
 const justOneAdvanceRoundFn = httpsCallable<{ gameId: string }, void>(functions, 'justOneAdvanceRound')
+const justOneForceDedupFn = httpsCallable<{ gameId: string; roundNum: number }, void>(functions, 'justOneForceDedup')
 
 export async function justOneCreateGame(playerName: string) {
   const result = await justOneCreateGameFn({ playerName })
@@ -39,6 +39,10 @@ export async function submitGuess(gameId: string, roundNum: number, guess: strin
 
 export async function advanceRound(gameId: string) {
   await justOneAdvanceRoundFn({ gameId })
+}
+
+export async function forceDedup(gameId: string, roundNum: number) {
+  await justOneForceDedupFn({ gameId, roundNum })
 }
 
 // -- Just One Real-time Listeners --

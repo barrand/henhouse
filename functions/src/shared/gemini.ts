@@ -201,20 +201,26 @@ Return ONLY valid JSON: { "questions": [{ "text": "...", "category": "...", "typ
 // ── Just One ──────────────────────────────────────────────────────────────────
 
 export interface DuplicateClueResult {
-  eliminatedPlayerIds: string[] // playerIds whose clues matched others
-  reason: string // why they were eliminated
+  // ALL clues grouped together. Size-1 groups = unique clues. Size-2+ = duplicates.
+  // Every playerId in `clues` MUST appear in exactly one group.
+  // e.g. [["alice"], ["bob","carol"], ["dave"]]
+  groups: string[][]
+  reason: string
 }
 
 export async function detectDuplicateClues(
   secretWord: string,
   clues: Record<string, string>, // playerId -> clue word
 ): Promise<DuplicateClueResult> {
-  if (Object.keys(clues).length === 0) {
-    return { eliminatedPlayerIds: [], reason: 'No clues submitted' }
+  const playerIds = Object.keys(clues)
+  if (playerIds.length === 0) {
+    return { groups: [], reason: 'No clues submitted' }
+  }
+  if (playerIds.length === 1) {
+    return { groups: [[playerIds[0]]], reason: 'Only one clue submitted' }
   }
 
   const model = getModel()
-  const playerIds = Object.keys(clues)
   const cluesList = playerIds.map((id) => `${id}: "${clues[id]}"`)
 
   const prompt = `The secret word for this round of Just One is: "${secretWord}"
@@ -222,21 +228,29 @@ export async function detectDuplicateClues(
 Players gave these clues:
 ${cluesList.join('\n')}
 
-Your job: identify ANY clues that are identical or too similar to another clue. In Just One, duplicate or matching clues are eliminated to make the game harder.
+Your job: GROUP the clues that mean the same thing or are too similar. Players who share a group are "eliminated" together. Players in a size-1 group (unique clue) survive.
 
-RULES for when to eliminate a clue:
-- ELIMINATE if two clues are EXACTLY the same word (case-insensitive): "Paris" = "paris" = "PARIS"
-- ELIMINATE if two clues are synonyms that mean the same thing: "big" and "large", "happy" and "joyful"
-- ELIMINATE if two clues are very close variations: "run" and "running", "cat" and "cats"
-- ELIMINATE if both clues are anagrams of the same letters (super rare, but eliminate): "listen" and "silent"
-- DO NOT eliminate just because clues are related to the same topic: "movie" and "actor" both relate to cinema but are different clues
+Every player MUST appear in exactly one group.
+
+RULES for when two clues belong to the same group:
+- SAME GROUP if EXACTLY the same word (case-insensitive): "Paris" = "paris" = "PARIS"
+- SAME GROUP if synonyms that mean the same thing: "big" and "large", "happy" and "joyful"
+- SAME GROUP if very close variations: "run" and "running", "cat" and "cats"
+- SAME GROUP if anagrams of the same letters (super rare): "listen" and "silent"
+- DIFFERENT GROUPS if just related to the same topic: "movie" and "actor" both relate to cinema but are different clues — keep them separate
 
 Context matters. For example, if the secret word is "PARIS":
-- "FRANCE" and "CITY" are both different → no elimination
-- "FRANCE" and "FRENCH" are similar enough → ELIMINATE both
-- "EIFFEL" and "FRANCE" are different → no elimination
+- "FRANCE" and "CITY" → DIFFERENT groups (both unique)
+- "FRANCE" and "FRENCH" → SAME group (similar enough)
+- "EIFFEL" and "FRANCE" → DIFFERENT groups (both unique)
 
-Return ONLY valid JSON: {"eliminatedPlayerIds":["id1","id2"],"reason":"Explanation of why these were eliminated"}`
+Return ONLY valid JSON in this exact shape:
+{
+  "groups": [["playerId1"], ["playerId2", "playerId3"], ["playerId4"]],
+  "reason": "Brief one-sentence explanation, e.g. 'Bob and Carol both wrote FRANCE'"
+}
+
+Every player in the input MUST be in exactly one group in the output. The number of input players must equal the total players across all groups.`
 
   try {
     const result = await model.generateContent({
@@ -248,31 +262,118 @@ Return ONLY valid JSON: {"eliminatedPlayerIds":["id1","id2"],"reason":"Explanati
 
     const text = result.response.text()
     const parsed = JSON.parse(text)
-    return {
-      eliminatedPlayerIds: Array.isArray(parsed.eliminatedPlayerIds) ? parsed.eliminatedPlayerIds : [],
-      reason: parsed.reason ?? 'Duplicate or similar clues detected',
-    }
-  } catch (err) {
-    console.error('Gemini duplicate detection failed:', err)
-    // Fallback: eliminate exact duplicates only
-    const eliminated: string[] = []
-    const clueToIds: Record<string, string[]> = {}
+    const rawGroups: unknown = parsed.groups
 
-    for (const [playerId, clue] of Object.entries(clues)) {
-      const normalized = clue.trim().toLowerCase()
-      if (!clueToIds[normalized]) clueToIds[normalized] = []
-      clueToIds[normalized].push(playerId)
+    if (!Array.isArray(rawGroups)) {
+      throw new Error('Invalid Gemini response: groups not an array')
     }
 
-    for (const ids of Object.values(clueToIds)) {
-      if (ids.length > 1) {
-        eliminated.push(...ids)
+    // Validate that every player appears exactly once across all groups
+    const seen = new Set<string>()
+    const validGroups: string[][] = []
+    for (const group of rawGroups) {
+      if (!Array.isArray(group)) continue
+      const groupIds: string[] = []
+      for (const id of group) {
+        if (typeof id === 'string' && id in clues && !seen.has(id)) {
+          seen.add(id)
+          groupIds.push(id)
+        }
+      }
+      if (groupIds.length > 0) validGroups.push(groupIds)
+    }
+
+    // Add any missing players as their own unique group (defensive)
+    for (const id of playerIds) {
+      if (!seen.has(id)) {
+        validGroups.push([id])
       }
     }
 
     return {
-      eliminatedPlayerIds: eliminated,
-      reason: 'Exact duplicate clues detected (Gemini unavailable)',
+      groups: validGroups,
+      reason: typeof parsed.reason === 'string' ? parsed.reason : 'Clues grouped',
     }
+  } catch (err) {
+    console.error('Gemini duplicate detection failed, falling back to exact match:', err)
+    return fallbackExactMatchGrouping(clues)
+  }
+}
+
+function fallbackExactMatchGrouping(clues: Record<string, string>): DuplicateClueResult {
+  // Group by exact normalized text (lowercase, trimmed)
+  const clueToIds: Record<string, string[]> = {}
+  for (const [playerId, clue] of Object.entries(clues)) {
+    const normalized = clue.trim().toLowerCase()
+    if (!clueToIds[normalized]) clueToIds[normalized] = []
+    clueToIds[normalized].push(playerId)
+  }
+  const groups = Object.values(clueToIds)
+  const hasDuplicates = groups.some((g) => g.length > 1)
+  return {
+    groups,
+    reason: hasDuplicates
+      ? 'Exact duplicates detected (Gemini unavailable)'
+      : 'All clues unique (Gemini unavailable)',
+  }
+}
+
+// ── Just One: Guess Evaluation ────────────────────────────────────────────────
+
+export async function evaluateGuess(secretWord: string, guess: string): Promise<boolean> {
+  const trimmedGuess = guess.trim()
+  const trimmedSecret = secretWord.trim()
+
+  // Fast path: exact case-insensitive match (no Gemini call needed)
+  if (trimmedGuess.toUpperCase() === trimmedSecret.toUpperCase()) {
+    return true
+  }
+
+  // Empty guess is never correct
+  if (trimmedGuess.length === 0) return false
+
+  // Skip Gemini if guess is wildly different in length (likely not close)
+  if (Math.abs(trimmedGuess.length - trimmedSecret.length) > Math.max(5, trimmedSecret.length)) {
+    return false
+  }
+
+  try {
+    const model = getModel()
+    const prompt = `In the party game Just One, the secret word is: "${trimmedSecret}"
+
+A player guessed: "${trimmedGuess}"
+
+Should this be accepted as correct?
+
+ACCEPT (return true) for:
+- Plural/singular variations: "wolves" matches "WOLF", "cat" matches "CATS"
+- Verb tense variations: "ran" matches "RUN", "running" matches "RUN"
+- Common typos and misspellings: "neccessary" matches "NECESSARY", "tomatoe" matches "TOMATO"
+- Accents/diacritics: "café" matches "CAFE", "résumé" matches "RESUME"
+- Capitalization: already handled, but extra leniency is fine
+- Compound words written differently: "ice cream" matches "ICECREAM"
+
+REJECT (return false) for:
+- Completely different words: "WOLF" does NOT match "BEAR"
+- Same category but different: "WOLF" does NOT match "DOG"
+- Synonyms with different meanings: "HAPPY" does NOT match "JOY" (different word entirely)
+- Related words: "OCEAN" does NOT match "BEACH"
+
+Return ONLY valid JSON: {"correct": true} or {"correct": false}`
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+      },
+    })
+
+    const text = result.response.text()
+    const parsed = JSON.parse(text)
+    return parsed.correct === true
+  } catch (err) {
+    console.error('Gemini guess evaluation failed, falling back to exact match:', err)
+    // Already failed the exact match earlier, so fallback = reject
+    return false
   }
 }

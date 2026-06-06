@@ -3,25 +3,42 @@
 import type { BaseGameData, PlayerData as SharedPlayerData } from '@shared/types'
 
 export interface GameData extends BaseGameData {
-  currentGuesser: string // playerId of the current guesser
-  teamScore: number // team score (shared across all players)
-  cardsRemaining: string[] // remaining words to guess
-  currentCard: string // current secret word for this round
+  currentGuesser: string | null    // playerId of current guesser (null in lobby)
+  cardsRemaining: string[]         // word stack for remaining rounds
 }
 
 export interface PlayerData extends SharedPlayerData {
-  // No additional fields beyond shared PlayerData for Just One
+  score: number   // cumulative across the game
+}
+
+export type RoundStatus =
+  | 'clue-submission'
+  | 'deduplication'
+  | 'reveal'
+  | 'guess'
+  | 'scored'
+
+export interface ClueGroup {
+  playerIds: string[]      // 1+ players who share the same/similar clue
+  clueText: string         // canonical version of the clue
+  isDuplicate: boolean     // true if size >= 2
 }
 
 export interface RoundData {
   id: string
   secretWord: string
-  status: 'clue-submission' | 'reveal' | 'guess' | 'scored'
-  deadline: { seconds: number; nanoseconds: number }
-  cluesByPlayer: Record<string, string> // playerId -> clue
-  eliminatedPlayerIds: string[] // players whose clues were duplicates
-  eliminationReason: string
-  guesserAnswer?: string // what the guesser guessed
-  isCorrect?: boolean
-  score: number // 0 or -1 (only applies after scoring)
+  status: RoundStatus
+  currentAttempt: number               // 1–4 (always 1 in Phase 3A)
+  maxAttempts: number                  // always 1 in Phase 3A
+  attemptInProgress: boolean           // true during Gemini guess evaluation
+  attemptDeadline?: { seconds: number; nanoseconds: number }
+  cluesByPlayer: Record<string, string>
+  clueGroups: ClueGroup[]              // populated after dedup
+  visibleGroupIndexes: number[]        // which groups are visible to the guesser
+  eliminationReason: string            // human-readable from Gemini
+  guessAttempts: string[]              // history of wrong guesses (Phase 3B)
+  guesserAnswer?: string               // final guess
+  isCorrect?: boolean                  // round result
+  tentativePoints: Record<string, number>  // server-computed, not yet final
+  pointsThisRound: Record<string, number>  // final scores (written at 'scored')
 }
