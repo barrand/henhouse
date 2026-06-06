@@ -1691,102 +1691,18 @@
     "source": "patriotic"
   },
   {
-    "text": "Name a famous American landmark.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name something you'd find at a Fourth of July cookout.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
     "text": "Name a president that everyone knows.",
     "type": "open",
     "source": "patriotic"
   },
   {
-    "text": "Name a symbol of the United States.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a statue or monument in America.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name something that represents American freedom.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name something patriotic to wear.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a famous national park.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a document from American history.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name an American patriotic song.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a Founding Father.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a Revolutionary War hero other than George Washington.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a right protected by the Bill of Rights.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name something Benjamin Franklin was known for.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a state named after a historical figure.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "Name a key document from America's founding.",
-    "type": "open",
-    "source": "patriotic"
-  },
-  {
-    "text": "What are American ideals based on?",
+    "text": "What is the best thing to grill on the 4th of July?",
     "type": "multiple_choice",
     "options": [
-      "Freedom",
-      "Liberty",
-      "Equality"
-    ],
-    "source": "patriotic"
-  },
-  {
-    "text": "Where would you like to spend a day?",
-    "type": "multiple_choice",
-    "options": [
-      "The White House",
-      "The Capitol",
-      "The Pentagon"
+      "Burgers",
+      "Brats",
+      "Hot Dogs",
+      "Tofu"
     ],
     "source": "patriotic"
   },
@@ -1807,7 +1723,6 @@
     "options": [
       "Marching barefoot in winter",
       "Sleeping in mud and snow",
-      "Charging at British cannons",
       "Eating hardtack and rotten meat"
     ],
     "source": "patriotic"
@@ -1818,13 +1733,22 @@
     "options": [
       "Cannon loader",
       "Latrine digger",
-      "Surgeon with no anesthesia",
-      "Drummer boy leading the charge"
+      "Surgeon with no anesthesia"
     ],
     "source": "patriotic"
   },
   {
-    "text": "If your face had to be on American currency, which would you pick?",
+    "text": "Where would you like to throw an epic dance party?",
+    "type": "multiple_choice",
+    "options": [
+      "The White House",
+      "The Capitol",
+      "The Pentagon"
+    ],
+    "source": "patriotic"
+  },
+  {
+    "text": "You get to be the face on some currency, what do you pick?",
     "type": "multiple_choice",
     "options": [
       "The penny (everyone hates it)",
@@ -1855,7 +1779,7 @@
     "source": "patriotic"
   },
   {
-    "text": "If giving up a little privacy (like cameras everywhere) made everyone safer, would it be worth it?",
+    "text": "Should the government put cameras everywhere for safety, even if it means less privacy?",
     "type": "multiple_choice",
     "options": [
       "Yes — safety first!",
@@ -1870,7 +1794,7 @@
     "options": [
       "Wide open — everyone deserves a shot!",
       "Controlled — rules and limits make it fair",
-      "Closed until we fix things at home first"
+      "Closed because we can't let people in who don't pay taxes!"
     ],
     "source": "patriotic"
   },
@@ -1886,7 +1810,7 @@
     "source": "patriotic"
   },
   {
-    "text": "Rich people should pay…",
+    "text": "Rich people should pay how much in taxes?",
     "type": "multiple_choice",
     "options": [
       "Way more — they can afford it!",
@@ -1896,21 +1820,21 @@
     "source": "patriotic"
   },
   {
-    "text": "Should news channels be allowed to roast the President on live TV?",
+    "text": "Should news channels be allowed to criticize the President on live TV?",
     "type": "multiple_choice",
     "options": [
-      "Absolutely — that's literally what a free press is for",
+      "Absolutely — especially when they do dumb stuff",
       "Only if they can back it up with facts",
-      "No — there have to be some limits"
+      "No — we should respect our leaders"
     ],
     "source": "patriotic"
   },
   {
-    "text": "Your town votes 7-3 to ban a religion from meeting in public. Legal?",
+    "text": "Your town votes 7-3 to ban a religion from meeting in public. Is that OK?",
     "type": "multiple_choice",
     "options": [
       "Yes — majority rules, that's democracy",
-      "No — some things aren't up for a vote, period"
+      "No — some things aren't up for a vote"
     ],
     "source": "patriotic"
   },
@@ -1953,12 +1877,12 @@
     "source": "patriotic"
   },
   {
-    "text": "The Founders said Americans have the right to own a gun. In today's world, that means…",
+    "text": "What does the right to own a gun mean today?",
     "type": "multiple_choice",
     "options": [
-      "Anyone who wants one should be able to get one — period",
+      "Anyone who wants one should be able to get one",
       "Strict rules — background checks, waiting periods, the works",
-      "Hunting rifles? Sure. Military-style weapons? Come on."
+      "Hunting rifles yes, military-style weapons no"
     ],
     "source": "patriotic"
   },
@@ -2002,12 +1926,12 @@
       "Star Spangled Banner",
       "America the Beautiful",
       "Born in the USA",
-      "God Bless America"
+      "Party in the USA"
     ],
     "source": "patriotic"
   },
   {
-    "text": "Who was the most important Founding Father?",
+    "text": "Who was the coolest Founding Father?",
     "type": "multiple_choice",
     "options": [
       "George Washington",
@@ -2018,7 +1942,7 @@
     "source": "patriotic"
   },
   {
-    "text": "Which American right matters most?",
+    "text": "If you could only keep one American right, which would it be?",
     "type": "multiple_choice",
     "options": [
       "Freedom of speech",
