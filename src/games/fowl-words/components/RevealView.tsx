@@ -54,10 +54,16 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
         {isGuesser ? (
           <div className="text-center">
             <h2 className="font-headline text-2xl font-bold text-on-surface">
-              {round.currentAttempt === 1 ? 'Your clues' : 'New clue unlocked!'}
+              {visibleSet.size === 0
+                ? 'Duplicates only'
+                : round.currentAttempt === 1
+                ? 'Your clues'
+                : 'New clue unlocked!'}
             </h2>
             <p className="text-on-surface-variant text-sm mt-1 font-body">
-              {round.currentAttempt === 1
+              {visibleSet.size === 0
+                ? 'All the clues match each other. What do you think?'
+                : round.currentAttempt === 1
                 ? 'Take a beat. Then guess.'
                 : 'Try again — points just dropped.'}
             </p>
@@ -75,8 +81,22 @@ export default function RevealView({ game, round, players, isGuesser }: Props) {
           </div>
         )}
 
-        {/* Clue groups */}
+        {/* Clue groups - or placeholder if all duplicates */}
         <div className="space-y-3">
+          {isGuesser && visibleSet.size === 0 && (
+            <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-6 text-center">
+              <p className="font-headline text-lg font-bold text-on-surface mb-2">
+                🔒 No unique clues!
+              </p>
+              <p className="text-on-surface-variant text-sm mb-3 font-body">
+                All the clues are duplicates — they're locked. Make your best guess to unlock them.
+              </p>
+              <p className="text-xs text-outline italic font-body">
+                Guess wrong → unlock one duplicate on attempt 2 for 5 pts
+              </p>
+            </div>
+          )}
+
           {round.clueGroups.map((group, idx) => {
             const isVisible = visibleSet.has(idx)
 
