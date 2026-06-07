@@ -27,7 +27,7 @@ import type { ClueGroup } from './types'
 
 const db = admin.firestore
 const SECONDS_PER_ATTEMPT = 60
-
+const SECONDS_PER_CLUE_SUBMISSION = 60
 const WORD_SELECTION_SECONDS = 15
 
 /**
@@ -82,11 +82,14 @@ export async function finalizeWordSelection(gameId: string, roundNum: number): P
 
   const secretWord = wordOptions[winnerIdx] ?? wordOptions[0] ?? ''
 
+  const clueSubmissionDeadline = Timestamp.fromMillis(Date.now() + SECONDS_PER_CLUE_SUBMISSION * 1000)
+
   await roundRef.update({
     status: 'clue-submission',
     secretWord,
     cluesByPlayer: {},
     clueTimestamps: {},
+    clueSubmissionDeadline,
   })
 }
 
@@ -128,11 +131,15 @@ export async function runDeduplication(gameId: string, roundNum: number): Promis
   const currentAttempt = 1
   const guesserId: string = await getGuesserId(gameId)
 
+  const rawTimestamps = roundSnap.data()?.clueTimestamps ?? {}
+  const clueTimestamps = normalizeTimestamps(rawTimestamps)
+
   const tentativePoints = computeTentativePoints(
     clueGroups,
     visibleGroupIndexes,
     guesserId,
     currentAttempt,
+    clueTimestamps,
   )
 
   const attemptDeadline = Timestamp.fromMillis(Date.now() + SECONDS_PER_ATTEMPT * 1000)
@@ -195,6 +202,7 @@ export async function handleGuess(
   const maxAttempts: number = roundData.maxAttempts ?? 1
 
   const isCorrect = await evaluateGuess(secretWord, guess)
+  const clueTimestamps = normalizeTimestamps(roundData.clueTimestamps ?? {})
 
   // ── Path 1: Correct ─────────────────────────────────────────────
   if (isCorrect) {
@@ -204,6 +212,7 @@ export async function handleGuess(
       guesserId,
       true,
       currentAttempt,
+      clueTimestamps,
     )
 
     const batch = firestore.batch()
@@ -216,7 +225,7 @@ export async function handleGuess(
       attemptInProgress: false,
     })
     for (const [playerId, pts] of Object.entries(scores)) {
-      if (pts > 0) {
+      if (pts !== 0) {
         const playerRef = firestore.collection('games').doc(gameId).collection('players').doc(playerId)
         batch.update(playerRef, { score: FieldValue.increment(pts) })
       }
@@ -233,8 +242,10 @@ export async function handleGuess(
       guesserId,
       false,
       currentAttempt,
+      clueTimestamps,
     )
-    await roundRef.update({
+    const batch = firestore.batch()
+    batch.update(roundRef, {
       status: 'scored',
       isCorrect: false,
       guesserAnswer: guess.trim(),
@@ -242,11 +253,18 @@ export async function handleGuess(
       tentativePoints: scores,
       attemptInProgress: false,
     })
+    // Apply penalties (e.g. duplicate -1) even on failure
+    for (const [playerId, pts] of Object.entries(scores)) {
+      if (pts !== 0) {
+        const playerRef = firestore.collection('games').doc(gameId).collection('players').doc(playerId)
+        batch.update(playerRef, { score: FieldValue.increment(pts) })
+      }
+    }
+    await batch.commit()
     return
   }
 
   // ── Path 3: Wrong, attempts left → unlock next group, retry ─────
-  const clueTimestamps = normalizeTimestamps(roundData.clueTimestamps ?? {})
   const playerScores = await fetchPlayerScores(gameId)
 
   const nextUnlockIdx = selectNextUnlockGroup(
@@ -258,7 +276,7 @@ export async function handleGuess(
 
   // If nothing to unlock (shouldn't happen if maxAttempts is consistent), end round
   if (nextUnlockIdx < 0) {
-    const scores = computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, false, currentAttempt)
+    const scores = computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, false, currentAttempt, clueTimestamps)
     await roundRef.update({
       status: 'scored',
       isCorrect: false,
@@ -272,7 +290,7 @@ export async function handleGuess(
 
   const newVisible = [...visibleGroupIndexes, nextUnlockIdx]
   const newAttempt = currentAttempt + 1
-  const newTentative = computeTentativePoints(clueGroups, newVisible, guesserId, newAttempt)
+  const newTentative = computeTentativePoints(clueGroups, newVisible, guesserId, newAttempt, clueTimestamps)
   const newDeadline = Timestamp.fromMillis(Date.now() + SECONDS_PER_ATTEMPT * 1000)
 
   await roundRef.update({
@@ -323,7 +341,7 @@ export async function skipToNextAttempt(gameId: string, roundNum: number): Promi
 
   if (nextUnlockIdx < 0) {
     // Nothing to unlock — end the round with zero scores
-    const scores = computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, false, currentAttempt)
+    const scores = computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, false, currentAttempt, clueTimestamps)
     await roundRef.update({
       status: 'scored',
       isCorrect: false,
@@ -335,7 +353,7 @@ export async function skipToNextAttempt(gameId: string, roundNum: number): Promi
 
   const newVisible = [nextUnlockIdx]
   const newAttempt = currentAttempt + 1
-  const newTentative = computeTentativePoints(clueGroups, newVisible, guesserId, newAttempt)
+  const newTentative = computeTentativePoints(clueGroups, newVisible, guesserId, newAttempt, clueTimestamps)
   const newDeadline = Timestamp.fromMillis(Date.now() + SECONDS_PER_ATTEMPT * 1000)
 
   await roundRef.update({
@@ -358,7 +376,7 @@ export async function advanceToNextRound(gameId: string): Promise<void> {
   const gameSnap = await gameRef.get()
   const game = gameSnap.data()!
 
-  const totalRounds: number = game.settings?.totalRounds ?? 13
+  const totalRounds: number = game.settings?.totalRounds ?? 10
   const currentRound: number = game.currentRound ?? 0
 
   if (currentRound >= totalRounds) {

@@ -81,7 +81,7 @@ export default function RoundResultView({ game, round, players, isHost, currentP
           </p>
         </div>
 
-        {/* Clue debrief — show all groups with names */}
+        {/* Clue debrief — show all groups with scoring breakdown */}
         {round.clueGroups.length > 0 && (
           <div>
             <h3 className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
@@ -89,50 +89,101 @@ export default function RoundResultView({ game, round, players, isHost, currentP
             </h3>
             <div className="space-y-2">
               {round.clueGroups.map((group, idx) => {
-                const scored = (round.pointsThisRound[group.playerIds[0]] ?? 0) > 0
+                const isVisible = round.visibleGroupIndexes.includes(idx)
                 const isYours = group.playerIds.includes(currentPlayerId ?? '')
                 const displayText = Array.from(new Set(group.clueTexts.map((t) => t.trim()))).join(' / ')
                 const names = group.playerIds.map((id) => players.find((p) => p.id === id)?.name ?? '?').join(', ')
 
+                // Determine per-player breakdown for "yours" row
+                const yourId = currentPlayerId ?? ''
+                const yourPoints = round.pointsThisRound[yourId] ?? 0
+                const attemptPts = [10, 5, 2, 1][round.currentAttempt - 1] ?? 0
+                const gotFastBonus = isYours && isVisible && round.isCorrect && (
+                  group.isDuplicate ? yourPoints === attemptPts - 1 + 2 : yourPoints === attemptPts + 2
+                )
+
                 return (
                   <div
                     key={idx}
-                    className={`flex items-center justify-between px-4 py-3 rounded-xl border font-body ${
+                    className={`px-4 py-3 rounded-xl border font-body ${
                       group.isDuplicate
-                        ? 'bg-surface-container-low border-outline-variant/20 opacity-75'
-                        : scored
+                        ? 'bg-surface-container-low border-outline-variant/20 opacity-80'
+                        : isVisible && round.isCorrect
                         ? 'bg-primary-fixed/20 border-primary-fixed-dim'
                         : 'bg-surface-container-lowest border-outline-variant/30'
                     }`}
                   >
-                    <div className="flex flex-col">
-                      <span className={`font-headline font-bold text-lg ${group.isDuplicate ? 'text-on-surface-variant line-through' : 'text-on-surface'}`}>
-                        {displayText}
-                      </span>
-                      <span className="text-xs text-outline mt-0.5">
-                        {names}
-                        {isYours && <span className="text-primary font-bold ml-1">← you</span>}
-                      </span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className={`font-headline font-bold text-lg ${group.isDuplicate ? 'text-on-surface-variant line-through' : 'text-on-surface'}`}>
+                          {displayText}
+                        </span>
+                        <span className="text-xs text-outline mt-0.5">
+                          {names}
+                          {isYours && <span className="text-primary font-bold ml-1">← you</span>}
+                        </span>
+                      </div>
+                      <div className="ml-3 flex-shrink-0 text-right">
+                        {group.isDuplicate ? (
+                          <span className="text-[10px] text-error font-bold uppercase tracking-wider font-label">
+                            🔄 Duplicate
+                          </span>
+                        ) : isVisible && round.isCorrect ? (
+                          <span className="text-[10px] text-primary font-bold uppercase tracking-wider font-label">
+                            ✅ Used
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-outline font-bold uppercase tracking-wider font-label">
+                            🔒 Locked
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="ml-3 flex-shrink-0">
-                      {group.isDuplicate ? (
-                        <span className="text-[10px] text-error font-bold uppercase tracking-wider font-label">
-                          Duped
-                        </span>
-                      ) : scored ? (
-                        <span className="text-[10px] text-primary font-bold uppercase tracking-wider font-label">
-                          ✓ Scored
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-outline font-bold uppercase tracking-wider font-label">
-                          Locked
-                        </span>
-                      )}
-                    </div>
+
+                    {/* Scoring badges for this player's own clue */}
+                    {isYours && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {isVisible && round.isCorrect && (
+                          <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full font-label">
+                            +{attemptPts} used
+                          </span>
+                        )}
+                        {gotFastBonus && (
+                          <span className="bg-tertiary-container text-on-tertiary-container text-[10px] font-bold px-2 py-0.5 rounded-full font-label">
+                            ⚡ +2 fastest
+                          </span>
+                        )}
+                        {group.isDuplicate && (
+                          <span className="bg-error/10 text-error text-[10px] font-bold px-2 py-0.5 rounded-full font-label">
+                            -1 duplicate
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )
               })}
             </div>
+          </div>
+        )}
+
+        {/* Guesser result message */}
+        {currentPlayerId === game.currentGuesser && (
+          <div className={`rounded-xl px-4 py-3 text-center font-body border ${round.isCorrect ? 'bg-primary-fixed/20 border-primary-fixed-dim' : 'bg-surface-container-low border-outline-variant/20'}`}>
+            <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider font-label mb-1">Your result as guesser</p>
+            <p className="font-headline font-bold text-lg text-on-surface">
+              {round.isCorrect
+                ? ([
+                    '🎯 Got it on the first try!',
+                    '✨ Second time\'s the charm!',
+                    '💪 Persistence pays off!',
+                    '🔓 Finally unlocked it!',
+                  ][round.currentAttempt - 1] ?? '✅ Correct!')
+                : '😅 The word remains a mystery…'}
+            </p>
+            {round.isCorrect && (
+              <p className="text-primary font-bold text-sm mt-1">+{[10, 5, 2, 1][round.currentAttempt - 1] ?? 0} points</p>
+            )}
           </div>
         )}
 

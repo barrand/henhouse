@@ -6,7 +6,16 @@ import { runDeduplication, handleGuess, advanceToNextRound, skipToNextAttempt, f
 
 const db = admin.firestore
 
-const TOTAL_ROUNDS = 13 // Phase 3A: fixed length
+const TOTAL_ROUNDS = 10 // Reduced from 13 after playtest feedback
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
 
 // -- CREATE GAME (Fowl Words) --
 export const fowlWordsCreateGame = onCall(async (request) => {
@@ -29,7 +38,7 @@ export const fowlWordsCreateGame = onCall(async (request) => {
 
   // Load and shuffle word list — draw 3 words per round (2 burned after voting)
   const words = (await import('./data/words.json')).default as string[]
-  const shuffled = [...words].sort(() => Math.random() - 0.5)
+  const shuffled = shuffle(words)
   const cardsRemaining = shuffled.slice(0, TOTAL_ROUNDS * 3)
 
   await gameRef.set({
@@ -84,7 +93,7 @@ export const fowlWordsRematch = onCall(async (request) => {
   await releaseRoomCode(game.code)
 
   const words = (await import('./data/words.json')).default as string[]
-  const shuffled = [...words].sort(() => Math.random() - 0.5)
+  const shuffled = shuffle(words)
   const cardsRemaining = shuffled.slice(0, TOTAL_ROUNDS * 3)
 
   await newGameRef.set({

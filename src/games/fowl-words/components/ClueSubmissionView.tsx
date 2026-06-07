@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
 import { submitClue, forceDedup, advanceRound } from '../service'
 
@@ -15,6 +15,53 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
   const [clue, setClue] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [timeLeft, setTimeLeft] = useState(60)
+  const clueRef = useRef(clue)
+  const autoSubmittedRef = useRef(false)
+  const hostForcedRef = useRef(false)
+
+  // Keep ref in sync so the timer callback can read current value
+  useEffect(() => { clueRef.current = clue }, [clue])
+
+  // Countdown timer — auto-submit on expiry
+  useEffect(() => {
+    if (!round.clueSubmissionDeadline) return
+    autoSubmittedRef.current = false
+    hostForcedRef.current = false
+
+    const deadlineMs = round.clueSubmissionDeadline.seconds * 1000
+
+    const tick = async () => {
+      const remaining = Math.max(0, Math.ceil((deadlineMs - Date.now()) / 1000))
+      setTimeLeft(remaining)
+
+      if (remaining === 0) {
+        // Givers: auto-submit whatever they've typed (if anything and not yet submitted)
+        if (!isGuesser && !autoSubmittedRef.current && !myClueSubmitted) {
+          autoSubmittedRef.current = true
+          const currentClue = clueRef.current.trim()
+          if (currentClue && currentClue.split(/\s+/).length === 1) {
+            try { await submitClue(game.id, game.currentRound, currentClue) } catch { /* ignore */ }
+          }
+        }
+        // Host: force dedup after a short grace period (2s after individual auto-submits)
+        if (isHost && !hostForcedRef.current) {
+          hostForcedRef.current = true
+          setTimeout(async () => {
+            const cluesCount = Object.keys(round.cluesByPlayer).length
+            try {
+              if (cluesCount === 0) await advanceRound(game.id)
+              else await forceDedup(game.id, game.currentRound)
+            } catch { /* ignore — might already be past clue-submission */ }
+          }, 2000)
+        }
+      }
+    }
+
+    tick()
+    const interval = setInterval(tick, 500)
+    return () => clearInterval(interval)
+  }, [round.clueSubmissionDeadline?.seconds]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const myClueSubmitted = currentPlayer?.id && !!round.cluesByPlayer[currentPlayer.id]
   const cluesCount = Object.keys(round.cluesByPlayer).length
@@ -110,6 +157,18 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
             {round.secretWord}
           </p>
         </div>
+
+        {/* Clue submission timer */}
+        {round.clueSubmissionDeadline && !myClueSubmitted && (
+          <div className="flex items-center justify-center gap-2">
+            <span className={`font-headline text-3xl font-bold tabular-nums transition-colors ${
+              timeLeft <= 10 ? 'text-error' : timeLeft <= 20 ? 'text-tertiary' : 'text-primary'
+            }`}>
+              {timeLeft}s
+            </span>
+            <span className="text-on-surface-variant text-sm font-body">to submit your clue</span>
+          </div>
+        )}
 
         {/* Clue Input or Submitted State */}
         {!myClueSubmitted ? (

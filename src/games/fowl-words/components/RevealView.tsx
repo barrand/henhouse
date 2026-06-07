@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
 import { submitGuess, unlockFirst, advanceRound } from '../service'
 import PointCounter from './PointCounter'
@@ -17,6 +17,36 @@ export default function RevealView({ game, round, players, isGuesser, isHost }: 
   const [submitting, setSubmitting] = useState(false)
   const [unlocking, setUnlocking] = useState(false)
   const [error, setError] = useState('')
+  const [timeLeft, setTimeLeft] = useState(60)
+  const guessRef = useRef(guess)
+  const autoSubmittedRef = useRef(false)
+
+  // Keep ref in sync so the timer callback can read the current value
+  useEffect(() => { guessRef.current = guess }, [guess])
+
+  // Guess countdown timer — auto-submit on expiry
+  useEffect(() => {
+    if (!round.attemptDeadline || !isGuesser) return
+    autoSubmittedRef.current = false
+
+    const deadlineMs = round.attemptDeadline.seconds * 1000
+
+    const tick = async () => {
+      const remaining = Math.max(0, Math.ceil((deadlineMs - Date.now()) / 1000))
+      setTimeLeft(remaining)
+
+      if (remaining === 0 && !autoSubmittedRef.current && !submitting) {
+        autoSubmittedRef.current = true
+        // Submit whatever they've typed, or a placeholder if empty (forced wrong answer)
+        const currentGuess = guessRef.current.trim() || '---'
+        try { await submitGuess(game.id, game.currentRound, currentGuess) } catch { /* ignore */ }
+      }
+    }
+
+    tick()
+    const interval = setInterval(tick, 500)
+    return () => clearInterval(interval)
+  }, [round.attemptDeadline?.seconds, round.currentAttempt]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const playerName = (id: string) => players.find((p) => p.id === id)?.name ?? 'Unknown'
   const visibleSet = new Set(round.visibleGroupIndexes)
@@ -220,22 +250,35 @@ export default function RevealView({ game, round, players, isGuesser, isHost }: 
         {/* Guesser's input — only shown when there are visible clues to guess from */}
         {isGuesser && !allDuplicates && (
           <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-5 space-y-3 shadow-sm mt-2">
-            <label className="block">
+            {/* Guess timer */}
+            {round.attemptDeadline && (
+              <div className="flex items-center justify-between">
+                <span className="font-label text-[10px] uppercase tracking-wider text-secondary font-bold">
+                  Your guess
+                </span>
+                <span className={`font-headline text-2xl font-bold tabular-nums transition-colors ${
+                  timeLeft <= 10 ? 'text-error' : timeLeft <= 20 ? 'text-tertiary' : 'text-primary'
+                }`}>
+                  {timeLeft}s
+                </span>
+              </div>
+            )}
+            {!round.attemptDeadline && (
               <span className="font-label text-[10px] uppercase tracking-wider text-secondary font-bold">
                 Your guess
               </span>
-              <input
-                type="text"
-                value={guess}
-                onChange={(e) => setGuess(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleGuess()}
-                placeholder="The secret word…"
-                maxLength={100}
-                autoFocus
-                disabled={submitting}
-                className="mt-2 w-full bg-surface-container-lowest border-2 border-outline-variant/30 rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-outline/50 font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-              />
-            </label>
+            )}
+            <input
+              type="text"
+              value={guess}
+              onChange={(e) => setGuess(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleGuess()}
+              placeholder="The secret word…"
+              maxLength={100}
+              autoFocus
+              disabled={submitting}
+              className="w-full bg-surface-container-lowest border-2 border-outline-variant/30 rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-outline/50 font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+            />
             <button
               onClick={handleGuess}
               disabled={submitting || !guess.trim()}

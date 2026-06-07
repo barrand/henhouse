@@ -1,11 +1,17 @@
 // Fowl Words scoring logic.
 //
-// Multi-attempt scoring (Phase 3B):
+// Scoring (post-playtest rebalance):
 // - Attempt 1: 10 pts if correct
 // - Attempt 2: 5 pts
 // - Attempt 3: 2 pts
 // - Attempt 4: 1 pt
 // - All fail: 0 pts for everyone
+//
+// Giver bonuses (on top of attempt points):
+//   USED:      +attemptPts if your group is visible when guesser succeeds
+//   FAST:      +2 if your clue was submitted first among all USED clues
+//   DUPLICATE: -1 always, for every player in an isDuplicate group
+//              (even if their group was later unlocked / shown)
 //
 // On wrong guess, server picks the next group to unlock using priority:
 //   priority = lowestScoreInGroup + (groupSize * 2)
@@ -19,10 +25,13 @@ export const MAX_ATTEMPTS = 4
 
 /**
  * Compute final scores for the round.
- * - Players in CURRENTLY VISIBLE groups (when guesser succeeds) get the attempt's point value
- * - Players in LOCKED groups (never unlocked) get 0
- * - Guesser gets the attempt's pt value if correct
- * - All zeros if guesser failed all attempts
+ *
+ * Scoring rules:
+ *  - DUPLICATE penalty: -1 for every player in an isDuplicate group (always applied)
+ *  - USED bonus: +attemptPts for players whose group is visible when guesser succeeds
+ *  - FAST bonus: +2 for the player with the earliest clueTimestamp among USED players
+ *  - Guesser: +attemptPts if correct, +0 if not
+ *  - All fail: giver scores = only penalty points (duplicates get -1, others 0)
  */
 export function computeRoundScores(
   clueGroups: ClueGroup[],
@@ -30,10 +39,11 @@ export function computeRoundScores(
   guesserId: string,
   isCorrect: boolean,
   currentAttempt: number,
+  clueTimestamps: Record<string, number> = {},
 ): Record<string, number> {
   const scores: Record<string, number> = {}
 
-  // Initialize all players to 0
+  // Initialize all to 0
   for (const group of clueGroups) {
     for (const playerId of group.playerIds) {
       scores[playerId] = 0
@@ -41,17 +51,49 @@ export function computeRoundScores(
   }
   scores[guesserId] = 0
 
+  // Step 1: Duplicate penalty — always applied regardless of outcome
+  for (const group of clueGroups) {
+    if (group.isDuplicate) {
+      for (const playerId of group.playerIds) {
+        scores[playerId] = -1
+      }
+    }
+  }
+
   if (!isCorrect) return scores
 
+  // Step 2: Used bonus — players in visible groups get attempt points
   const pointValue = ATTEMPT_POINTS[currentAttempt - 1] ?? 0
+  const visiblePlayerIds: string[] = []
+
   for (const idx of visibleGroupIndexes) {
     const group = clueGroups[idx]
     if (!group) continue
     for (const playerId of group.playerIds) {
-      scores[playerId] = pointValue
+      // Add to existing (-1 for duplicates, 0 for uniques)
+      scores[playerId] = (scores[playerId] ?? 0) + pointValue
+      visiblePlayerIds.push(playerId)
     }
   }
+
+  // Guesser always gets attempt pts if correct
   scores[guesserId] = pointValue
+
+  // Step 3: Fast bonus — +2 to earliest-submitted player among USED (visible) clues
+  if (visiblePlayerIds.length > 0) {
+    let fastestId = visiblePlayerIds[0]
+    let fastestTime = clueTimestamps[fastestId] ?? Number.MAX_SAFE_INTEGER
+
+    for (const playerId of visiblePlayerIds) {
+      const t = clueTimestamps[playerId] ?? Number.MAX_SAFE_INTEGER
+      if (t < fastestTime) {
+        fastestTime = t
+        fastestId = playerId
+      }
+    }
+
+    scores[fastestId] = (scores[fastestId] ?? 0) + 2
+  }
 
   return scores
 }
@@ -66,8 +108,9 @@ export function computeTentativePoints(
   visibleGroupIndexes: number[],
   guesserId: string,
   currentAttempt: number,
+  clueTimestamps: Record<string, number> = {},
 ): Record<string, number> {
-  return computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, true, currentAttempt)
+  return computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, true, currentAttempt, clueTimestamps)
 }
 
 /**

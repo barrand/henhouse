@@ -42,7 +42,7 @@ export default function WordSelectionView({ game, round, players, isGuesser, isH
   }, [round.wordSelectionDeadline, game.id, game.currentRound, round.id])
 
   const handleVote = async (idx: number) => {
-    if (voting || myVote !== null) return
+    if (voting || idx === myVote) return  // no-op if tapping the same word again
     setMyVote(idx)
     setVoting(true)
     try {
@@ -120,12 +120,10 @@ export default function WordSelectionView({ game, round, players, isGuesser, isH
               <button
                 key={idx}
                 onClick={() => handleVote(idx)}
-                disabled={myVote !== null || voting}
+                disabled={voting}
                 className={`relative flex flex-col items-center justify-center rounded-2xl border-2 px-3 py-5 font-body transition-all active:scale-[0.97] ${
                   isMyPick
                     ? 'bg-primary border-primary text-on-primary shadow-[0_8px_24px_rgba(0,0,0,0.3)] scale-[1.04]'
-                    : myVote !== null
-                    ? 'bg-surface-container-lowest border-outline-variant/30 text-on-surface-variant opacity-60'
                     : 'bg-surface-container-lowest border-outline-variant/30 text-on-surface hover:border-primary/50 hover:bg-primary-fixed/20'
                 }`}
               >
@@ -151,15 +149,15 @@ export default function WordSelectionView({ game, round, players, isGuesser, isH
           })}
         </div>
 
-        {myVote === null && (
+        {myVote === null ? (
           <p className="text-center text-outline text-xs font-body">
             Tap to vote — {guesserPlayer?.name} can't see this screen
           </p>
-        )}
-
-        {myVote !== null && totalVotes < nonGuesserCount && (
-          <p className="text-center text-outline text-sm animate-pulse font-body">
-            Waiting for {nonGuesserCount - totalVotes} more vote{nonGuesserCount - totalVotes !== 1 ? 's' : ''}…
+        ) : (
+          <p className="text-center text-outline text-xs font-body">
+            {totalVotes < nonGuesserCount
+              ? `Waiting for ${nonGuesserCount - totalVotes} more vote${nonGuesserCount - totalVotes !== 1 ? 's' : ''}… Tap to change your pick.`
+              : 'All voted! Finalizing…'}
           </p>
         )}
 
