@@ -10,10 +10,10 @@ import { db } from '../../lib/firebase'
 
 const flockCreateGameFn = httpsCallable<{ playerName: string }, { gameId: string; code: string }>(functions, 'flockCreateGame')
 const flockRematchFn = httpsCallable<{ gameId: string }, { code: string }>(functions, 'flockRematch')
-const startGameFn = httpsCallable<{ gameId: string }, void>(functions, 'startGame')
+const startGameFn = httpsCallable<{ gameId: string }, void>(functions, 'flockStartGame')
 const submitAnswerFn = httpsCallable<{ gameId: string; roundNum: number; answer: string }, void>(functions, 'submitAnswer')
 const skipQuestionFn = httpsCallable<{ gameId: string }, void>(functions, 'skipQuestion')
-const advanceRoundFn = httpsCallable<{ gameId: string }, void>(functions, 'advanceRound')
+const advanceRoundFn = httpsCallable<{ gameId: string }, void>(functions, 'flockAdvanceRound')
 const forceEndRoundFn = httpsCallable<{ gameId: string }, void>(functions, 'forceEndRound')
 const updateCategoriesFn = httpsCallable<{ gameId: string; categories: string[] }, void>(functions, 'updateCategories')
 const setPatrioticModeFn = httpsCallable<{ gameId: string; enabled: boolean }, void>(functions, 'setPatrioticMode')

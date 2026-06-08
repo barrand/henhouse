@@ -15,10 +15,12 @@ firebase emulators:start --project flock-together-game &
 EMULATOR_PID=$!
 
 # Give emulators a moment to initialize
-sleep 3
+sleep 5
 
 # Start Vite dev server in foreground
-echo "⚡ Starting Vite dev server..."
+echo "⚡ Starting Vite dev server at http://localhost:5173..."
+echo "⚠️  Note: There's a known CORS issue with local emulators."
+echo "   For testing: use http://localhost:5050 (Firebase Hosting emulator) or test in production."
 (cd "$ROOT" && npm run dev) &
 VITE_PID=$!
 
