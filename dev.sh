@@ -18,9 +18,7 @@ EMULATOR_PID=$!
 sleep 5
 
 # Start Vite dev server in foreground
-echo "⚡ Starting Vite dev server at http://localhost:5173..."
-echo "⚠️  Note: There's a known CORS issue with local emulators."
-echo "   For testing: use http://localhost:5050 (Firebase Hosting emulator) or test in production."
+echo "⚡ Starting Vite dev server..."
 (cd "$ROOT" && npm run dev) &
 VITE_PID=$!
 
