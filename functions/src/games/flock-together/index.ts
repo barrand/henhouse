@@ -127,7 +127,12 @@ export const startGame = onCall(async (request) => {
   if (game.status !== 'lobby') throw new HttpsError('failed-precondition', 'Game already started')
 
   // Seed the question pool with the current patriotic setting
-  await seedQuestionPool(gameId, game.includePatrioticQuestions ?? false)
+  try {
+    await seedQuestionPool(gameId, game.includePatrioticQuestions ?? false)
+  } catch (err) {
+    console.error('Failed to seed question pool:', err)
+    throw new HttpsError('internal', `Failed to load questions: ${err instanceof Error ? err.message : String(err)}`)
+  }
 
   if (game.categories?.length > 0) {
     try {
@@ -152,7 +157,7 @@ export const startGame = onCall(async (request) => {
   }
 
   const question = await drawQuestion(gameId, [], game.includePatrioticQuestions ?? false)
-  if (!question) throw new HttpsError('internal', 'No questions available')
+  if (!question) throw new HttpsError('internal', 'No questions available in pool')
 
   const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
 

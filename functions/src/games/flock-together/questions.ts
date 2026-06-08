@@ -22,7 +22,20 @@ export function questionKey(text: string): string {
 
 export async function seedQuestionPool(gameId: string, includePatrioticQuestions: boolean = false) {
   const db = getDb()
-  const questions = (await import('./data/questions.json')).default as PresetQuestion[]
+
+  let questions: PresetQuestion[]
+  try {
+    // Use require() instead of dynamic import for better compatibility with Cloud Functions
+    questions = require('./data/questions.json')
+  } catch (err) {
+    console.error('Failed to load questions.json:', err)
+    throw new Error(`Failed to load questions: ${err instanceof Error ? err.message : String(err)}`)
+  }
+
+  if (!Array.isArray(questions) || questions.length === 0) {
+    console.error('Questions array is empty or invalid, received:', typeof questions, questions?.length)
+    throw new Error('Questions data is empty or invalid')
+  }
 
   // Filter out patriotic questions if not enabled
   const filtered = includePatrioticQuestions
