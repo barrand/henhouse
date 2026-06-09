@@ -26,9 +26,15 @@ import {
 import type { ClueGroup } from './types'
 
 const db = admin.firestore
-const SECONDS_PER_ATTEMPT = 60
 const SECONDS_PER_CLUE_SUBMISSION = 60
 const WORD_SELECTION_SECONDS = 15
+
+// Timer decreases with each attempt to keep game paced (shorter time as more clues visible)
+function getSecondsForAttempt(attemptNum: number): number {
+  if (attemptNum === 1) return 60
+  if (attemptNum === 2) return 40
+  return 20 // attempt 3+
+}
 
 /**
  * Finalize the word-selection vote and transition to clue-submission.
@@ -125,9 +131,9 @@ export async function runDeduplication(gameId: string, roundNum: number): Promis
   const visibleGroupIndexes = initialVisibleGroupIndexes(clueGroups)
   console.log('[runDeduplication] Initial visible group indexes:', visibleGroupIndexes)
 
-  // maxAttempts = min(MAX_ATTEMPTS, max(1, totalClueGroups))
-  // — one attempt per clue group, capped at MAX_ATTEMPTS
-  const maxAttempts = Math.min(MAX_ATTEMPTS, Math.max(1, clueGroups.length))
+  // Guarantee minimum 3 attempts always, but allow more if there are many unique clues
+  // (which rewards less duplication). Capped at MAX_ATTEMPTS.
+  const maxAttempts = Math.max(3, Math.min(MAX_ATTEMPTS, Math.max(1, clueGroups.length)))
   const currentAttempt = 1
   const guesserId: string = await getGuesserId(gameId)
   const giverCount: number = await getGiverCount(gameId)
@@ -144,7 +150,7 @@ export async function runDeduplication(gameId: string, roundNum: number): Promis
     giverCount,
   )
 
-  const attemptDeadline = Timestamp.fromMillis(Date.now() + SECONDS_PER_ATTEMPT * 1000)
+  const attemptDeadline = Timestamp.fromMillis(Date.now() + getSecondsForAttempt(currentAttempt) * 1000)
 
   await roundRef.update({
     status: 'reveal',
