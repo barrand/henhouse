@@ -69,20 +69,20 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
   const guesserPlayer = players.find((p) => p.id === game.currentGuesser)
 
   const isMultiWord = clue.trim().split(/\s+/).length > 1
-  const secretWordLower = round.secretWord?.toLowerCase().trim() ?? ‘’
-  const clueIsPartOfWord = secretWordLower && clue.trim().toLowerCase().length > 0 && secretWordLower.includes(clue.trim().toLowerCase())
+  const secretWordLower = round.secretWord?.toLowerCase().trim() ?? ""
+  const clueIsPartOfWord = !!(secretWordLower && clue.trim().toLowerCase().length > 0 && secretWordLower.includes(clue.trim().toLowerCase()))
 
   const handleSubmit = async () => {
-    if (!clue.trim()) return setError(‘Pop in a clue first’)
-    if (isMultiWord) return setError(‘One word only — that\’s the whole game!’)
-    if (clueIsPartOfWord) return setError(‘Your clue can\’t be part of the secret word’)
-    setError(‘’)
+    if (!clue.trim()) return setError("Pop in a clue first")
+    if (isMultiWord) return setError("One word only — that’s the whole game!")
+    if (clueIsPartOfWord) return setError("Your clue can’t be part of the secret word")
+    setError("")
     setSubmitting(true)
     try {
       await submitClue(game.id, game.currentRound, clue)
-      setClue(‘’)
+      setClue("")
     } catch (err: any) {
-      setError(err.message ?? ‘Couldn’t send your clue’)
+      setError(err.message ?? "Couldn’t send your clue")
     } finally {
       setSubmitting(false)
     }
@@ -188,7 +188,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
                 )}
                 {clueIsPartOfWord && (
                   <span className="font-label text-[10px] uppercase tracking-wider text-error font-bold">
-                    Can't use the secret!
+                    Cannot use the secret!
                   </span>
                 )}
               </div>
