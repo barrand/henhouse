@@ -46,7 +46,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
             <span className="text-sm font-medium">Back</span>
           </button>
           <h2 className="font-headline text-4xl font-bold text-on-surface mb-1 tracking-tight">FOWL WORDS</h2>
-          <p className="text-on-surface-variant text-sm font-body">One clue. One guess. Stay unique.</p>
+          <p className="text-on-surface-variant text-sm font-body">One clue. One word. Stay unique.</p>
 
           <div className="mt-5 inline-flex items-center gap-3 bg-surface-container-lowest px-6 py-3 rounded-2xl border border-outline-variant/30 shadow-sm">
             <div className="flex flex-col items-center">
