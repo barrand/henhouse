@@ -69,6 +69,8 @@ export function computeRoundScores(
   }
   scores[guesserId] = 0
 
+  console.log('[computeRoundScores] Initialized scores for:', Object.keys(scores), 'isCorrect:', isCorrect, 'giverCount:', giverCount)
+
   // Step 1: Duplicate penalty — always applied regardless of outcome
   for (const group of clueGroups) {
     if (group.isDuplicate) {
