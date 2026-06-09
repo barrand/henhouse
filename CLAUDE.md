@@ -14,7 +14,9 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 **Fowl Words** — Based on "Just One." One **guesser**, everyone else are **givers**.
 - Givers each write **ONE word** clue (enforced in frontend — button disabled if multi-word)
 - Duplicate clues get eliminated (locked from guesser)
-- Guesser sees only unique clues on attempt 1; wrong guess unlocks one duplicate, points drop
+- **Minimum 3 guesses guaranteed** (even if no duplicates); more if many unique clues
+- On wrong guess, unlock next duplicate clue group
+- Timers decrease per attempt: 60s → 40s → 20s (keeps game paced)
 - Points: attempt 1→10pts, 2→5pts, 3→2pts, 4→1pt
 
 **Round flow:** `word-selection` → `clue-submission` → `deduplication` → `reveal` ↔ `guess` → `scored`
