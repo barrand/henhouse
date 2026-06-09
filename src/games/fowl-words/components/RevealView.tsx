@@ -250,6 +250,15 @@ export default function RevealView({ game, round, players, isGuesser, isHost }: 
         {/* Guesser's input — only shown when there are visible clues to guess from */}
         {isGuesser && !allDuplicates && (
           <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-5 space-y-3 shadow-sm mt-2">
+            {/* Previous wrong guesses */}
+            {round.guessAttempts?.length > 0 && (
+              <div className="text-center space-y-1">
+                <p className="font-label text-[10px] uppercase tracking-wider text-error font-bold">Wrong so far</p>
+                <p className="text-sm text-on-surface-variant font-body">
+                  {round.guessAttempts.join(', ')}
+                </p>
+              </div>
+            )}
             {/* Guess timer */}
             {round.attemptDeadline && (
               <div className="flex items-center justify-between">
@@ -292,6 +301,14 @@ export default function RevealView({ game, round, players, isGuesser, isHost }: 
 
         {!isGuesser && !allDuplicates && (
           <div className="text-center space-y-2 mt-2">
+            {round.guessAttempts?.length > 0 && (
+              <div className="space-y-1">
+                <p className="font-label text-[10px] uppercase tracking-wider text-error font-bold">Wrong so far</p>
+                <p className="text-sm text-on-surface-variant font-body">
+                  {round.guessAttempts.join(', ')}
+                </p>
+              </div>
+            )}
             <p className="text-outline text-sm animate-pulse font-body">
               Watching {guesserPlayer?.name} think…
             </p>
