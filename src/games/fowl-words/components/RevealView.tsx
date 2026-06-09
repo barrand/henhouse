@@ -12,7 +12,7 @@ interface Props {
   isHost: boolean
 }
 
-export default function RevealView({ game, round, players, isGuesser, isHost }: Props) {
+export default function RevealView({ game, round, players, currentPlayer, isGuesser, isHost }: Props) {
   const [guess, setGuess] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [unlocking, setUnlocking] = useState(false)
