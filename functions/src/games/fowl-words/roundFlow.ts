@@ -225,6 +225,10 @@ export async function handleGuess(
       giverCount,
     )
 
+    // Re-read star votes right before write to capture any cast during Gemini eval
+    const finalSnap1 = await roundRef.get()
+    applyStarVotes(finalSnap1.data()?.clueStarVotes ?? {}, clueGroups, visibleGroupIndexes, scores)
+
     const batch = firestore.batch()
     batch.update(roundRef, {
       status: 'scored',
@@ -255,6 +259,11 @@ export async function handleGuess(
       clueTimestamps,
       giverCount,
     )
+
+    // Stars count even on failed rounds
+    const finalSnap2 = await roundRef.get()
+    applyStarVotes(finalSnap2.data()?.clueStarVotes ?? {}, clueGroups, visibleGroupIndexes, scores)
+
     const batch = firestore.batch()
     batch.update(roundRef, {
       status: 'scored',
@@ -436,6 +445,8 @@ export async function advanceToNextRound(gameId: string): Promise<void> {
     tentativePoints: {},
     pointsThisRound: {},
     eliminationReason: '',
+    clueStarVotes: {},
+    guesserStarVote: null,
   })
 
   await gameRef.update({
@@ -493,6 +504,27 @@ function normalizeTimestamps(raw: Record<string, unknown>): Record<string, numbe
     }
   }
   return out
+}
+
+/**
+ * Fold giver star votes into a scores map (+1 per star for each player in the starred group).
+ * Only counts stars targeting visible groups. Mutates `scores` in place.
+ */
+function applyStarVotes(
+  clueStarVotes: Record<string, number>,
+  clueGroups: ClueGroup[],
+  visibleGroupIndexes: number[],
+  scores: Record<string, number>,
+): void {
+  const visibleSet = new Set(visibleGroupIndexes)
+  for (const groupIdx of Object.values(clueStarVotes)) {
+    if (!visibleSet.has(groupIdx)) continue
+    const group = clueGroups[groupIdx]
+    if (!group) continue
+    for (const pid of group.playerIds) {
+      scores[pid] = (scores[pid] ?? 0) + 1
+    }
+  }
 }
 
 // Suppress unused warnings if any export becomes optional during refactor

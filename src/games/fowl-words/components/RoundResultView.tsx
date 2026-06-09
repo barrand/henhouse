@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
-import { advanceRound } from '../service'
+import { advanceRound, submitGuesserStarVote } from '../service'
 
 interface Props {
   game: GameData
@@ -87,6 +87,17 @@ export default function RoundResultView({ game, round, players, isHost, currentP
             <h3 className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
               What everyone wrote
             </h3>
+
+            {/* Guesser star prompt — only after correct round, before they've voted */}
+            {currentPlayerId === game.currentGuesser && round.isCorrect && round.guesserStarVote == null && (
+              <div className="mb-3 bg-tertiary-container/40 border border-tertiary/30 rounded-xl px-4 py-3 text-center">
+                <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider font-label">
+                  ⭐ Tip your hat to the best clue
+                </p>
+                <p className="text-[11px] text-outline mt-0.5 font-body">Tap a clue below — worth +5 pts to that player</p>
+              </div>
+            )}
+
             <div className="space-y-2">
               {round.clueGroups.map((group, idx) => {
                 const isVisible = round.visibleGroupIndexes.includes(idx)
@@ -102,16 +113,29 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                   group.isDuplicate ? yourPoints === attemptPts - 1 + 2 : yourPoints === attemptPts + 2
                 )
 
+                // Star counts
+                const giverStarCount = Object.values(round.clueStarVotes ?? {}).filter((v) => v === idx).length
+                const isGuesserStarred = round.guesserStarVote === idx
+
+                // Is this a tappable guesser star target?
+                const canGuesserStar = currentPlayerId === game.currentGuesser
+                  && round.isCorrect
+                  && round.guesserStarVote == null
+                  && isVisible
+
                 return (
                   <div
                     key={idx}
-                    className={`px-4 py-3 rounded-xl border font-body ${
+                    onClick={canGuesserStar ? () => submitGuesserStarVote(game.id, game.currentRound, idx).catch(() => {}) : undefined}
+                    className={`px-4 py-3 rounded-xl border font-body transition-all ${
                       group.isDuplicate
                         ? 'bg-surface-container-low border-outline-variant/20 opacity-80'
+                        : isGuesserStarred
+                        ? 'bg-tertiary-container/40 border-tertiary/50'
                         : isVisible && round.isCorrect
                         ? 'bg-primary-fixed/20 border-primary-fixed-dim'
                         : 'bg-surface-container-lowest border-outline-variant/30'
-                    }`}
+                    } ${canGuesserStar ? 'cursor-pointer active:scale-[0.98] hover:border-tertiary/50' : ''}`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
@@ -123,19 +147,30 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                           {isYours && <span className="text-primary font-bold ml-1">← you</span>}
                         </span>
                       </div>
-                      <div className="ml-3 flex-shrink-0 text-right">
+                      <div className="ml-3 flex-shrink-0 text-right space-y-1">
                         {group.isDuplicate ? (
-                          <span className="text-[10px] text-error font-bold uppercase tracking-wider font-label">
+                          <div className="text-[10px] text-error font-bold uppercase tracking-wider font-label">
                             🔄 Duplicate
-                          </span>
+                          </div>
                         ) : isVisible && round.isCorrect ? (
-                          <span className="text-[10px] text-primary font-bold uppercase tracking-wider font-label">
+                          <div className="text-[10px] text-primary font-bold uppercase tracking-wider font-label">
                             ✅ Used
-                          </span>
+                          </div>
                         ) : (
-                          <span className="text-[10px] text-outline font-bold uppercase tracking-wider font-label">
+                          <div className="text-[10px] text-outline font-bold uppercase tracking-wider font-label">
                             🔒 Locked
-                          </span>
+                          </div>
+                        )}
+                        {/* Star counts */}
+                        {giverStarCount > 0 && (
+                          <div className="text-[11px] text-on-surface-variant font-bold font-label">
+                            ⭐ {giverStarCount}
+                          </div>
+                        )}
+                        {isGuesserStarred && (
+                          <div className="text-[10px] text-tertiary font-bold uppercase tracking-wider font-label">
+                            🌟 +5 guesser
+                          </div>
                         )}
                       </div>
                     </div>

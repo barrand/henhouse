@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
-import { submitGuess, unlockFirst, advanceRound } from '../service'
+import { submitGuess, unlockFirst, advanceRound, submitClueStarVote } from '../service'
 import PointCounter from './PointCounter'
 
 interface Props {
@@ -223,6 +223,35 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                       ? `from ${playerName(group.playerIds[0])}`
                       : `from ${group.playerIds.map(playerName).join(', ')}`}
                   </p>
+                  {/* Star button — givers only, cannot star own clue */}
+                  {!isGuesser && (() => {
+                    const isOwnClue = currentPlayer ? group.playerIds.includes(currentPlayer.id) : false
+                    const myVote = currentPlayer ? (round.clueStarVotes?.[currentPlayer.id] ?? null) : null
+                    const isMyVote = myVote === idx
+                    const starCount = Object.values(round.clueStarVotes ?? {}).filter((v) => v === idx).length
+                    return (
+                      <div className="flex justify-center mt-3">
+                        <button
+                          disabled={isOwnClue}
+                          onClick={() => {
+                            if (!isOwnClue && currentPlayer) {
+                              submitClueStarVote(game.id, game.currentRound, idx).catch(() => {})
+                            }
+                          }}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold font-label transition-all ${
+                            isOwnClue
+                              ? 'opacity-30 cursor-default text-outline'
+                              : isMyVote
+                              ? 'bg-tertiary-container text-on-tertiary-container scale-105 shadow-sm'
+                              : 'bg-surface-container-low text-on-surface-variant hover:bg-tertiary-container/50 active:scale-95'
+                          }`}
+                        >
+                          <span>{isMyVote ? '⭐' : '☆'}</span>
+                          {starCount > 0 && <span>{starCount}</span>}
+                        </button>
+                      </div>
+                    )
+                  })()}
                 </div>
               )
             }
