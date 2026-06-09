@@ -205,7 +205,16 @@ export const submitClue = onCall(async (request) => {
     throw new HttpsError('failed-precondition', 'Guesser cannot submit clues')
   }
 
-  const existing = roundSnap.data()!.cluesByPlayer ?? {}
+  const roundData = roundSnap.data()!
+  const secretWord = roundData.secretWord?.toLowerCase().trim() ?? ''
+  const normalizedClue = clue.trim().toLowerCase()
+
+  // Check if clue is a substring of the secret word
+  if (secretWord && secretWord.includes(normalizedClue)) {
+    throw new HttpsError('invalid-argument', `Clue cannot be part of the secret word`)
+  }
+
+  const existing = roundData.cluesByPlayer ?? {}
   if (existing[uid]) {
     throw new HttpsError('already-exists', 'Already submitted a clue')
   }

@@ -302,7 +302,7 @@ export async function handleGuess(
   const newVisible = [...visibleGroupIndexes, nextUnlockIdx]
   const newAttempt = currentAttempt + 1
   const newTentative = computeTentativePoints(clueGroups, newVisible, guesserId, newAttempt, clueTimestamps, giverCount)
-  const newDeadline = Timestamp.fromMillis(Date.now() + SECONDS_PER_ATTEMPT * 1000)
+  const newDeadline = Timestamp.fromMillis(Date.now() + getSecondsForAttempt(newAttempt) * 1000)
 
   await roundRef.update({
     status: 'reveal',
@@ -366,7 +366,7 @@ export async function skipToNextAttempt(gameId: string, roundNum: number): Promi
   const newVisible = [nextUnlockIdx]
   const newAttempt = currentAttempt + 1
   const newTentative = computeTentativePoints(clueGroups, newVisible, guesserId, newAttempt, clueTimestamps, giverCount)
-  const newDeadline = Timestamp.fromMillis(Date.now() + SECONDS_PER_ATTEMPT * 1000)
+  const newDeadline = Timestamp.fromMillis(Date.now() + getSecondsForAttempt(newAttempt) * 1000)
 
   await roundRef.update({
     status: 'reveal',

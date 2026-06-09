@@ -69,17 +69,20 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
   const guesserPlayer = players.find((p) => p.id === game.currentGuesser)
 
   const isMultiWord = clue.trim().split(/\s+/).length > 1
+  const secretWordLower = round.secretWord?.toLowerCase().trim() ?? ‘’
+  const clueIsPartOfWord = secretWordLower && clue.trim().toLowerCase().length > 0 && secretWordLower.includes(clue.trim().toLowerCase())
 
   const handleSubmit = async () => {
-    if (!clue.trim()) return setError('Pop in a clue first')
-    if (isMultiWord) return setError('One word only — that\'s the whole game!')
-    setError('')
+    if (!clue.trim()) return setError(‘Pop in a clue first’)
+    if (isMultiWord) return setError(‘One word only — that\’s the whole game!’)
+    if (clueIsPartOfWord) return setError(‘Your clue can\’t be part of the secret word’)
+    setError(‘’)
     setSubmitting(true)
     try {
       await submitClue(game.id, game.currentRound, clue)
-      setClue('')
+      setClue(‘’)
     } catch (err: any) {
-      setError(err.message ?? 'Couldn’t send your clue')
+      setError(err.message ?? ‘Couldn’t send your clue’)
     } finally {
       setSubmitting(false)
     }
@@ -183,6 +186,11 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
                     Too many words!
                   </span>
                 )}
+                {clueIsPartOfWord && (
+                  <span className="font-label text-[10px] uppercase tracking-wider text-error font-bold">
+                    Can't use the secret!
+                  </span>
+                )}
               </div>
               <input
                 type="text"
@@ -193,7 +201,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
                 maxLength={30}
                 autoFocus
                 className={`mt-1 w-full bg-surface-container-lowest border-2 rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-outline/50 font-body focus:ring-2 outline-none transition-all ${
-                  isMultiWord
+                  isMultiWord || clueIsPartOfWord
                     ? 'border-error focus:ring-error/20 focus:border-error'
                     : 'border-outline-variant/30 focus:ring-primary/20 focus:border-primary'
                 }`}
@@ -201,7 +209,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
             </label>
             <button
               onClick={handleSubmit}
-              disabled={submitting || !clue.trim() || isMultiWord}
+              disabled={submitting || !clue.trim() || isMultiWord || clueIsPartOfWord}
               className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
             >
               {submitting ? 'Sending…' : 'Lock it in'}
