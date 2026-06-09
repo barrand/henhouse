@@ -9,7 +9,11 @@
 //
 // Giver bonuses (on top of attempt points):
 //   USED:      +attemptPts if your group is visible when guesser succeeds
-//   FAST:      +2 if your clue was submitted first among all USED clues
+//   FAST:      Tiered bonus for fastest clue submitters among USED clues.
+//              Number of winners scales with giver count (total players - 1):
+//                ≤5 givers: 1st place → +3
+//                6–8 givers: 1st → +3, 2nd → +2
+//                9+ givers:  1st → +3, 2nd → +2, 3rd → +1
 //   DUPLICATE: -1 always, for every player in an isDuplicate group
 //              (even if their group was later unlocked / shown)
 //
@@ -24,12 +28,25 @@ export const ATTEMPT_POINTS = [10, 5, 2, 1]
 export const MAX_ATTEMPTS = 4
 
 /**
+ * Returns the fast-bonus prizes for a given giver count.
+ * Prizes are awarded to the top N fastest submitters among USED clues.
+ *   ≤5 givers: [+3]
+ *   6–8 givers: [+3, +2]
+ *   9+ givers:  [+3, +2, +1]
+ */
+export function fastBonusPrizes(giverCount: number): number[] {
+  if (giverCount >= 9) return [3, 2, 1]
+  if (giverCount >= 6) return [3, 2]
+  return [3]
+}
+
+/**
  * Compute final scores for the round.
  *
  * Scoring rules:
  *  - DUPLICATE penalty: -1 for every player in an isDuplicate group (always applied)
  *  - USED bonus: +attemptPts for players whose group is visible when guesser succeeds
- *  - FAST bonus: +2 for the player with the earliest clueTimestamp among USED players
+ *  - FAST bonus: tiered bonus for fastest submitters among USED players (see fastBonusPrizes)
  *  - Guesser: +attemptPts if correct, +0 if not
  *  - All fail: giver scores = only penalty points (duplicates get -1, others 0)
  */
@@ -40,6 +57,7 @@ export function computeRoundScores(
   isCorrect: boolean,
   currentAttempt: number,
   clueTimestamps: Record<string, number> = {},
+  giverCount: number = 0,
 ): Record<string, number> {
   const scores: Record<string, number> = {}
 
@@ -79,20 +97,17 @@ export function computeRoundScores(
   // Guesser always gets attempt pts if correct
   scores[guesserId] = pointValue
 
-  // Step 3: Fast bonus — +2 to earliest-submitted player among USED (visible) clues
+  // Step 3: Fast bonus — tiered prizes for fastest submitters among USED (visible) clues
   if (visiblePlayerIds.length > 0) {
-    let fastestId = visiblePlayerIds[0]
-    let fastestTime = clueTimestamps[fastestId] ?? Number.MAX_SAFE_INTEGER
-
-    for (const playerId of visiblePlayerIds) {
-      const t = clueTimestamps[playerId] ?? Number.MAX_SAFE_INTEGER
-      if (t < fastestTime) {
-        fastestTime = t
-        fastestId = playerId
-      }
+    const prizes = fastBonusPrizes(giverCount)
+    const sorted = [...visiblePlayerIds].sort((a, b) => {
+      const tA = clueTimestamps[a] ?? Number.MAX_SAFE_INTEGER
+      const tB = clueTimestamps[b] ?? Number.MAX_SAFE_INTEGER
+      return tA - tB
+    })
+    for (let i = 0; i < Math.min(prizes.length, sorted.length); i++) {
+      scores[sorted[i]] = (scores[sorted[i]] ?? 0) + prizes[i]
     }
-
-    scores[fastestId] = (scores[fastestId] ?? 0) + 2
   }
 
   return scores
@@ -109,8 +124,9 @@ export function computeTentativePoints(
   guesserId: string,
   currentAttempt: number,
   clueTimestamps: Record<string, number> = {},
+  giverCount: number = 0,
 ): Record<string, number> {
-  return computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, true, currentAttempt, clueTimestamps)
+  return computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, true, currentAttempt, clueTimestamps, giverCount)
 }
 
 /**
