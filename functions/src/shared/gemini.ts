@@ -365,18 +365,13 @@ A player guessed: "${trimmedGuess}"
 Should this be accepted as correct?
 
 ACCEPT (return true) for:
-- Plural/singular variations: "wolves" matches "WOLF", "cat" matches "CATS"
-- Verb tense variations: "ran" matches "RUN", "running" matches "RUN"
-- Common typos and misspellings: "neccessary" matches "NECESSARY", "tomatoe" matches "TOMATO"
-- Accents/diacritics: "café" matches "CAFE", "résumé" matches "RESUME"
-- Capitalization: already handled, but extra leniency is fine
-- Compound words written differently: "ice cream" matches "ICECREAM"
+- Plurals, verb tenses, accents, capitalization, compound words written differently
+- Words in different languages that mean the same thing: "house" matches "casa", "dog" matches "perro"
+- Extremely close semantic equivalents: words where the dictionary definition is essentially the same, or they're interchangeable in casual usage
 
 REJECT (return false) for:
-- Completely different words: "WOLF" does NOT match "BEAR"
-- Same category but different: "WOLF" does NOT match "DOG"
-- Synonyms with different meanings: "HAPPY" does NOT match "JOY" (different word entirely)
-- Related words: "OCEAN" does NOT match "BEACH"
+- Different words even if related: "happy" is not "joy", "firefighter" is not "police officer", "ocean" is not "beach"
+- Different things in the same category, or different meanings
 
 Return ONLY valid JSON: {"correct": true} or {"correct": false}`
 
