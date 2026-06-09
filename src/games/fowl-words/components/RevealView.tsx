@@ -228,16 +228,28 @@ export default function RevealView({ game, round, players, isGuesser, isHost }: 
             }
 
             // Locked / eliminated group (non-guessers only)
+            const isPlayerInDupGroup = currentPlayer && group.playerIds.includes(currentPlayer.id)
             return (
               <div
                 key={idx}
-                className="bg-surface-container-low rounded-2xl border border-outline-variant/30 px-5 py-3 opacity-70"
+                className={`rounded-2xl border px-5 py-4 transition-all ${
+                  isPlayerInDupGroup
+                    ? 'bg-error/10 border-error/40 ring-2 ring-error/30'
+                    : 'bg-surface-container-low border-outline-variant/30 opacity-70'
+                }`}
               >
-                <p className="font-headline text-lg font-medium text-on-surface-variant text-center line-through">
+                {isPlayerInDupGroup && (
+                  <p className="text-center text-5xl mb-2">🤦‍♂️</p>
+                )}
+                <p className={`font-headline text-lg font-medium text-center line-through ${
+                  isPlayerInDupGroup ? 'text-error' : 'text-on-surface-variant'
+                }`}>
                   {displayText}
                 </p>
-                <p className="text-[10px] text-error text-center mt-1 font-label uppercase tracking-wider font-bold">
-                  Eliminated — duplicate
+                <p className={`text-[10px] text-center mt-1 font-label uppercase tracking-wider font-bold ${
+                  isPlayerInDupGroup ? 'text-error' : 'text-error'
+                }`}>
+                  {isPlayerInDupGroup ? '😭 That was you!' : 'Eliminated — duplicate'}
                 </p>
                 <p className="text-xs text-outline text-center mt-1 font-body">
                   from {group.playerIds.map(playerName).join(', ')}
