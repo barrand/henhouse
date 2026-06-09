@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
 import { startGame, updateCategories, setPatrioticMode, resetQuestionCooldowns, submitCustomQuestion, onCustomQuestionsUpdate } from '../service'
 import CategoryInput from './CategoryInput'
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
+  const navigate = useNavigate()
   const [starting, setStarting] = useState(false)
   const [error, setError] = useState('')
   const [customQuestions, setCustomQuestions] = useState<string[]>([])
@@ -100,6 +102,13 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
       <main className="max-w-md mx-auto px-6 pt-4 pb-32 relative z-10">
         {/* Header + Room Code */}
         <div className="text-center mb-8">
+          <button
+            onClick={() => navigate('/')}
+            className="mb-4 inline-flex items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors"
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+            <span className="text-sm font-medium">Back</span>
+          </button>
           <h2 className="font-headline text-4xl font-bold text-on-surface mb-2 tracking-tight">FLOCK TOGETHER</h2>
           <p className="text-on-surface-variant text-sm">Waiting in the lobby</p>
 

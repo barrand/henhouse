@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
 import { startGame } from '../service'
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
+  const navigate = useNavigate()
   const [starting, setStarting] = useState(false)
   const [error, setError] = useState('')
 
@@ -36,6 +38,13 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
       <main className="max-w-md mx-auto px-6 pt-6 pb-24 relative z-10">
         {/* Title + Room Code */}
         <div className="text-center mb-6">
+          <button
+            onClick={() => navigate('/')}
+            className="mb-4 inline-flex items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors"
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+            <span className="text-sm font-medium">Back</span>
+          </button>
           <h2 className="font-headline text-4xl font-bold text-on-surface mb-1 tracking-tight">FOWL WORDS</h2>
           <p className="text-on-surface-variant text-sm font-body">One clue. One guess. Stay unique.</p>
 
