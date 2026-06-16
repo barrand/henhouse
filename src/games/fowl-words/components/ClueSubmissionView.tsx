@@ -107,7 +107,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
     return (
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-10">
         <div className="max-w-md w-full text-center space-y-6">
-          <div className="text-7xl">🙈</div>
+          <img src="/images/hen-blindfold.svg" alt="" className="w-28 h-28 mx-auto animate-hen-bob" />
           <h2 className="font-headline text-3xl font-bold text-on-surface">No peeking!</h2>
           <p className="text-on-surface-variant font-body">
             Keep your eyes on your own screen. The flock is writing clues for you.

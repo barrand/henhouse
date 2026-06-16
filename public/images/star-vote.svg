@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <polygon points="16,2 19.5,12 30,12 21.5,18.5 24.5,29 16,23 7.5,29 10.5,18.5 2,12 12.5,12" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Shine on star -->
+  <path d="M12,8 Q14,6 16,8" fill="none" stroke="#e8e2db" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Wings -->
+  <ellipse cx="38" cy="152" rx="22" ry="30" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2"/>
+  <ellipse cx="162" cy="152" rx="22" ry="30" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2"/>
+  <!-- Body -->
+  <ellipse cx="100" cy="150" rx="52" ry="44" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
+  <!-- Head (tilted slightly) -->
+  <circle cx="100" cy="82" r="40" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
+  <!-- Comb -->
+  <path d="M82,46 Q86,28 92,42 Q97,22 103,38 Q108,20 114,36 Q118,26 122,42" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Cheeks (visible, slight smile vibe) -->
+  <ellipse cx="70" cy="96" rx="10" ry="7" fill="#ffb4ab" opacity="0.45"/>
+  <ellipse cx="130" cy="96" rx="10" ry="7" fill="#ffb4ab" opacity="0.45"/>
+  <!-- Gold blindfold band -->
+  <rect x="56" y="63" width="88" height="26" rx="13" fill="#f0c078" stroke="#2a1f0e" stroke-width="2.2"/>
+  <!-- Knot at side -->
+  <ellipse cx="148" cy="76" rx="9" ry="6" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8"/>
+  <!-- Band tie strings -->
+  <line x1="156" y1="72" x2="168" y2="66" stroke="#f0c078" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="156" y1="80" x2="168" y2="86" stroke="#f0c078" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Beak (slight upward curve — content) -->
+  <ellipse cx="100" cy="104" rx="11" ry="8" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8"/>
+  <!-- Wattle -->
+  <ellipse cx="100" cy="119" rx="9" ry="11" fill="#ffb4ab" stroke="#2a1f0e" stroke-width="1.5"/>
+  <!-- Legs -->
+  <line x1="82" y1="190" x2="72" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="80" y1="190" x2="64" y2="198" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="118" y1="190" x2="128" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="120" y1="190" x2="136" y2="198" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

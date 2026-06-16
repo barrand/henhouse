@@ -22,7 +22,7 @@ export default function GameHeader({ game, players, currentPlayer, round: _round
         </div>
         <div className="flex justify-between items-center mt-1">
           <div className="flex items-center gap-2 font-body">
-            <span>🥚 x {currentPlayer?.eggs ?? 0}</span>
+            <span className="flex items-center gap-1"><img src="/images/egg-icon.svg" alt="" className="w-4 h-4 inline-block" /> x {currentPlayer?.eggs ?? 0}</span>
             {game.rottenEggHolder === currentPlayer?.id && (
               <span className="flex items-center gap-1 bg-tertiary-container text-on-tertiary-container text-xs px-2 py-0.5 rounded-full font-bold">
                 <RottenEgg size={14} />

@@ -6,25 +6,32 @@ interface Props {
   maxAttempts: number
 }
 
+const HEN_CONFIG = [
+  { img: '/images/hen-excited.svg',     anim: 'animate-hen-celebrate', label: 'This is your moment!' },
+  { img: '/images/hen-thinking.svg',    anim: 'animate-hen-bob',       label: 'Think it through…'    },
+  { img: '/images/hen-embarrassed.svg', anim: '',                      label: 'Last shot…'            },
+  { img: '/images/hen-embarrassed.svg', anim: '',                      label: 'No pressure…'          },
+]
+
 export default function PointCounter({ currentAttempt, maxAttempts }: Props) {
   const safeAttempt = Math.max(1, Math.min(currentAttempt, ATTEMPT_POINTS.length))
   const points = ATTEMPT_POINTS[safeAttempt - 1] ?? 0
+  const hen = HEN_CONFIG[safeAttempt - 1] ?? HEN_CONFIG[HEN_CONFIG.length - 1]
 
-  // Tick-down flash animation when the value drops
-  const [prevPoints, setPrevPoints] = useState(points)
-  const [flashing, setFlashing] = useState(false)
+  const [prevAttempt, setPrevAttempt] = useState(safeAttempt)
+  const [popping, setPopping] = useState(false)
+
   useEffect(() => {
-    if (points !== prevPoints) {
-      setFlashing(true)
+    if (safeAttempt !== prevAttempt) {
+      setPopping(true)
       const t = setTimeout(() => {
-        setPrevPoints(points)
-        setFlashing(false)
-      }, 700)
+        setPrevAttempt(safeAttempt)
+        setPopping(false)
+      }, 400)
       return () => clearTimeout(t)
     }
-  }, [points, prevPoints])
+  }, [safeAttempt, prevAttempt])
 
-  // Color shift as points drop — uses Flock-aligned tokens
   const tint = (() => {
     switch (points) {
       case 10: return { bg: 'bg-primary-fixed/40', border: 'border-primary-fixed-dim', text: 'text-primary' }
@@ -36,17 +43,23 @@ export default function PointCounter({ currentAttempt, maxAttempts }: Props) {
   })()
 
   return (
-    <div
-      className={`rounded-2xl border-2 ${tint.bg} ${tint.border} px-6 py-3 text-center transition-all shadow-sm ${
-        flashing ? 'scale-105 animate-pulse' : 'scale-100'
-      }`}
-    >
-      <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">
-        Attempt {safeAttempt} of {maxAttempts} · Guess for
-      </p>
-      <p className={`font-headline font-bold tabular-nums leading-none mt-1 ${tint.text} ${flashing ? 'text-7xl' : 'text-6xl'} transition-all`}>
-        {points} <span className="text-3xl">pts</span>
-      </p>
+    <div className={`rounded-2xl border-2 ${tint.bg} ${tint.border} px-5 py-4 transition-all shadow-sm`}>
+      <div className="flex items-center gap-4">
+        <img
+          src={hen.img}
+          alt=""
+          className={`w-16 h-16 flex-shrink-0 ${popping ? 'animate-hen-pop' : hen.anim}`}
+        />
+        <div className="flex-1 min-w-0">
+          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">
+            Attempt {safeAttempt} of {maxAttempts} · Guess for
+          </p>
+          <p className={`font-headline font-bold tabular-nums leading-none mt-0.5 text-5xl ${tint.text} transition-all`}>
+            {points} <span className="text-2xl">pts</span>
+          </p>
+          <p className="font-body text-xs text-on-surface-variant mt-1 italic">{hen.label}</p>
+        </div>
+      </div>
     </div>
   )
 }

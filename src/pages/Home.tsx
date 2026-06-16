@@ -76,10 +76,10 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-8 py-12 bg-surface linen-texture font-body text-on-surface relative overflow-hidden">
       {/* Decorative botanical backgrounds */}
-      <div className="absolute -top-10 -left-10 opacity-10 pointer-events-none -rotate-12">
+      <div className="absolute -top-10 -left-10 opacity-20 pointer-events-none -rotate-12">
         <img src="/images/botanical-fern.png" alt="" className="w-48 h-48 object-contain" />
       </div>
-      <div className="absolute -bottom-10 -right-10 opacity-10 pointer-events-none rotate-45">
+      <div className="absolute -bottom-10 -right-10 opacity-20 pointer-events-none rotate-45">
         <img src="/images/botanical-wheat.png" alt="" className="w-64 h-64 object-contain" />
       </div>
 
@@ -156,8 +156,8 @@ export default function Home() {
             className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-2xl">
-                🐔
+              <div className="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center">
+                <img src="/images/hen-neutral.svg" alt="" className="w-10 h-10" />
               </div>
               <span className="font-label text-[9px] font-bold uppercase tracking-[0.2em] text-secondary opacity-70">3+ players</span>
             </div>
@@ -178,8 +178,8 @@ export default function Home() {
             className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-2xl">
-                💡
+              <div className="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center">
+                <img src="/images/feather-quill.svg" alt="" className="w-10 h-10" />
               </div>
               <span className="font-label text-[9px] font-bold uppercase tracking-[0.2em] text-secondary opacity-70">2+ players · new!</span>
             </div>
@@ -197,13 +197,7 @@ export default function Home() {
           <p className="text-center text-error text-sm font-body">{error}</p>
         )}
 
-        <div className="mt-8 opacity-30 flex items-center justify-center gap-4">
-          <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'opsz' 20" }}>local_florist</span>
-          <div className="w-12 h-px bg-secondary" />
-          <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'opsz' 20" }}>psychiatry</span>
-          <div className="w-12 h-px bg-secondary" />
-          <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'opsz' 20" }}>local_florist</span>
-        </div>
+        <img src="/images/footprint-divider.svg" alt="" className="w-full max-w-xs opacity-60 mx-auto mt-8" />
       </div>
     </div>
   )

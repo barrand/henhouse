@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Speed lines suggesting lean -->
+  <!-- Body (side profile leaning right) -->
+  <ellipse cx="88" cy="152" rx="52" ry="42" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
+  <!-- Near wing -->
+  <ellipse cx="62" cy="148" rx="20" ry="30" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2"/>
+  <!-- Far wing hint -->
+  <ellipse cx="118" cy="155" rx="16" ry="24" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="1.8" opacity="0.7"/>
+  <!-- Head (shifted right for lean) -->
+  <circle cx="110" cy="80" r="38" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
+  <!-- Comb -->
+  <path d="M94,44 Q98,26 104,40 Q108,22 114,37 Q118,20 124,36 Q128,26 132,42" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Left eye — normal, smaller (far eye) -->
+  <circle cx="98" cy="74" r="8" fill="#2a1f0e"/>
+  <circle cx="95" cy="71" r="2.5" fill="#e8e2db"/>
+  <!-- Right eye — huge through magnifying glass lens -->
+  <circle cx="124" cy="74" r="16" fill="#2a1f0e"/>
+  <circle cx="118" cy="68" r="6" fill="#e8e2db"/>
+  <circle cx="117" cy="67" r="2.5" fill="#f0c078"/>
+  <!-- Magnifying glass ring (over right eye) -->
+  <circle cx="124" cy="74" r="24" fill="none" stroke="#2a1f0e" stroke-width="3.5"/>
+  <!-- Magnifying glass glint -->
+  <path d="M108,56 Q112,52 116,56" fill="none" stroke="#e8e2db" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <!-- Magnifying glass handle -->
+  <line x1="142" y1="94" x2="164" y2="122" stroke="#2a1f0e" stroke-width="6" stroke-linecap="round"/>
+  <line x1="142" y1="94" x2="164" y2="122" stroke="#d6c5a5" stroke-width="3" stroke-linecap="round"/>
+  <!-- Beak (side-ish) -->
+  <ellipse cx="142" cy="88" rx="10" ry="7" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8"/>
+  <!-- Wattle -->
+  <ellipse cx="146" cy="101" rx="7" ry="9" fill="#ffb4ab" stroke="#2a1f0e" stroke-width="1.5"/>
+  <!-- Legs -->
+  <line x1="74" y1="190" x2="62" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="72" y1="190" x2="56" y2="198" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="106" y1="190" x2="116" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="108" y1="190" x2="124" y2="198" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

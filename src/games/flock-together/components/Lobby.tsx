@@ -159,8 +159,9 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
                   </div>
                 </li>
               ))}
-              <li className="pt-2 border-t border-outline-variant/10">
-                <p className="italic text-on-surface-variant text-sm text-center">Waiting for others...</p>
+              <li className="pt-2 border-t border-outline-variant/10 text-center">
+                <img src="/images/hen-neutral.svg" alt="" className="w-12 h-12 mx-auto mb-1 opacity-70 animate-hen-bob" />
+                <p className="italic text-on-surface-variant text-sm">Waiting for others...</p>
               </li>
             </ul>
             <span className="material-symbols-outlined absolute -bottom-4 -right-4 opacity-15 rotate-[165deg] text-primary text-6xl pointer-events-none">account_tree</span>

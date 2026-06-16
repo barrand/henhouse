@@ -15,7 +15,7 @@ export default function GuessView({ game, round, players, isGuesser }: Props) {
   return (
     <main className="flex-1 flex flex-col items-center justify-center px-6 py-10">
       <div className="max-w-md w-full text-center space-y-6">
-        <div className="text-6xl animate-pulse">🤔</div>
+        <img src="/images/hen-thinking.svg" alt="" className="w-16 h-16 mx-auto animate-hen-bob" />
         <h2 className="font-headline text-2xl font-bold text-on-surface">
           Checking that guess…
         </h2>

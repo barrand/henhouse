@@ -36,7 +36,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
       <div className="max-w-sm mx-auto space-y-6">
         {isFinal && !winner && (
           <div className="text-center space-y-2">
-            <p className="text-5xl">🙊</p>
+            <img src="/images/hen-embarrassed.svg" alt="" className="w-20 h-20 mx-auto" />
             <p className="font-headline text-4xl font-bold text-on-surface tracking-tight">GAME OVER</p>
             <p className="font-headline text-xl font-bold text-on-surface">Nobody scored!</p>
             <p className="text-outline">Tough crowd. Try again?</p>
@@ -45,7 +45,10 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
 
         {isFinal && winner && isTie && (
           <div className="text-center space-y-2">
-            <p className="text-5xl">🏆🤝🏆</p>
+            <div className="flex justify-center gap-2">
+              <img src="/images/hen-winner.svg" alt="" className="w-16 h-16" />
+              <img src="/images/hen-winner.svg" alt="" className="w-16 h-16" />
+            </div>
             <p className="font-headline text-4xl font-bold text-on-surface tracking-tight">GAME OVER</p>
             <p className="font-headline text-xl font-bold text-on-surface">
               Tied at {topScore} points!
@@ -56,7 +59,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
 
         {isFinal && winner && !isTie && (
           <div className="text-center space-y-2">
-            <p className="text-5xl">🏆</p>
+            <img src="/images/hen-winner.svg" alt="" className="w-24 h-24 mx-auto animate-hen-celebrate" />
             <p className="font-headline text-4xl font-bold text-on-surface tracking-tight">GAME OVER</p>
             <p className="font-headline text-2xl font-bold text-primary">
               {winner.name} wins!

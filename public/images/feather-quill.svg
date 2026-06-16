@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Feather vane (right side) -->
+  <path d="M16,4 Q26,8 28,16 Q26,20 20,22 L16,28" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.2" stroke-linejoin="round"/>
+  <!-- Feather vane (left side) -->
+  <path d="M16,4 Q6,8 4,16 Q6,20 12,22 L16,28" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="1.2" stroke-linejoin="round"/>
+  <!-- Central quill shaft -->
+  <line x1="16" y1="4" x2="16" y2="32" stroke="#2a1f0e" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- Quill tip point -->
+  <path d="M14,26 Q16,32 18,26" fill="#2a1f0e"/>
+  <!-- Barb lines right -->
+  <line x1="17" y1="8" x2="24" y2="12" stroke="#2a1f0e" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/>
+  <line x1="17" y1="12" x2="25" y2="15" stroke="#2a1f0e" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/>
+  <line x1="17" y1="16" x2="25" y2="18" stroke="#2a1f0e" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/>
+  <line x1="17" y1="20" x2="22" y2="21" stroke="#2a1f0e" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/>
+  <!-- Barb lines left -->
+  <line x1="15" y1="8" x2="8" y2="12" stroke="#2a1f0e" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/>
+  <line x1="15" y1="12" x2="7" y2="15" stroke="#2a1f0e" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/>
+  <line x1="15" y1="16" x2="7" y2="18" stroke="#2a1f0e" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/>
+  <line x1="15" y1="20" x2="10" y2="21" stroke="#2a1f0e" stroke-width="0.7" stroke-linecap="round" opacity="0.6"/>
+</svg>

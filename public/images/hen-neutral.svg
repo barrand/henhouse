@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Wings -->
+  <ellipse cx="38" cy="152" rx="22" ry="30" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2"/>
+  <ellipse cx="162" cy="152" rx="22" ry="30" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2"/>
+  <!-- Body -->
+  <ellipse cx="100" cy="150" rx="52" ry="44" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
+  <!-- Head -->
+  <circle cx="100" cy="82" r="40" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
+  <!-- Comb -->
+  <path d="M82,46 Q86,28 92,42 Q97,22 103,38 Q108,20 114,36 Q118,26 122,42" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Cheeks -->
+  <ellipse cx="70" cy="92" rx="10" ry="7" fill="#ffb4ab" opacity="0.5"/>
+  <ellipse cx="130" cy="92" rx="10" ry="7" fill="#ffb4ab" opacity="0.5"/>
+  <!-- Eyes -->
+  <circle cx="84" cy="76" r="11" fill="#2a1f0e"/>
+  <circle cx="116" cy="76" r="11" fill="#2a1f0e"/>
+  <circle cx="80" cy="72" r="3.5" fill="#e8e2db"/>
+  <circle cx="112" cy="72" r="3.5" fill="#e8e2db"/>
+  <circle cx="79" cy="71" r="1.5" fill="#f0c078"/>
+  <circle cx="111" cy="71" r="1.5" fill="#f0c078"/>
+  <!-- Beak -->
+  <ellipse cx="100" cy="103" rx="11" ry="8" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8"/>
+  <!-- Wattle -->
+  <ellipse cx="100" cy="118" rx="9" ry="11" fill="#ffb4ab" stroke="#2a1f0e" stroke-width="1.5"/>
+  <!-- Legs -->
+  <line x1="82" y1="190" x2="72" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="80" y1="190" x2="64" y2="198" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="118" y1="190" x2="128" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="120" y1="190" x2="136" y2="198" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

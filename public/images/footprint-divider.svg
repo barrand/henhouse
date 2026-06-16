@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 48">
+  <!-- Chicken footprint: 3 forward toes + 1 back toe, repeated across -->
+  <!-- Print 1 at x=30 -->
+  <g transform="translate(30,24)">
+    <line x1="0" y1="0" x2="-8" y2="-12" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="0" y2="-14" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="8" y2="-12" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#e8e2db" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="3" fill="#e8e2db"/>
+  </g>
+  <!-- Print 2 at x=70 (offset right, slight angle) -->
+  <g transform="translate(72,20) rotate(15)">
+    <line x1="0" y1="0" x2="-8" y2="-12" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="0" y2="-14" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="8" y2="-12" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#e8e2db" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="3" fill="#e8e2db"/>
+  </g>
+  <!-- Dots between prints -->
+  <circle cx="105" cy="24" r="2" fill="#e8e2db" opacity="0.5"/>
+  <circle cx="118" cy="24" r="2" fill="#e8e2db" opacity="0.5"/>
+  <circle cx="131" cy="24" r="2" fill="#e8e2db" opacity="0.5"/>
+  <!-- Print 3 at x=155 -->
+  <g transform="translate(155,28) rotate(-10)">
+    <line x1="0" y1="0" x2="-8" y2="-12" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="0" y2="-14" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="8" y2="-12" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#e8e2db" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="3" fill="#e8e2db"/>
+  </g>
+  <!-- Print 4 at x=198 -->
+  <g transform="translate(198,20) rotate(12)">
+    <line x1="0" y1="0" x2="-8" y2="-12" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="0" y2="-14" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="8" y2="-12" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#e8e2db" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="3" fill="#e8e2db"/>
+  </g>
+  <!-- Dots between prints -->
+  <circle cx="228" cy="24" r="2" fill="#e8e2db" opacity="0.5"/>
+  <circle cx="241" cy="24" r="2" fill="#e8e2db" opacity="0.5"/>
+  <circle cx="254" cy="24" r="2" fill="#e8e2db" opacity="0.5"/>
+  <!-- Print 5 at x=278 -->
+  <g transform="translate(278,26) rotate(-8)">
+    <line x1="0" y1="0" x2="-8" y2="-12" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="0" y2="-14" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="8" y2="-12" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#e8e2db" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="3" fill="#e8e2db"/>
+  </g>
+</svg>

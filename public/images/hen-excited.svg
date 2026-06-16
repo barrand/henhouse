@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Orbiting sparkles -->
+  <polygon points="28,44 30,51 37,53 30,55 28,62 26,55 19,53 26,51" fill="#f0c078" stroke="#2a1f0e" stroke-width="0.8"/>
+  <polygon points="100,10 102,17 109,19 102,21 100,28 98,21 91,19 98,17" fill="#f0c078" stroke="#2a1f0e" stroke-width="0.8"/>
+  <polygon points="168,36 170,43 177,45 170,47 168,54 166,47 159,45 166,43" fill="#f0c078" stroke="#2a1f0e" stroke-width="0.8"/>
+  <polygon points="176,100 178,106 184,108 178,110 176,116 174,110 168,108 174,106" fill="#f0c078" stroke="#2a1f0e" stroke-width="0.8"/>
+  <polygon points="16,100 18,106 24,108 18,110 16,116 14,110 8,108 14,106" fill="#f0c078" stroke="#2a1f0e" stroke-width="0.8"/>
+  <!-- Wings slightly spread -->
+  <ellipse cx="34" cy="140" rx="22" ry="32" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2" transform="rotate(10 34 140)"/>
+  <ellipse cx="166" cy="140" rx="22" ry="32" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2" transform="rotate(-10 166 140)"/>
+  <!-- Body -->
+  <ellipse cx="100" cy="150" rx="52" ry="44" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
+  <!-- Head -->
+  <circle cx="100" cy="82" r="40" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
+  <!-- Comb -->
+  <path d="M82,46 Q86,28 92,42 Q97,22 103,38 Q108,20 114,36 Q118,26 122,42" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Cheeks (big with excitement) -->
+  <ellipse cx="68" cy="92" rx="11" ry="8" fill="#ffb4ab" opacity="0.6"/>
+  <ellipse cx="132" cy="92" rx="11" ry="8" fill="#ffb4ab" opacity="0.6"/>
+  <!-- Star pupils (left) -->
+  <circle cx="84" cy="76" r="13" fill="#2a1f0e"/>
+  <polygon points="84,64 85.5,72 93,72 87,77 89,85 84,80 79,85 81,77 75,72 82.5,72" fill="#f0c078"/>
+  <!-- Star pupils (right) -->
+  <circle cx="116" cy="76" r="13" fill="#2a1f0e"/>
+  <polygon points="116,64 117.5,72 125,72 119,77 121,85 116,80 111,85 113,77 107,72 114.5,72" fill="#f0c078"/>
+  <!-- Beak (wide open smile shape) -->
+  <ellipse cx="100" cy="104" rx="13" ry="9" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8"/>
+  <!-- Wattle -->
+  <ellipse cx="100" cy="120" rx="9" ry="11" fill="#ffb4ab" stroke="#2a1f0e" stroke-width="1.5"/>
+  <!-- Legs -->
+  <line x1="82" y1="190" x2="72" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="80" y1="190" x2="64" y2="198" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="118" y1="190" x2="128" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="120" y1="190" x2="136" y2="198" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

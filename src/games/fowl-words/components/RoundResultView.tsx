@@ -39,7 +39,11 @@ export default function RoundResultView({ game, round, players, isHost, currentP
         <div className="text-center space-y-2">
           {round.isCorrect ? (
             <>
-              <div className="text-6xl">🎉</div>
+              <img
+                src={round.currentAttempt === 1 ? '/images/hen-excited.svg' : '/images/hen-winner.svg'}
+                alt=""
+                className={`w-24 h-24 mx-auto ${round.currentAttempt === 1 ? 'animate-hen-celebrate' : 'animate-hen-pop'}`}
+              />
               <h2 className="font-headline text-4xl font-bold text-primary tracking-tight">
                 NAILED IT!
               </h2>
@@ -55,7 +59,7 @@ export default function RoundResultView({ game, round, players, isHost, currentP
             </>
           ) : (
             <>
-              <div className="text-6xl">😬</div>
+              <img src="/images/hen-embarrassed.svg" alt="" className="w-24 h-24 mx-auto animate-hen-pop" />
               <h2 className="font-headline text-4xl font-bold text-error tracking-tight">
                 NO LUCK
               </h2>

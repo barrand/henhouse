@@ -5,21 +5,21 @@
   --font-body: "Inter", sans-serif;
   --font-label: "Inter", sans-serif;
 
-  --color-primary: #a8c9a9;
+  --color-primary: #91c595;
   --color-on-primary: #113314;
   --color-primary-container: #2e4a30;
   --color-on-primary-container: #c4e5c5;
   --color-primary-fixed: #c4e5c5;
-  --color-primary-fixed-dim: #a8c9a9;
+  --color-primary-fixed-dim: #91c595;
   --color-on-primary-fixed: #002107;
   --color-on-primary-fixed-variant: #2e4a30;
 
-  --color-secondary: #ebbf85;
+  --color-secondary: #f0c078;
   --color-on-secondary: #2e1a00;
   --color-secondary-container: #5a3e10;
   --color-on-secondary-container: #ffddb3;
   --color-secondary-fixed: #ffddb3;
-  --color-secondary-fixed-dim: #ebbf85;
+  --color-secondary-fixed-dim: #f0c078;
   --color-on-secondary-fixed: #291800;
   --color-on-secondary-fixed-variant: #5a3e10;
 
@@ -32,24 +32,24 @@
   --color-on-tertiary-fixed: #231a06;
   --color-on-tertiary-fixed-variant: #4a3f26;
 
-  --color-surface: #141312;
+  --color-surface: #1e1b18;
   --color-on-surface: #e8e2db;
   --color-surface-variant: #434842;
   --color-on-surface-variant: #c3c8c0;
-  --color-surface-container: #1e1d1b;
-  --color-surface-container-low: #1a1918;
-  --color-surface-container-high: #282725;
-  --color-surface-container-highest: #333230;
-  --color-surface-container-lowest: #0f0e0d;
+  --color-surface-container: #252219;
+  --color-surface-container-low: #211e1a;
+  --color-surface-container-high: #2e2b27;
+  --color-surface-container-highest: #383430;
+  --color-surface-container-lowest: #262320;
   --color-surface-bright: #3a3937;
-  --color-surface-dim: #141312;
-  --color-surface-tint: #a8c9a9;
+  --color-surface-dim: #1e1b18;
+  --color-surface-tint: #91c595;
 
-  --color-background: #141312;
+  --color-background: #1e1b18;
   --color-on-background: #e8e2db;
 
-  --color-outline: #8e938c;
-  --color-outline-variant: #434842;
+  --color-outline: #a8b0a8;
+  --color-outline-variant: #7a827a;
 
   --color-error: #ffb4ab;
   --color-on-error: #690005;
@@ -62,7 +62,7 @@
 }
 
 .linen-texture {
-  background-image: radial-gradient(#ffffff06 1px, transparent 0);
+  background-image: radial-gradient(#ffffff0b 1px, transparent 0);
   background-size: 24px 24px;
 }
 
@@ -79,3 +79,24 @@
 .animate-rotten-wobble {
   animation: rotten-wobble 0.8s ease-in-out;
 }
+
+@keyframes hen-bob {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+@keyframes hen-pop {
+  0%   { transform: scale(0.75); opacity: 0; }
+  70%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+@keyframes hen-celebrate {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25%       { transform: translateY(-8px) rotate(-4deg); }
+  75%       { transform: translateY(-8px) rotate(4deg); }
+}
+
+.animate-hen-bob       { animation: hen-bob 1.4s ease-in-out infinite; }
+.animate-hen-pop       { animation: hen-pop 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
+.animate-hen-celebrate { animation: hen-celebrate 0.7s ease-in-out infinite; }

@@ -88,8 +88,9 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
                   </div>
                 </li>
               ))}
-              <li className="pt-2 border-t border-outline-variant/20">
-                <p className="italic text-outline text-sm text-center font-body">More friends? Send them the code.</p>
+              <li className="pt-2 border-t border-outline-variant/20 text-center">
+                <img src="/images/hen-neutral.svg" alt="" className="w-12 h-12 mx-auto mb-1 opacity-70 animate-hen-bob" />
+                <p className="italic text-outline text-sm font-body">More friends? Send them the code.</p>
               </li>
             </ul>
           </div>

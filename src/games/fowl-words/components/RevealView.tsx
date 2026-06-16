@@ -132,7 +132,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
         {/* All-duplicates state — shown instead of clue list */}
         {allDuplicates && (
           <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-6 text-center space-y-4 shadow-sm">
-            <p className="text-4xl">🔒</p>
+            <img src="/images/hen-embarrassed.svg" alt="" className="w-16 h-16 mx-auto" />
             <div>
               <p className="font-headline text-lg font-bold text-on-surface">
                 Every clue matched
@@ -246,7 +246,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                               : 'bg-surface-container-low text-on-surface-variant hover:bg-tertiary-container/50 active:scale-95'
                           }`}
                         >
-                          <span>{isMyVote ? '⭐' : '☆'}</span>
+                          <img src="/images/star-vote.svg" alt="" className={`w-4 h-4 ${isMyVote ? '' : 'opacity-40'}`} />
                           {starCount > 0 && <span>{starCount}</span>}
                         </button>
                       </div>
@@ -268,7 +268,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                 }`}
               >
                 {isPlayerInDupGroup && (
-                  <p className="text-center text-5xl mb-2">🤦‍♂️</p>
+                  <img src="/images/hen-embarrassed.svg" alt="" className="w-12 h-12 mx-auto mb-2 animate-hen-pop" />
                 )}
                 <p className={`font-headline text-lg font-medium text-center line-through ${
                   isPlayerInDupGroup ? 'text-error' : 'text-on-surface-variant'

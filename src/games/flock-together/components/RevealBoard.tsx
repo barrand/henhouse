@@ -16,8 +16,8 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
   if (round.status === 'revealing') {
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        <div className="animate-pulse text-center space-y-3">
-          <p className="text-4xl">🐔</p>
+        <div className="text-center space-y-3">
+          <img src="/images/hen-thinking.svg" alt="" className="w-20 h-20 animate-hen-bob mx-auto" />
           <p className="font-headline text-xl font-bold text-on-surface">Checking all answers...</p>
           <p className="text-outline text-sm font-body">The flock is being counted</p>
         </div>
@@ -118,6 +118,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
                 </span>
               </div>
               <div className="flex items-center gap-2">
+                {result === 'rotten' && <img src="/images/hen-embarrassed.svg" alt="" className="w-10 h-10 animate-hen-pop" />}
                 {resultBadge(result)}
                 {result === 'flock' && <span className="text-sm font-bold text-primary font-body">+1</span>}
               </div>

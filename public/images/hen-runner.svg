@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Speed lines (left side) -->
+  <line x1="4" y1="88" x2="42" y2="88" stroke="#e8e2db" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+  <line x1="8" y1="106" x2="44" y2="106" stroke="#e8e2db" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <line x1="14" y1="122" x2="46" y2="122" stroke="#e8e2db" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <!-- Near wing (behind body, raised back for running) -->
+  <ellipse cx="74" cy="118" rx="26" ry="16" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2" transform="rotate(-30 74 118)"/>
+  <!-- Body (leaning forward) -->
+  <ellipse cx="104" cy="144" rx="54" ry="38" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5" transform="rotate(-12 104 144)"/>
+  <!-- Head (shifted right, leaning forward) -->
+  <circle cx="148" cy="84" r="36" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
+  <!-- Comb -->
+  <path d="M132,50 Q136,34 142,48 Q146,30 152,46 Q156,32 162,48 Q166,36 170,50" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Single visible eye (determined squint) -->
+  <path d="M136,78 Q148,66 160,78" fill="none" stroke="#2a1f0e" stroke-width="5" stroke-linecap="round"/>
+  <!-- Beak (pointing right, sharp) -->
+  <path d="M180,82 L196,86 L180,91" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Wattle -->
+  <ellipse cx="184" cy="98" rx="6" ry="8" fill="#ffb4ab" stroke="#2a1f0e" stroke-width="1.4"/>
+  <!-- Legs running (one forward, one back) -->
+  <!-- Front leg extended forward -->
+  <line x1="122" y1="176" x2="150" y2="196" stroke="#f0c078" stroke-width="4" stroke-linecap="round"/>
+  <line x1="150" y1="196" x2="168" y2="192" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="150" y1="196" x2="156" y2="204" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Back leg trailing behind -->
+  <line x1="86" y1="174" x2="62" y2="192" stroke="#f0c078" stroke-width="4" stroke-linecap="round"/>
+  <line x1="62" y1="192" x2="44" y2="188" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="62" y1="192" x2="56" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+</svg>
