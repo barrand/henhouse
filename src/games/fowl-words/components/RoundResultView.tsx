@@ -179,15 +179,11 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                             <div className="text-[10px] text-error font-bold uppercase tracking-wider font-label">
                               🔄 Duplicate
                             </div>
-                          ) : isVisible && round.isCorrect ? (
+                          ) : isVisible ? (
                             <div className="text-[10px] text-primary font-bold uppercase tracking-wider font-label">
                               ✅ Used
                             </div>
-                          ) : (
-                            <div className="text-[10px] text-outline font-bold uppercase tracking-wider font-label">
-                              🔒 Locked
-                            </div>
-                          )}
+                          ) : null}
                           {giverStarCount > 0 && (
                             <div className="text-[11px] text-on-surface-variant font-bold font-label">
                               ⭐ {giverStarCount}
