@@ -7,10 +7,10 @@ interface Props {
 }
 
 const HEN_CONFIG = [
-  { img: '/images/hen-excited.svg',     anim: 'animate-hen-celebrate', label: 'This is your moment!' },
-  { img: '/images/hen-thinking.svg',    anim: 'animate-hen-bob',       label: 'Think it through…'    },
-  { img: '/images/hen-embarrassed.svg', anim: '',                      label: 'Last shot…'            },
-  { img: '/images/hen-embarrassed.svg', anim: '',                      label: 'No pressure…'          },
+  { img: '/images/hen-neutral.svg',     anim: 'animate-hen-bob',       label: 'Best shot. Make it count.' },
+  { img: '/images/hen-thinking.svg',    anim: 'animate-hen-bob',       label: 'Think it through…'         },
+  { img: '/images/hen-embarrassed.svg', anim: '',                      label: 'Last shot…'                },
+  { img: '/images/hen-embarrassed.svg', anim: '',                      label: 'No pressure…'              },
 ]
 
 export default function PointCounter({ currentAttempt, maxAttempts }: Props) {
