@@ -101,10 +101,15 @@ export default function Home() {
             type="text"
             placeholder="Enter name..."
             value={name}
-            onChange={(e) => saveName(e.target.value)}
-            className="w-full bg-surface-container-lowest border-2 border-outline-variant/30 rounded-xl px-4 py-3.5 text-on-surface placeholder:text-outline/50 font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+            onChange={(e) => { saveName(e.target.value); if (error) setError('') }}
+            className={`w-full bg-surface-container-lowest border-2 rounded-xl px-4 py-3.5 text-on-surface placeholder:text-outline/50 font-body focus:ring-2 outline-none transition-all ${
+              error ? 'border-error focus:ring-error/20 focus:border-error' : 'border-outline-variant/30 focus:ring-primary/20 focus:border-primary'
+            }`}
             maxLength={20}
           />
+          {error && (
+            <p className="text-error text-sm font-body mt-1 ml-1">{error}</p>
+          )}
         </div>
 
         {/* Join Section */}
@@ -192,10 +197,6 @@ export default function Home() {
             </div>
           </button>
         </div>
-
-        {error && (
-          <p className="text-center text-error text-sm font-body">{error}</p>
-        )}
 
         <img src="/images/footprint-divider.svg" alt="" className="w-full max-w-xs opacity-60 mx-auto mt-8" />
       </div>

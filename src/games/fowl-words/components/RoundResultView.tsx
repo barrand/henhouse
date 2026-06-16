@@ -13,6 +13,7 @@ interface Props {
 export default function RoundResultView({ game, round, players, isHost, currentPlayerId }: Props) {
   const [advancing, setAdvancing] = useState(false)
   const [error, setError] = useState('')
+  const [pendingStarIdx, setPendingStarIdx] = useState<number | null>(null)
 
   const guesserPlayer = players.find((p) => p.id === game.currentGuesser)
   const isLastRound = game.currentRound >= game.settings.totalRounds
@@ -93,12 +94,13 @@ export default function RoundResultView({ game, round, players, isHost, currentP
             </h3>
 
             {/* Guesser star prompt — only after correct round, before they've voted */}
-            {currentPlayerId === game.currentGuesser && round.isCorrect && round.guesserStarVote == null && (
+            {currentPlayerId === game.currentGuesser && round.isCorrect && round.guesserStarVote == null && pendingStarIdx === null && (
               <div className="mb-3 bg-tertiary-container/40 border border-tertiary/30 rounded-xl px-4 py-3 text-center">
-                <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider font-label">
-                  ⭐ Tip your hat to the best clue
+                <p className="text-xs font-bold text-on-tertiary-container uppercase tracking-wider font-label">
+                  <img src="/images/star-vote.svg" alt="" className="w-4 h-4 inline-block mr-1 align-middle" />
+                  Tip your hat to the best clue
                 </p>
-                <p className="text-[11px] text-outline mt-0.5 font-body">Tap a clue below — worth +5 pts to that player</p>
+                <p className="text-[11px] text-outline mt-0.5 font-body">Tap ⭐ on the clue that helped most — worth +5 pts</p>
               </div>
             )}
 
@@ -119,30 +121,35 @@ export default function RoundResultView({ game, round, players, isHost, currentP
 
                 // Star counts
                 const giverStarCount = Object.values(round.clueStarVotes ?? {}).filter((v) => v === idx).length
-                const isGuesserStarred = round.guesserStarVote === idx
+                const isGuesserStarred = round.guesserStarVote === idx || pendingStarIdx === idx
 
                 // Is this a tappable guesser star target?
                 const canGuesserStar = currentPlayerId === game.currentGuesser
                   && round.isCorrect
                   && round.guesserStarVote == null
+                  && pendingStarIdx === null
                   && isVisible
+
+                const handleGuesserStar = () => {
+                  setPendingStarIdx(idx)
+                  submitGuesserStarVote(game.id, game.currentRound, idx).catch(() => setPendingStarIdx(null))
+                }
 
                 return (
                   <div
                     key={idx}
-                    onClick={canGuesserStar ? () => submitGuesserStarVote(game.id, game.currentRound, idx).catch(() => {}) : undefined}
                     className={`px-4 py-3 rounded-xl border font-body transition-all ${
                       group.isDuplicate
                         ? 'bg-surface-container-low border-outline-variant/20 opacity-80'
                         : isGuesserStarred
-                        ? 'bg-tertiary-container/40 border-tertiary/50'
+                        ? 'bg-tertiary-container/40 border-tertiary/50 shadow-[0_0_12px_rgba(255,200,100,0.2)]'
                         : isVisible && round.isCorrect
                         ? 'bg-primary-fixed/20 border-primary-fixed-dim'
                         : 'bg-surface-container-lowest border-outline-variant/30'
-                    } ${canGuesserStar ? 'cursor-pointer active:scale-[0.98] hover:border-tertiary/50' : ''}`}
+                    }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex flex-col flex-1 min-w-0">
                         <span className={`font-headline font-bold text-lg ${group.isDuplicate ? 'text-on-surface-variant line-through' : 'text-on-surface'}`}>
                           {displayText}
                         </span>
@@ -151,31 +158,42 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                           {isYours && <span className="text-primary font-bold ml-1">← you</span>}
                         </span>
                       </div>
-                      <div className="ml-3 flex-shrink-0 text-right space-y-1">
-                        {group.isDuplicate ? (
-                          <div className="text-[10px] text-error font-bold uppercase tracking-wider font-label">
-                            🔄 Duplicate
+                      <div className="flex-shrink-0 flex flex-col items-end gap-1">
+                        {/* Guesser star button or awarded badge */}
+                        {isGuesserStarred ? (
+                          <div className="flex items-center gap-1 bg-tertiary-container text-on-tertiary-container text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full font-label animate-hen-pop">
+                            <img src="/images/star-vote.svg" alt="" className="w-3.5 h-3.5" />
+                            +5
                           </div>
-                        ) : isVisible && round.isCorrect ? (
-                          <div className="text-[10px] text-primary font-bold uppercase tracking-wider font-label">
-                            ✅ Used
-                          </div>
-                        ) : (
-                          <div className="text-[10px] text-outline font-bold uppercase tracking-wider font-label">
-                            🔒 Locked
-                          </div>
-                        )}
-                        {/* Star counts */}
-                        {giverStarCount > 0 && (
-                          <div className="text-[11px] text-on-surface-variant font-bold font-label">
-                            ⭐ {giverStarCount}
-                          </div>
-                        )}
-                        {isGuesserStarred && (
-                          <div className="text-[10px] text-tertiary font-bold uppercase tracking-wider font-label">
-                            🌟 +5 guesser
-                          </div>
-                        )}
+                        ) : canGuesserStar ? (
+                          <button
+                            onClick={handleGuesserStar}
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-full border-2 border-dashed border-tertiary/50 text-tertiary text-[10px] font-bold font-label hover:bg-tertiary-container/30 active:scale-95 transition-all"
+                          >
+                            <img src="/images/star-vote.svg" alt="" className="w-3.5 h-3.5 opacity-60" />
+                            +5
+                          </button>
+                        ) : null}
+                        <div className="text-right space-y-1">
+                          {group.isDuplicate ? (
+                            <div className="text-[10px] text-error font-bold uppercase tracking-wider font-label">
+                              🔄 Duplicate
+                            </div>
+                          ) : isVisible && round.isCorrect ? (
+                            <div className="text-[10px] text-primary font-bold uppercase tracking-wider font-label">
+                              ✅ Used
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-outline font-bold uppercase tracking-wider font-label">
+                              🔒 Locked
+                            </div>
+                          )}
+                          {giverStarCount > 0 && (
+                            <div className="text-[11px] text-on-surface-variant font-bold font-label">
+                              ⭐ {giverStarCount}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
