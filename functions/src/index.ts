@@ -106,6 +106,7 @@ export {
   submitCustomQuestion,
   advanceRound as flockAdvanceRound,
   forceEndRound,
+  flockAbandonGame,
 } from './games/flock-together/index'
 
 // ── Fowl Words ────────────────────────────────────────────────────────────────
@@ -120,4 +121,5 @@ export {
   fowlWordsSubmitWordVote,
   fowlWordsFinalizeWordSelection,
   fowlWordsUnlockFirst,
+  fowlWordsAbandonGame,
 } from './games/fowl-words/index'
