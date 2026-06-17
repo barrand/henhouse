@@ -294,15 +294,17 @@ export async function handleGuess(
     clueTimestamps,
   )
 
-  // If nothing to unlock (shouldn't happen if maxAttempts is consistent), end round
+  // All clues already visible — still advance to next attempt so the guesser
+  // gets the guaranteed minimum number of guesses.
   if (nextUnlockIdx < 0) {
-    const scores = computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, false, currentAttempt, clueTimestamps, giverCount)
+    const newAttempt = currentAttempt + 1
+    const newTentative = computeTentativePoints(clueGroups, visibleGroupIndexes, guesserId, newAttempt, clueTimestamps, giverCount)
+    const newDeadline = Timestamp.fromMillis(Date.now() + getSecondsForAttempt(newAttempt) * 1000)
     await roundRef.update({
-      status: 'scored',
-      isCorrect: false,
-      guesserAnswer: guess.trim(),
-      pointsThisRound: scores,
-      tentativePoints: scores,
+      status: 'reveal',
+      currentAttempt: newAttempt,
+      tentativePoints: newTentative,
+      attemptDeadline: newDeadline,
       attemptInProgress: false,
     })
     return

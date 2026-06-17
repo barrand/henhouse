@@ -11,7 +11,7 @@ export interface BaseGameData {
   gameType: 'flock-together' | 'fowl-words'
   hostId: string
   originalHostId: string
-  status: 'lobby' | 'playing' | 'finished'
+  status: 'lobby' | 'playing' | 'finished' | 'abandoned'
   currentRound: number
   playerIds: string[]
   settings: GameSettings

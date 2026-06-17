@@ -84,6 +84,11 @@ export function onPlayersUpdate(gameId: string, callback: (players: PlayerData[]
   })
 }
 
+const fowlWordsAbandonGameFn = httpsCallable<{ gameId: string }, void>(functions, 'fowlWordsAbandonGame')
+export async function fowlWordsAbandonGame(gameId: string) {
+  await fowlWordsAbandonGameFn({ gameId })
+}
+
 export function onRoundUpdate(gameId: string, roundNum: number, callback: (data: RoundData | null) => void) {
   return onSnapshot(doc(db, 'games', gameId, 'rounds', String(roundNum)), (snap) => {
     callback(snap.exists() ? ({ id: snap.id, ...snap.data() } as RoundData) : null)

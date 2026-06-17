@@ -52,6 +52,13 @@ export default function Game() {
     }
   }, [game?.rematchCode, navigate])
 
+  // When host abandons the game, everyone goes home
+  useEffect(() => {
+    if (game?.status === 'abandoned') {
+      navigate('/')
+    }
+  }, [game?.status, navigate])
+
   // Auto-redirect to home if game doesn't exist (refresh after game ended)
   useEffect(() => {
     if (lookupError) {
@@ -107,6 +114,7 @@ export default function Game() {
         players={players}
         currentPlayer={currentPlayer}
         round={round}
+        isHost={isHost}
       />
 
       {round?.status === 'answering' && (

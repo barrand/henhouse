@@ -232,7 +232,7 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                     '💪 Persistence pays off!',
                     '🔓 Finally unlocked it!',
                   ][round.currentAttempt - 1] ?? '✅ Correct!')
-                : '😅 The word remains a mystery…'}
+                : '😅 Better luck next time!'}
             </p>
             {round.isCorrect && (
               <p className="text-primary font-bold text-sm mt-1">+{[10, 5, 2, 1][round.currentAttempt - 1] ?? 0} points</p>

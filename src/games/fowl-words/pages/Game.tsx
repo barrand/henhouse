@@ -56,6 +56,13 @@ export default function Game() {
     }
   }, [game?.rematchCode, navigate])
 
+  // When host abandons the game, everyone goes home
+  useEffect(() => {
+    if (game?.status === 'abandoned') {
+      navigate('/')
+    }
+  }, [game?.status, navigate])
+
   // Auto-redirect to home if game doesn't exist (refresh after game ended)
   useEffect(() => {
     if (lookupError) {
@@ -108,7 +115,7 @@ export default function Game() {
 
   return (
     <div className="min-h-screen flex flex-col bg-surface linen-texture">
-      <GameHeader game={game} players={players} round={round} currentPlayer={currentPlayer} />
+      <GameHeader game={game} players={players} round={round} currentPlayer={currentPlayer} isHost={isHost} />
 
       {round?.status === 'word-selection' && (
         <WordSelectionView

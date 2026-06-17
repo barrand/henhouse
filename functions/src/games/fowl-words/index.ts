@@ -448,3 +448,21 @@ export const fowlWordsForceDedup = onCall(async (request) => {
 
   await runDeduplication(gameId, roundNum)
 })
+
+// -- ABANDON GAME (Fowl Words) --
+export const fowlWordsAbandonGame = onCall(async (request) => {
+  const uid = request.auth?.uid
+  if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
+
+  const { gameId } = request.data as { gameId: string }
+  const firestore = db()
+  const gameRef = firestore.collection('games').doc(gameId)
+  const gameSnap = await gameRef.get()
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+
+  const game = gameSnap.data()!
+  if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only the host can end the game')
+
+  await gameRef.update({ status: 'abandoned' })
+  try { await releaseRoomCode(game.code) } catch { /* ignore — code expiry is fine */ }
+})

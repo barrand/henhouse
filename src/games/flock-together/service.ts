@@ -88,6 +88,11 @@ export function onRoundUpdate(gameId: string, roundNum: number, callback: (data:
   })
 }
 
+const flockAbandonGameFn = httpsCallable<{ gameId: string }, void>(functions, 'flockAbandonGame')
+export async function flockAbandonGame(gameId: string) {
+  await flockAbandonGameFn({ gameId })
+}
+
 export function onCustomQuestionsUpdate(gameId: string, callback: (questions: string[]) => void) {
   const q = query(
     collection(db, 'games', gameId, 'questionPool'),
