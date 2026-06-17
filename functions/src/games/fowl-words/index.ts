@@ -198,11 +198,11 @@ export const submitClue = onCall(async (request) => {
   const [gameSnap, roundSnap] = await Promise.all([gameRef.get(), roundRef.get()])
 
   if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
+  const game = gameSnap.data()!
+  if (game.status === 'abandoned') throw new HttpsError('failed-precondition', 'Game has ended')
   if (roundSnap.data()!.status !== 'clue-submission') {
     throw new HttpsError('failed-precondition', 'Round not accepting clues')
   }
-
-  const game = gameSnap.data()!
   if (game.currentGuesser === uid) {
     throw new HttpsError('failed-precondition', 'Guesser cannot submit clues')
   }

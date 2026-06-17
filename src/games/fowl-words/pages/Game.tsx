@@ -111,6 +111,8 @@ export default function Game() {
     )
   }
 
+  if (game.status === 'abandoned') return null
+
   const isGuesser = game.currentGuesser === uid
 
   return (

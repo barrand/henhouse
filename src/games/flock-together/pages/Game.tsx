@@ -107,6 +107,8 @@ export default function Game() {
     )
   }
 
+  if (game.status === 'abandoned') return null
+
   return (
     <div className="min-h-screen flex flex-col bg-surface linen-texture">
       <GameHeader
