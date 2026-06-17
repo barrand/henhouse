@@ -5,12 +5,6 @@
   "targets": {
     "flock-together-game": {
       "hosting": {
-        "live": [
-          "flockgame"
-        ],
-        "default": [
-          "flock-together-game"
-        ],
         "chickenparty": [
           "chickenparty"
         ]

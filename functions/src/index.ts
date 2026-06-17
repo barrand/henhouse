@@ -94,32 +94,7 @@ export const onPresenceChange = onValueWritten(
 )
 
 // ── Flock Together ────────────────────────────────────────────────────────────
-export {
-  flockCreateGame,
-  flockRematch,
-  startGame as flockStartGame,
-  submitAnswer,
-  skipQuestion,
-  updateCategories,
-  setPatrioticMode,
-  resetQuestionCooldowns,
-  submitCustomQuestion,
-  advanceRound as flockAdvanceRound,
-  forceEndRound,
-  flockAbandonGame,
-} from './games/flock-together/index'
+export * from './games/flock-together/index'
 
 // ── Fowl Words ────────────────────────────────────────────────────────────────
-export {
-  fowlWordsCreateGame,
-  fowlWordsRematch,
-  fowlWordsStartGame,
-  submitClue,
-  submitGuess,
-  fowlWordsAdvanceRound,
-  fowlWordsForceDedup,
-  fowlWordsSubmitWordVote,
-  fowlWordsFinalizeWordSelection,
-  fowlWordsUnlockFirst,
-  fowlWordsAbandonGame,
-} from './games/fowl-words/index'
+export * from './games/fowl-words/index'

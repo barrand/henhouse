@@ -113,7 +113,7 @@ export const flockRematch = onCall(async (request) => {
 })
 
 // -- START GAME --
-export const startGame = onCall(async (request) => {
+export const flockStartGame = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -379,7 +379,7 @@ export const submitCustomQuestion = onCall(async (request) => {
 })
 
 // -- ADVANCE ROUND (callable by host) --
-export const advanceRound = onCall(async (request) => {
+export const flockAdvanceRound = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
