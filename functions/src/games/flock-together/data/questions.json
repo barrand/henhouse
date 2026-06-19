@@ -2015,5 +2015,83 @@
       "Stricter — quality over quantity"
     ],
     "source": "patriotic"
+  },
+  {
+    "text": "Would you rather walk a dog or play with a cat?",
+    "type": "multiple_choice",
+    "options": ["Walk a dog", "Play with a cat"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather live where it's hot or where it's cold?",
+    "type": "multiple_choice",
+    "options": ["Live where it's hot", "Live where it's cold"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather drive a monster truck or pilot an airplane?",
+    "type": "multiple_choice",
+    "options": ["Drive a monster truck", "Pilot an airplane"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather hear what everyone is thinking or see the future?",
+    "type": "multiple_choice",
+    "options": ["Hear what everyone is thinking", "See the future"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather drink with your nose or taste with your hands?",
+    "type": "multiple_choice",
+    "options": ["Drink with your nose", "Taste with your hands"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather stay outside all day or stay inside all day?",
+    "type": "multiple_choice",
+    "options": ["Stay outside all day", "Stay inside all day"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather make your own food or make your own clothes?",
+    "type": "multiple_choice",
+    "options": ["Make your own food", "Make your own clothes"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather fly with birds or swim with penguins?",
+    "type": "multiple_choice",
+    "options": ["Fly with birds", "Swim with penguins"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather live on the moon or live underwater?",
+    "type": "multiple_choice",
+    "options": ["Live on the moon", "Live underwater"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather visit the future or visit the past?",
+    "type": "multiple_choice",
+    "options": ["Visit the future", "Visit the past"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather have really long toes or really short fingers?",
+    "type": "multiple_choice",
+    "options": ["Really long toes", "Really short fingers"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather ride in a hot air balloon or ride in a submarine?",
+    "type": "multiple_choice",
+    "options": ["Ride in a hot air balloon", "Ride in a submarine"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather live in a tree house or live in a castle?",
+    "type": "multiple_choice",
+    "options": ["Live in a tree house", "Live in a castle"],
+    "source": "preset"
   }
 ]
