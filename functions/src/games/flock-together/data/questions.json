@@ -2093,5 +2093,47 @@
     "type": "multiple_choice",
     "options": ["Live in a tree house", "Live in a castle"],
     "source": "preset"
+  },
+  {
+    "text": "Would you rather fight one horse-sized duck or 100 duck-sized horses?",
+    "type": "multiple_choice",
+    "options": ["Fight one horse-sized duck", "Fight 100 duck-sized horses"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather be able to speak to animals or speak all human languages?",
+    "type": "multiple_choice",
+    "options": ["Speak to animals", "Speak all human languages"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather grow an inch taller every year or an inch shorter every year?",
+    "type": "multiple_choice",
+    "options": ["Grow an inch taller every year", "Grow an inch shorter every year"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather live without music or live without movies?",
+    "type": "multiple_choice",
+    "options": ["Live without music", "Live without movies"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather have tiny hands or tiny feet?",
+    "type": "multiple_choice",
+    "options": ["Tiny hands", "Tiny feet"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather never need sleep or never need to eat?",
+    "type": "multiple_choice",
+    "options": ["Never need sleep", "Never need to eat"],
+    "source": "preset"
+  },
+  {
+    "text": "Would you rather live in Hogwarts, Narnia, or Middle Earth?",
+    "type": "multiple_choice",
+    "options": ["Hogwarts", "Narnia", "Middle Earth"],
+    "source": "preset"
   }
 ]
