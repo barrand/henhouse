@@ -113,7 +113,7 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
       <div className={`rounded-2xl border-2 p-6 text-center shadow-sm relative ${
         round.source === 'patriotic'
           ? 'bg-gradient-to-br from-red-50 to-blue-50 border-red-200'
-          : 'bg-surface-container-lowest border-outline-variant/30'
+          : 'bg-surface-container-lowest border-outline-variant/60'
       }`}>
         {round.source === 'patriotic' && (
           <div className="absolute top-3 right-3 text-2xl">🇺🇸</div>
@@ -159,7 +159,7 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
                   key={opt}
                   onClick={() => handleSubmit(opt)}
                   disabled={submitting}
-                  className="bg-surface-container-lowest border-2 border-outline-variant/40 hover:border-primary hover:bg-primary/10 active:scale-95 disabled:opacity-50 rounded-xl px-4 py-4 text-lg font-body font-semibold text-on-surface transition-all text-center leading-snug"
+                  className="bg-surface-container-low border-2 border-outline-variant/60 hover:border-primary hover:bg-primary/10 active:scale-95 disabled:opacity-50 rounded-xl px-4 py-4 text-lg font-body font-semibold text-on-surface transition-all text-center leading-snug"
                 >
                   {opt}
                 </button>
@@ -173,7 +173,7 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-              className="w-full bg-surface-container-lowest border-2 border-outline-variant/30 rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-outline/50 font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              className="w-full bg-surface-container-low border-2 border-outline rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-outline/50 font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               maxLength={100}
               autoFocus
             />
@@ -187,7 +187,7 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
           </>
           )
         ) : (
-          <div className="text-center py-4 rounded-xl border border-outline-variant/20 bg-surface-container-low/50 px-4">
+          <div className="text-center py-4 rounded-xl border border-outline-variant/50 bg-surface-container-low px-4">
             <p className="font-headline text-lg font-semibold text-on-surface">You&apos;re clucked in</p>
             {round.type === 'multiple_choice' && answer && (
               <p className="mt-2 inline-block rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-sm font-body font-semibold text-primary">
@@ -208,7 +208,7 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
       </div>
 
       {/* Player answer status list */}
-      <div className="mt-6 bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-4">
+      <div className="mt-6 bg-surface-container-lowest rounded-xl border border-outline-variant/60 p-4">
         <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 font-label">
           {answeredIds.size} of {players.length} answered
         </p>

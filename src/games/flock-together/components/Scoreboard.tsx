@@ -78,7 +78,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
           </div>
         )}
 
-        <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 divide-y divide-outline-variant/20">
+        <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 divide-y divide-outline-variant/20">
           {sorted.map((player, i) => (
             <li key={player.id} className="px-4 py-3 flex items-center justify-between">
               <span className="flex items-center gap-1.5 font-medium text-on-surface font-body">

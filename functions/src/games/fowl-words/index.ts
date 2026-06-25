@@ -175,6 +175,7 @@ export const fowlWordsStartGame = onCall(async (request) => {
     eliminationReason: '',
     clueStarVotes: {},
     guesserStarVote: null,
+    eligiblePlayerCount: game.playerIds.length,
   })
   batch.update(gameRef, {
     status: 'playing',
@@ -229,9 +230,10 @@ export const submitClue = onCall(async (request) => {
     [`clueTimestamps.${uid}`]: FieldValue.serverTimestamp(),
   })
 
-  // Check if all non-guesser players have submitted
+  // Check if all eligible non-guesser players have submitted
+  // Use eligiblePlayerCount snapshotted at round creation so late joiners don't block dedup
   const playersSnap = await gameRef.collection('players').get()
-  const nonGuesserCount = playersSnap.docs.length - 1
+  const nonGuesserCount = (roundSnap.data()!.eligiblePlayerCount ?? playersSnap.docs.length) - 1
   const updatedRound = await roundRef.get()
   const cluesCount = Object.keys(updatedRound.data()!.cluesByPlayer ?? {}).length
 
@@ -298,9 +300,10 @@ export const fowlWordsSubmitWordVote = onCall(async (request) => {
 
   await roundRef.update({ [`wordVotes.${uid}`]: wordIndex })
 
-  // Auto-finalize if all non-guessers have voted
+  // Auto-finalize if all eligible non-guessers have voted
+  // Use eligiblePlayerCount snapshotted at round creation so late joiners don't block finalization
   const playersSnap = await firestore.collection('games').doc(gameId).collection('players').get()
-  const nonGuesserCount = playersSnap.docs.length - 1
+  const nonGuesserCount = (roundSnap.data()!.eligiblePlayerCount ?? playersSnap.docs.length) - 1
   const updatedRound = await roundRef.get()
   const voteCount = Object.keys(updatedRound.data()!.wordVotes ?? {}).length
 

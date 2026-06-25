@@ -456,6 +456,7 @@ export async function advanceToNextRound(gameId: string): Promise<void> {
     eliminationReason: '',
     clueStarVotes: {},
     guesserStarVote: null,
+    eligiblePlayerCount: playerIds.length,
   })
 
   await gameRef.update({

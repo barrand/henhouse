@@ -140,7 +140,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
               The Henhouse <span className="text-on-surface-variant font-normal text-sm ml-1">({players.length})</span>
             </h3>
           </div>
-          <div className="bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.3)] border border-outline-variant/15 relative overflow-hidden">
+          <div className="bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.3)] border border-outline-variant/60 relative overflow-hidden">
             <span className="material-symbols-outlined absolute -top-2.5 -left-2.5 opacity-15 -rotate-[15deg] text-primary text-6xl pointer-events-none">eco</span>
             <ul className="space-y-4 relative z-10">
               {players.map((p) => (
@@ -173,11 +173,11 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
           <section className="mb-8">
             <h3 className="font-headline text-lg font-semibold text-primary mb-3 px-1">Game Settings</h3>
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 flex flex-col gap-1">
+              <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/60 flex flex-col gap-1">
                 <span className="font-label text-[10px] uppercase tracking-wider text-secondary">Rounds</span>
                 <span className="font-headline text-xl font-bold">{game.settings.totalRounds}</span>
               </div>
-              <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 flex flex-col gap-1">
+              <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/60 flex flex-col gap-1">
                 <span className="font-label text-[10px] uppercase tracking-wider text-secondary">Timer</span>
                 <span className="font-headline text-xl font-bold">{game.settings.secondsPerRound}s</span>
               </div>
@@ -188,7 +188,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
         {/* Patriotic Mode Toggle */}
         {isHost && (
           <section className="mb-8 space-y-3">
-            <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/10 flex items-center justify-between">
+            <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/60 flex items-center justify-between">
               <div className="flex-1">
                 <h4 className="font-headline text-base font-semibold text-on-surface mb-1">🎆 Add patriotic flavor to the game</h4>
                 <p className="text-xs text-on-surface-variant">Include America's 250th anniversary questions</p>
@@ -208,7 +208,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
             </div>
             <button
               onClick={handleResetQuestionCooldowns}
-              className="w-full bg-surface-container-low hover:bg-surface-container p-3 rounded-xl border border-outline-variant/10 transition-colors flex items-center justify-center gap-2 text-on-surface text-sm font-medium"
+              className="w-full bg-surface-container-low hover:bg-surface-container p-3 rounded-xl border border-outline-variant/60 transition-colors flex items-center justify-center gap-2 text-on-surface text-sm font-medium"
             >
               <span className="material-symbols-outlined text-lg">refresh</span>
               Reset Question Cooldowns

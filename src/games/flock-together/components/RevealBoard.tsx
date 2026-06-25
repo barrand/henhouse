@@ -58,7 +58,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
       case 'outlier':
         return <span className="text-xs font-bold bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded-full font-label">FLOWN THE COOP</span>
       case 'no-answer':
-        return <span className="text-xs font-bold bg-surface-container text-outline px-2 py-0.5 rounded-full font-label">NO ANSWER</span>
+        return <span className="text-xs font-bold bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-full font-label">NO ANSWER</span>
       default:
         return null
     }
@@ -101,7 +101,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
                   ? 'bg-primary-fixed/20 border-primary-fixed-dim'
                   : result === 'rotten'
                   ? 'bg-tertiary-fixed/20 border-tertiary-fixed-dim'
-                  : 'bg-surface-container-lowest border-outline-variant/30'
+                  : 'bg-surface-container-lowest border-outline-variant/60'
               }`}
             >
               <div className="flex flex-col gap-0.5">
@@ -113,7 +113,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
                     </span>
                   )}
                 </span>
-                <span className="text-outline text-sm font-body">
+                <span className="text-on-surface-variant text-sm font-body">
                   {playerAnswers[playerId] ? `"${playerAnswers[playerId]}"` : '—'}
                 </span>
               </div>

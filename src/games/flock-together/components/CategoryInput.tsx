@@ -53,7 +53,7 @@ export default function CategoryInput({ categories, editable, onAdd, onRemove }:
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-            className="w-full bg-surface-container-lowest border-none rounded-xl py-4 pl-5 pr-14 shadow-[0_4px_12px_rgba(0,0,0,0.2)] focus:ring-1 focus:ring-primary/20 placeholder:text-on-surface-variant/40 text-sm"
+            className="w-full bg-surface-container-low border-2 border-outline rounded-xl py-4 pl-5 pr-14 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none placeholder:text-outline/50 text-sm transition-all"
             maxLength={30}
           />
           <button

@@ -30,20 +30,30 @@ export const joinGame = onCall(async (request) => {
   const gameSnap = await gameRef.get()
 
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
-  if (gameSnap.data()!.status !== 'lobby') throw new HttpsError('failed-precondition', 'Game already started')
+  const gameStatus = gameSnap.data()!.status
+  if (gameStatus === 'finished') throw new HttpsError('failed-precondition', 'This game has already ended')
+  if (gameStatus === 'abandoned') throw new HttpsError('failed-precondition', 'This game was abandoned')
+
+  // If the player already has a doc in this game, they're reconnecting — don't overwrite their score
+  const playerDocRef = gameRef.collection('players').doc(uid)
+  const playerDocSnap = await playerDocRef.get()
+  if (playerDocSnap.exists) {
+    return { gameId, gameType: gameType ?? 'flock-together' }
+  }
 
   await gameRef.update({ playerIds: FieldValue.arrayUnion(uid) })
 
   // Player doc shape varies by game type
   if (gameType === 'flock-together') {
-    await gameRef.collection('players').doc(uid).set({
+    await playerDocRef.set({
       name: playerName.trim(),
       eggs: 0,
       connected: true,
     })
   } else {
-    await gameRef.collection('players').doc(uid).set({
+    await playerDocRef.set({
       name: playerName.trim(),
+      score: 0,
       connected: true,
     })
   }

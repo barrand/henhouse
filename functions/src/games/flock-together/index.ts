@@ -171,6 +171,7 @@ export const flockStartGame = onCall(async (request) => {
     answerGroups: [],
     flockAnswer: [],
     results: {},
+    eligiblePlayerCount: game.playerIds.length,
   })
 
   await gameRef.update({ status: 'playing', currentRound: 1 })
@@ -215,7 +216,7 @@ export const submitAnswer = onCall(async (request) => {
   })
 
   const gameSnap = await db.collection('games').doc(gameId).get()
-  const playerCount = gameSnap.data()!.playerIds.length
+  const playerCount = roundData.eligiblePlayerCount ?? gameSnap.data()!.playerIds.length
 
   const newCount = await db.runTransaction(async (tx) => {
     const rSnap = await tx.get(roundRef)
@@ -577,6 +578,7 @@ async function doAdvanceRound(gameId: string) {
     answerGroups: [],
     flockAnswer: [],
     results: {},
+    eligiblePlayerCount: game.playerIds.length,
   })
 
   await gameRef.update({ currentRound: nextRound })
