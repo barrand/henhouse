@@ -2,7 +2,8 @@
 
 Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material 3 tokens). Players join via room code, no install needed.
 
-**URLs:** `chickenparty.web.app` (main), `flockgame.web.app` (legacy), `flock-together-game.web.app` (dev)
+**Production:** `chickenparty.web.app` (chickenparty Firebase project) — **this is the only one that matters**
+**Legacy/Unused:** `flockgame.web.app` (flockgame project), `flock-together-game.web.app` (flock-together-game project)
 **Local:** `/Users/bbarrand/Documents/Projects/HerdMentality`
 
 ---
