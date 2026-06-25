@@ -33,6 +33,24 @@ export default function RoundResultView({ game, round, players, isHost, currentP
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
   const guesserName = guesserPlayer?.name ?? 'The guesser'
 
+  // Derive fast bonus amounts per player by back-calculating from pointsThisRound.
+  // expected = attemptPts ± dupPenalty + giverStars + guesserStar; remainder = fast bonus.
+  const fastBonusMap: Record<string, number> = {}
+  if (round.isCorrect) {
+    const attemptPts = [10, 5, 2, 1][round.currentAttempt - 1] ?? 0
+    for (let gIdx = 0; gIdx < round.clueGroups.length; gIdx++) {
+      const g = round.clueGroups[gIdx]
+      if (!round.visibleGroupIndexes.includes(gIdx)) continue
+      const giverStarPts = Object.values(round.clueStarVotes ?? {}).filter((v) => v === gIdx).length
+      const guesserStarPts = round.guesserStarVote === gIdx ? 5 : 0
+      const basePts = attemptPts + (g.isDuplicate ? -1 : 0) + giverStarPts + guesserStarPts
+      for (const pid of g.playerIds) {
+        const bonus = (round.pointsThisRound[pid] ?? 0) - basePts
+        if (bonus > 0) fastBonusMap[pid] = bonus
+      }
+    }
+  }
+
   return (
     <main className="flex-1 flex flex-col px-4 py-4">
       <div className="max-w-md w-full mx-auto space-y-4">
@@ -121,13 +139,11 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                 const displayText = Array.from(new Set(group.clueTexts.map((t) => t.trim()))).join(' / ')
                 const names = group.playerIds.map((id) => players.find((p) => p.id === id)?.name ?? '?').join(', ')
 
-                // Determine per-player breakdown for "yours" row
+                // Fast bonus winner(s) in this group — shown to all players
+                const groupFastWinners = group.playerIds.filter((pid) => fastBonusMap[pid])
                 const yourId = currentPlayerId ?? ''
-                const yourPoints = round.pointsThisRound[yourId] ?? 0
+                const gotFastBonus = isYours && !!fastBonusMap[yourId] && group.playerIds.includes(yourId)
                 const attemptPts = [10, 5, 2, 1][round.currentAttempt - 1] ?? 0
-                const gotFastBonus = isYours && isVisible && round.isCorrect && (
-                  group.isDuplicate ? yourPoints === attemptPts - 1 + 2 : yourPoints === attemptPts + 2
-                )
 
                 // Star counts
                 const giverStarCount = Object.values(round.clueStarVotes ?? {}).filter((v) => v === idx).length
@@ -194,6 +210,11 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                               ✅ Used
                             </div>
                           ) : null}
+                          {groupFastWinners.length > 0 && (
+                            <div className="text-[10px] text-tertiary font-bold uppercase tracking-wider font-label">
+                              ⚡ +{fastBonusMap[groupFastWinners[0]]} fastest
+                            </div>
+                          )}
                           {giverStarCount > 0 && (
                             <div className="text-[11px] text-on-surface-variant font-bold font-label">
                               ⭐ {giverStarCount}
@@ -213,7 +234,7 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                         )}
                         {gotFastBonus && (
                           <span className="bg-tertiary-container text-on-tertiary-container text-[10px] font-bold px-2 py-0.5 rounded-full font-label">
-                            ⚡ +2 fastest
+                            ⚡ +{fastBonusMap[yourId]} fastest
                           </span>
                         )}
                         {group.isDuplicate && (
