@@ -153,7 +153,10 @@ export const fowlWordsStartGame = onCall(async (request) => {
   const { Timestamp } = await import('firebase-admin/firestore')
   const wordSelectionDeadline = Timestamp.fromMillis(Date.now() + 15 * 1000)
 
-  await gameRef.collection('rounds').doc('1').set({
+  // Batch write so round doc and game status change are atomic — clients can't
+  // see game.status === 'playing' without the round document already existing.
+  const batch = firestore.batch()
+  batch.set(gameRef.collection('rounds').doc('1'), {
     secretWord: '',
     wordOptions,
     wordVotes: {},
@@ -173,13 +176,13 @@ export const fowlWordsStartGame = onCall(async (request) => {
     clueStarVotes: {},
     guesserStarVote: null,
   })
-
-  await gameRef.update({
+  batch.update(gameRef, {
     status: 'playing',
     currentRound: 1,
     currentGuesser: firstGuesser,
     cardsRemaining,
   })
+  await batch.commit()
 })
 
 // -- SUBMIT CLUE --
