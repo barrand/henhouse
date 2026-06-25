@@ -2,11 +2,26 @@
 
 Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material 3 tokens). Players join via room code, no install needed.
 
-**Production:** `chickenparty.web.app` (Firebase project: `flock-together-game`) — **this is the only one that matters**
-**Deployment:** `firebase deploy --only functions --project flock-together-game`
-**Console:** https://console.firebase.google.com/u/0/project/flock-together-game/overview
-**Legacy/Unused:** `flockgame.web.app` and `flock-together-game.web.app`
-**Local:** `/Users/bbarrand/Documents/Projects/HerdMentality`
+## Deployment & URLs
+
+**⚠️ Important:** The public URL is `chickenparty.web.app` but the Firebase project ID is `flock-together-game` — use the project ID, not the URL.
+
+| Environment | URL | Firebase Project | Deploy Command |
+|---|---|---|---|
+| **Production** | https://chickenparty.web.app | `flock-together-game` | `firebase deploy --only functions --project flock-together-game` |
+| Dev/Testing | flock-together-game.web.app | (same) | (same) |
+| Legacy | flockgame.web.app | (unused) | — |
+
+**Firebase Console:** https://console.firebase.google.com/u/0/project/flock-together-game/overview
+
+**Deploy workflow:**
+1. Make changes and test locally
+2. Commit to `main` 
+3. Run: `firebase deploy --only functions --project flock-together-game` (functions only)
+4. Or: `firebase deploy --project flock-together-game` (full deploy: hosting + functions)
+5. Watch for "✔ Deploy complete!" message
+
+**Local testing:** `/Users/bbarrand/Documents/Projects/HerdMentality` — run `npm run dev` and open localhost
 
 ---
 
