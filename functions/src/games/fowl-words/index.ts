@@ -441,11 +441,6 @@ export const fowlWordsForceDedup = onCall(async (request) => {
     throw new HttpsError('failed-precondition', 'Already past clue submission')
   }
 
-  const clues = roundSnap.data()!.cluesByPlayer ?? {}
-  if (Object.keys(clues).length === 0) {
-    throw new HttpsError('failed-precondition', 'No clues submitted yet')
-  }
-
   await runDeduplication(gameId, roundNum)
 })
 

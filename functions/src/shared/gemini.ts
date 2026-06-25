@@ -339,6 +339,33 @@ function fallbackExactMatchGrouping(clues: Record<string, string>): DuplicateClu
 
 // ── Fowl Words: Guess Evaluation ────────────────────────────────────────────────
 
+export function normalizeGuess(str: string): string {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // strip diacritics: café → cafe
+    .replace(/[^a-z0-9]/g, '') // strip spaces, hyphens, apostrophes: fire-truck → firetruck
+}
+
+export function fuzzyMatch(guess: string, secret: string): boolean {
+  const g = normalizeGuess(guess)
+  const s = normalizeGuess(secret)
+
+  if (g === s) return true // catches accents, spacing, hyphens
+
+  // Simple plural: dog/dogs, cat/cats
+  if (g + 's' === s || s + 's' === g) return true
+
+  // -es plural: beach/beaches, class/classes
+  if (g + 'es' === s || s + 'es' === g) return true
+
+  // -ies plural: berry/berries, party/parties
+  if (g.endsWith('y') && g.slice(0, -1) + 'ies' === s) return true
+  if (s.endsWith('y') && s.slice(0, -1) + 'ies' === g) return true
+
+  return false
+}
+
 export async function evaluateGuess(secretWord: string, guess: string): Promise<boolean> {
   const trimmedGuess = guess.trim()
   const trimmedSecret = secretWord.trim()
@@ -355,6 +382,9 @@ export async function evaluateGuess(secretWord: string, guess: string): Promise<
   if (Math.abs(trimmedGuess.length - trimmedSecret.length) > Math.max(5, trimmedSecret.length)) {
     return false
   }
+
+  // Fuzzy fast path: accents, spacing/hyphens, simple plurals — no Gemini needed
+  if (fuzzyMatch(trimmedGuess, trimmedSecret)) return true
 
   try {
     const model = getModel()

@@ -128,6 +128,24 @@ export async function runDeduplication(gameId: string, roundNum: number): Promis
   const clueGroups = buildClueGroups(result.groups, cluesByPlayer)
   console.log('[runDeduplication] Built clue groups:', JSON.stringify(clueGroups))
 
+  // Fast-path: no clues submitted — jump straight to scored
+  if (clueGroups.length === 0) {
+    console.log('[runDeduplication] No clue groups — fast-pathing to scored')
+    await roundRef.update({
+      status: 'scored',
+      clueGroups: [],
+      visibleGroupIndexes: [],
+      currentAttempt: 1,
+      maxAttempts: 1,
+      isCorrect: false,
+      guesserAnswer: '',
+      guessAttempts: [],
+      pointsThisRound: {},
+      eliminationReason: result.reason,
+    })
+    return
+  }
+
   const visibleGroupIndexes = initialVisibleGroupIndexes(clueGroups)
   console.log('[runDeduplication] Initial visible group indexes:', visibleGroupIndexes)
 

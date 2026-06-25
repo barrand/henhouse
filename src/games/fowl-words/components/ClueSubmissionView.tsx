@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
-import { submitClue, forceDedup, advanceRound } from '../service'
+import { submitClue, forceDedup } from '../service'
 
 interface Props {
   game: GameData
@@ -48,10 +48,8 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
         if (isHost && !hostForcedRef.current) {
           hostForcedRef.current = true
           setTimeout(async () => {
-            const cluesCount = Object.keys(round.cluesByPlayer).length
             try {
-              if (cluesCount === 0) await advanceRound(game.id)
-              else await forceDedup(game.id, game.currentRound)
+              await forceDedup(game.id, game.currentRound)
             } catch { /* ignore — might already be past clue-submission */ }
           }, 2000)
         }
