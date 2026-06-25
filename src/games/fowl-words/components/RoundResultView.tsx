@@ -87,11 +87,11 @@ export default function RoundResultView({ game, round, players, isHost, currentP
         </div>
 
         {/* Secret Word — Flock-style premium card */}
-        <div className="bg-primary-fixed/50 border-2 border-primary-fixed-dim rounded-2xl px-4 py-3 text-center shadow-sm">
-          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-0.5">
+        <div className="bg-primary-fixed border-2 border-primary-fixed-dim rounded-2xl px-4 py-3 text-center shadow-sm">
+          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-primary-fixed-variant font-bold mb-0.5">
             The word was
           </p>
-          <p className="font-headline text-3xl font-bold text-on-surface tracking-tight">
+          <p className="font-headline text-3xl font-bold text-on-primary-fixed tracking-tight">
             {round.secretWord}
           </p>
         </div>
