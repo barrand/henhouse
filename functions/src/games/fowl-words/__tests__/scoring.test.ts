@@ -7,16 +7,13 @@ const unique = (playerIds: string[]): ClueGroup => ({ playerIds, clueTexts: play
 const dup = (playerIds: string[]): ClueGroup => ({ playerIds, clueTexts: playerIds.map(() => 'clue'), isDuplicate: true })
 
 describe('fastBonusPrizes', () => {
-  it('returns [3] for ≤5 givers', () => {
+  it('returns [3] for ≤4 givers (≤5 players)', () => {
     expect(fastBonusPrizes(0)).toEqual([3])
     expect(fastBonusPrizes(3)).toEqual([3])
-    expect(fastBonusPrizes(5)).toEqual([3])
+    expect(fastBonusPrizes(4)).toEqual([3])
   })
-  it('returns [3, 2] for 6–8 givers', () => {
-    expect(fastBonusPrizes(6)).toEqual([3, 2])
-    expect(fastBonusPrizes(8)).toEqual([3, 2])
-  })
-  it('returns [3, 2, 1] for 9+ givers', () => {
+  it('returns [3, 2, 1] for 5+ givers (6+ players)', () => {
+    expect(fastBonusPrizes(5)).toEqual([3, 2, 1])
     expect(fastBonusPrizes(9)).toEqual([3, 2, 1])
     expect(fastBonusPrizes(15)).toEqual([3, 2, 1])
   })
@@ -68,7 +65,7 @@ describe('computeRoundScores', () => {
   // ── Fast Bonus ─────────────────────────────────────────────────────────────
 
   describe('Fast bonus (tiered by giver count)', () => {
-    it('awards +3 to earliest submitted among visible players (≤5 givers default)', () => {
+    it('awards +3 to earliest submitted among visible players (≤4 givers)', () => {
       const groups = [unique(['A']), unique(['B'])]
       const scores = computeRoundScores(groups, [0, 1], 'G', true, 1, { A: 100, B: 200 })
       expect(scores['A']).toBe(13) // 10 + 3 fast
@@ -108,14 +105,15 @@ describe('computeRoundScores', () => {
       expect(scores['A']).toBe(5)           // 5 used, no fast bonus
     })
 
-    it('awards +3/+2 to top 2 for 6–8 givers', () => {
+    it('awards +3/+2/+1 to top 3 for 5+ givers (6+ players)', () => {
       // 6 givers: A, B, C, D, E, F (+ guesser G = 7 players total)
       const groups = [unique(['A']), unique(['B']), unique(['C']), unique(['D']), unique(['E']), unique(['F'])]
       const scores = computeRoundScores(groups, [0, 1, 2, 3, 4, 5], 'G', true, 1,
         { A: 300, B: 100, C: 200, D: 400, E: 500, F: 600 }, 6)
       expect(scores['B']).toBe(10 + 3) // fastest → +3
       expect(scores['C']).toBe(10 + 2) // 2nd fastest → +2
-      expect(scores['A']).toBe(10)     // 3rd → no bonus
+      expect(scores['A']).toBe(10 + 1) // 3rd fastest → +1
+      expect(scores['D']).toBe(10)     // 4th → no bonus
     })
 
     it('awards +3/+2/+1 to top 3 for 9+ givers', () => {
@@ -216,8 +214,9 @@ describe('computeRoundScores', () => {
     })
 
     it('handles large group (8 givers): 2 unique + 3 dup pairs, success on attempt 4', () => {
-      // 8 givers → 6–8 tier → top 2 get +3/+2
-      // A, B unique; C&D pair1; E&F pair2; G_dup&H pair3 (all eventually visible)
+      // 8 givers → 5+ tier → top 3 get +3/+2/+1
+      // A, B unique; C&D pair1; E&F pair2; P&H pair3 (all eventually visible)
+      // Visible sorted by timestamp: A(100), B(200), C(300), D(400), ...
       const groups = [
         unique(['A']),
         unique(['B']),
@@ -228,14 +227,14 @@ describe('computeRoundScores', () => {
       const timestamps = { A: 100, B: 200, C: 300, D: 400, E: 500, F: 600, P: 700, H: 800 }
       const scores = computeRoundScores(groups, [0, 1, 2, 3, 4], 'G', true, 4, timestamps, 8)
 
-      expect(scores['G']).toBe(1)       // guesser: 1 pt (attempt 4)
-      expect(scores['A']).toBe(1 + 3)   // 1 used + 3 fast (1st place, earliest)
-      expect(scores['B']).toBe(1 + 2)   // 1 used + 2 fast (2nd place)
-      expect(scores['C']).toBe(1 - 1)   // 1 used - 1 dup = 0
-      expect(scores['D']).toBe(1 - 1)   // 0
-      expect(scores['E']).toBe(1 - 1)   // 0
-      expect(scores['F']).toBe(1 - 1)   // 0
-      expect(scores['H']).toBe(1 - 1)   // 0
+      expect(scores['G']).toBe(1)           // guesser: 1 pt (attempt 4)
+      expect(scores['A']).toBe(1 + 3)       // 1 used + 3 fast (1st place)
+      expect(scores['B']).toBe(1 + 2)       // 1 used + 2 fast (2nd place)
+      expect(scores['C']).toBe(1 - 1 + 1)   // 1 used - 1 dup + 1 fast (3rd place) = 1
+      expect(scores['D']).toBe(1 - 1)       // 1 used - 1 dup = 0
+      expect(scores['E']).toBe(1 - 1)       // 0
+      expect(scores['F']).toBe(1 - 1)       // 0
+      expect(scores['H']).toBe(1 - 1)       // 0
     })
 
     it('uses no timestamps (defaults) — fast bonus goes to first array element among visible', () => {

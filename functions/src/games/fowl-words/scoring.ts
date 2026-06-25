@@ -11,9 +11,8 @@
 //   USED:      +attemptPts if your group is visible when guesser succeeds
 //   FAST:      Tiered bonus for fastest clue submitters among USED clues.
 //              Number of winners scales with giver count (total players - 1):
-//                ≤5 givers: 1st place → +3
-//                6–8 givers: 1st → +3, 2nd → +2
-//                9+ givers:  1st → +3, 2nd → +2, 3rd → +1
+//                ≤4 givers (≤5 players): 1st → +3
+//                5+ givers (6+ players): 1st → +3, 2nd → +2, 3rd → +1
 //   DUPLICATE: -1 always, for every player in an isDuplicate group
 //              (even if their group was later unlocked / shown)
 //
@@ -30,13 +29,11 @@ export const MAX_ATTEMPTS = 4
 /**
  * Returns the fast-bonus prizes for a given giver count.
  * Prizes are awarded to the top N fastest submitters among USED clues.
- *   ≤5 givers: [+3]
- *   6–8 givers: [+3, +2]
- *   9+ givers:  [+3, +2, +1]
+ *   ≤4 givers (≤5 players): [+3]
+ *   5+ givers (6+ players): [+3, +2, +1]
  */
 export function fastBonusPrizes(giverCount: number): number[] {
-  if (giverCount >= 9) return [3, 2, 1]
-  if (giverCount >= 6) return [3, 2]
+  if (giverCount >= 5) return [3, 2, 1]
   return [3]
 }
 
