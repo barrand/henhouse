@@ -78,7 +78,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
 
   return (
     <main className="flex-1 flex flex-col px-4 py-4">
-      <div className="max-w-md w-full mx-auto space-y-4">
+      <div className="max-w-md w-full mx-auto space-y-3">
         {/* Secret word visible to non-guessers only — Flock-style premium card */}
         {!isGuesser && (
           <div className="bg-primary-fixed border-2 border-primary-fixed-dim rounded-2xl px-4 py-3 text-center shadow-sm">
@@ -91,20 +91,20 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
           </div>
         )}
 
-        {/* Point counter — visible to everyone */}
-        <PointCounter currentAttempt={round.currentAttempt} maxAttempts={round.maxAttempts} />
+        {/* Point counter — compact bar for guesser, full card for givers */}
+        <PointCounter currentAttempt={round.currentAttempt} maxAttempts={round.maxAttempts} compact={isGuesser} />
 
         {/* Heading */}
         {isGuesser ? (
           <div className="text-center">
-            <h2 className="font-headline text-2xl font-bold text-on-surface">
+            <h2 className="font-headline text-lg font-bold text-on-surface">
               {allDuplicates
                 ? 'All clues are duplicates!'
                 : round.currentAttempt === 1
                 ? 'Your clues'
                 : 'New clue unlocked!'}
             </h2>
-            <p className="text-on-surface-variant text-sm mt-1 font-body">
+            <p className="text-on-surface-variant text-xs mt-0.5 font-body">
               {allDuplicates
                 ? 'Everyone thought of the same thing. Unlock one to see it.'
                 : round.currentAttempt === 1
@@ -181,7 +181,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
         )}
 
         {/* Clue groups — only shown when there are visible clues */}
-        {!allDuplicates && <div className="space-y-2">
+        {!allDuplicates && <div className={isGuesser ? "grid grid-cols-2 gap-2" : "space-y-2"}>
           {round.clueGroups.map((group, idx) => {
             const isVisible = visibleSet.has(idx)
 
@@ -197,7 +197,9 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
               return (
                 <div
                   key={idx}
-                  className={`relative bg-surface-container-lowest rounded-2xl border-2 px-4 py-3 shadow-sm transition-all ${
+                  className={`relative bg-surface-container-lowest rounded-2xl border-2 shadow-sm transition-all ${
+                    isGuesser ? 'px-3 py-2.5' : 'px-4 py-3'
+                  } ${
                     justUnlocked
                       ? 'border-tertiary scale-[1.02] shadow-[0_8px_24px_rgba(255,200,100,0.3)]'
                       : group.isDuplicate
@@ -210,7 +212,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                       🔓 Just unlocked
                     </span>
                   )}
-                  <p className="font-headline text-xl font-bold text-on-surface text-center">
+                  <p className={`font-headline font-bold text-on-surface text-center ${isGuesser ? 'text-lg' : 'text-xl'}`}>
                     {displayText}
                   </p>
                   {showVariants && (
@@ -218,7 +220,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                       same word, different spelling
                     </p>
                   )}
-                  <p className="text-xs text-on-surface-variant text-center mt-1 font-body">
+                  <p className={`text-on-surface-variant text-center font-body ${isGuesser ? 'text-[10px] mt-0.5' : 'text-xs mt-1'}`}>
                     {group.playerIds.length === 1
                       ? `from ${playerName(group.playerIds[0])}`
                       : `from ${group.playerIds.map(playerName).join(', ')}`}
@@ -285,9 +287,10 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
           })}
         </div>}
 
-        {/* Guesser's input — only shown when there are visible clues to guess from */}
+        {/* Guesser's input — sticky at bottom so clue grid is scrollable above it */}
         {isGuesser && !allDuplicates && (
-          <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 px-4 py-3 space-y-2.5 shadow-sm mt-1">
+          <div className="sticky bottom-0 bg-background pt-2 pb-1 -mx-4 px-4">
+          <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 px-4 py-3 space-y-2.5 shadow-[0_-4px_16px_rgba(0,0,0,0.3)]">
             {/* Previous wrong guesses */}
             {round.guessAttempts?.length > 0 && (
               <div className="text-center space-y-1">
@@ -334,6 +337,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
               {submitting ? 'Checking…' : 'Submit guess'}
             </button>
             {error && <p className="text-center text-error text-sm font-body">{error}</p>}
+          </div>
           </div>
         )}
 

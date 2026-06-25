@@ -4,6 +4,7 @@ import { ATTEMPT_POINTS } from '../types'
 interface Props {
   currentAttempt: number  // 1-based
   maxAttempts: number
+  compact?: boolean
 }
 
 const HEN_CONFIG = [
@@ -13,7 +14,7 @@ const HEN_CONFIG = [
   { img: '/images/hen-embarrassed.svg', anim: '',                      label: 'No pressure…'              },
 ]
 
-export default function PointCounter({ currentAttempt, maxAttempts }: Props) {
+export default function PointCounter({ currentAttempt, maxAttempts, compact = false }: Props) {
   const safeAttempt = Math.max(1, Math.min(currentAttempt, ATTEMPT_POINTS.length))
   const points = ATTEMPT_POINTS[safeAttempt - 1] ?? 0
   const hen = HEN_CONFIG[safeAttempt - 1] ?? HEN_CONFIG[HEN_CONFIG.length - 1]
@@ -41,6 +42,19 @@ export default function PointCounter({ currentAttempt, maxAttempts }: Props) {
       default: return { bg: 'bg-surface-container-low', border: 'border-outline-variant/30', text: 'text-on-surface-variant', label: 'text-on-surface-variant' }
     }
   })()
+
+  if (compact) {
+    return (
+      <div className={`rounded-xl border-2 ${tint.bg} ${tint.border} px-4 py-2 flex items-center justify-between transition-all ${popping ? 'animate-hen-pop' : ''}`}>
+        <p className={`font-label text-[10px] uppercase tracking-[0.2em] ${tint.label} font-bold`}>
+          Attempt {safeAttempt} of {maxAttempts} · Guess for
+        </p>
+        <p className={`font-headline font-bold tabular-nums text-2xl ${tint.text} transition-all`}>
+          {points} <span className="text-sm">pts</span>
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className={`rounded-2xl border-2 ${tint.bg} ${tint.border} px-4 py-3 transition-all shadow-sm`}>
