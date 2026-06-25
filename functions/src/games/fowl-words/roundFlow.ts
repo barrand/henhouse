@@ -40,6 +40,9 @@ function getSecondsForAttempt(attemptNum: number): number {
  * Finalize the word-selection vote and transition to clue-submission.
  * Safe to call multiple times — uses a transaction to only process once.
  * Called when: timer expires (frontend) OR all non-guessers have voted.
+ *
+ * All vote tallying and the secretWord write happen inside the transaction so
+ * clients never see a clue-submission phase without the secret word present.
  */
 export async function finalizeWordSelection(gameId: string, roundNum: number): Promise<void> {
   const firestore = db()
@@ -49,53 +52,39 @@ export async function finalizeWordSelection(gameId: string, roundNum: number): P
     .collection('rounds')
     .doc(String(roundNum))
 
-  // Transaction: only finalize once
-  const finalized = await firestore.runTransaction(async (tx) => {
+  await firestore.runTransaction(async (tx) => {
     const snap = await tx.get(roundRef)
-    if (!snap.exists) return false
+    if (!snap.exists) return
     const data = snap.data()!
-    if (data.status !== 'word-selection') return false // already finalized
-    tx.update(roundRef, { status: 'clue-submission' }) // placeholder to claim the transition
-    return true
-  })
-  if (!finalized) return
+    if (data.status !== 'word-selection') return // already finalized
 
-  const roundSnap = await roundRef.get()
-  const data = roundSnap.data()!
-  const wordOptions: string[] = data.wordOptions ?? []
-  const wordVotes: Record<string, number> = data.wordVotes ?? {}
+    const wordOptions: string[] = data.wordOptions ?? []
+    const wordVotes: Record<string, number> = data.wordVotes ?? {}
 
-  // Tally votes
-  const tally = [0, 0, 0]
-  const firstVoteTime: Record<number, number> = {}
-  for (const [, idx] of Object.entries(wordVotes)) {
-    if (idx >= 0 && idx <= 2) {
-      tally[idx]++
+    // Tally votes
+    const tally = [0, 0, 0]
+    for (const [, idx] of Object.entries(wordVotes)) {
+      if (idx >= 0 && idx <= 2) tally[idx]++
     }
-  }
 
-  // Pick winner: most votes; tiebreaker: random among tied (simple for now)
-  let winnerIdx = 0
-  let maxVotes = -1
-  for (let i = 0; i < 3; i++) {
-    if (tally[i] > maxVotes) {
-      maxVotes = tally[i]
-      winnerIdx = i
+    // Pick winner: most votes; tiebreaker: random among tied
+    let winnerIdx = 0
+    let maxVotes = -1
+    for (let i = 0; i < 3; i++) {
+      if (tally[i] > maxVotes) { maxVotes = tally[i]; winnerIdx = i }
     }
-  }
-  // If no votes at all, pick random
-  if (maxVotes === 0) winnerIdx = Math.floor(Math.random() * wordOptions.length)
+    if (maxVotes === 0) winnerIdx = Math.floor(Math.random() * wordOptions.length)
 
-  const secretWord = wordOptions[winnerIdx] ?? wordOptions[0] ?? ''
+    const secretWord = wordOptions[winnerIdx] ?? wordOptions[0] ?? ''
+    const clueSubmissionDeadline = Timestamp.fromMillis(Date.now() + SECONDS_PER_CLUE_SUBMISSION * 1000)
 
-  const clueSubmissionDeadline = Timestamp.fromMillis(Date.now() + SECONDS_PER_CLUE_SUBMISSION * 1000)
-
-  await roundRef.update({
-    status: 'clue-submission',
-    secretWord,
-    cluesByPlayer: {},
-    clueTimestamps: {},
-    clueSubmissionDeadline,
+    tx.update(roundRef, {
+      status: 'clue-submission',
+      secretWord,
+      cluesByPlayer: {},
+      clueTimestamps: {},
+      clueSubmissionDeadline,
+    })
   })
 }
 

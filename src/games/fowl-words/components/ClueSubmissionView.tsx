@@ -154,9 +154,13 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
           <p className="font-label text-[10px] uppercase tracking-[0.2em] text-primary mb-2 font-bold">
             Secret word for {guesserPlayer?.name ?? 'the guesser'}
           </p>
-          <p className="font-headline text-5xl font-bold text-on-surface tracking-tight">
-            {round.secretWord}
-          </p>
+          {round.secretWord ? (
+            <p className="font-headline text-5xl font-bold text-on-surface tracking-tight">
+              {round.secretWord}
+            </p>
+          ) : (
+            <div className="h-14 w-48 mx-auto rounded-xl bg-primary-fixed-dim/40 animate-pulse" />
+          )}
         </div>
 
         {/* Clue submission timer */}
