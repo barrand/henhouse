@@ -71,14 +71,14 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
       </div>
 
       {hasFlock ? (
-        <div className="bg-primary-fixed/50 border-2 border-primary-fixed-dim rounded-2xl p-4 text-center">
-          <p className="font-label text-sm font-bold text-primary uppercase tracking-wide">The Flock Said</p>
-          <p className="font-headline text-2xl font-bold text-on-surface mt-1">"{round.flockAnswer?.[0]}"</p>
+        <div className="bg-primary-fixed border-2 border-primary-fixed-dim rounded-2xl p-4 text-center">
+          <p className="font-label text-sm font-bold text-on-primary-fixed-variant uppercase tracking-wide">The Flock Said</p>
+          <p className="font-headline text-2xl font-bold text-on-primary-fixed mt-1">"{round.flockAnswer?.[0]}"</p>
         </div>
       ) : (
-        <div className="bg-secondary-fixed/30 border-2 border-secondary-fixed-dim rounded-2xl p-4 text-center">
-          <p className="font-headline text-lg font-bold text-secondary">No Flock!</p>
-          <p className="text-on-surface-variant text-sm font-body">No eggs awarded this round.</p>
+        <div className="bg-secondary-fixed border-2 border-secondary-fixed-dim rounded-2xl p-4 text-center">
+          <p className="font-headline text-lg font-bold text-on-secondary-fixed">No Flock!</p>
+          <p className="text-on-secondary-fixed-variant text-sm font-body">No eggs awarded this round.</p>
         </div>
       )}
 

@@ -69,6 +69,7 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 - `border-outline` — preferred for input/form field borders at full opacity
 - Never use `bg-surface-container-lowest` for interactive inputs — it's darker than the page; use `bg-surface-container-low` or higher for elevated inputs
 - `text-outline` — tertiary/disabled text only; `text-on-surface-variant` for supporting text
+- **Fixed-color info cards:** Never use `bg-primary-fixed`, `bg-secondary-fixed`, or `bg-tertiary-fixed` with an opacity modifier (e.g. `/50`) on cards that display primary information. Semi-transparent fixed colors over the dark surface produce a muddy mid-tone where both same-hue text and `text-on-surface` lose contrast. Always use the full-opacity token (`bg-primary-fixed`) paired with its semantic text tokens: `text-on-primary-fixed-variant` for labels/secondary text, `text-on-primary-fixed` for the main word/value. Apply the same rule to `secondary-fixed` and `tertiary-fixed` variants. Faint tints (`/20`) are fine for decorative row highlights where `text-on-surface` is the text color.
 
 ### Illustration rules
 - Prefer SVG from `public/images/` over emoji for any prominent visual moment (game states, loading screens, result screens)

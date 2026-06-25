@@ -34,11 +34,11 @@ export default function PointCounter({ currentAttempt, maxAttempts }: Props) {
 
   const tint = (() => {
     switch (points) {
-      case 10: return { bg: 'bg-primary-fixed/40', border: 'border-primary-fixed-dim', text: 'text-primary' }
-      case 5:  return { bg: 'bg-tertiary-container/60', border: 'border-tertiary', text: 'text-on-tertiary-container' }
-      case 2:  return { bg: 'bg-error-container/40', border: 'border-error/50', text: 'text-error' }
-      case 1:  return { bg: 'bg-error-container/60', border: 'border-error', text: 'text-error' }
-      default: return { bg: 'bg-surface-container-low', border: 'border-outline-variant/30', text: 'text-on-surface-variant' }
+      case 10: return { bg: 'bg-primary-fixed', border: 'border-primary-fixed-dim', text: 'text-on-primary-fixed', label: 'text-on-primary-fixed-variant' }
+      case 5:  return { bg: 'bg-tertiary-container/60', border: 'border-tertiary', text: 'text-on-tertiary-container', label: 'text-on-surface-variant' }
+      case 2:  return { bg: 'bg-error-container/40', border: 'border-error/50', text: 'text-error', label: 'text-on-surface-variant' }
+      case 1:  return { bg: 'bg-error-container/60', border: 'border-error', text: 'text-error', label: 'text-on-surface-variant' }
+      default: return { bg: 'bg-surface-container-low', border: 'border-outline-variant/30', text: 'text-on-surface-variant', label: 'text-on-surface-variant' }
     }
   })()
 
@@ -51,13 +51,13 @@ export default function PointCounter({ currentAttempt, maxAttempts }: Props) {
           className={`w-20 h-20 flex-shrink-0 ${popping ? 'animate-hen-pop' : hen.anim}`}
         />
         <div className="flex-1 min-w-0">
-          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">
+          <p className={`font-label text-[10px] uppercase tracking-[0.2em] ${tint.label} font-bold`}>
             Attempt {safeAttempt} of {maxAttempts} · Guess for
           </p>
           <p className={`font-headline font-bold tabular-nums leading-none mt-0.5 text-4xl ${tint.text} transition-all`}>
             {points} <span className="text-xl">pts</span>
           </p>
-          <p className="font-body text-xs text-on-surface-variant mt-0.5 italic">{hen.label}</p>
+          <p className={`font-body text-xs ${tint.label} mt-0.5 italic`}>{hen.label}</p>
         </div>
       </div>
     </div>

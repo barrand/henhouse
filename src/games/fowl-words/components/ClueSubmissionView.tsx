@@ -150,16 +150,16 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
     <main className="flex-1 flex flex-col px-4 py-6">
       <div className="max-w-md w-full mx-auto space-y-5">
         {/* Secret Word Banner — uses Flock's premium card pattern */}
-        <div className="bg-primary-fixed/50 border-2 border-primary-fixed-dim rounded-2xl p-6 text-center shadow-sm">
-          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-primary mb-2 font-bold">
+        <div className="bg-primary-fixed border-2 border-primary-fixed-dim rounded-2xl p-6 text-center shadow-sm">
+          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-primary-fixed-variant mb-2 font-bold">
             Secret word for {guesserPlayer?.name ?? 'the guesser'}
           </p>
           {round.secretWord ? (
-            <p className="font-headline text-5xl font-bold text-on-surface tracking-tight">
+            <p className="font-headline text-5xl font-bold text-on-primary-fixed tracking-tight">
               {round.secretWord}
             </p>
           ) : (
-            <div className="h-14 w-48 mx-auto rounded-xl bg-primary-fixed-dim/40 animate-pulse" />
+            <div className="h-14 w-48 mx-auto rounded-xl bg-on-primary-fixed/20 animate-pulse" />
           )}
         </div>
 
