@@ -43,21 +43,21 @@ export default function PointCounter({ currentAttempt, maxAttempts }: Props) {
   })()
 
   return (
-    <div className={`rounded-2xl border-2 ${tint.bg} ${tint.border} px-5 py-4 transition-all shadow-sm`}>
-      <div className="flex items-center gap-4">
+    <div className={`rounded-2xl border-2 ${tint.bg} ${tint.border} px-4 py-3 transition-all shadow-sm`}>
+      <div className="flex items-center gap-3">
         <img
           src={hen.img}
           alt=""
-          className={`w-16 h-16 flex-shrink-0 ${popping ? 'animate-hen-pop' : hen.anim}`}
+          className={`w-20 h-20 flex-shrink-0 ${popping ? 'animate-hen-pop' : hen.anim}`}
         />
         <div className="flex-1 min-w-0">
           <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold">
             Attempt {safeAttempt} of {maxAttempts} · Guess for
           </p>
-          <p className={`font-headline font-bold tabular-nums leading-none mt-0.5 text-5xl ${tint.text} transition-all`}>
-            {points} <span className="text-2xl">pts</span>
+          <p className={`font-headline font-bold tabular-nums leading-none mt-0.5 text-4xl ${tint.text} transition-all`}>
+            {points} <span className="text-xl">pts</span>
           </p>
-          <p className="font-body text-xs text-on-surface-variant mt-1 italic">{hen.label}</p>
+          <p className="font-body text-xs text-on-surface-variant mt-0.5 italic">{hen.label}</p>
         </div>
       </div>
     </div>

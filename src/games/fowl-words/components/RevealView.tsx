@@ -77,15 +77,15 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
   const allDuplicates = visibleSet.size === 0 && round.clueGroups.length > 0
 
   return (
-    <main className="flex-1 flex flex-col px-4 py-6">
-      <div className="max-w-md w-full mx-auto space-y-5">
+    <main className="flex-1 flex flex-col px-4 py-4">
+      <div className="max-w-md w-full mx-auto space-y-4">
         {/* Secret word visible to non-guessers only — Flock-style premium card */}
         {!isGuesser && (
-          <div className="bg-primary-fixed/50 border-2 border-primary-fixed-dim rounded-2xl p-4 text-center shadow-sm">
-            <p className="font-label text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-1">
+          <div className="bg-primary-fixed/50 border-2 border-primary-fixed-dim rounded-2xl px-4 py-3 text-center shadow-sm">
+            <p className="font-label text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-0.5">
               The secret word
             </p>
-            <p className="font-headline text-4xl font-bold text-on-surface tracking-tight">
+            <p className="font-headline text-3xl font-bold text-on-surface tracking-tight">
               {round.secretWord}
             </p>
           </div>
@@ -181,7 +181,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
         )}
 
         {/* Clue groups — only shown when there are visible clues */}
-        {!allDuplicates && <div className="space-y-3">
+        {!allDuplicates && <div className="space-y-2">
           {round.clueGroups.map((group, idx) => {
             const isVisible = visibleSet.has(idx)
 
@@ -197,7 +197,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
               return (
                 <div
                   key={idx}
-                  className={`relative bg-surface-container-lowest rounded-2xl border-2 px-5 py-4 shadow-sm transition-all ${
+                  className={`relative bg-surface-container-lowest rounded-2xl border-2 px-4 py-3 shadow-sm transition-all ${
                     justUnlocked
                       ? 'border-tertiary scale-[1.02] shadow-[0_8px_24px_rgba(255,200,100,0.3)]'
                       : group.isDuplicate
@@ -210,15 +210,15 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                       🔓 Just unlocked
                     </span>
                   )}
-                  <p className="font-headline text-2xl font-bold text-on-surface text-center">
+                  <p className="font-headline text-xl font-bold text-on-surface text-center">
                     {displayText}
                   </p>
                   {showVariants && (
-                    <p className="text-[10px] text-outline text-center mt-1 italic font-body">
+                    <p className="text-[10px] text-outline text-center mt-0.5 italic font-body">
                       same word, different spelling
                     </p>
                   )}
-                  <p className="text-xs text-on-surface-variant text-center mt-2 font-body">
+                  <p className="text-xs text-on-surface-variant text-center mt-1 font-body">
                     {group.playerIds.length === 1
                       ? `from ${playerName(group.playerIds[0])}`
                       : `from ${group.playerIds.map(playerName).join(', ')}`}
@@ -230,7 +230,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                     const isMyVote = myVote === idx
                     const starCount = Object.values(round.clueStarVotes ?? {}).filter((v) => v === idx).length
                     return (
-                      <div className="flex justify-center mt-3">
+                      <div className="flex justify-center mt-2">
                         <button
                           disabled={isOwnClue}
                           onClick={() => {
@@ -256,33 +256,30 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
               )
             }
 
-            // Locked / eliminated group (non-guessers only)
+            // Locked / eliminated group (non-guessers only) — compact single row
             const isPlayerInDupGroup = currentPlayer && group.playerIds.includes(currentPlayer.id)
             return (
               <div
                 key={idx}
-                className={`rounded-2xl border px-5 py-4 transition-all ${
+                className={`rounded-xl border px-4 py-2 transition-all flex items-center gap-3 ${
                   isPlayerInDupGroup
-                    ? 'bg-error/10 border-error/40 ring-2 ring-error/30'
+                    ? 'bg-error/10 border-error/40 ring-1 ring-error/30'
                     : 'bg-surface-container-low border-outline-variant/30 opacity-70'
                 }`}
               >
                 {isPlayerInDupGroup && (
-                  <img src="/images/hen-embarrassed.svg" alt="" className="w-12 h-12 mx-auto mb-2 animate-hen-pop" />
+                  <img src="/images/hen-embarrassed.svg" alt="" className="w-8 h-8 flex-shrink-0 animate-hen-pop" />
                 )}
-                <p className={`font-headline text-lg font-medium text-center line-through ${
-                  isPlayerInDupGroup ? 'text-error' : 'text-on-surface-variant'
-                }`}>
-                  {displayText}
-                </p>
-                <p className={`text-[10px] text-center mt-1 font-label uppercase tracking-wider font-bold ${
-                  isPlayerInDupGroup ? 'text-error' : 'text-error'
-                }`}>
-                  {isPlayerInDupGroup ? '😭 That was you!' : 'Eliminated — duplicate'}
-                </p>
-                <p className="text-xs text-outline text-center mt-1 font-body">
-                  from {group.playerIds.map(playerName).join(', ')}
-                </p>
+                <div className="flex-1 min-w-0">
+                  <p className={`font-headline text-base font-medium line-through leading-tight ${
+                    isPlayerInDupGroup ? 'text-error' : 'text-on-surface-variant'
+                  }`}>
+                    {displayText}
+                  </p>
+                  <p className="text-[10px] text-outline font-body truncate">
+                    {isPlayerInDupGroup ? '😭 yours · ' : ''}from {group.playerIds.map(playerName).join(', ')} · duplicate
+                  </p>
+                </div>
               </div>
             )
           })}
@@ -290,7 +287,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
 
         {/* Guesser's input — only shown when there are visible clues to guess from */}
         {isGuesser && !allDuplicates && (
-          <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-5 space-y-3 shadow-sm mt-2">
+          <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 px-4 py-3 space-y-2.5 shadow-sm mt-1">
             {/* Previous wrong guesses */}
             {round.guessAttempts?.length > 0 && (
               <div className="text-center space-y-1">

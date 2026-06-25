@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
-import { submitClue, forceDedup } from '../service'
+import { submitClue, forceDedup, advanceRound } from '../service'
 
 interface Props {
   game: GameData
@@ -110,11 +110,11 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
           <p className="text-on-surface-variant font-body">
             Keep your eyes on your own screen. The flock is writing clues for you.
           </p>
-          <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-4">
-            <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 font-label">
+          <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl px-4 py-3">
+            <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-2 font-label">
               {cluesCount} of {nonGuesserCount} ready
             </p>
-            <ul className="space-y-2">
+            <ul className="space-y-1">
               {givers.map((p) => {
                 const hasClue = !!round.cluesByPlayer[p.id]
                 return (
@@ -218,16 +218,18 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
             </p>
           </div>
         ) : (
-          <div className="bg-surface-container-lowest rounded-2xl border-2 border-primary/30 p-5 shadow-sm space-y-4">
-            <div className="text-center">
-              <div className="text-4xl mb-2">✅</div>
-              <p className="font-headline text-lg font-bold text-primary">Clue locked in!</p>
+          <div className="bg-surface-container-lowest rounded-2xl border-2 border-primary/30 px-4 py-3 shadow-sm space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">✅</span>
+              <div>
+                <p className="font-headline text-base font-bold text-primary leading-tight">Clue locked in!</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-secondary font-label">
+                  {cluesCount} of {nonGuesserCount} ready
+                </p>
+              </div>
             </div>
-            <div className="border-t border-outline-variant/20 pt-3">
-              <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 font-label">
-                {cluesCount} of {nonGuesserCount} ready
-              </p>
-              <ul className="space-y-2">
+            <div className="border-t border-outline-variant/20 pt-2">
+              <ul className="space-y-1">
                 {givers.map((p) => {
                   const hasClue = !!round.cluesByPlayer[p.id]
                   return (

@@ -34,8 +34,8 @@ export default function RoundResultView({ game, round, players, isHost, currentP
   const guesserName = guesserPlayer?.name ?? 'The guesser'
 
   return (
-    <main className="flex-1 flex flex-col px-4 py-6">
-      <div className="max-w-md w-full mx-auto space-y-5">
+    <main className="flex-1 flex flex-col px-4 py-4">
+      <div className="max-w-md w-full mx-auto space-y-4">
         {/* Result Banner */}
         <div className="text-center space-y-2">
           {round.isCorrect ? (
@@ -43,7 +43,7 @@ export default function RoundResultView({ game, round, players, isHost, currentP
               <img
                 src={round.currentAttempt === 1 ? '/images/hen-excited.svg' : '/images/hen-winner.svg'}
                 alt=""
-                className={`w-24 h-24 mx-auto ${round.currentAttempt === 1 ? 'animate-hen-celebrate' : 'animate-hen-pop'}`}
+                className={`w-28 h-28 mx-auto ${round.currentAttempt === 1 ? 'animate-hen-celebrate' : 'animate-hen-pop'}`}
               />
               <h2 className="font-headline text-4xl font-bold text-primary tracking-tight">
                 NAILED IT!
@@ -60,7 +60,7 @@ export default function RoundResultView({ game, round, players, isHost, currentP
             </>
           ) : (
             <>
-              <img src="/images/hen-embarrassed.svg" alt="" className="w-24 h-24 mx-auto animate-hen-pop" />
+              <img src="/images/hen-embarrassed.svg" alt="" className="w-28 h-28 mx-auto animate-hen-pop" />
               <h2 className="font-headline text-4xl font-bold text-error tracking-tight">
                 NO LUCK
               </h2>
@@ -77,11 +77,11 @@ export default function RoundResultView({ game, round, players, isHost, currentP
         </div>
 
         {/* Secret Word — Flock-style premium card */}
-        <div className="bg-primary-fixed/50 border-2 border-primary-fixed-dim rounded-2xl p-5 text-center shadow-sm">
-          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-1">
+        <div className="bg-primary-fixed/50 border-2 border-primary-fixed-dim rounded-2xl px-4 py-3 text-center shadow-sm">
+          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-0.5">
             The word was
           </p>
-          <p className="font-headline text-4xl font-bold text-on-surface tracking-tight">
+          <p className="font-headline text-3xl font-bold text-on-surface tracking-tight">
             {round.secretWord}
           </p>
         </div>
@@ -104,7 +104,7 @@ export default function RoundResultView({ game, round, players, isHost, currentP
               </div>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {round.clueGroups.map((group, idx) => {
                 const isVisible = round.visibleGroupIndexes.includes(idx)
                 const isYours = group.playerIds.includes(currentPlayerId ?? '')
@@ -138,7 +138,7 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                 return (
                   <div
                     key={idx}
-                    className={`px-4 py-3 rounded-xl border font-body transition-all ${
+                    className={`px-4 py-2.5 rounded-xl border font-body transition-all ${
                       group.isDuplicate
                         ? 'bg-surface-container-low border-outline-variant/20 opacity-80'
                         : isGuesserStarred
@@ -242,12 +242,12 @@ export default function RoundResultView({ game, round, players, isHost, currentP
 
         {/* Personal score — only if you scored */}
         {myPoints > 0 && (
-          <div className="bg-primary text-on-primary rounded-2xl p-5 text-center shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
-            <p className="font-label text-[10px] uppercase tracking-[0.2em] opacity-80 mb-1 font-bold">
+          <div className="bg-primary text-on-primary rounded-2xl px-4 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+            <p className="font-label text-[10px] uppercase tracking-[0.2em] opacity-80 mb-0.5 font-bold">
               You earned
             </p>
-            <p className="font-headline text-5xl font-bold tabular-nums">
-              +{myPoints} <span className="text-3xl opacity-80">pts</span>
+            <p className="font-headline text-4xl font-bold tabular-nums">
+              +{myPoints} <span className="text-2xl opacity-80">pts</span>
             </p>
           </div>
         )}
@@ -264,7 +264,7 @@ export default function RoundResultView({ game, round, players, isHost, currentP
               return (
                 <li
                   key={p.id}
-                  className={`px-4 py-3 flex items-center justify-between font-body ${
+                  className={`px-3 py-2 flex items-center justify-between font-body ${
                     isYou ? 'bg-secondary-fixed/20' : ''
                   }`}
                 >
