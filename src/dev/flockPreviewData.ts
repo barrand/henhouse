@@ -5,12 +5,12 @@ export const PREVIEW_PLAYER_NAMES = [
   'Bob',
   'Carol',
   'Dave',
-  'Eve',
+  'Sally',
   'Frank',
   'Grace',
   'Hank',
   'Ivy',
-  'Jake',
+  'Billy',
 ] as const
 
 export const PREVIEW_PLAYERS: PlayerData[] = PREVIEW_PLAYER_NAMES.map((name, i) => ({
@@ -205,7 +205,7 @@ export function getFlockPreviewScenario(
       }
 
     case 'reveal-flock': {
-      const flockIds = ['p1', 'p2', 'p4', 'p5', 'p7', 'p10']
+      const flockIds = ['p1', 'p2', 'p4', 'p7']
       const results = Object.fromEntries(
         PLAYER_IDS.map((id) => {
           if (id === ROTTEN_ID) return [id, 'rotten']
@@ -219,12 +219,12 @@ export function getFlockPreviewScenario(
         p2: 'Gift',
         p3: 'Phone',
         p4: 'Gift',
-        p5: 'Gift',
+        p5: 'Drinks',
         p6: '',
         p7: 'Gift',
         p8: 'Snacks',
-        p9: 'Drinks',
-        p10: 'Gift',
+        p9: 'Snacks',
+        p10: 'Drinks',
       }
       return {
         game: baseGame(),
