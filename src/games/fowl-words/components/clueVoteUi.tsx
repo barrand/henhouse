@@ -120,12 +120,10 @@ export function MostHelpfulCell({
       active ? 'bg-primary-fixed shadow-sm' : 'bg-surface-container-low opacity-60'
     }`}>
       <StarIcon filled={active} className={active ? 'text-on-primary-fixed' : 'text-outline opacity-40'} />
-      {active ? (
+      {active && (
         <span className="text-[9px] font-bold text-on-primary-fixed leading-none">
           {authorCount > 1 ? `+${perAuthor} each` : `+${perAuthor}`}
         </span>
-      ) : (
-        <span className="text-[8px] text-outline leading-none">—</span>
       )}
     </div>
   )
@@ -149,11 +147,9 @@ export function BooCell({
   const content = (
     <>
       <span className={`text-base leading-none ${hasBoo || isActive ? '' : 'grayscale opacity-40'}`}>👎</span>
-      {!interactive && giverBooCount > 0 ? (
+      {!interactive && giverBooCount > 0 && (
         <span className="text-[9px] font-bold text-error leading-none">{giverBooCount}</span>
-      ) : !interactive && !guesserBoo ? (
-        <span className="text-[8px] text-outline leading-none">—</span>
-      ) : null}
+      )}
     </>
   )
 

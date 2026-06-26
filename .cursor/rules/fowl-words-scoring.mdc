@@ -1,0 +1,48 @@
+---
+description: Fowl Words round flow, scoring, and peer awards — keep UI and backend in sync.
+globs:
+  - src/games/fowl-words/**
+  - functions/src/games/fowl-words/**
+  - src/dev/fowlWordsPreviewData.ts
+  - src/dev/FowlWordsPreview.tsx
+---
+
+# Fowl Words — scoring & awards
+
+## Round flow
+`word-selection` → `clue-submission` → `deduplication` → `reveal` ↔ `guess` → `scored`
+
+## How you win
+- **Guesser:** guess the secret word within 4 attempts (timers 60s → 40s → 20s).
+- **Givers:** earn when their clue is **visible** at a correct guess (USED).
+- **Game:** highest cumulative score after all rounds.
+
+## Points (server-authoritative — clients display only)
+
+| Source | Who | Points | When |
+|--------|-----|--------|------|
+| Correct guess | Guesser | 10 / 5 / 2 / 1 by attempt | Win |
+| USED | Giver (visible clue) | Same as attempt | Win |
+| FAST | Fastest visible submitters | +3 (+2, +1 at 6+ players) | Win |
+| DUPLICATE | Giver in dup group | -1 | Any outcome |
+| ❤️ Peer love | Giver → other clues | +1 per heart per author | **Win only**; reveal/guess |
+| ⭐ Most Helpful | Guesser → one clue | `max(1, floor(5/N))` per co-author | Result; **win only** |
+| 👎 Boo | Giver or guesser | 0 | Givers: reveal/guess · Guesser: result |
+
+## Award rules (UI + backend must match)
+- Givers: one optional ❤️ per other clue (toggle per card), one 👎 per round; never own clue.
+- Guesser sees live ❤️/👎 counts while guessing (read-only).
+- Peer love on visible duplicates is allowed (+1 like any visible clue).
+- Boo never subtracts points. Votes show counts only, never voter names.
+- Vocabulary: **Peer love / Most Helpful / Boo** — never nod, shame, MVP, or star in copy.
+
+## Source of truth
+- Core round math: `functions/src/games/fowl-words/scoring.ts`
+- Peer love: `applyPeerLoveVotes` in `peerLove.ts` (win path only in `roundFlow.ts`)
+- Most Helpful transaction: `fowlWordsSubmitGuesserMostHelpful` in `index.ts`
+- Legacy field shims: `clueStarVotes`, `clueThumbsDownVotes`, etc. — read only; write new names
+
+## Critical bugs if forgotten
+- Duplicates locked on attempt 1 — `visibleGroupIndexes` = unique groups only
+- `tentativePoints` / `pointsThisRound` written by backend only
+- Do not score peer love on NO LUCK path

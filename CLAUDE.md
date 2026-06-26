@@ -41,6 +41,31 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 
 **Word selection:** Before each round, givers vote on 1 of 3 candidate words (15s timer). Guesser is blind. 2 losing words are burned. Game draws `totalRounds × 3` words at start.
 
+### Fowl Words — how you win
+- **Guesser** wins the round by guessing the secret word within 4 attempts.
+- **Givers** win points when their clue is **visible** at the moment of a correct guess (USED bonus).
+- Game winner = highest cumulative score after all rounds.
+
+### Fowl Words — scoring & awards (server-authoritative)
+| Source | Who | Points | When |
+|--------|-----|--------|------|
+| Correct guess | Guesser | 10 / 5 / 2 / 1 by attempt | Round ends correct |
+| USED | Giver (visible clue) | Same as attempt pts | Round ends correct |
+| FAST | Fastest visible submitters | +3 (+2, +1 at 6+ players) | Round ends correct |
+| DUPLICATE | Giver in dup group | -1 always | Round ends (any outcome) |
+| ❤️ Peer love | Giver → each other clue (one optional heart per card) | +1 per heart per author | **Win only**; during reveal/guess |
+| ⭐ Most Helpful | Guesser → one clue | `max(1, floor(5/N))` per co-author | Result screen; **win only** |
+| 👎 Boo | Giver or guesser | 0 (display only) | Givers: reveal/guess · Guesser: result screen |
+
+**Award rules (UI + backend must match):**
+- Givers: one optional ❤️ per other clue (binary per-card toggle), one 👎 per round; cannot vote own clue.
+- Guesser sees live ❤️/👎 counts on clue cards while guessing (read-only signal).
+- Most Helpful floor is +1 per co-author — no zero rewards on large duplicate groups.
+- Boo is fun, never punitive — 0 pts, never shown as negative.
+- Votes are anonymous: UI shows counts only, never voter names.
+- Scores live in `tentativePoints` / `pointsThisRound`; clients display only.
+- Core math: `functions/src/games/fowl-words/scoring.ts` · Peer love: `applyPeerLoveVotes` in `peerLove.ts` · Most Helpful: `fowlWordsSubmitGuesserMostHelpful` in `index.ts`
+
 ---
 
 ## Key Terms
@@ -58,6 +83,8 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 - If all clues are duplicates → guesser sees lock screen with "Unlock first clue → 5pts" button (`fowlWordsUnlockFirst`)
 - Scores are **server-authoritative** — backend writes `tentativePoints`/`pointsThisRound`, clients only display
 - Dedup uses **tier-1 fast match first** (normalization + plurals, no API call), Gemini only as fallback
+- Award naming: **❤️ Peer love** (givers), **⭐ Most Helpful** (guesser), **👎 Boo** (anyone) — never use nod/shame/MVP/star in copy or code comments
+- Peer love pays out **win-only** — `applyPeerLoveVotes` called only on correct-guess path in `roundFlow.ts`
 
 ---
 
@@ -86,9 +113,10 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 | `hen-thinking.svg` | Waiting/pondering | Word selection (guesser), GuessView, RevealBoard |
 | `hen-blindfold.svg` | Can't see | ClueSubmission (guesser) |
 | `hen-magnifying.svg` | Inspecting | DeduplicationView |
-| `hen-excited.svg` | Stars orbiting | First-attempt correct, gold star moment |
+| `hen-excited.svg` | Stars orbiting | First-attempt correct, Most Helpful moment |
 | `hen-winner.svg` | Wings up, laurel | Final win, NAILED IT (attempts 2-3) |
-| `hen-embarrassed.svg` | Wings to cheeks | NO LUCK, duplicates, rotten egg reveal |
+| `hen-confused.svg` | Head tilt, question marks | NO LUCK result (ran out of guesses) |
+| `hen-embarrassed.svg` | Wings to cheeks | NO CLUES, duplicates, rotten egg reveal |
 | `hen-runner.svg` | Side profile, speed | No-winner scoreboard |
 | `hen-flying.svg` | Wings spread, gleeful escape | FLOWN THE COOP (outlier) result rows |
 | `flock-icon.svg` | Three birds clustered together | Flock Together home tile icon |
@@ -109,6 +137,6 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 
 ## Status
 
-**Done:** word selection voting, multi-attempt mechanic, clue debrief on result screen, UX polish, LeaderboardModal, compact header, gold star clue appreciation, design system overhaul (warmer surface, visible borders), SVG illustration system
+**Done:** word selection voting, multi-attempt mechanic, clue debrief on result screen, UX polish, LeaderboardModal, compact header, peer awards redesign (❤️ love / ⭐ most helpful / 👎 boo), design system overhaul (warmer surface, visible borders), SVG illustration system
 
 **Planned:** per-attempt timer server enforcement, player-count scaling for large groups (`totalRounds = max(13, playerCount)`)

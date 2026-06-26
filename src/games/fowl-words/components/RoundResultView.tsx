@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
 import { advanceRound, submitGuesserMostHelpfulVote, submitGuesserBooVote } from '../service'
-import { animateThumbBtn, playThumbVoteFx } from './thumbVoteFx'
-import { stampMostHelpful } from './reactionFx'
+import { animateThumbBtn } from './thumbVoteFx'
+import { playMostHelpfulAwardFx, playBooAwardFx, stampMostHelpful } from './reactionFx'
 import {
   PeerLoveChip,
   PeerBooChip,
@@ -38,6 +38,8 @@ export default function RoundResultView({
   const [pendingStarIdx, setPendingStarIdx] = useState<number | null>(null)
   const [pendingBooIdx, setPendingBooIdx] = useState<number | null>(null)
   const mostHelpfulBadgeRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const cardRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const pendingStarBadgeAnimRef = useRef<number | null>(null)
 
   const guesserPlayer = players.find((p) => p.id === game.currentGuesser)
   const isLastRound = game.currentRound >= game.settings.totalRounds
@@ -70,6 +72,16 @@ export default function RoundResultView({
     if (pendingBooIdx !== null && serverGuesserBoo === pendingBooIdx) setPendingBooIdx(null)
   }, [serverGuesserBoo, pendingBooIdx])
 
+  useEffect(() => {
+    const idx = pendingStarBadgeAnimRef.current
+    if (idx === null) return
+    const badge = mostHelpfulBadgeRefs.current[idx]
+    if (badge && activeMostHelpfulIdx === idx) {
+      stampMostHelpful(badge)
+      pendingStarBadgeAnimRef.current = null
+    }
+  }, [activeMostHelpfulIdx, pendingStarIdx, serverMostHelpful])
+
   const myPoints = currentPlayerId ? round.pointsThisRound[currentPlayerId] ?? 0 : 0
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
   const guesserName = guesserPlayer?.name ?? 'The guesser'
@@ -91,15 +103,17 @@ export default function RoundResultView({
   }
 
   const handleMostHelpfulVote = (idx: number, e: React.MouseEvent<HTMLButtonElement>) => {
-    animateThumbBtn(e.currentTarget, 'up')
     if (!round.isCorrect) return
     const current = pendingStarIdx !== null ? pendingStarIdx : serverMostHelpful
-    const next = current === idx ? null : idx
-    setPendingStarIdx(next)
-    if (next !== null) {
-      const badge = mostHelpfulBadgeRefs.current[idx]
-      if (badge) stampMostHelpful(badge)
+    const isAdding = current !== idx
+    if (isAdding) {
+      playMostHelpfulAwardFx(e.currentTarget, cardRefs.current[idx])
+      pendingStarBadgeAnimRef.current = idx
+    } else {
+      animateThumbBtn(e.currentTarget, 'up')
     }
+    const next = isAdding ? idx : null
+    setPendingStarIdx(next)
     if (onMostHelpfulVote) {
       onMostHelpfulVote(idx)
     } else {
@@ -108,9 +122,14 @@ export default function RoundResultView({
   }
 
   const handleGuesserBoo = (idx: number, e: React.MouseEvent<HTMLButtonElement>) => {
-    playThumbVoteFx(e.currentTarget, 'down')
     const current = pendingBooIdx !== null ? pendingBooIdx : serverGuesserBoo
-    setPendingBooIdx(current === idx ? null : idx)
+    const isAdding = current !== idx
+    if (isAdding) {
+      playBooAwardFx(e.currentTarget, cardRefs.current[idx])
+    } else {
+      animateThumbBtn(e.currentTarget, 'down')
+    }
+    setPendingBooIdx(isAdding ? idx : null)
     if (onGuesserBoo) {
       onGuesserBoo(idx)
     } else {
@@ -245,6 +264,7 @@ export default function RoundResultView({
                 return (
                   <div
                     key={idx}
+                    ref={(el) => { cardRefs.current[idx] = el }}
                     className={`relative bg-surface-container-lowest rounded-xl border-2 shadow-sm px-2.5 py-1.5 transition-all ${
                       group.isDuplicate && !isVisible
                         ? 'bg-surface-container-low border-outline-variant/50'
