@@ -100,6 +100,39 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
 
   const givers = players.filter((p) => p.id !== game.currentGuesser)
 
+  const giverStatusList = (
+    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 p-4">
+      <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 font-label">
+        {cluesCount} of {nonGuesserCount} ready
+      </p>
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
+        {givers.map((p) => {
+          const hasClue = !!round.cluesByPlayer[p.id]
+          return (
+            <li key={p.id} className="flex items-center gap-1.5 min-w-0">
+              <span
+                className={`material-symbols-outlined text-base shrink-0 ${
+                  hasClue ? 'text-primary' : 'text-outline-variant'
+                }`}
+                style={hasClue ? { fontVariationSettings: "'FILL' 1" } : undefined}
+              >
+                {hasClue ? 'check_circle' : 'radio_button_unchecked'}
+              </span>
+              <span className="text-sm font-body min-w-0 flex items-baseline gap-0.5">
+                <span className={`truncate ${hasClue ? 'text-on-surface' : 'text-outline'}`}>
+                  {p.name}
+                </span>
+                {!hasClue && (
+                  <span className="text-outline text-xs shrink-0"> (waiting)</span>
+                )}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+
   // GUESSER VIEW: blind, just wait
   if (isGuesser) {
     return (
@@ -110,28 +143,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
           <p className="text-on-surface-variant font-body">
             Keep your eyes on your own screen. The flock is writing clues for you.
           </p>
-          <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl px-4 py-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-2 font-label">
-              {cluesCount} of {nonGuesserCount} ready
-            </p>
-            <ul className="space-y-1">
-              {givers.map((p) => {
-                const hasClue = !!round.cluesByPlayer[p.id]
-                return (
-                  <li key={p.id} className="flex items-center justify-between">
-                    <span className={`text-sm font-body ${hasClue ? 'text-on-surface' : 'text-outline'}`}>
-                      {p.name}
-                    </span>
-                    {hasClue ? (
-                      <span className="material-symbols-outlined text-primary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    ) : (
-                      <span className="text-xs text-outline italic font-body">writing…</span>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
+          {giverStatusList}
           {isHost && cluesCount < nonGuesserCount && (
             <button
               onClick={handleHostSkip}
@@ -222,37 +234,16 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
             </p>
           </div>
         ) : (
-          <div className="bg-surface-container-lowest rounded-2xl border-2 border-primary/30 px-4 py-3 shadow-sm space-y-3">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">✅</span>
-              <div>
-                <p className="font-headline text-base font-bold text-primary leading-tight">Clue locked in!</p>
-                <p className="text-xs font-bold uppercase tracking-widest text-secondary font-label">
-                  {cluesCount} of {nonGuesserCount} ready
-                </p>
-              </div>
-            </div>
-            <div className="border-t border-outline-variant/20 pt-2">
-              <ul className="space-y-1">
-                {givers.map((p) => {
-                  const hasClue = !!round.cluesByPlayer[p.id]
-                  return (
-                    <li key={p.id} className="flex items-center justify-between">
-                      <span className={`text-sm font-body ${hasClue ? 'text-on-surface' : 'text-outline'}`}>
-                        {p.name}
-                      </span>
-                      {hasClue ? (
-                        <span className="material-symbols-outlined text-primary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                      ) : (
-                        <span className="text-xs text-outline italic font-body">writing…</span>
-                      )}
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
+          <div className="text-center py-4 rounded-xl border border-outline-variant/50 bg-surface-container-low px-4">
+            <img src="/images/hen-thinking.svg" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
+            <p className="font-headline text-lg font-semibold text-on-surface">Clue locked in</p>
+            <p className="text-on-surface-variant text-sm font-body mt-2">
+              Waiting for the rest of the flock. Your clue stays hidden until the reveal.
+            </p>
           </div>
         )}
+
+        {!isGuesser && giverStatusList}
 
         {isHost && cluesCount < nonGuesserCount && (
           <div className="text-center">

@@ -33,9 +33,9 @@ const CAMPFIRE_CLUES: Record<string, string> = {
   p4: 'marshmallow',
   p5: 'hot',
   p6: 'woods',
-  p7: 'embers',
+  p7: 'glow',
   p8: 'toast',
-  p9: 'night',
+  p9: 'Glow',
   p10: 'Marshmallow',
 }
 
@@ -45,10 +45,13 @@ const CAMPFIRE_CLUE_GROUPS: ClueGroup[] = [
   { playerIds: ['p4', 'p10'], clueTexts: ['marshmallow', 'Marshmallow'], isDuplicate: true },
   { playerIds: ['p5'], clueTexts: ['hot'], isDuplicate: false },
   { playerIds: ['p6'], clueTexts: ['woods'], isDuplicate: false },
-  { playerIds: ['p7'], clueTexts: ['embers'], isDuplicate: false },
+  { playerIds: ['p7', 'p9'], clueTexts: ['glow', 'Glow'], isDuplicate: true },
   { playerIds: ['p8'], clueTexts: ['toast'], isDuplicate: false },
-  { playerIds: ['p9'], clueTexts: ['night'], isDuplicate: false },
 ]
+
+/** Unique (visible) group indexes for the campfire preview round */
+const CAMPFIRE_VISIBLE = [0, 1, 3, 4, 6]
+const CAMPFIRE_ELIMINATION = 'marshmallow / Marshmallow · glow / Glow matched'
 
 /** All clues landed in duplicate groups — guesser must unlock one. */
 const ALL_DUP_CLUE_GROUPS: ClueGroup[] = [
@@ -243,9 +246,9 @@ export function getFowlWordsPreviewScenario(
           status: 'reveal',
           cluesByPlayer: CAMPFIRE_CLUES,
           clueGroups: CAMPFIRE_CLUE_GROUPS,
-          visibleGroupIndexes: [0, 1, 3, 4, 5, 6, 7],
+          visibleGroupIndexes: CAMPFIRE_VISIBLE,
           maxAttempts: 4,
-          eliminationReason: 'marshmallow / Marshmallow matched',
+          eliminationReason: CAMPFIRE_ELIMINATION,
           attemptDeadline: { seconds: now() + 55, nanoseconds: 0 },
           clueStarVotes: { p3: 3, p5: 0 },
           clueThumbsDownVotes: { p4: 1 },
@@ -263,10 +266,10 @@ export function getFowlWordsPreviewScenario(
           currentAttempt: 2,
           cluesByPlayer: CAMPFIRE_CLUES,
           clueGroups: CAMPFIRE_CLUE_GROUPS,
-          visibleGroupIndexes: [0, 1, 3, 4, 5, 6, 7, 2],
+          visibleGroupIndexes: [...CAMPFIRE_VISIBLE, 2],
           lastUnlockedGroupIndex: 2,
           guessAttempts: ['beach'],
-          eliminationReason: 'marshmallow / Marshmallow matched',
+          eliminationReason: CAMPFIRE_ELIMINATION,
           attemptDeadline: { seconds: now() + 35, nanoseconds: 0 },
         }),
         players,
@@ -300,7 +303,7 @@ export function getFowlWordsPreviewScenario(
           attemptInProgress: true,
           cluesByPlayer: CAMPFIRE_CLUES,
           clueGroups: CAMPFIRE_CLUE_GROUPS,
-          visibleGroupIndexes: [0, 1, 3, 4, 5, 6, 7],
+          visibleGroupIndexes: CAMPFIRE_VISIBLE,
           guessAttempts: ['beach'],
         }),
         players,
@@ -318,8 +321,8 @@ export function getFowlWordsPreviewScenario(
           guesserAnswer: SECRET_WORD,
           cluesByPlayer: CAMPFIRE_CLUES,
           clueGroups: CAMPFIRE_CLUE_GROUPS,
-          visibleGroupIndexes: [0, 1, 3, 4, 5, 6, 7],
-          eliminationReason: 'marshmallow / Marshmallow matched',
+          visibleGroupIndexes: CAMPFIRE_VISIBLE,
+          eliminationReason: CAMPFIRE_ELIMINATION,
           pointsThisRound: {
             p2: 10,
             p1: 12,
@@ -353,8 +356,8 @@ export function getFowlWordsPreviewScenario(
           guessAttempts: ['beach', 'forest'],
           cluesByPlayer: CAMPFIRE_CLUES,
           clueGroups: CAMPFIRE_CLUE_GROUPS,
-          visibleGroupIndexes: [0, 1, 3, 4, 5, 6, 7, 2],
-          eliminationReason: 'marshmallow / Marshmallow matched',
+          visibleGroupIndexes: [...CAMPFIRE_VISIBLE, 2],
+          eliminationReason: CAMPFIRE_ELIMINATION,
           pointsThisRound: {
             p2: 2,
             p1: 4,
@@ -385,8 +388,8 @@ export function getFowlWordsPreviewScenario(
           guessAttempts: ['beach', 'forest', 'warm', 'cozy'],
           cluesByPlayer: CAMPFIRE_CLUES,
           clueGroups: CAMPFIRE_CLUE_GROUPS,
-          visibleGroupIndexes: [0, 1, 3, 4, 5, 6, 7, 2],
-          eliminationReason: 'marshmallow / Marshmallow matched',
+          visibleGroupIndexes: [...CAMPFIRE_VISIBLE, 2],
+          eliminationReason: CAMPFIRE_ELIMINATION,
           pointsThisRound: { p4: -1, p10: -1 },
           clueThumbsDownVotes: { p1: 2 },
           guesserThumbsDownVote: 2,

@@ -108,18 +108,6 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
           </ol>
         </section>
 
-        {/* Game Settings */}
-        <section className="mb-6 grid grid-cols-2 gap-3">
-          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4 flex flex-col gap-0.5">
-            <span className="font-label text-[10px] uppercase tracking-wider text-secondary font-bold">Rounds</span>
-            <span className="font-headline text-2xl font-bold text-on-surface">{game.settings.totalRounds}</span>
-          </div>
-          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4 flex flex-col gap-0.5">
-            <span className="font-label text-[10px] uppercase tracking-wider text-secondary font-bold">Timer</span>
-            <span className="font-headline text-2xl font-bold text-on-surface">{game.settings.secondsPerRound}s</span>
-          </div>
-        </section>
-
         {/* Start Button */}
         {isHost ? (
           <button
