@@ -244,12 +244,23 @@ export function getFlockPreviewScenario(
     }
 
     case 'reveal-no-flock': {
+      // No majority → everyone is outlier; rotten egg only applies when there IS a flock
+      // and exactly one player answered alone (see functions scoring.ts).
       const results = Object.fromEntries(
-        PLAYER_IDS.map((id) => [id, id === ROTTEN_ID ? 'rotten' : 'outlier']),
+        PLAYER_IDS.map((id) => [id, 'outlier']),
       ) as Record<string, RoundData['results'][string]>
-      const playerAnswers = Object.fromEntries(
-        PLAYER_IDS.map((id, i) => [id, ['Gift', 'Phone', 'Snacks', 'Drinks', 'Ice', 'Music', 'Napkins', 'Chairs', 'Cake', 'Balloons'][i]]),
-      )
+      const playerAnswers: Record<string, string> = {
+        p1: 'Gift',
+        p2: 'Gift',
+        p3: 'Phone',
+        p4: 'Phone',
+        p5: 'Snacks',
+        p6: 'Snacks',
+        p7: 'Drinks',
+        p8: 'Drinks',
+        p9: 'Ice',
+        p10: 'Ice',
+      }
       return {
         game: baseGame(),
         round: baseRound({
