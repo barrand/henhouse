@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Question marks — big & bold, not fly-sized -->
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <!-- hero ? (upper right) -->
+    <path d="M122,38 C122,14 158,12 158,30 C158,40 148,42 148,52" fill="none" stroke="#2a1f0e" stroke-width="6"/>
+    <path d="M122,38 C122,14 158,12 158,30 C158,40 148,42 148,52" fill="none" stroke="#f0c078" stroke-width="3.5"/>
+    <circle cx="148" cy="62" r="5.5" fill="#f0c078" stroke="#2a1f0e" stroke-width="2.5"/>
+
+    <!-- second ? (upper left) -->
+    <path d="M68,28 C68,12 92,10 92,24 C92,32 86,34 86,42" fill="none" stroke="#2a1f0e" stroke-width="5"/>
+    <path d="M68,28 C68,12 92,10 92,24 C92,32 86,34 86,42" fill="none" stroke="#f0c078" stroke-width="3"/>
+    <circle cx="86" cy="50" r="4.5" fill="#f0c078" stroke="#2a1f0e" stroke-width="2.2"/>
+  </g>
+
+  <!-- Wings — shrug -->
+  <ellipse cx="34" cy="118" rx="22" ry="32" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2" transform="rotate(-38 34 118)"/>
+  <ellipse cx="166" cy="118" rx="22" ry="32" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2" transform="rotate(38 166 118)"/>
+
+  <!-- Body -->
+  <ellipse cx="100" cy="152" rx="52" ry="44" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
+
+  <g transform="rotate(-10 100 84)">
+    <!-- Head -->
+    <circle cx="100" cy="84" r="40" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
+
+    <!-- Comb -->
+    <path d="M82,48 Q86,30 92,44 Q97,24 103,40 Q108,22 114,38 Q118,28 122,44" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8" stroke-linejoin="round"/>
+
+    <!-- Raised brow — left -->
+    <path d="M70,68 Q82,58 94,66" fill="none" stroke="#2a1f0e" stroke-width="2.2" stroke-linecap="round"/>
+    <!-- Raised brow — right -->
+    <path d="M106,66 Q118,58 130,68" fill="none" stroke="#2a1f0e" stroke-width="2.2" stroke-linecap="round"/>
+
+    <!-- Left eye — looking up-left -->
+    <circle cx="82" cy="78" r="11" fill="#2a1f0e"/>
+    <circle cx="78" cy="73" r="3.5" fill="#e8e2db"/>
+    <circle cx="77" cy="72" r="1.5" fill="#f0c078"/>
+
+    <!-- Right eye — looking up-right -->
+    <circle cx="118" cy="78" r="11" fill="#2a1f0e"/>
+    <circle cx="122" cy="73" r="3.5" fill="#e8e2db"/>
+    <circle cx="123" cy="72" r="1.5" fill="#f0c078"/>
+
+    <!-- Beak — slightly open -->
+    <path d="M92,100 Q100,94 108,100 L106,108 Q100,112 94,108 Z" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8"/>
+
+    <!-- Wattle -->
+    <ellipse cx="100" cy="118" rx="9" ry="11" fill="#ffb4ab" stroke="#2a1f0e" stroke-width="1.5"/>
+  </g>
+
+  <!-- Legs -->
+  <line x1="82" y1="192" x2="72" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="80" y1="192" x2="64" y2="199" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="118" y1="192" x2="128" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="120" y1="192" x2="136" y2="199" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

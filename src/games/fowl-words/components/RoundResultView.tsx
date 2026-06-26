@@ -3,7 +3,8 @@ import type { GameData, PlayerData, RoundData } from '../types'
 import { advanceRound, submitGuesserStarVote, submitGuesserThumbsDownVote } from '../service'
 import { playThumbVoteFx } from './thumbVoteFx'
 import {
-  GiverNodCell,
+  GiverNodChip,
+  GiverShameChip,
   GuesserMvpCell,
   ShameCell,
   StarIcon,
@@ -135,8 +136,8 @@ export default function RoundResultView({ game, round, players, isHost, currentP
               />
               <h2 className="font-headline text-4xl font-bold text-primary tracking-tight">NAILED IT!</h2>
               <p className="text-on-surface-variant font-body text-sm">
-                {guesserName} guessed{' '}
-                <span className="font-bold text-on-surface">{round.guesserAnswer}</span>
+                {guesserName} got{' '}
+                <span className="font-headline font-bold text-2xl text-primary tracking-tight">{round.secretWord}</span>
                 {round.currentAttempt > 1 && (
                   <span className="block text-xs mt-1 opacity-75">
                     on attempt {round.currentAttempt} of {round.maxAttempts}
@@ -152,29 +153,39 @@ export default function RoundResultView({ game, round, players, isHost, currentP
             </>
           ) : (
             <>
-              <img src="/images/hen-embarrassed.svg" alt="" className="w-28 h-28 mx-auto animate-hen-pop" />
+              <img src="/images/hen-confused.svg" alt="" className="w-28 h-28 mx-auto animate-hen-pop" />
               <h2 className="font-headline text-4xl font-bold text-error tracking-tight">NO LUCK</h2>
               <p className="text-on-surface-variant font-body text-sm">
                 {guesserName} ran out of guesses.
-                {round.guessAttempts.length > 0 && (
-                  <span className="block text-xs mt-1 opacity-75">
-                    Last try: <span className="font-bold">{round.guesserAnswer}</span>
-                  </span>
-                )}
               </p>
+              {(round.guessAttempts.length > 0 || round.guesserAnswer) && (
+                <div className="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1">
+                  {(round.guessAttempts.length > 0
+                    ? round.guessAttempts
+                    : [round.guesserAnswer!]
+                  ).map((guess, i) => (
+                    <span key={i} className="text-sm text-on-surface-variant font-body">
+                      <span className="font-label text-[10px] text-outline tabular-nums">{i + 1}.</span>{' '}
+                      <span className="font-bold text-on-surface">{guess}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
             </>
           )}
         </div>
 
-        {/* Secret Word */}
-        <div className="bg-primary-fixed border-2 border-primary-fixed-dim rounded-2xl px-4 py-3 text-center shadow-sm">
-          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-primary-fixed-variant font-bold mb-0.5">
-            The word was
-          </p>
-          <p className="font-headline text-3xl font-bold text-on-primary-fixed tracking-tight">
-            {round.secretWord}
-          </p>
-        </div>
+        {/* Secret Word — only shown on a loss as the reveal */}
+        {!round.isCorrect && (
+          <div className="bg-primary-fixed border-2 border-primary-fixed-dim rounded-2xl px-4 py-3 text-center shadow-sm">
+            <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-primary-fixed-variant font-bold mb-0.5">
+              The word was
+            </p>
+            <p className="font-headline text-3xl font-bold text-on-primary-fixed tracking-tight">
+              {round.secretWord}
+            </p>
+          </div>
+        )}
 
         {/* Clue debrief */}
         {round.clueGroups.length > 0 && (
@@ -239,15 +250,19 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                     >
                       {displayText}
                     </p>
-                    <p className="text-xs text-on-surface-variant font-medium mb-1 font-body text-center leading-snug h-4 truncate">
-                      {renderAuthorNames(group.playerIds, isYours)}
-                      {group.isDuplicate && isYours && (
-                        <span className="text-error font-bold"> · -1</span>
-                      )}
-                      {group.isDuplicate && !isYours && (
-                        <span className="text-error font-bold uppercase text-[9px] tracking-wide"> · dup</span>
-                      )}
-                    </p>
+                    <div className="flex items-center justify-center gap-1 mb-1 h-4 min-w-0 w-full px-0.5">
+                      <span className="text-xs text-on-surface-variant font-medium font-body truncate min-w-0 leading-snug">
+                        {renderAuthorNames(group.playerIds, isYours)}
+                        {group.isDuplicate && isYours && (
+                          <span className="text-error font-bold"> · -1</span>
+                        )}
+                        {group.isDuplicate && !isYours && (
+                          <span className="text-error font-bold uppercase text-[9px] tracking-wide"> · dup</span>
+                        )}
+                      </span>
+                      <GiverNodChip count={giverUpCount} />
+                      <GiverShameChip count={giverDownCount} />
+                    </div>
 
                     {((isVisible && round.isCorrect && isYours) || gotFastBonus) && (
                       <div className="mb-1 flex items-center justify-center gap-1 overflow-hidden">
@@ -267,12 +282,11 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                     <div className="flex gap-1.5">
                       {round.isCorrect ? (
                         <>
-                          <GiverNodCell count={giverUpCount} />
                           {canGuesserVote && canGuesserStarUp ? (
                             <button
                               onClick={(e) => handleGuesserUp(idx, e)}
                               title={`Award +5 MVP${group.playerIds.length > 1 ? ` (+${guesserUpPts} each)` : ''}`}
-                              className={`flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label shrink-0 transition-all active:scale-[0.97] ${
+                              className={`flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label transition-all active:scale-[0.97] ${
                                 isGuesserUpVoted
                                   ? 'bg-primary-fixed shadow-sm'
                                   : 'bg-surface-container-low'
@@ -296,7 +310,7 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                             />
                           )}
                           <ShameCell
-                            giverCount={giverDownCount}
+                            giverCount={canGuesserVote ? 0 : giverDownCount}
                             guesserShamed={isGuesserDownVoted}
                             interactive={canGuesserVote}
                             isActive={isGuesserDownVoted}
@@ -304,26 +318,20 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                           />
                         </>
                       ) : canGuesserVote ? (
-                        <>
-                          <GiverNodCell count={giverUpCount} />
-                          <ShameCell
-                            giverCount={giverDownCount}
-                            guesserShamed={isGuesserDownVoted}
-                            interactive
-                            wide
-                            isActive={isGuesserDownVoted}
-                            onClick={(e) => handleGuesserDown(idx, e)}
-                          />
-                        </>
+                        <ShameCell
+                          giverCount={0}
+                          guesserShamed={isGuesserDownVoted}
+                          interactive
+                          wide
+                          isActive={isGuesserDownVoted}
+                          onClick={(e) => handleGuesserDown(idx, e)}
+                        />
                       ) : (
-                        <>
-                          <GiverNodCell count={giverUpCount} />
-                          <GuesserMvpCell active={false} perAuthor={0} authorCount={1} />
-                          <ShameCell
-                            giverCount={giverDownCount}
-                            guesserShamed={isGuesserDownVoted}
-                          />
-                        </>
+                        <ShameCell
+                          giverCount={giverDownCount}
+                          guesserShamed={isGuesserDownVoted}
+                          wide
+                        />
                       )}
                     </div>
                   </div>

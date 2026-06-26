@@ -7,7 +7,7 @@ export const GIVER_REVEAL_VOTE_HINT =
 
 export function guesserResultVoteHint(isCorrect: boolean): string {
   if (isCorrect) {
-    return '⭐ One MVP star (+5 split) · 👎 Shame the worst · pick different clues'
+    return 'Giver nods show beside names · ⭐ One MVP (+5) · 👎 Shame the worst'
   }
   return '👎 Shame the worst clue'
 }
@@ -78,22 +78,29 @@ export function StarIcon({ filled = false, className = '' }: StarIconProps) {
   )
 }
 
-/** Read-only giver nod tally — always shown on result cards so nods aren't hidden behind guesser controls. */
-export function GiverNodCell({ count }: { count: number }) {
+/** Compact giver nod tally — inline chip beside author name on result cards. */
+export function GiverNodChip({ count }: { count: number }) {
+  if (count <= 0) return null
   return (
-    <div
-      className={`flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg bg-surface-container-low font-label shrink-0 ${
-        count > 0 ? '' : 'opacity-60'
-      }`}
-      title={count > 0 ? `${nodLabel(count)} · +${count} pt each for authors` : 'No giver nods'}
+    <span
+      className="inline-flex shrink-0 items-center rounded-full bg-secondary-container px-1.5 py-px text-[9px] font-bold font-label text-on-secondary-container whitespace-nowrap"
+      title={`${nodLabel(count)} · +${count} pt each for authors`}
     >
-      <span className={`text-base leading-none ${count > 0 ? '' : 'grayscale opacity-40'}`}>👍</span>
-      {count > 0 ? (
-        <span className="text-[9px] font-bold text-primary leading-none">+{count} ea</span>
-      ) : (
-        <span className="text-[8px] text-outline leading-none">—</span>
-      )}
-    </div>
+      {count} nod{count !== 1 ? 's' : ''}
+    </span>
+  )
+}
+
+/** Compact giver shame tally — inline chip beside author name. */
+export function GiverShameChip({ count }: { count: number }) {
+  if (count <= 0) return null
+  return (
+    <span
+      className="inline-flex shrink-0 items-center rounded-full bg-error-container px-1.5 py-px text-[9px] font-bold font-label text-error whitespace-nowrap"
+      title={`${count} giver${count !== 1 ? 's' : ''} shamed this clue during reveal`}
+    >
+      {count} shame
+    </span>
   )
 }
 
@@ -152,9 +159,9 @@ export function ShameCell({
   const content = (
     <>
       <span className={`text-base leading-none ${hasShame || isActive ? '' : 'grayscale opacity-40'}`}>👎</span>
-      {giverCount > 0 ? (
+      {!interactive && giverCount > 0 ? (
         <span className="text-[9px] font-bold text-error leading-none">{giverCount}</span>
-      ) : !guesserShamed && !interactive ? (
+      ) : !interactive && !guesserShamed ? (
         <span className="text-[8px] text-outline leading-none">—</span>
       ) : null}
     </>
