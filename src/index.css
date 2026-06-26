@@ -148,6 +148,21 @@
 }
 .animate-boo-float { animation: boo-float 0.95s ease-out forwards; }
 
+@keyframes card-unlock-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(240, 192, 120, 0); }
+  50%      { box-shadow: 0 0 0 8px rgba(240, 192, 120, 0.35); }
+}
+.animate-card-unlock-pulse { animation: card-unlock-pulse 0.65s ease-out; }
+
+@keyframes card-shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-5px); }
+  40%      { transform: translateX(5px); }
+  60%      { transform: translateX(-3px); }
+  80%      { transform: translateX(3px); }
+}
+.animate-card-shake { animation: card-shake 0.32s ease both; }
+
 @keyframes card-pulse-love {
   0%, 100% { box-shadow: 0 0 0 0 rgba(232, 143, 160, 0); }
   50%      { box-shadow: 0 0 0 6px rgba(232, 143, 160, 0.3); }
@@ -177,5 +192,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-heart-float, .animate-boo-float, .animate-star-float,
-  .animate-card-pulse-love, .animate-card-pulse-mvp, .animate-star-stamp { animation: none !important; }
+  .animate-card-pulse-love, .animate-card-pulse-mvp, .animate-card-unlock-pulse,
+  .animate-card-shake, .animate-star-stamp { animation: none !important; }
 }

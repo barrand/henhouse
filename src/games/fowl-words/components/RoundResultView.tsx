@@ -1,14 +1,18 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
 import { advanceRound, submitGuesserMostHelpfulVote, submitGuesserBooVote } from '../service'
 import { animateThumbBtn } from './thumbVoteFx'
 import { playMostHelpfulAwardFx, playBooAwardFx, stampMostHelpful } from './reactionFx'
+import { computeRoundPointBreakdown } from './pointBreakdown'
+import { PointBreakdownChips } from './PointBreakdownChips'
 import {
   PeerLoveChip,
   PeerBooChip,
   MostHelpfulCell,
   BooCell,
-  StarIcon,
+  ScoreChip,
+  CARD_VOTE_TRANSITION,
+  clueCardBorderClass,
   guesserResultVoteHint,
   mostHelpfulSplitPts,
   countGroupPeerLoves,
@@ -37,7 +41,7 @@ export default function RoundResultView({
   const [error, setError] = useState('')
   const [pendingStarIdx, setPendingStarIdx] = useState<number | null>(null)
   const [pendingBooIdx, setPendingBooIdx] = useState<number | null>(null)
-  const mostHelpfulBadgeRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const mostHelpfulBadgeRefs = useRef<Record<number, HTMLElement | null>>({})
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({})
   const pendingStarBadgeAnimRef = useRef<number | null>(null)
 
@@ -82,25 +86,22 @@ export default function RoundResultView({
     }
   }, [activeMostHelpfulIdx, pendingStarIdx, serverMostHelpful])
 
-  const myPoints = currentPlayerId ? round.pointsThisRound[currentPlayerId] ?? 0 : 0
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
   const guesserName = guesserPlayer?.name ?? 'The guesser'
 
-  const fastBonusMap: Record<string, number> = {}
-  if (round.isCorrect) {
-    const attemptPts = [10, 5, 2, 1][round.currentAttempt - 1] ?? 0
-    for (let gIdx = 0; gIdx < round.clueGroups.length; gIdx++) {
-      const g = round.clueGroups[gIdx]
-      if (!round.visibleGroupIndexes.includes(gIdx)) continue
-      const loveCount = countGroupPeerLoves(peerLoveVotes, gIdx)
-      const mvpPts = serverMostHelpful === gIdx ? mostHelpfulSplitPts(g.playerIds.length) : 0
-      const basePts = attemptPts + (g.isDuplicate ? -1 : 0) + loveCount + mvpPts
-      for (const pid of g.playerIds) {
-        const bonus = (round.pointsThisRound[pid] ?? 0) - basePts
-        if (bonus > 0) fastBonusMap[pid] = bonus
-      }
+  const pointBreakdowns = useMemo(
+    () => computeRoundPointBreakdown(round, game.currentGuesser ?? ''),
+    [round, game.currentGuesser],
+  )
+
+  const fastBonusMap = useMemo(() => {
+    const map: Record<string, number> = {}
+    for (const [pid, chips] of Object.entries(pointBreakdowns)) {
+      const fast = chips.find((c) => c.kind === 'fast')
+      if (fast) map[pid] = fast.pts
     }
-  }
+    return map
+  }, [pointBreakdowns])
 
   const handleMostHelpfulVote = (idx: number, e: React.MouseEvent<HTMLButtonElement>) => {
     if (!round.isCorrect) return
@@ -241,7 +242,7 @@ export default function RoundResultView({
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 items-stretch">
               {clueGroupDisplayOrder.map((idx) => {
                 const group = round.clueGroups[idx]
                 const isVisible = visibleSet.has(idx)
@@ -261,24 +262,21 @@ export default function RoundResultView({
                 const canGuesserVote = isCurrentGuesser && isVisible && !isYours
                 const canAwardMostHelpful = canGuesserVote && round.isCorrect
 
+                const showUsedBadge = isVisible && round.isCorrect && isYours
+
                 return (
                   <div
                     key={idx}
                     ref={(el) => { cardRefs.current[idx] = el }}
-                    className={`relative bg-surface-container-lowest rounded-xl border-2 shadow-sm px-2.5 py-1.5 transition-all ${
-                      group.isDuplicate && !isVisible
-                        ? 'bg-surface-container-low border-outline-variant/50'
-                        : isMostHelpful
-                        ? 'border-primary/70 bg-primary/5'
-                        : isGuesserBoo
-                        ? 'border-error/60 bg-error/5'
-                        : isVisible && round.isCorrect
-                        ? 'border-primary/40'
-                        : 'border-outline-variant/60'
-                    }`}
+                    className={`relative flex flex-col h-full bg-surface-container-lowest rounded-xl border-2 shadow-sm px-2.5 py-1.5 ${CARD_VOTE_TRANSITION} ${clueCardBorderClass({
+                      hiddenDuplicate: group.isDuplicate && !isVisible,
+                      isMostHelpful,
+                      isGuesserBoo,
+                      visibleCorrect: isVisible && round.isCorrect,
+                    })}`}
                   >
                     <p
-                      className={`font-headline font-bold text-xl leading-tight text-center line-clamp-2 h-11 flex items-center justify-center mb-0.5 ${
+                      className={`font-headline font-bold text-xl leading-tight text-center line-clamp-2 h-11 flex items-center justify-center mb-0.5 shrink-0 ${
                         group.isDuplicate && !isVisible
                           ? 'text-error line-through'
                           : 'text-on-surface'
@@ -287,8 +285,8 @@ export default function RoundResultView({
                       {displayText}
                     </p>
 
-                    <div className="flex items-center justify-center gap-1 mb-1 min-w-0 w-full px-0.5 flex-wrap">
-                      <span className="text-xs text-on-surface-variant font-medium font-body truncate min-w-0 leading-snug">
+                    <div className="flex flex-wrap items-center justify-center gap-1 mb-1 min-w-0 w-full px-0.5 shrink-0">
+                      <span className="text-xs text-on-surface-variant font-medium font-body truncate min-w-0 leading-snug max-w-full">
                         {renderAuthorNames(group.playerIds, isYours)}
                         {group.isDuplicate && isYours && (
                           <span className="text-error font-bold"> · -1</span>
@@ -299,58 +297,30 @@ export default function RoundResultView({
                       </span>
                       <PeerLoveChip count={loveCount} />
                       <PeerBooChip count={booCount} />
+                      {showUsedBadge && <ScoreChip>+{attemptPts}</ScoreChip>}
+                      {gotFastBonus && <ScoreChip icon="⚡">+{fastBonusMap[yourId]}</ScoreChip>}
+                      {isMostHelpful && (
+                        <span ref={(el) => { mostHelpfulBadgeRefs.current[idx] = el }}>
+                          <ScoreChip icon="⭐">
+                            +{mvpPts}{group.playerIds.length > 1 ? ' each' : ''}
+                          </ScoreChip>
+                        </span>
+                      )}
                     </div>
 
-                    {((isVisible && round.isCorrect && isYours) || gotFastBonus) && (
-                      <div className="mb-1 flex items-center justify-center gap-1 overflow-hidden flex-wrap">
-                        {isVisible && round.isCorrect && isYours && (
-                          <span className="bg-primary-fixed text-on-primary-fixed text-[10px] font-bold px-2 py-0.5 rounded-full font-label whitespace-nowrap">
-                            +{attemptPts} used
-                          </span>
-                        )}
-                        {gotFastBonus && (
-                          <span className="bg-tertiary-container text-on-tertiary-container text-[10px] font-bold px-2 py-0.5 rounded-full font-label whitespace-nowrap">
-                            ⚡ +{fastBonusMap[yourId]} fastest
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {isMostHelpful && (
-                      <div
-                        ref={(el) => { mostHelpfulBadgeRefs.current[idx] = el }}
-                        className="mb-1 flex items-center justify-center gap-1"
-                      >
-                        <span className="bg-primary-fixed text-on-primary-fixed text-[10px] font-bold px-2 py-0.5 rounded-full font-label whitespace-nowrap">
-                          ⭐ Most Helpful +{mvpPts}{group.playerIds.length > 1 ? ' each' : ''}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1.5 mt-auto shrink-0">
                       {round.isCorrect ? (
                         <>
                           {canAwardMostHelpful ? (
-                            <button
-                              onClick={(e) => handleMostHelpfulVote(idx, e)}
-                              aria-label={`Award Most Helpful to: ${displayText}`}
+                            <MostHelpfulCell
+                              active={isMostHelpful}
+                              perAuthor={mvpPts}
+                              authorCount={group.playerIds.length}
+                              interactive
+                              ariaLabel={`Award Most Helpful to: ${displayText}`}
                               title={`Most Helpful +${mvpPts}${group.playerIds.length > 1 ? ' each' : ''}`}
-                              className={`flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label transition-all active:scale-[0.97] ${
-                                isMostHelpful
-                                  ? 'bg-primary-fixed shadow-sm'
-                                  : 'bg-surface-container-low'
-                              }`}
-                            >
-                              <StarIcon
-                                filled={isMostHelpful}
-                                className={isMostHelpful ? 'text-on-primary-fixed' : 'text-primary opacity-50'}
-                              />
-                              {isMostHelpful && (
-                                <span className="text-[9px] font-bold leading-none text-on-primary-fixed">
-                                  +{mvpPts}
-                                </span>
-                              )}
-                            </button>
+                              onClick={(e) => handleMostHelpfulVote(idx, e)}
+                            />
                           ) : (
                             <MostHelpfulCell
                               active={isMostHelpful}
@@ -411,15 +381,6 @@ export default function RoundResultView({
           </div>
         )}
 
-        {myPoints > 0 && (
-          <div className="bg-primary text-on-primary rounded-2xl px-4 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
-            <p className="font-label text-[10px] uppercase tracking-[0.2em] opacity-80 mb-0.5 font-bold">You earned</p>
-            <p className="font-headline text-4xl font-bold tabular-nums">
-              +{myPoints} <span className="text-2xl opacity-80">pts</span>
-            </p>
-          </div>
-        )}
-
         <div>
           <h3 className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
             Standings
@@ -428,21 +389,27 @@ export default function RoundResultView({
             {sortedPlayers.map((p, i) => {
               const earned = round.pointsThisRound[p.id] ?? 0
               const isYou = p.id === currentPlayerId
+              const chips = pointBreakdowns[p.id] ?? []
               return (
                 <li
                   key={p.id}
-                  className={`px-3 py-2 flex items-center justify-between font-body ${isYou ? 'bg-secondary-fixed/20' : ''}`}
+                  className={`px-3 py-2 font-body flex items-center gap-2 ${isYou ? 'bg-secondary-fixed/20' : ''}`}
                 >
-                  <span className="flex items-center gap-2 font-medium text-on-surface">
-                    <span className="text-outline w-5 tabular-nums">{i + 1}.</span>
-                    {p.name}
-                    {isYou && <span className="text-xs text-on-surface-variant">← you</span>}
-                  </span>
-                  <div className="flex items-center gap-3">
-                    {earned > 0 && (
-                      <span className="text-xs text-primary font-bold tabular-nums">+{earned}</span>
+                  <span className="text-outline w-5 tabular-nums shrink-0 text-sm">{i + 1}.</span>
+                  <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                    <span className="font-medium text-on-surface truncate">{p.name}</span>
+                    {isYou && <span className="text-xs text-on-surface-variant shrink-0">← you</span>}
+                    {chips.length > 0 && (
+                      <PointBreakdownChips chips={chips} className="gap-0.5" />
                     )}
-                    <span className="font-headline text-lg font-bold tabular-nums text-on-surface">{p.score}</span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {earned !== 0 && (
+                      <span className={`text-xs font-bold tabular-nums ${earned > 0 ? 'text-primary' : 'text-error'}`}>
+                        {earned > 0 ? '+' : ''}{earned}
+                      </span>
+                    )}
+                    <span className="font-headline text-lg font-bold tabular-nums text-on-surface w-8 text-right">{p.score}</span>
                   </div>
                 </li>
               )

@@ -11,6 +11,7 @@ import RoundResultView from '@fowl-words/components/RoundResultView'
 import Scoreboard from '@fowl-words/components/Scoreboard'
 import LeaderboardModal from '@fowl-words/components/LeaderboardModal'
 import type { RoundData } from '@fowl-words/types'
+import { effectiveMostHelpfulVote, mostHelpfulSplitPts } from '@fowl-words/components/clueVoteUi'
 import {
   FOWL_WORDS_PREVIEW_SCREENS,
   PREVIEW_GUESSER_ID,
@@ -23,6 +24,21 @@ const DEFAULT_SCREEN: FowlWordsPreviewScreen = 'lobby'
 
 function isValidScreen(s: string | undefined): s is FowlWordsPreviewScreen {
   return FOWL_WORDS_PREVIEW_SCREENS.some((item) => item.id === s)
+}
+
+/** Mirror server: Most Helpful increments pointsThisRound when guesser picks a clue */
+function withMostHelpfulPoints(round: RoundData): RoundData {
+  if (round.status !== 'scored' || !round.isCorrect) return round
+  const vote = effectiveMostHelpfulVote(round.guesserMostHelpfulVote, round.guesserStarVote)
+  if (vote === null) return round
+  const group = round.clueGroups[vote]
+  if (!group || !round.visibleGroupIndexes.includes(vote)) return round
+  const pts = mostHelpfulSplitPts(group.playerIds.length)
+  const points = { ...round.pointsThisRound }
+  for (const pid of group.playerIds) {
+    points[pid] = (points[pid] ?? 0) + pts
+  }
+  return { ...round, pointsThisRound: points }
 }
 
 export default function FowlWordsPreview() {
@@ -48,7 +64,7 @@ export default function FowlWordsPreview() {
 
   const buildPreviewRound = (base: RoundData): RoundData => {
     const baseLoves = base.cluePeerLoveVotes ?? {}
-    return {
+    const merged: RoundData = {
       ...base,
       cluePeerLoveVotes: { ...baseLoves, [asPlayerId]: localLoves },
       cluePeerBooVotes: localBoo !== null
@@ -59,6 +75,7 @@ export default function FowlWordsPreview() {
       guesserBooVote:
         localGuesserBoo !== null ? localGuesserBoo : base.guesserBooVote ?? null,
     }
+    return withMostHelpfulPoints(merged)
   }
 
   const previewRound = scenario.round ? buildPreviewRound(scenario.round) : null

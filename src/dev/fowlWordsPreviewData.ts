@@ -39,6 +39,19 @@ const CAMPFIRE_CLUES: Record<string, string> = {
   p10: 'Marshmallow',
 }
 
+/** Submission order for fast bonus: Alice → Carol → Sally (+3/+2/+1) */
+const CAMPFIRE_TIMESTAMPS: Record<string, number> = {
+  p1: 100,
+  p3: 110,
+  p5: 120,
+  p6: 130,
+  p8: 140,
+  p4: 200,
+  p10: 205,
+  p7: 210,
+  p9: 220,
+}
+
 const CAMPFIRE_CLUE_GROUPS: ClueGroup[] = [
   { playerIds: ['p1'], clueTexts: ['smoke'], isDuplicate: false },
   { playerIds: ['p3'], clueTexts: ['flame'], isDuplicate: false },
@@ -52,6 +65,58 @@ const CAMPFIRE_CLUE_GROUPS: ClueGroup[] = [
 /** Unique (visible) group indexes for the campfire preview round */
 const CAMPFIRE_VISIBLE = [0, 1, 3, 4, 6]
 const CAMPFIRE_ELIMINATION = 'marshmallow / Marshmallow · glow / Glow matched'
+
+/**
+ * Attempt-1 win (Bob nails it first try, 10 pt attempt, 9 givers → fast +3/+2/+1).
+ * Votes: Carol+Sally ❤️ smoke; Frank ❤️ flame; Alice ❤️ woods.
+ * Fastest: Alice +3, Carol +2, Sally +1.
+ * Bob awarded ⭐ Most Helpful to Frank's "woods" (+5) — applied in preview helper.
+ */
+const RESULT_WIN_POINTS: Record<string, number> = {
+  p2: 10,  // guesser
+  p1: 15,  // +10 +3 fast +2 love
+  p3: 13,  // +10 +2 fast +1 love
+  p5: 11,  // +10 +1 fast
+  p6: 12,  // +10 +1 fast +1 love (+5 helpful added when vote set)
+  p8: 10,  // +10 visible
+  p4: -1,
+  p10: -1,
+  p7: -1,
+  p9: -1,
+}
+
+const RESULT_WIN_LOVES = {
+  p3: { '0': true as const },
+  p5: { '0': true as const },
+  p6: { '1': true as const },
+  p1: { '4': true as const },
+}
+
+/**
+ * Attempt-3 win after unlocking marshmallow dup (2 pt attempt).
+ * Votes: Carol+Sally ❤️ smoke; Frank ❤️ flame; Hank ❤️ woods; Ivy ❤️ toast.
+ * Unlocked marshmallow dup visible — Dave+Billy get used +2 but keep -1 dup.
+ */
+const RESULT_WIN_LATE_POINTS: Record<string, number> = {
+  p2: 2,
+  p1: 7,   // +2 +3 fast +2 love
+  p3: 5,   // +2 +2 fast +1 love
+  p5: 3,   // +2 +1 fast
+  p6: 3,   // +2 +1 love
+  p8: 3,   // +2 +1 love
+  p4: 1,   // -1 dup +2 used
+  p10: 1,
+  p7: -1,
+  p9: -1,
+}
+
+const RESULT_WIN_LATE_LOVES = {
+  p3: { '0': true as const },
+  p5: { '0': true as const },
+  p6: { '1': true as const },
+  p8: { '4': true as const },
+  p7: { '6': true as const },
+}
 
 /** All clues landed in duplicate groups — guesser must unlock one. */
 const ALL_DUP_CLUE_GROUPS: ClueGroup[] = [
@@ -322,23 +387,14 @@ export function getFowlWordsPreviewScenario(
           currentAttempt: 1,
           guesserAnswer: SECRET_WORD,
           cluesByPlayer: CAMPFIRE_CLUES,
+          clueTimestamps: CAMPFIRE_TIMESTAMPS,
           clueGroups: CAMPFIRE_CLUE_GROUPS,
           visibleGroupIndexes: CAMPFIRE_VISIBLE,
           eliminationReason: CAMPFIRE_ELIMINATION,
-          pointsThisRound: {
-            p2: 10,
-            p1: 12,
-            p3: 10,
-            p5: 11,
-            p6: 9,
-            p7: 8,
-            p8: 7,
-            p9: 6,
-            p4: -1,
-            p10: -1,
-          },
-          cluePeerLoveVotes: { p3: { '0': true }, p5: { '0': true }, p6: { '1': true } },
-          cluePeerBooVotes: { p4: 4 },
+          pointsThisRound: RESULT_WIN_POINTS,
+          cluePeerLoveVotes: RESULT_WIN_LOVES,
+          cluePeerBooVotes: { p4: 1 },
+          guesserMostHelpfulVote: 4,
         }),
         players,
         isHost,
@@ -356,28 +412,12 @@ export function getFowlWordsPreviewScenario(
           guesserAnswer: SECRET_WORD,
           guessAttempts: ['beach', 'forest'],
           cluesByPlayer: CAMPFIRE_CLUES,
+          clueTimestamps: CAMPFIRE_TIMESTAMPS,
           clueGroups: CAMPFIRE_CLUE_GROUPS,
           visibleGroupIndexes: [...CAMPFIRE_VISIBLE, 2],
           eliminationReason: CAMPFIRE_ELIMINATION,
-          pointsThisRound: {
-            p2: 2,
-            p1: 4,
-            p3: 2,
-            p5: 3,
-            p6: 2,
-            p7: 2,
-            p8: 2,
-            p9: 2,
-            p4: -1,
-            p10: 1,
-          },
-          cluePeerLoveVotes: {
-            p3: { '0': true },
-            p5: { '0': true },
-            p6: { '1': true },
-            p8: { '4': true },
-            p7: { '6': true },
-          },
+          pointsThisRound: RESULT_WIN_LATE_POINTS,
+          cluePeerLoveVotes: RESULT_WIN_LATE_LOVES,
           cluePeerBooVotes: { p4: 3 },
         }),
         players,
@@ -396,10 +436,11 @@ export function getFowlWordsPreviewScenario(
           guesserAnswer: 'cozy',
           guessAttempts: ['beach', 'forest', 'warm', 'cozy'],
           cluesByPlayer: CAMPFIRE_CLUES,
+          clueTimestamps: CAMPFIRE_TIMESTAMPS,
           clueGroups: CAMPFIRE_CLUE_GROUPS,
           visibleGroupIndexes: [...CAMPFIRE_VISIBLE, 2],
           eliminationReason: CAMPFIRE_ELIMINATION,
-          pointsThisRound: { p4: -1, p10: -1 },
+          pointsThisRound: { p4: -1, p10: -1, p7: -1, p9: -1 },
           cluePeerLoveVotes: {
             p1: { '3': true },
             p5: { '0': true, '4': true },

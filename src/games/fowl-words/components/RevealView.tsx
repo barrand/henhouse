@@ -3,7 +3,7 @@ import type { GameData, PlayerData, RoundData } from '../types'
 import { submitGuess, unlockFirst, advanceRound, submitCluePeerLoveVote, submitCluePeerBooVote } from '../service'
 import PointCounter from './PointCounter'
 import { animateThumbBtn } from './thumbVoteFx'
-import { spawnHeartFloat, spawnBooFloat, pulseCardLove, shakeCardBoo } from './reactionFx'
+import { spawnHeartFloat, spawnBooFloat, pulseCardLove, shakeCardBoo, pulseCardUnlock } from './reactionFx'
 import {
   GIVER_REVEAL_HINT,
   effectivePeerLoveVotes,
@@ -13,6 +13,11 @@ import {
   myLovedGroups,
   PeerLoveChip,
   PeerBooChip,
+  CARD_VOTE_TRANSITION,
+  VOTE_COUNT_CLASS,
+  clueCardBorderClass,
+  loveVoteBtnClass,
+  booVoteBtnClass,
 } from './clueVoteUi'
 
 interface Props {
@@ -38,8 +43,25 @@ export default function RevealView({
   const guessRef = useRef(guess)
   const autoSubmittedRef = useRef(false)
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const unlockAnimKeyRef = useRef<string | null>(null)
 
   useEffect(() => { guessRef.current = guess }, [guess])
+
+  // One-time unlock pulse on the newly visible clue (attempt 2+)
+  useEffect(() => {
+    const idx = round.lastUnlockedGroupIndex
+    if (idx == null || isGuesser) return
+    const key = `${round.currentAttempt}:${idx}`
+    if (unlockAnimKeyRef.current === key) return
+    const run = () => {
+      const card = cardRefs.current[idx]
+      if (!card) return false
+      unlockAnimKeyRef.current = key
+      pulseCardUnlock(card)
+      return true
+    }
+    if (!run()) requestAnimationFrame(() => { run() })
+  }, [round.lastUnlockedGroupIndex, round.currentAttempt, isGuesser])
 
   useEffect(() => {
     if (!round.attemptDeadline || !isGuesser) return
@@ -278,12 +300,12 @@ export default function RevealView({
                   <div
                     key={idx}
                     ref={(el) => { cardRefs.current[idx] = el }}
-                    className={`relative bg-surface-container-lowest rounded-xl border-2 shadow-sm px-2.5 py-1.5 transition-all ${
-                      justUnlocked ? 'border-tertiary'
-                      : isMyLoved ? 'border-love/70 bg-love/5'
-                      : isMyBoo ? 'border-error/60 bg-error/5'
-                      : 'border-primary/30'
-                    }`}
+                    className={`relative flex flex-col bg-surface-container-lowest rounded-xl border-2 shadow-sm px-2.5 py-1.5 ${CARD_VOTE_TRANSITION} ${clueCardBorderClass({
+                      isMyLoved,
+                      isMyBoo,
+                      justUnlocked,
+                      visibleCorrect: true,
+                    })}`}
                   >
                     {justUnlocked && (
                       <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-tertiary-container text-on-tertiary-container text-[9px] font-bold uppercase px-2 py-0.5 rounded-full font-label whitespace-nowrap">
@@ -316,11 +338,11 @@ export default function RevealView({
                         <>
                           <div className="flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg bg-surface-container-low font-label">
                             <span className={`text-lg leading-none ${loveCount > 0 ? '' : 'grayscale opacity-30'}`}>❤️</span>
-                            {loveCount > 0 && <span className="text-[9px] font-bold text-love leading-none">{loveCount}</span>}
+                            {loveCount > 0 && <span className={VOTE_COUNT_CLASS}>{loveCount}</span>}
                           </div>
                           <div className="flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg bg-surface-container-low font-label">
                             <span className={`text-lg leading-none ${booCount > 0 ? '' : 'grayscale opacity-30'}`}>👎</span>
-                            {booCount > 0 && <span className="text-[9px] font-bold text-error leading-none">{booCount}</span>}
+                            {booCount > 0 && <span className={VOTE_COUNT_CLASS}>{booCount}</span>}
                           </div>
                         </>
                       ) : (
@@ -329,13 +351,11 @@ export default function RevealView({
                             onClick={(e) => handleLoveToggle(idx, e)}
                             aria-label={`Love clue: ${displayText}`}
                             title="Love this clue (+1 pt if we win)"
-                            className={`flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label transition-all active:scale-[0.97] ${
-                              isMyLoved ? 'bg-love-container shadow-sm' : 'bg-surface-container-low'
-                            }`}
+                            className={loveVoteBtnClass(isMyLoved)}
                           >
                             <span className={`text-lg leading-none ${isMyLoved ? '' : 'grayscale opacity-40'}`}>❤️</span>
                             {loveCount > 0 && (
-                              <span className={`text-[9px] font-bold leading-none ${isMyLoved ? 'text-on-love-container' : 'text-love'}`}>
+                              <span className={VOTE_COUNT_CLASS}>
                                 {loveCount}
                               </span>
                             )}
@@ -344,13 +364,11 @@ export default function RevealView({
                             onClick={(e) => handleBooToggle(idx, e)}
                             aria-label={`Boo clue: ${displayText}`}
                             title="Boo this clue (fun only — no point penalty)"
-                            className={`flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label transition-all active:scale-[0.97] ${
-                              isMyBoo ? 'bg-error-container shadow-sm' : 'bg-surface-container-low'
-                            }`}
+                            className={booVoteBtnClass(isMyBoo)}
                           >
                             <span className={`text-lg leading-none ${isMyBoo ? '' : 'grayscale opacity-40'}`}>👎</span>
                             {booCount > 0 && (
-                              <span className={`text-[9px] font-bold leading-none ${isMyBoo ? 'text-error' : 'text-error/80'}`}>
+                              <span className={VOTE_COUNT_CLASS}>
                                 {booCount}
                               </span>
                             )}

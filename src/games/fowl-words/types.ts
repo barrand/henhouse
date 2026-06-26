@@ -39,6 +39,7 @@ export interface RoundData {
   attemptInProgress: boolean            // true during Gemini guess evaluation
   attemptDeadline?: { seconds: number; nanoseconds: number }
   cluesByPlayer: Record<string, string>
+  clueTimestamps?: Record<string, number> // unix seconds, for fast-bonus ordering
   clueGroups: ClueGroup[]               // populated after dedup
   visibleGroupIndexes: number[]         // which groups are visible to the guesser
   lastUnlockedGroupIndex?: number       // most recently unlocked index (for flash anim)

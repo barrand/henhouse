@@ -1,6 +1,28 @@
 /** Shared copy, helpers, and display for ❤️ Peer love · ⭐ Most Helpful · 👎 Boo */
 
-import type { MouseEvent } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
+
+export const SCORE_CHIP_SHELL =
+  'inline-flex shrink-0 items-center gap-0.5 rounded-full bg-surface-container-high border border-outline-variant/50 px-1.5 py-px text-[9px] font-bold font-label text-on-surface-variant whitespace-nowrap'
+
+export function ScoreChip({
+  icon,
+  iconClassName = '',
+  title,
+  children,
+}: {
+  icon?: string
+  iconClassName?: string
+  title?: string
+  children: ReactNode
+}) {
+  return (
+    <span className={SCORE_CHIP_SHELL} title={title}>
+      {icon && <span className={iconClassName} aria-hidden>{icon}</span>}
+      {children}
+    </span>
+  )
+}
 
 export const GIVER_REVEAL_HINT =
   '❤️ Love great clues (+1 if we win) · 👎 Boo one bad clue'
@@ -79,25 +101,68 @@ export function effectiveGuesserBoo(
 export function PeerLoveChip({ count }: { count: number }) {
   if (count <= 0) return null
   return (
-    <span
-      className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-love-container px-1.5 py-px text-[9px] font-bold font-label text-on-love-container whitespace-nowrap"
+    <ScoreChip
+      icon="❤️"
       title={`${count} peer love${count !== 1 ? 's' : ''} · +${count} pt each if we win`}
     >
-      ❤️ {count}
-    </span>
+      {count}
+    </ScoreChip>
   )
 }
 
 export function PeerBooChip({ count }: { count: number }) {
   if (count <= 0) return null
   return (
-    <span
-      className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-error-container px-1.5 py-px text-[9px] font-bold font-label text-on-error-container whitespace-nowrap"
+    <ScoreChip
+      icon="👎"
       title={`${count} boo${count !== 1 ? 's' : ''} from the flock`}
     >
-      👎 {count}
-    </span>
+      {count}
+    </ScoreChip>
   )
+}
+
+/** Shared vote-button + card-border styling (Reveal + Result) */
+export const VOTE_COUNT_CLASS = 'text-[9px] font-bold leading-none text-on-surface-variant'
+
+export const CARD_VOTE_TRANSITION = 'transition-[border-color,background-color,box-shadow]'
+
+export function loveVoteBtnClass(active: boolean, interactive = true) {
+  return `flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label shrink-0 ${CARD_VOTE_TRANSITION} ${
+    interactive ? 'active:scale-[0.97]' : ''
+  } ${active ? 'bg-love/15 ring-1 ring-inset ring-love/50' : 'bg-surface-container-low'}`
+}
+
+export function booVoteBtnClass(active: boolean, opts?: { wide?: boolean; interactive?: boolean }) {
+  const wide = opts?.wide ?? false
+  const interactive = opts?.interactive ?? true
+  return `${wide ? 'flex-[2]' : 'flex-1'} h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label shrink-0 ${CARD_VOTE_TRANSITION} ${
+    interactive ? 'active:scale-[0.97]' : ''
+  } ${active ? 'bg-surface-container-high ring-1 ring-inset ring-outline-variant/80' : 'bg-surface-container-low'}`
+}
+
+export function starVoteBtnClass(active: boolean, interactive = true) {
+  return `flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label shrink-0 ${CARD_VOTE_TRANSITION} ${
+    interactive ? 'active:scale-[0.97]' : ''
+  } ${active ? 'bg-primary/15 ring-1 ring-inset ring-primary/50' : 'bg-surface-container-low'}`
+}
+
+export function clueCardBorderClass(opts: {
+  hiddenDuplicate?: boolean
+  isMostHelpful?: boolean
+  isMyLoved?: boolean
+  isMyBoo?: boolean
+  isGuesserBoo?: boolean
+  justUnlocked?: boolean
+  visibleCorrect?: boolean
+}): string {
+  if (opts.hiddenDuplicate) return 'bg-surface-container-low border-outline-variant/50'
+  if (opts.isMostHelpful) return 'border-primary/50 bg-primary/5'
+  if (opts.isMyLoved) return 'border-love/50 bg-love/5'
+  if (opts.isMyBoo || opts.isGuesserBoo) return 'border-outline-variant/60'
+  if (opts.justUnlocked) return 'border-tertiary'
+  if (opts.visibleCorrect) return 'border-primary/40'
+  return 'border-outline-variant/60'
 }
 
 export function StarIcon({ filled = false, className = '' }: { filled?: boolean; className?: string }) {
@@ -113,20 +178,35 @@ export function StarIcon({ filled = false, className = '' }: { filled?: boolean;
 }
 
 export function MostHelpfulCell({
-  active, perAuthor, authorCount,
-}: { active: boolean; perAuthor: number; authorCount: number }) {
-  return (
-    <div className={`flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label shrink-0 ${
-      active ? 'bg-primary-fixed shadow-sm' : 'bg-surface-container-low opacity-60'
-    }`}>
-      <StarIcon filled={active} className={active ? 'text-on-primary-fixed' : 'text-outline opacity-40'} />
+  active, perAuthor, authorCount, interactive, onClick, ariaLabel, title,
+}: {
+  active: boolean
+  perAuthor: number
+  authorCount: number
+  interactive?: boolean
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void
+  ariaLabel?: string
+  title?: string
+}) {
+  const className = `${starVoteBtnClass(active, !!interactive)}${!interactive && !active ? ' opacity-60' : ''}`
+  const content = (
+    <>
+      <StarIcon filled={active} className={active ? 'text-primary' : 'text-outline opacity-40'} />
       {active && (
-        <span className="text-[9px] font-bold text-on-primary-fixed leading-none">
+        <span className={VOTE_COUNT_CLASS}>
           {authorCount > 1 ? `+${perAuthor} each` : `+${perAuthor}`}
         </span>
       )}
-    </div>
+    </>
   )
+  if (interactive && onClick) {
+    return (
+      <button type="button" onClick={onClick} aria-label={ariaLabel} title={title} className={className}>
+        {content}
+      </button>
+    )
+  }
+  return <div className={className}>{content}</div>
 }
 
 export function BooCell({
@@ -140,15 +220,15 @@ export function BooCell({
   onClick?: (e: MouseEvent<HTMLButtonElement>) => void
 }) {
   const hasBoo = giverBooCount > 0 || guesserBoo
-  const className = `${wide ? 'flex-[2]' : 'flex-1'} h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label shrink-0 transition-all ${
-    isActive ? 'bg-error-container shadow-sm' : 'bg-surface-container-low'
-  } ${!hasBoo && !interactive ? 'opacity-60' : ''} ${interactive ? 'active:scale-[0.97]' : ''}`
+  const className = `${booVoteBtnClass(!!isActive, { wide, interactive })}${
+    !hasBoo && !interactive ? ' opacity-60' : ''
+  }`
 
   const content = (
     <>
       <span className={`text-base leading-none ${hasBoo || isActive ? '' : 'grayscale opacity-40'}`}>👎</span>
       {!interactive && giverBooCount > 0 && (
-        <span className="text-[9px] font-bold text-error leading-none">{giverBooCount}</span>
+        <span className={VOTE_COUNT_CLASS}>{giverBooCount}</span>
       )}
     </>
   )

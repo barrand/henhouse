@@ -109,10 +109,17 @@ export function pulseCardMostHelpful(cardEl: HTMLElement) {
 }
 
 export function shakeCardBoo(cardEl: HTMLElement) {
-  cardEl.classList.remove('animate-thumb-shake')
+  cardEl.classList.remove('animate-card-shake')
   void cardEl.offsetWidth
-  cardEl.classList.add('animate-thumb-shake')
-  cardEl.addEventListener('animationend', () => cardEl.classList.remove('animate-thumb-shake'), { once: true })
+  cardEl.classList.add('animate-card-shake')
+  cardEl.addEventListener('animationend', () => cardEl.classList.remove('animate-card-shake'), { once: true })
+}
+
+export function pulseCardUnlock(cardEl: HTMLElement) {
+  cardEl.classList.remove('animate-card-unlock-pulse')
+  void cardEl.offsetWidth
+  cardEl.classList.add('animate-card-unlock-pulse')
+  cardEl.addEventListener('animationend', () => cardEl.classList.remove('animate-card-unlock-pulse'), { once: true })
 }
 
 export function playMostHelpfulAwardFx(btn: HTMLButtonElement, cardEl?: HTMLElement | null) {
