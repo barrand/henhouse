@@ -162,7 +162,7 @@ export default function QuestionDisplay({
       <div className="mt-6 space-y-3">
         {expired && !submitted ? (
           <div className="text-center py-4">
-            <img src="/images/hen-embarrassed.svg" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-pop" />
+            <img src="/images/hen-sleeping.svg" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
             <p className="text-error font-bold text-lg font-body">Too slow!</p>
             <p className="text-outline mt-1 font-body">You didn't answer in time.</p>
           </div>

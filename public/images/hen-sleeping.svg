@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Tail feathers tucked -->
+  <ellipse cx="158" cy="168" rx="18" ry="14" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2" transform="rotate(20 158 168)"/>
+  <!-- Wings folded over body -->
+  <ellipse cx="42" cy="158" rx="26" ry="20" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2" transform="rotate(-25 42 158)"/>
+  <ellipse cx="158" cy="154" rx="26" ry="20" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2" transform="rotate(25 158 154)"/>
+  <!-- Body (slumped, cozy) -->
+  <ellipse cx="100" cy="158" rx="54" ry="40" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5" transform="rotate(-6 100 158)"/>
+  <!-- Head tilted down on wing -->
+  <circle cx="88" cy="88" r="38" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5" transform="rotate(18 88 88)"/>
+  <!-- Comb (flopped to side) -->
+  <path d="M62,58 Q66,42 72,54 Q76,38 82,50 Q86,36 92,48 Q96,40 100,52" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8" stroke-linejoin="round" transform="rotate(12 82 48)"/>
+  <!-- Closed eyes (peaceful arcs) -->
+  <path d="M72,82 Q80,76 88,82" fill="none" stroke="#2a1f0e" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M92,82 Q100,76 108,82" fill="none" stroke="#2a1f0e" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- Beak (tucked) -->
+  <ellipse cx="82" cy="102" rx="9" ry="6" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8" transform="rotate(18 82 102)"/>
+  <!-- Wattle -->
+  <ellipse cx="86" cy="112" rx="7" ry="9" fill="#ffb4ab" stroke="#2a1f0e" stroke-width="1.5" opacity="0.85"/>
+  <!-- Legs tucked under -->
+  <line x1="88" y1="192" x2="78" y2="198" stroke="#f0c078" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+  <line x1="86" y1="192" x2="72" y2="196" stroke="#f0c078" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+  <line x1="112" y1="192" x2="122" y2="198" stroke="#f0c078" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+  <line x1="114" y1="192" x2="128" y2="196" stroke="#f0c078" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+  <!-- Zzz (hand-drawn paths, small → large) -->
+  <path d="M126,54 L138,54 L126,66 L138,66" fill="none" stroke="#e8e2db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M140,36 L158,36 L140,52 L158,52" fill="none" stroke="#e8e2db" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M154,14 L178,14 L154,34 L178,34" fill="none" stroke="#e8e2db" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

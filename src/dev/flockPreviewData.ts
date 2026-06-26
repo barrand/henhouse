@@ -178,18 +178,22 @@ export function getFlockPreviewScenario(
         currentPlayerId: asPlayerId,
       }
 
-    case 'question-timeout':
+    case 'question-timeout': {
+      // Current player did NOT answer — deadline passed → "Too slow!" UI
+      const timeoutPlayer = PLAYER_IDS.includes(asPlayerId) ? asPlayerId : 'p10'
+      const othersAnswered = PLAYER_IDS.filter((id) => id !== timeoutPlayer).slice(0, 7)
       return {
         game: baseGame(),
         round: baseRound({
           deadline: { seconds: now() - 30, nanoseconds: 0 },
-          answeredPlayerIds: answered7,
-          answerCount: 7,
+          answeredPlayerIds: othersAnswered,
+          answerCount: othersAnswered.length,
         }),
         players,
         isHost: false,
-        currentPlayerId: asPlayerId === HOST_ID ? 'p4' : asPlayerId,
+        currentPlayerId: timeoutPlayer,
       }
+    }
 
     case 'reveal-loading':
       return {
