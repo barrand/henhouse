@@ -1,14 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
-import { advanceRound, submitGuesserStarVote, submitGuesserThumbsDownVote } from '../service'
-import { playThumbVoteFx } from './thumbVoteFx'
+import { advanceRound, submitGuesserMostHelpfulVote, submitGuesserBooVote } from '../service'
+import { animateThumbBtn, playThumbVoteFx } from './thumbVoteFx'
+import { stampMostHelpful } from './reactionFx'
 import {
-  GiverNodChip,
-  GiverShameChip,
-  GuesserMvpCell,
-  ShameCell,
+  PeerLoveChip,
+  PeerBooChip,
+  MostHelpfulCell,
+  BooCell,
   StarIcon,
   guesserResultVoteHint,
+  mostHelpfulSplitPts,
+  countGroupPeerLoves,
+  countGroupPeerBoos,
+  effectivePeerLoveVotes,
+  effectivePeerBooVotes,
+  effectiveMostHelpfulVote,
+  effectiveGuesserBoo,
 } from './clueVoteUi'
 
 interface Props {
@@ -17,13 +25,19 @@ interface Props {
   players: PlayerData[]
   isHost: boolean
   currentPlayerId: string | null
+  onMostHelpfulVote?: (groupIdx: number) => void
+  onGuesserBoo?: (groupIdx: number) => void
 }
 
-export default function RoundResultView({ game, round, players, isHost, currentPlayerId }: Props) {
+export default function RoundResultView({
+  game, round, players, isHost, currentPlayerId,
+  onMostHelpfulVote, onGuesserBoo,
+}: Props) {
   const [advancing, setAdvancing] = useState(false)
   const [error, setError] = useState('')
-  const [pendingUpIdx, setPendingUpIdx] = useState<number | null>(null)
-  const [pendingDownIdx, setPendingDownIdx] = useState<number | null>(null)
+  const [pendingStarIdx, setPendingStarIdx] = useState<number | null>(null)
+  const [pendingBooIdx, setPendingBooIdx] = useState<number | null>(null)
+  const mostHelpfulBadgeRefs = useRef<Record<number, HTMLDivElement | null>>({})
 
   const guesserPlayer = players.find((p) => p.id === game.currentGuesser)
   const isLastRound = game.currentRound >= game.settings.totalRounds
@@ -32,28 +46,43 @@ export default function RoundResultView({ game, round, players, isHost, currentP
   const handleAdvance = async () => {
     setError('')
     setAdvancing(true)
-    try {
-      await advanceRound(game.id)
-    } catch (err: any) {
+    try { await advanceRound(game.id) } catch (err: any) {
       setError(err.message ?? "Couldn't move on")
       setAdvancing(false)
     }
   }
 
+  const peerLoveVotes = effectivePeerLoveVotes(round.cluePeerLoveVotes, round.clueStarVotes)
+  const peerBooVotes = effectivePeerBooVotes(round.cluePeerBooVotes, round.clueThumbsDownVotes)
+  const serverMostHelpful = effectiveMostHelpfulVote(round.guesserMostHelpfulVote, round.guesserStarVote)
+  const serverGuesserBoo = effectiveGuesserBoo(round.guesserBooVote, round.guesserThumbsDownVote)
+
+  const activeMostHelpfulIdx =
+    pendingStarIdx !== null ? pendingStarIdx : serverMostHelpful
+  const activeGuesserBooIdx =
+    pendingBooIdx !== null ? pendingBooIdx : serverGuesserBoo
+
+  useEffect(() => {
+    if (pendingStarIdx !== null && serverMostHelpful === pendingStarIdx) setPendingStarIdx(null)
+  }, [serverMostHelpful, pendingStarIdx])
+
+  useEffect(() => {
+    if (pendingBooIdx !== null && serverGuesserBoo === pendingBooIdx) setPendingBooIdx(null)
+  }, [serverGuesserBoo, pendingBooIdx])
+
   const myPoints = currentPlayerId ? round.pointsThisRound[currentPlayerId] ?? 0 : 0
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
   const guesserName = guesserPlayer?.name ?? 'The guesser'
 
-  // Back-calculate fast bonus per player from pointsThisRound
   const fastBonusMap: Record<string, number> = {}
   if (round.isCorrect) {
     const attemptPts = [10, 5, 2, 1][round.currentAttempt - 1] ?? 0
     for (let gIdx = 0; gIdx < round.clueGroups.length; gIdx++) {
       const g = round.clueGroups[gIdx]
       if (!round.visibleGroupIndexes.includes(gIdx)) continue
-      const giverStarPts = Object.values(round.clueStarVotes ?? {}).filter((v) => v === gIdx).length
-      const guesserStarPts = round.guesserStarVote === gIdx ? Math.floor(5 / g.playerIds.length) : 0
-      const basePts = attemptPts + (g.isDuplicate ? -1 : 0) + giverStarPts + guesserStarPts
+      const loveCount = countGroupPeerLoves(peerLoveVotes, gIdx)
+      const mvpPts = serverMostHelpful === gIdx ? mostHelpfulSplitPts(g.playerIds.length) : 0
+      const basePts = attemptPts + (g.isDuplicate ? -1 : 0) + loveCount + mvpPts
       for (const pid of g.playerIds) {
         const bonus = (round.pointsThisRound[pid] ?? 0) - basePts
         if (bonus > 0) fastBonusMap[pid] = bonus
@@ -61,40 +90,33 @@ export default function RoundResultView({ game, round, players, isHost, currentP
     }
   }
 
-  const handleGuesserUp = (idx: number, e: React.MouseEvent<HTMLButtonElement>) => {
-    playThumbVoteFx(e.currentTarget, 'up')
+  const handleMostHelpfulVote = (idx: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    animateThumbBtn(e.currentTarget, 'up')
     if (!round.isCorrect) return
-    const current =
-      pendingUpIdx !== null ? pendingUpIdx : round.guesserStarVote ?? null
-    setPendingUpIdx(current === idx ? null : idx)
-    submitGuesserStarVote(game.id, game.currentRound, idx).catch(() => {})
+    const current = pendingStarIdx !== null ? pendingStarIdx : serverMostHelpful
+    const next = current === idx ? null : idx
+    setPendingStarIdx(next)
+    if (next !== null) {
+      const badge = mostHelpfulBadgeRefs.current[idx]
+      if (badge) stampMostHelpful(badge)
+    }
+    if (onMostHelpfulVote) {
+      onMostHelpfulVote(idx)
+    } else {
+      submitGuesserMostHelpfulVote(game.id, game.currentRound, idx).catch(() => {})
+    }
   }
 
-  const handleGuesserDown = (idx: number, e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleGuesserBoo = (idx: number, e: React.MouseEvent<HTMLButtonElement>) => {
     playThumbVoteFx(e.currentTarget, 'down')
-    const current =
-      pendingDownIdx !== null ? pendingDownIdx : round.guesserThumbsDownVote ?? null
-    setPendingDownIdx(current === idx ? null : idx)
-    submitGuesserThumbsDownVote(game.id, game.currentRound, idx).catch(() => {})
+    const current = pendingBooIdx !== null ? pendingBooIdx : serverGuesserBoo
+    setPendingBooIdx(current === idx ? null : idx)
+    if (onGuesserBoo) {
+      onGuesserBoo(idx)
+    } else {
+      submitGuesserBooVote(game.id, game.currentRound, idx).catch(() => {})
+    }
   }
-
-  // Single active star/shame — pending overrides server until Firestore confirms.
-  const activeStarIdx =
-    pendingUpIdx !== null ? pendingUpIdx : round.guesserStarVote ?? null
-  const activeShameIdx =
-    pendingDownIdx !== null ? pendingDownIdx : round.guesserThumbsDownVote ?? null
-
-  useEffect(() => {
-    if (pendingUpIdx !== null && round.guesserStarVote === pendingUpIdx) {
-      setPendingUpIdx(null)
-    }
-  }, [round.guesserStarVote, pendingUpIdx])
-
-  useEffect(() => {
-    if (pendingDownIdx !== null && round.guesserThumbsDownVote === pendingDownIdx) {
-      setPendingDownIdx(null)
-    }
-  }, [round.guesserThumbsDownVote, pendingDownIdx])
 
   const hasVisibleClues = round.clueGroups.some((_, i) => round.visibleGroupIndexes.includes(i))
   const visibleSet = new Set(round.visibleGroupIndexes)
@@ -113,11 +135,9 @@ export default function RoundResultView({ game, round, players, isHost, currentP
     return playerIds.map((id, i) => (
       <span key={id}>
         {i > 0 && ', '}
-        {id === currentPlayerId ? (
-          <span className="text-primary font-bold">← you</span>
-        ) : (
-          playerName(id)
-        )}
+        {id === currentPlayerId
+          ? <span className="text-primary font-bold">← you</span>
+          : playerName(id)}
       </span>
     ))
   }
@@ -125,7 +145,6 @@ export default function RoundResultView({ game, round, players, isHost, currentP
   return (
     <main className="flex-1 flex flex-col px-4 py-4">
       <div className="max-w-md w-full mx-auto space-y-4">
-        {/* Result Banner */}
         <div className="text-center space-y-2">
           {round.isCorrect ? (
             <>
@@ -163,10 +182,10 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                   {(round.guessAttempts.length > 0
                     ? round.guessAttempts
                     : [round.guesserAnswer!]
-                  ).map((guess, i) => (
+                  ).map((g, i) => (
                     <span key={i} className="text-sm text-on-surface-variant font-body">
                       <span className="font-label text-[10px] text-outline tabular-nums">{i + 1}.</span>{' '}
-                      <span className="font-bold text-on-surface">{guess}</span>
+                      <span className="font-bold text-on-surface">{g}</span>
                     </span>
                   ))}
                 </div>
@@ -175,7 +194,6 @@ export default function RoundResultView({ game, round, players, isHost, currentP
           )}
         </div>
 
-        {/* Secret Word — only shown on a loss as the reveal */}
         {!round.isCorrect && (
           <div className="bg-primary-fixed border-2 border-primary-fixed-dim rounded-2xl px-4 py-3 text-center shadow-sm">
             <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-primary-fixed-variant font-bold mb-0.5">
@@ -187,14 +205,12 @@ export default function RoundResultView({ game, round, players, isHost, currentP
           </div>
         )}
 
-        {/* Clue debrief */}
         {round.clueGroups.length > 0 && (
           <div>
             <h3 className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
               What everyone wrote
             </h3>
 
-            {/* Guesser rate-the-clues prompt */}
             {isCurrentGuesser && hasVisibleClues && (
               <div className="mb-3 bg-tertiary-container/40 border border-tertiary/30 rounded-xl px-4 py-3 text-center">
                 <p className="text-xs font-bold text-on-tertiary-container uppercase tracking-wider font-label">
@@ -217,14 +233,14 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                 const gotFastBonus = isYours && !!fastBonusMap[yourId] && group.playerIds.includes(yourId)
                 const attemptPts = [10, 5, 2, 1][round.currentAttempt - 1] ?? 0
 
-                const giverUpCount = Object.values(round.clueStarVotes ?? {}).filter((v) => v === idx).length
-                const giverDownCount = Object.values(round.clueThumbsDownVotes ?? {}).filter((v) => v === idx).length
-                const guesserUpPts = Math.floor(5 / group.playerIds.length)
+                const loveCount = countGroupPeerLoves(peerLoveVotes, idx)
+                const booCount = countGroupPeerBoos(peerBooVotes, idx)
+                const mvpPts = mostHelpfulSplitPts(group.playerIds.length)
 
-                const isGuesserUpVoted = activeStarIdx === idx
-                const isGuesserDownVoted = activeShameIdx === idx
+                const isMostHelpful = activeMostHelpfulIdx === idx
+                const isGuesserBoo = activeGuesserBooIdx === idx
                 const canGuesserVote = isCurrentGuesser && isVisible && !isYours
-                const canGuesserStarUp = canGuesserVote && round.isCorrect
+                const canAwardMostHelpful = canGuesserVote && round.isCorrect
 
                 return (
                   <div
@@ -232,9 +248,9 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                     className={`relative bg-surface-container-lowest rounded-xl border-2 shadow-sm px-2.5 py-1.5 transition-all ${
                       group.isDuplicate && !isVisible
                         ? 'bg-surface-container-low border-outline-variant/50'
-                        : isGuesserUpVoted
+                        : isMostHelpful
                         ? 'border-primary/70 bg-primary/5'
-                        : isGuesserDownVoted
+                        : isGuesserBoo
                         ? 'border-error/60 bg-error/5'
                         : isVisible && round.isCorrect
                         ? 'border-primary/40'
@@ -250,7 +266,8 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                     >
                       {displayText}
                     </p>
-                    <div className="flex items-center justify-center gap-1 mb-1 h-4 min-w-0 w-full px-0.5">
+
+                    <div className="flex items-center justify-center gap-1 mb-1 min-w-0 w-full px-0.5 flex-wrap">
                       <span className="text-xs text-on-surface-variant font-medium font-body truncate min-w-0 leading-snug">
                         {renderAuthorNames(group.playerIds, isYours)}
                         {group.isDuplicate && isYours && (
@@ -260,12 +277,12 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                           <span className="text-error font-bold uppercase text-[9px] tracking-wide"> · dup</span>
                         )}
                       </span>
-                      <GiverNodChip count={giverUpCount} />
-                      <GiverShameChip count={giverDownCount} />
+                      <PeerLoveChip count={loveCount} />
+                      <PeerBooChip count={booCount} />
                     </div>
 
                     {((isVisible && round.isCorrect && isYours) || gotFastBonus) && (
-                      <div className="mb-1 flex items-center justify-center gap-1 overflow-hidden">
+                      <div className="mb-1 flex items-center justify-center gap-1 overflow-hidden flex-wrap">
                         {isVisible && round.isCorrect && isYours && (
                           <span className="bg-primary-fixed text-on-primary-fixed text-[10px] font-bold px-2 py-0.5 rounded-full font-label whitespace-nowrap">
                             +{attemptPts} used
@@ -279,57 +296,69 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                       </div>
                     )}
 
+                    {isMostHelpful && (
+                      <div
+                        ref={(el) => { mostHelpfulBadgeRefs.current[idx] = el }}
+                        className="mb-1 flex items-center justify-center gap-1"
+                      >
+                        <span className="bg-primary-fixed text-on-primary-fixed text-[10px] font-bold px-2 py-0.5 rounded-full font-label whitespace-nowrap">
+                          ⭐ Most Helpful +{mvpPts}{group.playerIds.length > 1 ? ' each' : ''}
+                        </span>
+                      </div>
+                    )}
+
                     <div className="flex gap-1.5">
                       {round.isCorrect ? (
                         <>
-                          {canGuesserVote && canGuesserStarUp ? (
+                          {canAwardMostHelpful ? (
                             <button
-                              onClick={(e) => handleGuesserUp(idx, e)}
-                              title={`Award +5 MVP${group.playerIds.length > 1 ? ` (+${guesserUpPts} each)` : ''}`}
+                              onClick={(e) => handleMostHelpfulVote(idx, e)}
+                              aria-label={`Award Most Helpful to: ${displayText}`}
+                              title={`Most Helpful +${mvpPts}${group.playerIds.length > 1 ? ' each' : ''}`}
                               className={`flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label transition-all active:scale-[0.97] ${
-                                isGuesserUpVoted
+                                isMostHelpful
                                   ? 'bg-primary-fixed shadow-sm'
                                   : 'bg-surface-container-low'
                               }`}
                             >
                               <StarIcon
-                                filled={isGuesserUpVoted}
-                                className={isGuesserUpVoted ? 'text-on-primary-fixed' : 'text-primary opacity-50'}
+                                filled={isMostHelpful}
+                                className={isMostHelpful ? 'text-on-primary-fixed' : 'text-primary opacity-50'}
                               />
-                              {isGuesserUpVoted && (
+                              {isMostHelpful && (
                                 <span className="text-[9px] font-bold leading-none text-on-primary-fixed">
-                                  +5
+                                  +{mvpPts}
                                 </span>
                               )}
                             </button>
                           ) : (
-                            <GuesserMvpCell
-                              active={isGuesserUpVoted}
-                              perAuthor={guesserUpPts}
+                            <MostHelpfulCell
+                              active={isMostHelpful}
+                              perAuthor={mvpPts}
                               authorCount={group.playerIds.length}
                             />
                           )}
-                          <ShameCell
-                            giverCount={canGuesserVote ? 0 : giverDownCount}
-                            guesserShamed={isGuesserDownVoted}
+                          <BooCell
+                            giverBooCount={canGuesserVote ? 0 : booCount}
+                            guesserBoo={isGuesserBoo}
                             interactive={canGuesserVote}
-                            isActive={isGuesserDownVoted}
-                            onClick={canGuesserVote ? (e) => handleGuesserDown(idx, e) : undefined}
+                            isActive={isGuesserBoo}
+                            onClick={canGuesserVote ? (e) => handleGuesserBoo(idx, e) : undefined}
                           />
                         </>
                       ) : canGuesserVote ? (
-                        <ShameCell
-                          giverCount={0}
-                          guesserShamed={isGuesserDownVoted}
+                        <BooCell
+                          giverBooCount={0}
+                          guesserBoo={isGuesserBoo}
                           interactive
                           wide
-                          isActive={isGuesserDownVoted}
-                          onClick={(e) => handleGuesserDown(idx, e)}
+                          isActive={isGuesserBoo}
+                          onClick={(e) => handleGuesserBoo(idx, e)}
                         />
                       ) : (
-                        <ShameCell
-                          giverCount={giverDownCount}
-                          guesserShamed={isGuesserDownVoted}
+                        <BooCell
+                          giverBooCount={booCount}
+                          guesserBoo={isGuesserBoo}
                           wide
                         />
                       )}
@@ -341,7 +370,6 @@ export default function RoundResultView({ game, round, players, isHost, currentP
           </div>
         )}
 
-        {/* Guesser result message */}
         {isCurrentGuesser && (
           <div className={`rounded-xl px-4 py-3 text-center font-body border ${round.isCorrect ? 'bg-primary-fixed/20 border-primary-fixed-dim' : 'bg-surface-container-low border-outline-variant/20'}`}>
             <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider font-label mb-1">Your result as guesser</p>
@@ -349,7 +377,7 @@ export default function RoundResultView({ game, round, players, isHost, currentP
               {round.isCorrect
                 ? ([
                     '🎯 Got it on the first try!',
-                    '✨ Second time\'s the charm!',
+                    "✨ Second time's the charm!",
                     '💪 Persistence pays off!',
                     '🔓 Finally unlocked it!',
                   ][round.currentAttempt - 1] ?? '✅ Correct!')
@@ -363,7 +391,6 @@ export default function RoundResultView({ game, round, players, isHost, currentP
           </div>
         )}
 
-        {/* Personal score */}
         {myPoints > 0 && (
           <div className="bg-primary text-on-primary rounded-2xl px-4 py-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
             <p className="font-label text-[10px] uppercase tracking-[0.2em] opacity-80 mb-0.5 font-bold">You earned</p>
@@ -373,7 +400,6 @@ export default function RoundResultView({ game, round, players, isHost, currentP
           </div>
         )}
 
-        {/* Standings */}
         <div>
           <h3 className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
             Standings
@@ -404,7 +430,6 @@ export default function RoundResultView({ game, round, players, isHost, currentP
           </ul>
         </div>
 
-        {/* Action button */}
         {isHost ? (
           <button
             onClick={handleAdvance}

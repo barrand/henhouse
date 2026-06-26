@@ -109,10 +109,10 @@ function baseRound(overrides: Partial<RoundData> = {}): RoundData {
     guessAttempts: [],
     tentativePoints: {},
     pointsThisRound: {},
-    clueStarVotes: {},
-    clueThumbsDownVotes: {},
-    guesserStarVote: null,
-    guesserThumbsDownVote: null,
+    cluePeerLoveVotes: {},
+    cluePeerBooVotes: {},
+    guesserMostHelpfulVote: null,
+    guesserBooVote: null,
     ...overrides,
   }
 }
@@ -126,6 +126,7 @@ export type FowlWordsPreviewScreen =
   | 'reveal'
   | 'reveal-attempt2'
   | 'reveal-all-dupes'
+  | 'reveal-busy'
   | 'guess'
   | 'result-win'
   | 'result-win-late'
@@ -145,6 +146,7 @@ export const FOWL_WORDS_PREVIEW_SCREENS: { id: FowlWordsPreviewScreen; label: st
   { id: 'reveal', label: 'Reveal (attempt 1)' },
   { id: 'reveal-attempt2', label: 'Reveal (attempt 2)' },
   { id: 'reveal-all-dupes', label: 'Reveal (all dupes)' },
+  { id: 'reveal-busy', label: '🔥 Reveal (busy)' },
   { id: 'guess', label: 'Guess (checking)' },
   { id: 'result-win', label: 'Result (nailed it)' },
   { id: 'result-win-late', label: 'Result (late win)' },
@@ -250,8 +252,8 @@ export function getFowlWordsPreviewScenario(
           maxAttempts: 4,
           eliminationReason: CAMPFIRE_ELIMINATION,
           attemptDeadline: { seconds: now() + 55, nanoseconds: 0 },
-          clueStarVotes: { p3: 3, p5: 0 },
-          clueThumbsDownVotes: { p4: 1 },
+          cluePeerLoveVotes: { p3: { '3': true }, p5: { '0': true } },
+          cluePeerBooVotes: { p4: 1 },
         }),
         players,
         isHost,
@@ -335,8 +337,8 @@ export function getFowlWordsPreviewScenario(
             p4: -1,
             p10: -1,
           },
-          clueStarVotes: { p3: 0, p5: 0, p6: 1 },
-          clueThumbsDownVotes: { p4: 2 },
+          cluePeerLoveVotes: { p3: { '0': true }, p5: { '0': true }, p6: { '1': true } },
+          cluePeerBooVotes: { p4: 4 },
         }),
         players,
         isHost,
@@ -369,8 +371,14 @@ export function getFowlWordsPreviewScenario(
             p4: -1,
             p10: 1,
           },
-          clueStarVotes: { p3: 0, p5: 0, p6: 1, p8: 4, p7: 6 },
-          clueThumbsDownVotes: { p4: 5 },
+          cluePeerLoveVotes: {
+            p3: { '0': true },
+            p5: { '0': true },
+            p6: { '1': true },
+            p8: { '4': true },
+            p7: { '6': true },
+          },
+          cluePeerBooVotes: { p4: 3 },
         }),
         players,
         isHost,
@@ -392,8 +400,45 @@ export function getFowlWordsPreviewScenario(
           visibleGroupIndexes: [...CAMPFIRE_VISIBLE, 2],
           eliminationReason: CAMPFIRE_ELIMINATION,
           pointsThisRound: { p4: -1, p10: -1 },
-          clueThumbsDownVotes: { p1: 2 },
-          guesserThumbsDownVote: 2,
+          cluePeerLoveVotes: {
+            p1: { '3': true },
+            p5: { '0': true, '4': true },
+          },
+          cluePeerBooVotes: { p3: 3 },
+          guesserBooVote: 2,
+        }),
+        players,
+        isHost,
+        currentPlayerId: asPlayerId,
+      }
+
+    case 'reveal-busy':
+      return {
+        game: baseGame(),
+        round: baseRound({
+          status: 'reveal',
+          currentAttempt: 2,
+          cluesByPlayer: CAMPFIRE_CLUES,
+          clueGroups: CAMPFIRE_CLUE_GROUPS,
+          visibleGroupIndexes: [...CAMPFIRE_VISIBLE, 2],
+          lastUnlockedGroupIndex: 2,
+          guessAttempts: ['beach'],
+          eliminationReason: CAMPFIRE_ELIMINATION,
+          attemptDeadline: { seconds: now() + 35, nanoseconds: 0 },
+          cluePeerLoveVotes: {
+            p1: { '1': true, '4': true },
+            p3: { '0': true, '6': true },
+            p5: { '0': true, '1': true, '4': true },
+            p7: { '3': true },
+            p8: { '0': true, '4': true },
+            p9: { '1': true, '3': true, '2': true },
+            p10: { '0': true },
+          },
+          cluePeerBooVotes: {
+            p1: 6,
+            p5: 3,
+            p7: 4,
+          },
         }),
         players,
         isHost,

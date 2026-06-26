@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import Lobby from '@fowl-words/components/Lobby'
 import GameHeader from '@fowl-words/components/GameHeader'
@@ -9,6 +10,7 @@ import GuessView from '@fowl-words/components/GuessView'
 import RoundResultView from '@fowl-words/components/RoundResultView'
 import Scoreboard from '@fowl-words/components/Scoreboard'
 import LeaderboardModal from '@fowl-words/components/LeaderboardModal'
+import type { RoundData } from '@fowl-words/types'
 import {
   FOWL_WORDS_PREVIEW_SCREENS,
   PREVIEW_GUESSER_ID,
@@ -32,6 +34,68 @@ export default function FowlWordsPreview() {
   const currentPlayer = scenario.players.find((p) => p.id === scenario.currentPlayerId) ?? null
   const isGuesser = scenario.game.currentGuesser === scenario.currentPlayerId
 
+  const [localLoves, setLocalLoves] = useState<Record<string, true>>({})
+  const [localBoo, setLocalBoo] = useState<number | null>(null)
+  const [localMostHelpful, setLocalMostHelpful] = useState<number | null>(null)
+  const [localGuesserBoo, setLocalGuesserBoo] = useState<number | null>(null)
+
+  useEffect(() => {
+    setLocalLoves({})
+    setLocalBoo(null)
+    setLocalMostHelpful(null)
+    setLocalGuesserBoo(null)
+  }, [screen, asPlayerId])
+
+  const buildPreviewRound = (base: RoundData): RoundData => {
+    const baseLoves = base.cluePeerLoveVotes ?? {}
+    return {
+      ...base,
+      cluePeerLoveVotes: { ...baseLoves, [asPlayerId]: localLoves },
+      cluePeerBooVotes: localBoo !== null
+        ? { ...(base.cluePeerBooVotes ?? {}), [asPlayerId]: localBoo }
+        : (base.cluePeerBooVotes ?? {}),
+      guesserMostHelpfulVote:
+        localMostHelpful !== null ? localMostHelpful : base.guesserMostHelpfulVote ?? null,
+      guesserBooVote:
+        localGuesserBoo !== null ? localGuesserBoo : base.guesserBooVote ?? null,
+    }
+  }
+
+  const previewRound = scenario.round ? buildPreviewRound(scenario.round) : null
+
+  const onLoveToggle = (groupIdx: number) => {
+    setLocalLoves((prev) => {
+      const key = String(groupIdx)
+      if (prev[key]) {
+        const { [key]: _, ...rest } = prev
+        return rest
+      }
+      if (localBoo === groupIdx) setLocalBoo(null)
+      return { ...prev, [key]: true }
+    })
+  }
+
+  const onBooToggle = (groupIdx: number) => {
+    setLocalBoo((prev) => {
+      const next = prev === groupIdx ? null : groupIdx
+      if (next === groupIdx && localLoves[String(groupIdx)]) {
+        setLocalLoves((l) => {
+          const { [String(groupIdx)]: _, ...rest } = l
+          return rest
+        })
+      }
+      return next
+    })
+  }
+
+  const onMostHelpfulVote = (groupIdx: number) => {
+    setLocalMostHelpful((prev) => prev === groupIdx ? null : groupIdx)
+  }
+
+  const onGuesserBoo = (groupIdx: number) => {
+    setLocalGuesserBoo((prev) => prev === groupIdx ? null : groupIdx)
+  }
+
   const setAsPlayer = (id: string) => {
     const next = new URLSearchParams(searchParams)
     next.set('as', id)
@@ -40,6 +104,10 @@ export default function FowlWordsPreview() {
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
+      <div className="bg-secondary text-on-secondary text-center text-[11px] font-label font-bold py-1.5 px-3 tracking-wide">
+        ⚠️ Awards UX Prototype — votes are local only, nothing is saved
+      </div>
+
       <div className="sticky top-0 z-[100] border-b border-outline-variant/60 bg-surface-container-high px-3 py-2 space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
@@ -116,30 +184,30 @@ export default function FowlWordsPreview() {
           />
         )}
 
-        {!scenario.isFinal && scenario.game.status !== 'lobby' && scenario.round && (
+        {!scenario.isFinal && scenario.game.status !== 'lobby' && previewRound && (
           <div className="min-h-[calc(100vh-120px)] flex flex-col bg-surface linen-texture">
             <GameHeader
               game={scenario.game}
               players={scenario.players}
-              round={scenario.round}
+              round={previewRound}
               currentPlayer={currentPlayer}
               isHost={scenario.isHost}
             />
 
-            {scenario.round.status === 'word-selection' && (
+            {previewRound.status === 'word-selection' && (
               <WordSelectionView
                 game={scenario.game}
-                round={scenario.round}
+                round={previewRound}
                 players={scenario.players}
                 isGuesser={isGuesser}
                 isHost={scenario.isHost}
               />
             )}
 
-            {scenario.round.status === 'clue-submission' && (
+            {previewRound.status === 'clue-submission' && (
               <ClueSubmissionView
                 game={scenario.game}
-                round={scenario.round}
+                round={previewRound}
                 players={scenario.players}
                 currentPlayer={currentPlayer}
                 isGuesser={isGuesser}
@@ -147,44 +215,48 @@ export default function FowlWordsPreview() {
               />
             )}
 
-            {scenario.round.status === 'deduplication' && (
-              <DeduplicationView round={scenario.round} isGuesser={isGuesser} />
+            {previewRound.status === 'deduplication' && (
+              <DeduplicationView round={previewRound} isGuesser={isGuesser} />
             )}
 
-            {scenario.round.status === 'reveal' && (
+            {previewRound.status === 'reveal' && (
               <RevealView
                 game={scenario.game}
-                round={scenario.round}
+                round={previewRound}
                 players={scenario.players}
                 currentPlayer={currentPlayer}
                 isGuesser={isGuesser}
                 isHost={scenario.isHost}
+                onLoveToggle={onLoveToggle}
+                onBooToggle={onBooToggle}
               />
             )}
 
-            {scenario.round.status === 'guess' && (
+            {previewRound.status === 'guess' && (
               <GuessView
                 game={scenario.game}
-                round={scenario.round}
+                round={previewRound}
                 players={scenario.players}
                 isGuesser={isGuesser}
                 currentPlayerId={scenario.currentPlayerId}
               />
             )}
 
-            {scenario.round.status === 'scored' && (
+            {previewRound.status === 'scored' && (
               <RoundResultView
                 game={scenario.game}
-                round={scenario.round}
+                round={previewRound}
                 players={scenario.players}
                 isHost={scenario.isHost}
                 currentPlayerId={scenario.currentPlayerId}
+                onMostHelpfulVote={onMostHelpfulVote}
+                onGuesserBoo={onGuesserBoo}
               />
             )}
           </div>
         )}
 
-        {scenario.showLeaderboard && (
+        {scenario.showLeaderboard && scenario.round && (
           <LeaderboardModal
             game={scenario.game}
             players={scenario.players}

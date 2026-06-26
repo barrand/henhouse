@@ -3,6 +3,13 @@ import * as admin from 'firebase-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import { claimRoomCode, releaseRoomCode } from '../../shared/roomCodes'
 import { runDeduplication, handleGuess, advanceToNextRound, skipToNextAttempt, finalizeWordSelection } from './roundFlow'
+import { mostHelpfulSplitPts } from './peerLove'
+import {
+  giverLovesForPlayer,
+  giverBooForPlayer,
+  guesserMostHelpfulFromRound,
+  guesserBooFromRound,
+} from './voteHelpers'
 
 const db = admin.firestore
 
@@ -173,8 +180,10 @@ export const fowlWordsStartGame = onCall(async (request) => {
     tentativePoints: {},
     pointsThisRound: {},
     eliminationReason: '',
-    clueStarVotes: {},
-    guesserStarVote: null,
+    cluePeerLoveVotes: {},
+    cluePeerBooVotes: {},
+    guesserMostHelpfulVote: null,
+    guesserBooVote: null,
     eligiblePlayerCount: game.playerIds.length,
   })
   batch.update(gameRef, {
@@ -338,8 +347,9 @@ export const fowlWordsUnlockFirst = onCall(async (request) => {
   await skipToNextAttempt(gameId, roundNum)
 })
 
-// -- SUBMIT CLUE STAR VOTE --
-export const fowlWordsSubmitClueStarVote = onCall(async (request) => {
+// -- SUBMIT CLUE PEER LOVE (multi-toggle per giver) --
+// TODO(remove ~2026-07): fowlWordsSubmitClueStarVote is a legacy alias for one release.
+export const fowlWordsSubmitCluePeerLove = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -351,7 +361,7 @@ export const fowlWordsSubmitClueStarVote = onCall(async (request) => {
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
 
-  if (game.currentGuesser === uid) throw new HttpsError('permission-denied', 'Guesser cannot star clues during reveal')
+  if (game.currentGuesser === uid) throw new HttpsError('permission-denied', 'Guesser cannot love clues during reveal')
 
   const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
   const roundSnap = await roundRef.get()
@@ -359,41 +369,54 @@ export const fowlWordsSubmitClueStarVote = onCall(async (request) => {
   const round = roundSnap.data()!
 
   if (round.status !== 'reveal' && round.status !== 'guess') {
-    throw new HttpsError('failed-precondition', 'Stars can only be given during reveal/guess phase')
+    throw new HttpsError('failed-precondition', 'Peer love can only be given during reveal/guess phase')
   }
 
   const visibleGroupIndexes: number[] = round.visibleGroupIndexes ?? []
   if (!visibleGroupIndexes.includes(groupIndex)) {
-    throw new HttpsError('invalid-argument', 'Can only star visible clue groups')
+    throw new HttpsError('invalid-argument', 'Can only love visible clue groups')
   }
 
   const clueGroups = round.clueGroups ?? []
   const group = clueGroups[groupIndex]
   if (!group) throw new HttpsError('invalid-argument', 'Invalid group index')
-  if (group.isDuplicate) {
-    throw new HttpsError('failed-precondition', 'Cannot 👍 duplicate clue groups')
-  }
   if ((group.playerIds as string[]).includes(uid)) {
-    throw new HttpsError('permission-denied', 'Cannot star your own clue')
+    throw new HttpsError('permission-denied', 'Cannot love your own clue')
   }
 
-  const existingVote = (round.clueStarVotes ?? {})[uid]
-  const existingDown = (round.clueThumbsDownVotes ?? {})[uid]
-  if (existingVote === groupIndex) {
-    // Toggle off
-    await roundRef.update({ [`clueStarVotes.${uid}`]: FieldValue.delete() })
+  const loves = giverLovesForPlayer(round, uid)
+  const key = String(groupIndex)
+  const nextLoves = { ...loves }
+  const isAdding = !nextLoves[key]
+  if (isAdding) {
+    nextLoves[key] = true
   } else {
-    const update: Record<string, unknown> = { [`clueStarVotes.${uid}`]: groupIndex }
-    // Cross-type clear: remove thumbs-down on same group if present
-    if (existingDown === groupIndex) {
-      update[`clueThumbsDownVotes.${uid}`] = FieldValue.delete()
-    }
-    await roundRef.update(update)
+    delete nextLoves[key]
   }
+
+  const update: Record<string, unknown> = {
+    [`clueStarVotes.${uid}`]: FieldValue.delete(),
+  }
+  if (Object.keys(nextLoves).length === 0) {
+    update[`cluePeerLoveVotes.${uid}`] = FieldValue.delete()
+  } else {
+    update[`cluePeerLoveVotes.${uid}`] = nextLoves
+  }
+
+  const existingBoo = giverBooForPlayer(round, uid)
+  if (isAdding && existingBoo === groupIndex) {
+    update[`cluePeerBooVotes.${uid}`] = FieldValue.delete()
+    update[`clueThumbsDownVotes.${uid}`] = FieldValue.delete()
+  }
+
+  await roundRef.update(update)
 })
 
-// -- SUBMIT GUESSER STAR VOTE --
-export const fowlWordsSubmitGuesserStarVote = onCall(async (request) => {
+export const fowlWordsSubmitClueStarVote = fowlWordsSubmitCluePeerLove
+
+// -- SUBMIT GUESSER MOST HELPFUL VOTE --
+// TODO(remove ~2026-07): fowlWordsSubmitGuesserStarVote is a legacy alias for one release.
+export const fowlWordsSubmitGuesserMostHelpful = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -405,7 +428,7 @@ export const fowlWordsSubmitGuesserStarVote = onCall(async (request) => {
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
 
-  if (game.currentGuesser !== uid) throw new HttpsError('permission-denied', 'Only the guesser can give a guesser star')
+  if (game.currentGuesser !== uid) throw new HttpsError('permission-denied', 'Only the guesser can award Most Helpful')
 
   const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
 
@@ -415,42 +438,42 @@ export const fowlWordsSubmitGuesserStarVote = onCall(async (request) => {
     const round = roundSnap.data()!
 
     if (round.status !== 'scored') throw new HttpsError('failed-precondition', 'Round not yet scored')
-    if (!round.isCorrect) throw new HttpsError('failed-precondition', 'Guesser 👍 only available after a correct guess')
+    if (!round.isCorrect) throw new HttpsError('failed-precondition', 'Most Helpful only available after a correct guess')
 
     const visibleGroupIndexes: number[] = round.visibleGroupIndexes ?? []
     if (!visibleGroupIndexes.includes(groupIndex)) {
-      throw new HttpsError('invalid-argument', 'Can only 👍 visible clue groups')
+      throw new HttpsError('invalid-argument', 'Can only award visible clue groups')
     }
 
     const clueGroups = round.clueGroups ?? []
     const group = clueGroups[groupIndex]
     if (!group) throw new HttpsError('invalid-argument', 'Invalid group index')
 
-    const previousVote: number | null = round.guesserStarVote ?? null
-    const roundUpdate: Record<string, unknown> = {}
+    const previousVote = guesserMostHelpfulFromRound(round)
+    const roundUpdate: Record<string, unknown> = {
+      guesserStarVote: FieldValue.delete(),
+    }
 
     if (previousVote === groupIndex) {
-      // Toggle off — remove vote and take back points
-      roundUpdate.guesserStarVote = null
-      const pts = Math.floor(5 / (group.playerIds as string[]).length)
+      roundUpdate.guesserMostHelpfulVote = null
+      const pts = mostHelpfulSplitPts((group.playerIds as string[]).length)
       for (const pid of group.playerIds as string[]) {
         roundUpdate[`pointsThisRound.${pid}`] = FieldValue.increment(-pts)
         tx.update(firestore.collection('games').doc(gameId).collection('players').doc(pid), { score: FieldValue.increment(-pts) })
       }
     } else {
-      // Move vote: revoke points from old group if any, give to new group
       if (previousVote !== null) {
         const prevGroup = clueGroups[previousVote]
         if (prevGroup) {
-          const pts = Math.floor(5 / (prevGroup.playerIds as string[]).length)
+          const pts = mostHelpfulSplitPts((prevGroup.playerIds as string[]).length)
           for (const pid of prevGroup.playerIds as string[]) {
             roundUpdate[`pointsThisRound.${pid}`] = FieldValue.increment(-pts)
             tx.update(firestore.collection('games').doc(gameId).collection('players').doc(pid), { score: FieldValue.increment(-pts) })
           }
         }
       }
-      roundUpdate.guesserStarVote = groupIndex
-      const pts = Math.floor(5 / (group.playerIds as string[]).length)
+      roundUpdate.guesserMostHelpfulVote = groupIndex
+      const pts = mostHelpfulSplitPts((group.playerIds as string[]).length)
       for (const pid of group.playerIds as string[]) {
         roundUpdate[`pointsThisRound.${pid}`] = FieldValue.increment(pts)
         tx.update(firestore.collection('games').doc(gameId).collection('players').doc(pid), { score: FieldValue.increment(pts) })
@@ -461,8 +484,11 @@ export const fowlWordsSubmitGuesserStarVote = onCall(async (request) => {
   })
 })
 
-// -- SUBMIT CLUE THUMBS-DOWN VOTE --
-export const fowlWordsSubmitClueThumbsDown = onCall(async (request) => {
+export const fowlWordsSubmitGuesserStarVote = fowlWordsSubmitGuesserMostHelpful
+
+// -- SUBMIT CLUE PEER BOO (display only, one per giver) --
+// TODO(remove ~2026-07): fowlWordsSubmitClueThumbsDown is a legacy alias for one release.
+export const fowlWordsSubmitCluePeerBoo = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -474,7 +500,7 @@ export const fowlWordsSubmitClueThumbsDown = onCall(async (request) => {
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
 
-  if (game.currentGuesser === uid) throw new HttpsError('permission-denied', 'Guesser cannot 👎 clues during reveal')
+  if (game.currentGuesser === uid) throw new HttpsError('permission-denied', 'Guesser cannot boo clues during reveal')
 
   const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
   const roundSnap = await roundRef.get()
@@ -482,38 +508,52 @@ export const fowlWordsSubmitClueThumbsDown = onCall(async (request) => {
   const round = roundSnap.data()!
 
   if (round.status !== 'reveal' && round.status !== 'guess') {
-    throw new HttpsError('failed-precondition', '👎 can only be given during reveal/guess phase')
+    throw new HttpsError('failed-precondition', 'Boo can only be given during reveal/guess phase')
   }
 
   const visibleGroupIndexes: number[] = round.visibleGroupIndexes ?? []
   if (!visibleGroupIndexes.includes(groupIndex)) {
-    throw new HttpsError('invalid-argument', 'Can only 👎 visible clue groups')
+    throw new HttpsError('invalid-argument', 'Can only boo visible clue groups')
   }
 
   const clueGroups = round.clueGroups ?? []
   const group = clueGroups[groupIndex]
   if (!group) throw new HttpsError('invalid-argument', 'Invalid group index')
   if ((group.playerIds as string[]).includes(uid)) {
-    throw new HttpsError('permission-denied', 'Cannot 👎 your own clue')
+    throw new HttpsError('permission-denied', 'Cannot boo your own clue')
   }
 
-  const existingDown = (round.clueThumbsDownVotes ?? {})[uid]
-  const existingUp = (round.clueStarVotes ?? {})[uid]
+  const existingDown = giverBooForPlayer(round, uid)
+  const update: Record<string, unknown> = {
+    [`clueThumbsDownVotes.${uid}`]: FieldValue.delete(),
+  }
+
   if (existingDown === groupIndex) {
-    // Toggle off
-    await roundRef.update({ [`clueThumbsDownVotes.${uid}`]: FieldValue.delete() })
+    update[`cluePeerBooVotes.${uid}`] = FieldValue.delete()
   } else {
-    const update: Record<string, unknown> = { [`clueThumbsDownVotes.${uid}`]: groupIndex }
-    // Cross-type clear: remove thumbs-up on same group if present
-    if (existingUp === groupIndex) {
+    update[`cluePeerBooVotes.${uid}`] = groupIndex
+    const loves = giverLovesForPlayer(round, uid)
+    const key = String(groupIndex)
+    if (loves[key]) {
+      const nextLoves = { ...loves }
+      delete nextLoves[key]
+      if (Object.keys(nextLoves).length === 0) {
+        update[`cluePeerLoveVotes.${uid}`] = FieldValue.delete()
+      } else {
+        update[`cluePeerLoveVotes.${uid}`] = nextLoves
+      }
       update[`clueStarVotes.${uid}`] = FieldValue.delete()
     }
-    await roundRef.update(update)
   }
+
+  await roundRef.update(update)
 })
 
-// -- SUBMIT GUESSER THUMBS-DOWN VOTE (display/shame only, no points) --
-export const fowlWordsSubmitGuesserThumbsDown = onCall(async (request) => {
+export const fowlWordsSubmitClueThumbsDown = fowlWordsSubmitCluePeerBoo
+
+// -- SUBMIT GUESSER BOO (display only, no points) --
+// TODO(remove ~2026-07): fowlWordsSubmitGuesserThumbsDown is a legacy alias for one release.
+export const fowlWordsSubmitGuesserBoo = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -525,7 +565,7 @@ export const fowlWordsSubmitGuesserThumbsDown = onCall(async (request) => {
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
 
-  if (game.currentGuesser !== uid) throw new HttpsError('permission-denied', 'Only the guesser can give a guesser 👎')
+  if (game.currentGuesser !== uid) throw new HttpsError('permission-denied', 'Only the guesser can boo a clue on the result screen')
 
   const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
   const roundSnap = await roundRef.get()
@@ -536,22 +576,28 @@ export const fowlWordsSubmitGuesserThumbsDown = onCall(async (request) => {
 
   const visibleGroupIndexes: number[] = round.visibleGroupIndexes ?? []
   if (!visibleGroupIndexes.includes(groupIndex)) {
-    throw new HttpsError('invalid-argument', 'Can only 👎 visible clue groups')
+    throw new HttpsError('invalid-argument', 'Can only boo visible clue groups')
   }
 
   const clueGroups = round.clueGroups ?? []
   const group = clueGroups[groupIndex]
   if (!group) throw new HttpsError('invalid-argument', 'Invalid group index')
 
-  const previousVote: number | null = round.guesserThumbsDownVote ?? null
+  const previousVote = guesserBooFromRound(round)
   if (previousVote === groupIndex) {
-    // Toggle off
-    await roundRef.update({ guesserThumbsDownVote: null })
+    await roundRef.update({
+      guesserBooVote: null,
+      guesserThumbsDownVote: FieldValue.delete(),
+    })
   } else {
-    // Move vote (or new vote) — no scoring impact
-    await roundRef.update({ guesserThumbsDownVote: groupIndex })
+    await roundRef.update({
+      guesserBooVote: groupIndex,
+      guesserThumbsDownVote: FieldValue.delete(),
+    })
   }
 })
+
+export const fowlWordsSubmitGuesserThumbsDown = fowlWordsSubmitGuesserBoo
 
 // -- FORCE START DEDUP (manual escalation if a player is AFK) --
 export const fowlWordsForceDedup = onCall(async (request) => {

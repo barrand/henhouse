@@ -17,9 +17,18 @@ const fowlWordsForceDedupFn = httpsCallable<{ gameId: string; roundNum: number }
 const fowlWordsUnlockFirstFn = httpsCallable<{ gameId: string; roundNum: number }, void>(functions, 'fowlWordsUnlockFirst')
 const fowlWordsSubmitWordVoteFn = httpsCallable<{ gameId: string; roundNum: number; wordIndex: number }, void>(functions, 'fowlWordsSubmitWordVote')
 const fowlWordsFinalizeWordSelectionFn = httpsCallable<{ gameId: string; roundNum: number }, void>(functions, 'fowlWordsFinalizeWordSelection')
+const fowlWordsSubmitCluePeerLoveFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitCluePeerLove')
+const fowlWordsSubmitCluePeerBooFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitCluePeerBoo')
+const fowlWordsSubmitGuesserMostHelpfulFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitGuesserMostHelpful')
+const fowlWordsSubmitGuesserBooFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitGuesserBoo')
+
+/** @deprecated legacy alias — calls fowlWordsSubmitCluePeerLove */
 const fowlWordsSubmitClueStarVoteFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitClueStarVote')
+/** @deprecated legacy alias — calls fowlWordsSubmitCluePeerBoo */
 const fowlWordsSubmitClueThumbsDownVoteFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitClueThumbsDown')
+/** @deprecated legacy alias — calls fowlWordsSubmitGuesserMostHelpful */
 const fowlWordsSubmitGuesserStarVoteFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitGuesserStarVote')
+/** @deprecated legacy alias — calls fowlWordsSubmitGuesserBoo */
 const fowlWordsSubmitGuesserThumbsDownVoteFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitGuesserThumbsDown')
 
 export async function fowlWordsCreateGame(playerName: string) {
@@ -64,18 +73,38 @@ export async function finalizeWordSelection(gameId: string, roundNum: number) {
   await fowlWordsFinalizeWordSelectionFn({ gameId, roundNum })
 }
 
+export async function submitCluePeerLoveVote(gameId: string, roundNum: number, groupIndex: number) {
+  await fowlWordsSubmitCluePeerLoveFn({ gameId, roundNum, groupIndex })
+}
+
+export async function submitCluePeerBooVote(gameId: string, roundNum: number, groupIndex: number) {
+  await fowlWordsSubmitCluePeerBooFn({ gameId, roundNum, groupIndex })
+}
+
+export async function submitGuesserMostHelpfulVote(gameId: string, roundNum: number, groupIndex: number) {
+  await fowlWordsSubmitGuesserMostHelpfulFn({ gameId, roundNum, groupIndex })
+}
+
+export async function submitGuesserBooVote(gameId: string, roundNum: number, groupIndex: number) {
+  await fowlWordsSubmitGuesserBooFn({ gameId, roundNum, groupIndex })
+}
+
+/** @deprecated use submitCluePeerLoveVote */
 export async function submitClueStarVote(gameId: string, roundNum: number, groupIndex: number) {
   await fowlWordsSubmitClueStarVoteFn({ gameId, roundNum, groupIndex })
 }
 
+/** @deprecated use submitCluePeerBooVote */
 export async function submitClueThumbsDownVote(gameId: string, roundNum: number, groupIndex: number) {
   await fowlWordsSubmitClueThumbsDownVoteFn({ gameId, roundNum, groupIndex })
 }
 
+/** @deprecated use submitGuesserMostHelpfulVote */
 export async function submitGuesserStarVote(gameId: string, roundNum: number, groupIndex: number) {
   await fowlWordsSubmitGuesserStarVoteFn({ gameId, roundNum, groupIndex })
 }
 
+/** @deprecated use submitGuesserBooVote */
 export async function submitGuesserThumbsDownVote(gameId: string, roundNum: number, groupIndex: number) {
   await fowlWordsSubmitGuesserThumbsDownVoteFn({ gameId, roundNum, groupIndex })
 }
