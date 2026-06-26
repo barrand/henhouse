@@ -4,6 +4,9 @@ import Home from './pages/Home'
 
 const FlockGame = lazy(() => import('@flock/pages/Game'))
 const FowlWordsGame = lazy(() => import('@fowl-words/pages/Game'))
+const FlockPreview = import.meta.env.DEV
+  ? lazy(() => import('./dev/FlockPreview'))
+  : null
 
 const Loading = () => (
   <div className="min-h-screen flex items-center justify-center bg-surface linen-texture">
@@ -15,6 +18,26 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      {FlockPreview && (
+        <>
+          <Route
+            path="/dev/flock"
+            element={
+              <Suspense fallback={<Loading />}>
+                <FlockPreview />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dev/flock/:screen"
+            element={
+              <Suspense fallback={<Loading />}>
+                <FlockPreview />
+              </Suspense>
+            }
+          />
+        </>
+      )}
       <Route
         path="/flock/:code"
         element={

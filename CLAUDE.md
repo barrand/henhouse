@@ -90,6 +90,9 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 | `hen-winner.svg` | Wings up, laurel | Final win, NAILED IT (attempts 2-3) |
 | `hen-embarrassed.svg` | Wings to cheeks | NO LUCK, duplicates, rotten egg reveal |
 | `hen-runner.svg` | Side profile, speed | No-winner scoreboard |
+| `hen-flying.svg` | Wings spread, gleeful escape | FLOWN THE COOP (outlier) result rows |
+| `flock-icon.svg` | Three birds clustered together | Flock Together home tile icon |
+| `fowl-icon.svg` | One chicken on coop, three below | Fowl Words home tile icon |
 
 ### Animation classes (defined in `src/index.css`)
 - `animate-hen-bob` — idle waiting states

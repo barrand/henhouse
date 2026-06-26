@@ -1,27 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <!-- Wings pressed to cheeks -->
-  <ellipse cx="46" cy="96" rx="22" ry="30" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2" transform="rotate(-15 46 96)"/>
-  <ellipse cx="154" cy="96" rx="22" ry="30" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2" transform="rotate(15 154 96)"/>
-  <!-- Body -->
-  <ellipse cx="100" cy="152" rx="50" ry="42" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
-  <!-- Head -->
-  <circle cx="100" cy="84" r="40" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5"/>
-  <!-- Comb (drooping slightly) -->
-  <path d="M84,48 Q86,34 91,46 Q95,28 100,42 Q105,28 109,44 Q114,34 116,48" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8" stroke-linejoin="round"/>
-  <!-- X eyes -->
-  <line x1="76" y1="68" x2="92" y2="84" stroke="#2a1f0e" stroke-width="4" stroke-linecap="round"/>
-  <line x1="92" y1="68" x2="76" y2="84" stroke="#2a1f0e" stroke-width="4" stroke-linecap="round"/>
-  <line x1="108" y1="68" x2="124" y2="84" stroke="#2a1f0e" stroke-width="4" stroke-linecap="round"/>
-  <line x1="124" y1="68" x2="108" y2="84" stroke="#2a1f0e" stroke-width="4" stroke-linecap="round"/>
-  <!-- Sweat drop -->
-  <path d="M148,44 Q154,36 160,44 Q160,54 154,56 Q148,54 148,44 Z" fill="#91c595" stroke="#2a1f0e" stroke-width="1.2"/>
-  <!-- Beak -->
-  <ellipse cx="100" cy="104" rx="10" ry="7" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8"/>
-  <!-- Wattle -->
-  <ellipse cx="100" cy="118" rx="8" ry="10" fill="#ffb4ab" stroke="#2a1f0e" stroke-width="1.5"/>
-  <!-- Legs -->
-  <line x1="82" y1="190" x2="72" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
-  <line x1="80" y1="190" x2="64" y2="198" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
-  <line x1="118" y1="190" x2="128" y2="200" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
-  <line x1="120" y1="190" x2="136" y2="198" stroke="#f0c078" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Wings WRAPPED AROUND BODY (covering, embarrassed) -->
+  <ellipse cx="32" cy="150" rx="28" ry="18" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2" transform="rotate(-60 32 150)"/>
+  <ellipse cx="168" cy="150" rx="28" ry="18" fill="#d6c5a5" stroke="#2a1f0e" stroke-width="2" transform="rotate(60 168 150)"/>
+
+  <!-- Body (slouched, tilted down) -->
+  <ellipse cx="100" cy="160" rx="54" ry="42" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5" transform="rotate(4 100 160)"/>
+
+  <!-- Head (tilted down, ashamed) -->
+  <circle cx="98" cy="72" r="40" fill="#e8e2db" stroke="#2a1f0e" stroke-width="2.5" transform="rotate(20 98 72)"/>
+
+  <!-- Comb (drooped, less energetic) -->
+  <path d="M76,34 Q78,32 82,38 Q85,30 89,36 Q92,29 97,35 Q100,28 105,34 Q108,27 112,32 Q116,28 120,36" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.8" stroke-linejoin="round" opacity="0.8"/>
+
+  <!-- Cheeks (smaller, less vibrant) -->
+  <ellipse cx="62" cy="80" rx="10" ry="7" fill="#ffb4ab" opacity="0.35"/>
+  <ellipse cx="132" cy="80" rx="10" ry="7" fill="#ffb4ab" opacity="0.35"/>
+
+  <!-- X-eyes (closed/resigned, left) -->
+  <circle cx="80" cy="68" r="11" fill="#2a1f0e"/>
+  <line x1="74" y1="62" x2="86" y2="74" stroke="#f0c078" stroke-width="2" stroke-linecap="round"/>
+  <line x1="86" y1="62" x2="74" y2="74" stroke="#f0c078" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- X-eyes (closed/resigned, right) -->
+  <circle cx="116" cy="68" r="11" fill="#2a1f0e"/>
+  <line x1="110" y1="62" x2="122" y2="74" stroke="#f0c078" stroke-width="2" stroke-linecap="round"/>
+  <line x1="122" y1="62" x2="110" y2="74" stroke="#f0c078" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Beak (downturned, sad) -->
+  <path d="M98,96 Q100,92 102,96 L101,103 Q100,104 99,103 Z" fill="#f0c078" stroke="#2a1f0e" stroke-width="1.6"/>
+
+  <!-- Wattle (drooped) -->
+  <ellipse cx="100" cy="125" rx="8" ry="12" fill="#ffb4ab" stroke="#2a1f0e" stroke-width="1.5" opacity="0.7"/>
+
+  <!-- Legs (limp, drooped) -->
+  <line x1="82" y1="198" x2="72" y2="204" stroke="#f0c078" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+  <line x1="80" y1="198" x2="62" y2="200" stroke="#f0c078" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+  <line x1="118" y1="198" x2="128" y2="204" stroke="#f0c078" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+  <line x1="120" y1="198" x2="138" y2="200" stroke="#f0c078" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
 </svg>

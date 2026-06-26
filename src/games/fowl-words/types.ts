@@ -48,8 +48,10 @@ export interface RoundData {
   isCorrect?: boolean                   // round result
   tentativePoints: Record<string, number>  // server-computed, not yet final
   pointsThisRound: Record<string, number>  // final scores (written at 'scored')
-  clueStarVotes?: Record<string, number>   // voterId → groupIndex (givers only, moveable)
-  guesserStarVote?: number | null          // groupIndex guesser starred; null = not yet voted
+  clueStarVotes?: Record<string, number>        // voterId → groupIndex (givers 👍, moveable)
+  clueThumbsDownVotes?: Record<string, number>  // voterId → groupIndex (givers 👎, moveable)
+  guesserStarVote?: number | null               // groupIndex guesser 👍'd; null = not yet voted (moveable)
+  guesserThumbsDownVote?: number | null         // groupIndex guesser 👎'd; null = not yet voted (display only)
 }
 
 // Client-side point lookup — only used for the PointCounter display, kept in

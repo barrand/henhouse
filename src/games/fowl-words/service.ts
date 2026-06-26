@@ -18,7 +18,9 @@ const fowlWordsUnlockFirstFn = httpsCallable<{ gameId: string; roundNum: number 
 const fowlWordsSubmitWordVoteFn = httpsCallable<{ gameId: string; roundNum: number; wordIndex: number }, void>(functions, 'fowlWordsSubmitWordVote')
 const fowlWordsFinalizeWordSelectionFn = httpsCallable<{ gameId: string; roundNum: number }, void>(functions, 'fowlWordsFinalizeWordSelection')
 const fowlWordsSubmitClueStarVoteFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitClueStarVote')
+const fowlWordsSubmitClueThumbsDownVoteFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitClueThumbsDown')
 const fowlWordsSubmitGuesserStarVoteFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitGuesserStarVote')
+const fowlWordsSubmitGuesserThumbsDownVoteFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitGuesserThumbsDown')
 
 export async function fowlWordsCreateGame(playerName: string) {
   const result = await fowlWordsCreateGameFn({ playerName })
@@ -66,8 +68,16 @@ export async function submitClueStarVote(gameId: string, roundNum: number, group
   await fowlWordsSubmitClueStarVoteFn({ gameId, roundNum, groupIndex })
 }
 
+export async function submitClueThumbsDownVote(gameId: string, roundNum: number, groupIndex: number) {
+  await fowlWordsSubmitClueThumbsDownVoteFn({ gameId, roundNum, groupIndex })
+}
+
 export async function submitGuesserStarVote(gameId: string, roundNum: number, groupIndex: number) {
   await fowlWordsSubmitGuesserStarVoteFn({ gameId, roundNum, groupIndex })
+}
+
+export async function submitGuesserThumbsDownVote(gameId: string, roundNum: number, groupIndex: number) {
+  await fowlWordsSubmitGuesserThumbsDownVoteFn({ gameId, roundNum, groupIndex })
 }
 
 // -- Fowl Words Real-time Listeners --

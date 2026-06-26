@@ -375,11 +375,17 @@ export const fowlWordsSubmitClueStarVote = onCall(async (request) => {
   }
 
   const existingVote = (round.clueStarVotes ?? {})[uid]
+  const existingDown = (round.clueThumbsDownVotes ?? {})[uid]
   if (existingVote === groupIndex) {
     // Toggle off
     await roundRef.update({ [`clueStarVotes.${uid}`]: FieldValue.delete() })
   } else {
-    await roundRef.update({ [`clueStarVotes.${uid}`]: groupIndex })
+    const update: Record<string, unknown> = { [`clueStarVotes.${uid}`]: groupIndex }
+    // Cross-type clear: remove thumbs-down on same group if present
+    if (existingDown === groupIndex) {
+      update[`clueThumbsDownVotes.${uid}`] = FieldValue.delete()
+    }
+    await roundRef.update(update)
   }
 })
 
@@ -406,27 +412,142 @@ export const fowlWordsSubmitGuesserStarVote = onCall(async (request) => {
     const round = roundSnap.data()!
 
     if (round.status !== 'scored') throw new HttpsError('failed-precondition', 'Round not yet scored')
-    if (!round.isCorrect) throw new HttpsError('failed-precondition', 'Guesser star only available after a correct guess')
-    if (round.guesserStarVote != null) throw new HttpsError('already-exists', 'Already gave a guesser star this round')
+    if (!round.isCorrect) throw new HttpsError('failed-precondition', 'Guesser 👍 only available after a correct guess')
 
     const visibleGroupIndexes: number[] = round.visibleGroupIndexes ?? []
     if (!visibleGroupIndexes.includes(groupIndex)) {
-      throw new HttpsError('invalid-argument', 'Can only star visible clue groups')
+      throw new HttpsError('invalid-argument', 'Can only 👍 visible clue groups')
     }
 
     const clueGroups = round.clueGroups ?? []
     const group = clueGroups[groupIndex]
     if (!group) throw new HttpsError('invalid-argument', 'Invalid group index')
 
-    // Mark star on round doc and update pointsThisRound for accurate result screen display
-    const roundUpdate: Record<string, unknown> = { guesserStarVote: groupIndex }
-    for (const pid of group.playerIds as string[]) {
-      roundUpdate[`pointsThisRound.${pid}`] = FieldValue.increment(5)
-      const playerRef = firestore.collection('games').doc(gameId).collection('players').doc(pid)
-      tx.update(playerRef, { score: FieldValue.increment(5) })
+    const previousVote: number | null = round.guesserStarVote ?? null
+    const roundUpdate: Record<string, unknown> = {}
+
+    if (previousVote === groupIndex) {
+      // Toggle off — remove vote and take back points
+      roundUpdate.guesserStarVote = null
+      const pts = Math.floor(5 / (group.playerIds as string[]).length)
+      for (const pid of group.playerIds as string[]) {
+        roundUpdate[`pointsThisRound.${pid}`] = FieldValue.increment(-pts)
+        tx.update(firestore.collection('games').doc(gameId).collection('players').doc(pid), { score: FieldValue.increment(-pts) })
+      }
+    } else {
+      // Move vote: revoke points from old group if any, give to new group
+      if (previousVote !== null) {
+        const prevGroup = clueGroups[previousVote]
+        if (prevGroup) {
+          const pts = Math.floor(5 / (prevGroup.playerIds as string[]).length)
+          for (const pid of prevGroup.playerIds as string[]) {
+            roundUpdate[`pointsThisRound.${pid}`] = FieldValue.increment(-pts)
+            tx.update(firestore.collection('games').doc(gameId).collection('players').doc(pid), { score: FieldValue.increment(-pts) })
+          }
+        }
+      }
+      roundUpdate.guesserStarVote = groupIndex
+      const pts = Math.floor(5 / (group.playerIds as string[]).length)
+      for (const pid of group.playerIds as string[]) {
+        roundUpdate[`pointsThisRound.${pid}`] = FieldValue.increment(pts)
+        tx.update(firestore.collection('games').doc(gameId).collection('players').doc(pid), { score: FieldValue.increment(pts) })
+      }
     }
+
     tx.update(roundRef, roundUpdate)
   })
+})
+
+// -- SUBMIT CLUE THUMBS-DOWN VOTE --
+export const fowlWordsSubmitClueThumbsDown = onCall(async (request) => {
+  const uid = request.auth?.uid
+  if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
+
+  const { gameId, roundNum, groupIndex } = request.data as { gameId: string; roundNum: number; groupIndex: number }
+  if (typeof groupIndex !== 'number') throw new HttpsError('invalid-argument', 'groupIndex required')
+
+  const firestore = db()
+  const gameSnap = await firestore.collection('games').doc(gameId).get()
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+  const game = gameSnap.data()!
+
+  if (game.currentGuesser === uid) throw new HttpsError('permission-denied', 'Guesser cannot 👎 clues during reveal')
+
+  const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
+  const roundSnap = await roundRef.get()
+  if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
+  const round = roundSnap.data()!
+
+  if (round.status !== 'reveal' && round.status !== 'guess') {
+    throw new HttpsError('failed-precondition', '👎 can only be given during reveal/guess phase')
+  }
+
+  const visibleGroupIndexes: number[] = round.visibleGroupIndexes ?? []
+  if (!visibleGroupIndexes.includes(groupIndex)) {
+    throw new HttpsError('invalid-argument', 'Can only 👎 visible clue groups')
+  }
+
+  const clueGroups = round.clueGroups ?? []
+  const group = clueGroups[groupIndex]
+  if (!group) throw new HttpsError('invalid-argument', 'Invalid group index')
+  if ((group.playerIds as string[]).includes(uid)) {
+    throw new HttpsError('permission-denied', 'Cannot 👎 your own clue')
+  }
+
+  const existingDown = (round.clueThumbsDownVotes ?? {})[uid]
+  const existingUp = (round.clueStarVotes ?? {})[uid]
+  if (existingDown === groupIndex) {
+    // Toggle off
+    await roundRef.update({ [`clueThumbsDownVotes.${uid}`]: FieldValue.delete() })
+  } else {
+    const update: Record<string, unknown> = { [`clueThumbsDownVotes.${uid}`]: groupIndex }
+    // Cross-type clear: remove thumbs-up on same group if present
+    if (existingUp === groupIndex) {
+      update[`clueStarVotes.${uid}`] = FieldValue.delete()
+    }
+    await roundRef.update(update)
+  }
+})
+
+// -- SUBMIT GUESSER THUMBS-DOWN VOTE (display/shame only, no points) --
+export const fowlWordsSubmitGuesserThumbsDown = onCall(async (request) => {
+  const uid = request.auth?.uid
+  if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
+
+  const { gameId, roundNum, groupIndex } = request.data as { gameId: string; roundNum: number; groupIndex: number }
+  if (typeof groupIndex !== 'number') throw new HttpsError('invalid-argument', 'groupIndex required')
+
+  const firestore = db()
+  const gameSnap = await firestore.collection('games').doc(gameId).get()
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+  const game = gameSnap.data()!
+
+  if (game.currentGuesser !== uid) throw new HttpsError('permission-denied', 'Only the guesser can give a guesser 👎')
+
+  const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
+  const roundSnap = await roundRef.get()
+  if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
+  const round = roundSnap.data()!
+
+  if (round.status !== 'scored') throw new HttpsError('failed-precondition', 'Round not yet scored')
+
+  const visibleGroupIndexes: number[] = round.visibleGroupIndexes ?? []
+  if (!visibleGroupIndexes.includes(groupIndex)) {
+    throw new HttpsError('invalid-argument', 'Can only 👎 visible clue groups')
+  }
+
+  const clueGroups = round.clueGroups ?? []
+  const group = clueGroups[groupIndex]
+  if (!group) throw new HttpsError('invalid-argument', 'Invalid group index')
+
+  const previousVote: number | null = round.guesserThumbsDownVote ?? null
+  if (previousVote === groupIndex) {
+    // Toggle off
+    await roundRef.update({ guesserThumbsDownVote: null })
+  } else {
+    // Move vote (or new vote) — no scoring impact
+    await roundRef.update({ guesserThumbsDownVote: groupIndex })
+  }
 })
 
 // -- FORCE START DEDUP (manual escalation if a player is AFK) --

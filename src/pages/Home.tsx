@@ -130,14 +130,14 @@ export default function Home() {
               placeholder="Room code"
               value={roomCode}
               onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-              className="flex-1 bg-surface-container-lowest border-2 border-outline-variant/30 rounded-xl px-4 py-3.5 text-on-surface placeholder:text-outline/50 font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              className="flex-1 min-w-0 bg-surface-container-lowest border-2 border-outline-variant/30 rounded-xl px-4 py-3.5 text-on-surface placeholder:text-outline/50 font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               maxLength={10}
             />
             <button
               type="button"
               onClick={handleJoin}
               disabled={joining}
-              className="bg-primary text-on-primary h-[58px] px-6 rounded-xl font-headline font-bold text-base tracking-wide shadow-[0_8px_24px_rgba(0,0,0,0.3)] hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
+              className="shrink-0 bg-primary text-on-primary h-[58px] px-6 rounded-xl font-headline font-bold text-base tracking-wide shadow-[0_8px_24px_rgba(0,0,0,0.3)] hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
             >
               {joining ? 'Joining…' : 'JOIN'}
             </button>
@@ -161,14 +161,14 @@ export default function Home() {
             className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center">
-                <img src="/images/hen-neutral.svg" alt="" className="w-10 h-10" />
+              <div className="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center">
+                <img src="/images/flock-icon.svg" alt="" className="w-10 h-10" />
               </div>
               <span className="font-label text-[9px] font-bold uppercase tracking-[0.2em] text-secondary opacity-70">3+ players</span>
             </div>
             <h3 className="font-headline text-xl font-bold text-on-surface mb-1">Flock Together</h3>
             <p className="text-on-surface-variant text-xs font-body leading-snug mb-4">
-              Match the majority's answer. Be a sheep, not an outlier.
+              Match the majority's answer. Based on <em>Herd Mentality</em>.
             </p>
             <div className="bg-primary text-on-primary h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
               {creatingFlock ? 'CREATING…' : 'CREATE'}
@@ -183,14 +183,14 @@ export default function Home() {
             className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center">
-                <img src="/images/feather-quill.svg" alt="" className="w-10 h-10" />
+              <div className="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center">
+                <img src="/images/fowl-icon.svg" alt="" className="w-10 h-10" />
               </div>
               <span className="font-label text-[9px] font-bold uppercase tracking-[0.2em] text-secondary opacity-70">2+ players · new!</span>
             </div>
             <h3 className="font-headline text-xl font-bold text-on-surface mb-1">Fowl Words</h3>
             <p className="text-on-surface-variant text-xs font-body leading-snug mb-4">
-              Give a clever one-word clue. Avoid duplicates. Be unique.
+              Give a clever one-word clue. Based on <em>Just One</em>.
             </p>
             <div className="bg-primary text-on-primary h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
               {creatingFowlWords ? 'CREATING…' : 'CREATE'}

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Egg body -->
+  <ellipse cx="100" cy="110" rx="50" ry="60" fill="#a0825a" stroke="#2a1f0e" stroke-width="2.5"/>
+
+  <!-- Rotten green mold spots -->
+  <circle cx="75" cy="85" r="8" fill="#4a7c59" opacity="0.7"/>
+  <circle cx="125" cy="95" r="6" fill="#5a8c69" opacity="0.6"/>
+  <circle cx="90" cy="130" r="7" fill="#3a6c49" opacity="0.65"/>
+  <circle cx="115" cy="125" r="5" fill="#5a8c69" opacity="0.55"/>
+  <circle cx="100" cy="155" r="6" fill="#4a7c59" opacity="0.6"/>
+
+  <!-- Cracks -->
+  <path d="M80,70 Q90,60 95,75" fill="none" stroke="#2a1f0e" stroke-width="1.2" opacity="0.5"/>
+  <path d="M120,80 Q125,70 130,85" fill="none" stroke="#2a1f0e" stroke-width="1" opacity="0.4"/>
+  <path d="M70,110 Q75,105 85,115" fill="none" stroke="#2a1f0e" stroke-width="1.2" opacity="0.5"/>
+
+  <!-- Stink clouds (wisps) -->
+  <path d="M130,60 Q140,55 145,65" fill="none" stroke="#7a6a5a" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+  <path d="M50,95 Q40,90 38,105" fill="none" stroke="#7a6a5a" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <path d="M125,150 Q135,155 140,145" fill="none" stroke="#7a6a5a" stroke-width="1.8" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- Little flies (tiny dots) -->
+  <circle cx="135" cy="50" r="2" fill="#2a1f0e" opacity="0.5"/>
+  <circle cx="60" cy="70" r="1.5" fill="#2a1f0e" opacity="0.4"/>
+  <circle cx="145" cy="140" r="2" fill="#2a1f0e" opacity="0.45"/>
+</svg>

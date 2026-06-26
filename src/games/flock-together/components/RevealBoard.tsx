@@ -1,6 +1,5 @@
 import type { GameData, RoundData, PlayerData } from '../types'
 import { advanceRound } from '../service'
-import RottenEgg from './RottenEgg'
 
 interface Props {
   game: GameData
@@ -49,12 +48,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
       case 'flock':
         return <span className="text-xs font-bold bg-primary-fixed text-on-primary-fixed px-2 py-0.5 rounded-full font-label">FLOCK</span>
       case 'rotten':
-        return (
-          <span className="flex items-center gap-1 text-xs font-bold bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded-full font-label">
-            <RottenEgg size={14} animate />
-            ROTTEN EGG
-          </span>
-        )
+        return <span className="text-xs font-bold bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded-full font-label">ROTTEN EGG</span>
       case 'outlier':
         return <span className="text-xs font-bold bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded-full font-label">FLOWN THE COOP</span>
       case 'no-answer':
@@ -72,11 +66,13 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
 
       {hasFlock ? (
         <div className="bg-primary-fixed border-2 border-primary-fixed-dim rounded-2xl p-4 text-center">
+          <img src="/images/hen-excited.svg" alt="" className="w-12 h-12 mx-auto mb-1 animate-hen-pop [filter:drop-shadow(0_1px_4px_rgba(42,31,14,0.45))]" />
           <p className="font-label text-sm font-bold text-on-primary-fixed-variant uppercase tracking-wide">The Flock Said</p>
           <p className="font-headline text-2xl font-bold text-on-primary-fixed mt-1">"{round.flockAnswer?.[0]}"</p>
         </div>
       ) : (
         <div className="bg-secondary-fixed border-2 border-secondary-fixed-dim rounded-2xl p-4 text-center">
+          <img src="/images/hen-embarrassed.svg" alt="" className="w-12 h-12 mx-auto mb-1 animate-hen-pop [filter:drop-shadow(0_1px_4px_rgba(42,31,14,0.45))]" />
           <p className="font-headline text-lg font-bold text-on-secondary-fixed">No Flock!</p>
           <p className="text-on-secondary-fixed-variant text-sm font-body">No eggs awarded this round.</p>
         </div>
@@ -118,7 +114,9 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                {result === 'rotten' && <img src="/images/hen-embarrassed.svg" alt="" className="w-10 h-10 animate-hen-pop" />}
+                {result === 'flock' && <img src="/images/hen-excited.svg" alt="" className="w-10 h-10 animate-hen-pop" />}
+                {result === 'outlier' && <img src="/images/hen-flying.svg" alt="" className="w-10 h-10 animate-hen-pop" />}
+                {result === 'rotten' && <img src="/images/rotten-egg.svg" alt="" className="w-10 h-10 animate-hen-pop" />}
                 {resultBadge(result)}
                 {result === 'flock' && <span className="text-sm font-bold text-primary font-body">+1</span>}
               </div>

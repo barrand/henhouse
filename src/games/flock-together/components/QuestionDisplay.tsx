@@ -7,9 +7,20 @@ interface Props {
   round: RoundData
   isHost: boolean
   players: PlayerData[]
+  /** When set, restores "already answered" UI if this player is in answeredPlayerIds */
+  currentPlayerId?: string | null
+  /** Dev preview: skip Firebase calls and host auto-end on timer expiry */
+  previewMode?: boolean
 }
 
-export default function QuestionDisplay({ game, round, isHost, players }: Props) {
+export default function QuestionDisplay({
+  game,
+  round,
+  isHost,
+  players,
+  currentPlayerId = null,
+  previewMode = false,
+}: Props) {
   const [answer, setAnswer] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -30,6 +41,15 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
   }, [round.id, round.question, round.deadline.seconds, round.deadline.nanoseconds])
 
   useEffect(() => {
+    if (!currentPlayerId) return
+    if (answeredIds.has(currentPlayerId)) {
+      setSubmitted(true)
+      const existing = round.playerAnswers?.[currentPlayerId]
+      if (existing) setAnswer(existing)
+    }
+  }, [currentPlayerId, round.id, round.playerAnswers, round.answeredPlayerIds])
+
+  useEffect(() => {
     if (!round.deadline) return
 
     const deadlineMs = round.deadline.seconds * 1000 + (round.deadline.nanoseconds ?? 0) / 1e6
@@ -48,17 +68,21 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
   }, [round.deadline])
 
   useEffect(() => {
-    if (expired && isHost && !endRoundTriggered.current) {
-      endRoundTriggered.current = true
-      forceEndRound(game.id).catch((err) =>
-        console.error('Failed to force end round:', err)
-      )
-    }
-  }, [expired, isHost, game.id])
+    if (previewMode || !expired || !isHost || endRoundTriggered.current) return
+    endRoundTriggered.current = true
+    forceEndRound(game.id).catch((err) =>
+      console.error('Failed to force end round:', err)
+    )
+  }, [expired, isHost, game.id, previewMode])
 
   const handleSubmit = async (rawAnswer?: string) => {
     const finalAnswer = (rawAnswer ?? answer).trim()
     if (!finalAnswer || submitted || submitting || expired) return
+    if (previewMode) {
+      setAnswer(finalAnswer)
+      setSubmitted(true)
+      return
+    }
     setSubmitting(true)
     try {
       await submitAnswer(game.id, game.currentRound, finalAnswer)
@@ -72,6 +96,7 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
   }
 
   const handleSkip = async () => {
+    if (previewMode) return
     try {
       await skipQuestion(game.id)
     } catch (err) {
@@ -84,6 +109,7 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
       setConfirmEndRound(true)
       return
     }
+    if (previewMode) return
     try {
       await forceEndRound(game.id)
     } catch (err) {
@@ -110,13 +136,9 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
         </div>
       </div>
 
-      <div className={`rounded-2xl border-2 p-6 text-center shadow-sm relative ${
-        round.source === 'patriotic'
-          ? 'bg-gradient-to-br from-red-50 to-blue-50 border-red-200'
-          : 'bg-surface-container-lowest border-outline-variant/60'
-      }`}>
+      <div className="rounded-2xl border-2 p-6 text-center shadow-sm relative bg-surface-container-lowest border-outline-variant/60">
         {round.source === 'patriotic' && (
-          <div className="absolute top-3 right-3 text-2xl">🇺🇸</div>
+          <div className="absolute top-3 right-3 text-2xl" aria-hidden>🇺🇸</div>
         )}
         <p className="font-headline text-xl font-bold text-on-surface leading-relaxed">
           {round.question}
@@ -140,6 +162,7 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
       <div className="mt-6 space-y-3">
         {expired && !submitted ? (
           <div className="text-center py-4">
+            <img src="/images/hen-embarrassed.svg" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-pop" />
             <p className="text-error font-bold text-lg font-body">Too slow!</p>
             <p className="text-outline mt-1 font-body">You didn't answer in time.</p>
           </div>
@@ -188,6 +211,7 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
           )
         ) : (
           <div className="text-center py-4 rounded-xl border border-outline-variant/50 bg-surface-container-low px-4">
+            <img src="/images/hen-thinking.svg" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
             <p className="font-headline text-lg font-semibold text-on-surface">You&apos;re clucked in</p>
             {round.type === 'multiple_choice' && answer && (
               <p className="mt-2 inline-block rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-sm font-body font-semibold text-primary">
@@ -212,33 +236,51 @@ export default function QuestionDisplay({ game, round, isHost, players }: Props)
         <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 font-label">
           {answeredIds.size} of {players.length} answered
         </p>
-        <ul className="space-y-2">
+        <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
           {players.map((p) => {
             const hasAnswered = answeredIds.has(p.id)
             return (
-              <li key={p.id} className="flex items-center justify-between">
-                <span className={`text-sm font-body ${hasAnswered ? 'text-on-surface' : 'text-outline'}`}>
-                  {p.name}
+              <li key={p.id} className="flex items-center gap-1.5 min-w-0">
+                <span
+                  className={`material-symbols-outlined text-base shrink-0 ${
+                    hasAnswered ? 'text-primary' : 'text-outline-variant'
+                  }`}
+                  style={hasAnswered ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                >
+                  {hasAnswered ? 'check_circle' : 'radio_button_unchecked'}
                 </span>
-                {hasAnswered ? (
-                  <span className="material-symbols-outlined text-primary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                ) : (
-                  <span className="text-xs text-outline italic font-body">waiting...</span>
-                )}
+                <span className="text-sm font-body min-w-0 flex items-baseline gap-0.5">
+                  <span className={`truncate ${hasAnswered ? 'text-on-surface' : 'text-outline'}`}>
+                    {p.name}
+                  </span>
+                  {!hasAnswered && (
+                    <span className="text-outline text-xs shrink-0"> (waiting)</span>
+                  )}
+                </span>
               </li>
             )
           })}
         </ul>
+      </div>
 
-        {isHost && !expired && answeredIds.size > 0 && (
+      {isHost && !expired && answeredIds.size > 0 && (
+        <div className="mt-4 space-y-2">
           <button
             onClick={handleEndRound}
-            className="mt-4 w-full border-2 border-secondary text-secondary h-12 rounded-xl font-body font-semibold tracking-wide hover:bg-secondary-fixed/20 active:scale-95 transition-all"
+            className="w-full border-2 border-secondary text-secondary h-12 rounded-xl font-body font-semibold tracking-wide hover:bg-secondary-fixed/20 active:scale-95 transition-all flex items-center justify-center gap-2"
           >
-            {confirmEndRound ? 'Are you sure? Tap again to end round' : 'End Round'}
+            <span>{confirmEndRound ? 'Tap again to stop waiting' : 'Stop Waiting'}</span>
+            {!confirmEndRound && (
+              <span className="font-label text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
+                · Host only
+              </span>
+            )}
           </button>
-        )}
-      </div>
+          <p className="mt-2 text-center text-xs text-outline font-body">
+            Stop waiting and score answers — anyone who hasn&apos;t answered yet gets none.
+          </p>
+        </div>
+      )}
     </div>
   )
 }

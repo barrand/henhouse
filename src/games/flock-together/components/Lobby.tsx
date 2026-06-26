@@ -109,6 +109,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
             <span className="material-symbols-outlined">arrow_back</span>
             <span className="text-sm font-medium">Back</span>
           </button>
+          <img src="/images/hen-neutral.svg" alt="" className="w-24 h-24 mx-auto mb-3 animate-hen-bob" />
           <h2 className="font-headline text-4xl font-bold text-on-surface mb-2 tracking-tight">FLOCK TOGETHER</h2>
           <p className="text-on-surface-variant text-sm">Waiting in the lobby</p>
 
@@ -128,8 +129,9 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
 
         {/* Patriotic Edition Banner */}
         {game.includePatrioticQuestions && (
-          <div className="mb-6 bg-gradient-to-r from-red-50 to-blue-50 border-2 border-red-200 rounded-xl p-4 text-center">
-            <p className="font-headline text-lg font-bold text-primary">🎆 Patriotic Edition is ON</p>
+          <div className="mb-6 bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-4 text-center">
+            <p className="font-headline text-lg font-bold text-on-surface">🇺🇸 Patriotic Edition is ON</p>
+            <p className="text-on-surface-variant text-sm font-body mt-1">250th anniversary questions included</p>
           </div>
         )}
 
@@ -142,12 +144,12 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
           </div>
           <div className="bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.3)] border border-outline-variant/60 relative overflow-hidden">
             <span className="material-symbols-outlined absolute -top-2.5 -left-2.5 opacity-15 -rotate-[15deg] text-primary text-6xl pointer-events-none">eco</span>
-            <ul className="space-y-4 relative z-10">
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-3 relative z-10">
               {players.map((p) => (
-                <li key={p.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className={`w-2 h-2 rounded-full ${p.connected ? 'bg-primary shadow-[0_0_8px_rgba(168,201,169,0.5)]' : 'bg-outline-variant'}`} />
-                    <span className="font-medium">
+                <li key={p.id} className="flex items-center min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className={`shrink-0 w-2 h-2 rounded-full ${p.connected ? 'bg-primary shadow-[0_0_8px_rgba(168,201,169,0.5)]' : 'bg-outline-variant'}`} />
+                    <span className="font-medium truncate">
                       {p.name}
                       {(p.id === game.hostId || p.id === currentPlayer?.id) && (
                         <span className="text-on-surface-variant text-xs font-normal ml-1">
@@ -159,7 +161,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
                   </div>
                 </li>
               ))}
-              <li className="pt-2 border-t border-outline-variant/10 text-center">
+              <li className="col-span-2 pt-2 border-t border-outline-variant/10 text-center">
                 <img src="/images/hen-neutral.svg" alt="" className="w-12 h-12 mx-auto mb-1 opacity-70 animate-hen-bob" />
                 <p className="italic text-on-surface-variant text-sm">Waiting for others...</p>
               </li>
@@ -167,23 +169,6 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
             <span className="material-symbols-outlined absolute -bottom-4 -right-4 opacity-15 rotate-[165deg] text-primary text-6xl pointer-events-none">account_tree</span>
           </div>
         </section>
-
-        {/* Game Settings */}
-        {isHost && (
-          <section className="mb-8">
-            <h3 className="font-headline text-lg font-semibold text-primary mb-3 px-1">Game Settings</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/60 flex flex-col gap-1">
-                <span className="font-label text-[10px] uppercase tracking-wider text-secondary">Rounds</span>
-                <span className="font-headline text-xl font-bold">{game.settings.totalRounds}</span>
-              </div>
-              <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/60 flex flex-col gap-1">
-                <span className="font-label text-[10px] uppercase tracking-wider text-secondary">Timer</span>
-                <span className="font-headline text-xl font-bold">{game.settings.secondsPerRound}s</span>
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* Patriotic Mode Toggle */}
         {isHost && (
