@@ -370,6 +370,9 @@ export const fowlWordsSubmitClueStarVote = onCall(async (request) => {
   const clueGroups = round.clueGroups ?? []
   const group = clueGroups[groupIndex]
   if (!group) throw new HttpsError('invalid-argument', 'Invalid group index')
+  if (group.isDuplicate) {
+    throw new HttpsError('failed-precondition', 'Cannot 👍 duplicate clue groups')
+  }
   if ((group.playerIds as string[]).includes(uid)) {
     throw new HttpsError('permission-denied', 'Cannot star your own clue')
   }

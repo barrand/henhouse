@@ -531,6 +531,7 @@ function applyStarVotes(
     if (!visibleSet.has(groupIdx)) continue
     const group = clueGroups[groupIdx]
     if (!group) continue
+    if (group.isDuplicate) continue
     for (const pid of group.playerIds) {
       scores[pid] = (scores[pid] ?? 0) + 1
     }

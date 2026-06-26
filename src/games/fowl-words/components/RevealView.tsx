@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
 import { submitGuess, unlockFirst, advanceRound, submitClueStarVote, submitClueThumbsDownVote } from '../service'
 import PointCounter from './PointCounter'
+import { playThumbVoteFx } from './thumbVoteFx'
+import { ClueReactionStrip, GIVER_REVEAL_VOTE_HINT, nodLabel } from './clueVoteUi'
 
 interface Props {
   game: GameData
@@ -10,43 +12,6 @@ interface Props {
   currentPlayer: PlayerData | null
   isGuesser: boolean
   isHost: boolean
-}
-
-// Imperative animation helpers — run on the button DOM node directly so
-// re-tapping the same button always restarts the animation.
-function animateBtn(btn: HTMLButtonElement, type: 'up' | 'down') {
-  const cls = type === 'up' ? 'animate-thumb-punch' : 'animate-thumb-shake'
-  btn.classList.remove(cls)
-  void btn.offsetWidth // force reflow so removing+adding restarts animation
-  btn.classList.add(cls)
-  btn.addEventListener('animationend', () => btn.classList.remove(cls), { once: true })
-}
-
-function burstParticles(btn: HTMLButtonElement, type: 'up' | 'down') {
-  const r = btn.getBoundingClientRect()
-  const cx = r.left + r.width / 2
-  const cy = r.top + r.height / 2
-  const colors = type === 'up'
-    ? ['#91c595', '#c4e5c5', '#4caf66', '#b8e4bc']
-    : ['#f08080', '#e05050', '#c44444', '#f4a0a0']
-  const count = type === 'up' ? 8 : 5
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('div')
-    const angle = (i / count) * Math.PI * 2
-    const dist = type === 'up' ? 24 + Math.random() * 16 : 16 + Math.random() * 12
-    const dx = Math.cos(angle) * dist
-    const dy = Math.sin(angle) * dist - (type === 'up' ? 8 : 0)
-    p.style.cssText = [
-      'position:fixed', 'width:6px', 'height:6px', 'border-radius:50%',
-      'pointer-events:none', 'z-index:9999',
-      `left:${cx}px`, `top:${cy}px`,
-      `background:${colors[i % colors.length]}`,
-      'animation:thumb-particle 0.5s ease-out forwards',
-      `--thumb-dx:${dx}px`, `--thumb-dy:${dy}px`,
-    ].join(';')
-    document.body.appendChild(p)
-    setTimeout(() => p.remove(), 550)
-  }
 }
 
 export default function RevealView({ game, round, players, currentPlayer, isGuesser, isHost }: Props) {
@@ -112,25 +77,25 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
   }
 
   const handleThumbUp = (groupIndex: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    const group = round.clueGroups[groupIndex]
+    if (group?.isDuplicate) return
+    playThumbVoteFx(e.currentTarget, 'up')
     if (!currentPlayer) return
     // Cross-type clear: if voter has 👎 on this same group, toggle it off
     if (myThumbsDownVote === groupIndex) {
       submitClueThumbsDownVote(game.id, game.currentRound, groupIndex).catch(() => {})
     }
     submitClueStarVote(game.id, game.currentRound, groupIndex).catch(() => {})
-    animateBtn(e.currentTarget, 'up')
-    burstParticles(e.currentTarget, 'up')
   }
 
   const handleThumbDown = (groupIndex: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    playThumbVoteFx(e.currentTarget, 'down')
     if (!currentPlayer) return
     // Cross-type clear: if voter has 👍 on this same group, toggle it off
     if (myStarVote === groupIndex) {
       submitClueStarVote(game.id, game.currentRound, groupIndex).catch(() => {})
     }
     submitClueThumbsDownVote(game.id, game.currentRound, groupIndex).catch(() => {})
-    animateBtn(e.currentTarget, 'down')
-    burstParticles(e.currentTarget, 'down')
   }
 
   const allDuplicates = visibleSet.size === 0 && round.clueGroups.length > 0
@@ -186,7 +151,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                 ? `Every clue matched — ${guesserPlayer?.name} is unlocking the first one`
                 : round.eliminationReason && round.currentAttempt === 1
                 ? round.eliminationReason
-                : 'Tap 👍 or 👎 on others\' clues'}
+                : GIVER_REVEAL_VOTE_HINT}
             </p>
           </div>
         )}
@@ -237,7 +202,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
 
         {/* Clue groups — 2-col grid for both giver and guesser */}
         {!allDuplicates && (
-          <div className={`grid grid-cols-2 items-start ${isGuesser ? 'gap-1.5' : 'gap-2'}`}>
+          <div className={`grid grid-cols-2 ${isGuesser ? 'gap-1.5' : 'gap-2'}`}>
             {clueGroupDisplayOrder.map((idx) => {
               const group = round.clueGroups[idx]
               const isVisible = visibleSet.has(idx)
@@ -270,10 +235,10 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                           🔓 new
                         </span>
                       )}
-                      <p className="font-headline font-bold text-on-surface text-center text-lg leading-tight break-words line-clamp-2">
+                      <p className="font-headline font-bold text-on-surface text-center text-lg leading-tight line-clamp-2 h-11 flex items-center justify-center">
                         {displayText}
                       </p>
-                      <p className="text-on-surface-variant text-center font-body text-[10px] font-medium leading-snug mt-0.5">
+                      <p className="text-on-surface-variant text-center font-body text-[10px] font-medium leading-snug h-4 truncate">
                         {author}
                       </p>
                     </div>
@@ -288,7 +253,7 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                 return (
                   <div
                     key={idx}
-                    className={`relative bg-surface-container-lowest rounded-xl border-2 shadow-sm px-2.5 py-2 transition-all ${
+                    className={`relative bg-surface-container-lowest rounded-xl border-2 shadow-sm px-2.5 py-1.5 transition-all ${
                       justUnlocked
                         ? 'border-tertiary'
                         : isMyUp
@@ -304,10 +269,10 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                       </span>
                     )}
                     {/* Word + attribution */}
-                    <p className="font-headline font-bold text-on-surface text-xl leading-tight text-center break-words line-clamp-2 mb-1">
+                    <p className="font-headline font-bold text-on-surface text-xl leading-tight text-center line-clamp-2 h-11 flex items-center justify-center mb-0.5">
                       {displayText}
                     </p>
-                    <p className="text-xs text-on-surface-variant font-medium mb-2.5 font-body text-center leading-snug">
+                    <p className="text-xs text-on-surface-variant font-medium mb-1.5 font-body text-center leading-snug h-4 truncate">
                       {group.playerIds.length === 1 ? (
                         isOwnClue
                           ? <span className="text-primary font-bold">← you</span>
@@ -324,19 +289,40 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                           </span>
                         ))
                       )}
+                      {group.isDuplicate && !isOwnClue && (
+                        <span className="text-error font-bold uppercase text-[9px] tracking-wide"> · dup</span>
+                      )}
+                      {isOwnClue && group.isDuplicate && (
+                        <span className="text-error font-bold"> · -1</span>
+                      )}
                     </p>
+                    {(thumbsUpCount > 0 || thumbsDownCount > 0) && (
+                      <ClueReactionStrip
+                        giverNodCount={thumbsUpCount}
+                        giverDownCount={thumbsDownCount}
+                        guesserMvp={false}
+                        guesserShamed={false}
+                      />
+                    )}
                     {/* Vote row — full-width horizontal buttons at bottom of card */}
                     <div className="flex gap-1.5">
                       {isOwnClue ? (
                         // Own clue: read-only count display
                         <>
-                          <div className="flex-1 h-9 flex items-center justify-center gap-1.5 rounded-lg bg-surface-container-low text-lg font-label">
-                            <span className={thumbsUpCount > 0 ? '' : 'grayscale opacity-30'}>👍</span>
-                            {thumbsUpCount > 0 && <span className="text-xs font-bold text-primary">{thumbsUpCount}</span>}
+                          <div
+                            className="flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg bg-surface-container-low font-label"
+                            title={thumbsUpCount > 0 ? `${nodLabel(thumbsUpCount)} · +${thumbsUpCount} each if we win` : undefined}
+                          >
+                            <span className={`text-lg leading-none ${thumbsUpCount > 0 ? '' : 'grayscale opacity-30'}`}>👍</span>
+                            {thumbsUpCount > 0 && (
+                              <span className="text-[9px] font-bold text-primary leading-none">{thumbsUpCount}</span>
+                            )}
                           </div>
-                          <div className="flex-1 h-9 flex items-center justify-center gap-1.5 rounded-lg bg-surface-container-low text-lg font-label">
-                            <span className={thumbsDownCount > 0 ? '' : 'grayscale opacity-30'}>👎</span>
-                            {thumbsDownCount > 0 && <span className="text-xs font-bold text-error">{thumbsDownCount}</span>}
+                          <div className="flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg bg-surface-container-low font-label">
+                            <span className={`text-lg leading-none ${thumbsDownCount > 0 ? '' : 'grayscale opacity-30'}`}>👎</span>
+                            {thumbsDownCount > 0 && (
+                              <span className="text-[9px] font-bold text-error leading-none">{thumbsDownCount}</span>
+                            )}
                           </div>
                         </>
                       ) : (
@@ -344,25 +330,38 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
                         <>
                           <button
                             onClick={(e) => handleThumbUp(idx, e)}
-                            className={`flex-1 h-9 flex items-center justify-center gap-1.5 rounded-lg text-lg font-label transition-all active:scale-[0.97] ${
-                              isMyUp
+                            disabled={group.isDuplicate}
+                            title={group.isDuplicate ? 'Duplicates cannot earn nods' : 'Nod this clue (+1 pt each if we win)'}
+                            className={`flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label transition-all active:scale-[0.97] ${
+                              group.isDuplicate
+                                ? 'bg-surface-container-low opacity-50 cursor-not-allowed'
+                                : isMyUp
                                 ? 'bg-primary-fixed shadow-sm'
                                 : 'bg-surface-container-low'
                             }`}
                           >
-                            <span className={isMyUp ? '' : 'grayscale opacity-40'}>👍</span>
-                            {thumbsUpCount > 0 && <span className={`text-xs font-bold ${isMyUp ? 'text-on-primary-fixed' : 'text-primary'}`}>{thumbsUpCount}</span>}
+                            <span className={`text-lg leading-none ${isMyUp && !group.isDuplicate ? '' : 'grayscale opacity-40'}`}>👍</span>
+                            {thumbsUpCount > 0 && !group.isDuplicate && (
+                              <span className={`text-[9px] font-bold leading-none ${isMyUp ? 'text-on-primary-fixed' : 'text-primary'}`}>
+                                {thumbsUpCount}
+                              </span>
+                            )}
                           </button>
                           <button
                             onClick={(e) => handleThumbDown(idx, e)}
-                            className={`flex-1 h-9 flex items-center justify-center gap-1.5 rounded-lg text-lg font-label transition-all active:scale-[0.97] ${
+                            title="Shame this clue"
+                            className={`flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label transition-all active:scale-[0.97] ${
                               isMyDown
                                 ? 'bg-error-container shadow-sm'
                                 : 'bg-surface-container-low'
                             }`}
                           >
-                            <span className={isMyDown ? '' : 'grayscale opacity-40'}>👎</span>
-                            {thumbsDownCount > 0 && <span className={`text-xs font-bold ${isMyDown ? 'text-error' : 'text-error/80'}`}>{thumbsDownCount}</span>}
+                            <span className={`text-lg leading-none ${isMyDown ? '' : 'grayscale opacity-40'}`}>👎</span>
+                            {thumbsDownCount > 0 && (
+                              <span className={`text-[9px] font-bold leading-none ${isMyDown ? 'text-error' : 'text-error/80'}`}>
+                                {thumbsDownCount}
+                              </span>
+                            )}
                           </button>
                         </>
                       )}
@@ -376,23 +375,30 @@ export default function RevealView({ game, round, players, currentPlayer, isGues
               return (
                 <div
                   key={idx}
-                  className={`rounded-xl border px-2.5 py-2 transition-all ${
+                  className={`rounded-xl border px-2.5 py-1.5 transition-all ${
                     isPlayerInDupGroup
                       ? 'bg-error/10 border-error/50'
                       : 'bg-surface-container-low border-outline-variant/50'
                   }`}
                 >
-                  <p className={`font-headline text-lg font-bold line-through leading-tight text-center break-words line-clamp-2 ${
+                  <p className={`font-headline text-lg font-bold line-through leading-tight text-center line-clamp-2 h-11 flex items-center justify-center ${
                     isPlayerInDupGroup ? 'text-error' : 'text-on-surface-variant'
                   }`}>
                     {displayText}
                   </p>
-                  <p className="text-xs text-on-surface-variant font-medium font-body truncate mt-1 text-center">
+                  <p className="text-xs text-on-surface-variant font-medium font-body truncate h-4 text-center mb-1.5">
                     {isPlayerInDupGroup && (
                       <img src="/images/hen-embarrassed.svg" alt="" className="w-4 h-4 inline-block align-[-2px] mr-0.5 animate-hen-pop" />
                     )}
                     {isPlayerInDupGroup ? '😭 ' : ''}{group.playerIds.map(playerName).join(', ')}
+                    {!isPlayerInDupGroup && (
+                      <span className="text-error font-bold uppercase text-[9px] tracking-wide"> · dup</span>
+                    )}
+                    {isPlayerInDupGroup && (
+                      <span className="text-error font-bold"> · -1</span>
+                    )}
                   </p>
+                  <div className="h-9" aria-hidden />
                 </div>
               )
             })}

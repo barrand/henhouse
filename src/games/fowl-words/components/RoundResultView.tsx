@@ -1,6 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
 import { advanceRound, submitGuesserStarVote, submitGuesserThumbsDownVote } from '../service'
+import { playThumbVoteFx } from './thumbVoteFx'
+import {
+  GiverNodCell,
+  GuesserMvpCell,
+  ShameCell,
+  StarIcon,
+  guesserResultVoteHint,
+} from './clueVoteUi'
 
 interface Props {
   game: GameData
@@ -8,41 +16,6 @@ interface Props {
   players: PlayerData[]
   isHost: boolean
   currentPlayerId: string | null
-}
-
-function animateBtn(btn: HTMLButtonElement, type: 'up' | 'down') {
-  const cls = type === 'up' ? 'animate-thumb-punch' : 'animate-thumb-shake'
-  btn.classList.remove(cls)
-  void btn.offsetWidth
-  btn.classList.add(cls)
-  btn.addEventListener('animationend', () => btn.classList.remove(cls), { once: true })
-}
-
-function burstParticles(btn: HTMLButtonElement, type: 'up' | 'down') {
-  const r = btn.getBoundingClientRect()
-  const cx = r.left + r.width / 2
-  const cy = r.top + r.height / 2
-  const colors = type === 'up'
-    ? ['#91c595', '#c4e5c5', '#4caf66', '#b8e4bc']
-    : ['#f08080', '#e05050', '#c44444', '#f4a0a0']
-  const count = type === 'up' ? 8 : 5
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('div')
-    const angle = (i / count) * Math.PI * 2
-    const dist = type === 'up' ? 24 + Math.random() * 16 : 16 + Math.random() * 12
-    const dx = Math.cos(angle) * dist
-    const dy = Math.sin(angle) * dist - (type === 'up' ? 8 : 0)
-    p.style.cssText = [
-      'position:fixed', 'width:6px', 'height:6px', 'border-radius:50%',
-      'pointer-events:none', 'z-index:9999',
-      `left:${cx}px`, `top:${cy}px`,
-      `background:${colors[i % colors.length]}`,
-      'animation:thumb-particle 0.5s ease-out forwards',
-      `--thumb-dx:${dx}px`, `--thumb-dy:${dy}px`,
-    ].join(';')
-    document.body.appendChild(p)
-    setTimeout(() => p.remove(), 550)
-  }
 }
 
 export default function RoundResultView({ game, round, players, isHost, currentPlayerId }: Props) {
@@ -88,21 +61,65 @@ export default function RoundResultView({ game, round, players, isHost, currentP
   }
 
   const handleGuesserUp = (idx: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    playThumbVoteFx(e.currentTarget, 'up')
     if (!round.isCorrect) return
-    setPendingUpIdx(idx)
+    const current =
+      pendingUpIdx !== null ? pendingUpIdx : round.guesserStarVote ?? null
+    setPendingUpIdx(current === idx ? null : idx)
     submitGuesserStarVote(game.id, game.currentRound, idx).catch(() => {})
-    animateBtn(e.currentTarget, 'up')
-    burstParticles(e.currentTarget, 'up')
   }
 
   const handleGuesserDown = (idx: number, e: React.MouseEvent<HTMLButtonElement>) => {
-    setPendingDownIdx(idx)
+    playThumbVoteFx(e.currentTarget, 'down')
+    const current =
+      pendingDownIdx !== null ? pendingDownIdx : round.guesserThumbsDownVote ?? null
+    setPendingDownIdx(current === idx ? null : idx)
     submitGuesserThumbsDownVote(game.id, game.currentRound, idx).catch(() => {})
-    animateBtn(e.currentTarget, 'down')
-    burstParticles(e.currentTarget, 'down')
   }
 
+  // Single active star/shame — pending overrides server until Firestore confirms.
+  const activeStarIdx =
+    pendingUpIdx !== null ? pendingUpIdx : round.guesserStarVote ?? null
+  const activeShameIdx =
+    pendingDownIdx !== null ? pendingDownIdx : round.guesserThumbsDownVote ?? null
+
+  useEffect(() => {
+    if (pendingUpIdx !== null && round.guesserStarVote === pendingUpIdx) {
+      setPendingUpIdx(null)
+    }
+  }, [round.guesserStarVote, pendingUpIdx])
+
+  useEffect(() => {
+    if (pendingDownIdx !== null && round.guesserThumbsDownVote === pendingDownIdx) {
+      setPendingDownIdx(null)
+    }
+  }, [round.guesserThumbsDownVote, pendingDownIdx])
+
   const hasVisibleClues = round.clueGroups.some((_, i) => round.visibleGroupIndexes.includes(i))
+  const visibleSet = new Set(round.visibleGroupIndexes)
+  const clueGroupDisplayOrder = [
+    ...round.clueGroups.map((_, i) => i).filter((i) => visibleSet.has(i)),
+    ...round.clueGroups.map((_, i) => i).filter((i) => !visibleSet.has(i)),
+  ]
+  const playerName = (id: string) => players.find((p) => p.id === id)?.name ?? '?'
+
+  const renderAuthorNames = (playerIds: string[], isYours: boolean) => {
+    if (playerIds.length === 1) {
+      return isYours && playerIds[0] === currentPlayerId
+        ? <span className="text-primary font-bold">← you</span>
+        : playerName(playerIds[0])
+    }
+    return playerIds.map((id, i) => (
+      <span key={id}>
+        {i > 0 && ', '}
+        {id === currentPlayerId ? (
+          <span className="text-primary font-bold">← you</span>
+        ) : (
+          playerName(id)
+        )}
+      </span>
+    ))
+  }
 
   return (
     <main className="flex-1 flex flex-col px-4 py-4">
@@ -172,22 +189,19 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                 <p className="text-xs font-bold text-on-tertiary-container uppercase tracking-wider font-label">
                   Rate the clues
                 </p>
-                <p className="text-[11px] text-outline mt-0.5 font-body">
-                  {round.isCorrect
-                    ? '👍 best clue (+pts split among authors) · 👎 worst clue (shame only)'
-                    : '👎 shame the worst clue (or 👍 the best, no points this round)'}
+                <p className="text-[11px] text-on-surface-variant mt-0.5 font-body">
+                  {guesserResultVoteHint(!!round.isCorrect)}
                 </p>
               </div>
             )}
 
-            <div className="space-y-1.5">
-              {round.clueGroups.map((group, idx) => {
-                const isVisible = round.visibleGroupIndexes.includes(idx)
+            <div className="grid grid-cols-2 gap-2">
+              {clueGroupDisplayOrder.map((idx) => {
+                const group = round.clueGroups[idx]
+                const isVisible = visibleSet.has(idx)
                 const isYours = group.playerIds.includes(currentPlayerId ?? '')
-                const displayText = Array.from(new Set(group.clueTexts.map((t) => t.trim()))).join(' / ')
-                const names = group.playerIds.map((id) => players.find((p) => p.id === id)?.name ?? '?').join(', ')
+                const displayText = group.clueTexts[0]?.trim() || '—'
 
-                const groupFastWinners = group.playerIds.filter((pid) => fastBonusMap[pid])
                 const yourId = currentPlayerId ?? ''
                 const gotFastBonus = isYours && !!fastBonusMap[yourId] && group.playerIds.includes(yourId)
                 const attemptPts = [10, 5, 2, 1][round.currentAttempt - 1] ?? 0
@@ -196,128 +210,122 @@ export default function RoundResultView({ game, round, players, isHost, currentP
                 const giverDownCount = Object.values(round.clueThumbsDownVotes ?? {}).filter((v) => v === idx).length
                 const guesserUpPts = Math.floor(5 / group.playerIds.length)
 
-                const isGuesserUpVoted = round.guesserStarVote === idx || pendingUpIdx === idx
-                const isGuesserDownVoted = round.guesserThumbsDownVote === idx || pendingDownIdx === idx
-
-                // Guesser can vote on visible clues
-                const canGuesserVote = isCurrentGuesser && isVisible
+                const isGuesserUpVoted = activeStarIdx === idx
+                const isGuesserDownVoted = activeShameIdx === idx
+                const canGuesserVote = isCurrentGuesser && isVisible && !isYours
+                const canGuesserStarUp = canGuesserVote && round.isCorrect
 
                 return (
                   <div
                     key={idx}
-                    className={`px-4 py-2.5 rounded-xl border font-body transition-all ${
-                      group.isDuplicate
-                        ? 'bg-surface-container-low border-outline-variant/20 opacity-80'
+                    className={`relative bg-surface-container-lowest rounded-xl border-2 shadow-sm px-2.5 py-1.5 transition-all ${
+                      group.isDuplicate && !isVisible
+                        ? 'bg-surface-container-low border-outline-variant/50'
                         : isGuesserUpVoted
-                        ? 'bg-primary-fixed/30 border-primary/40 shadow-sm'
+                        ? 'border-primary/70 bg-primary/5'
                         : isGuesserDownVoted
-                        ? 'bg-error/10 border-error/30'
+                        ? 'border-error/60 bg-error/5'
                         : isVisible && round.isCorrect
-                        ? 'bg-primary-fixed/20 border-primary-fixed-dim'
-                        : 'bg-surface-container-lowest border-outline-variant/30'
+                        ? 'border-primary/40'
+                        : 'border-outline-variant/60'
                     }`}
                   >
-                    {/* Main row: word + badges */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex flex-col flex-1 min-w-0">
-                        <span className={`font-headline font-bold text-lg ${group.isDuplicate ? 'text-on-surface-variant line-through' : 'text-on-surface'}`}>
-                          {displayText}
-                        </span>
-                        <span className="text-xs text-outline mt-0.5">
-                          {names}
-                          {isYours && <span className="text-primary font-bold ml-1">← you</span>}
-                        </span>
-                      </div>
-                      <div className="flex-shrink-0 flex flex-col items-end gap-1">
-                        {group.isDuplicate ? (
-                          <div className="text-[10px] text-error font-bold uppercase tracking-wider font-label">
-                            🔄 Duplicate
-                          </div>
-                        ) : isVisible ? (
-                          <div className="text-[10px] text-primary font-bold uppercase tracking-wider font-label">
-                            ✅ Used
-                          </div>
-                        ) : null}
-                        {groupFastWinners.length > 0 && (
-                          <div className="text-[10px] text-tertiary font-bold uppercase tracking-wider font-label">
-                            ⚡ +{fastBonusMap[groupFastWinners[0]]} fastest
-                          </div>
-                        )}
-                        {/* Giver community votes */}
-                        {(giverUpCount > 0 || giverDownCount > 0) && (
-                          <div className="flex gap-2">
-                            {giverUpCount > 0 && (
-                              <span className="text-[11px] text-primary font-bold font-label">👍 {giverUpCount}</span>
-                            )}
-                            {giverDownCount > 0 && (
-                              <span className="text-[11px] text-error font-bold font-label">👎 {giverDownCount}</span>
-                            )}
-                          </div>
-                        )}
-                        {/* Guesser 👍 awarded badge */}
-                        {isGuesserUpVoted && (
-                          <div className="flex items-center gap-1 bg-primary-fixed text-on-primary-fixed text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full font-label animate-hen-pop">
-                            👍 +{guesserUpPts}
-                          </div>
-                        )}
-                        {/* Guesser 👎 shame badge */}
-                        {isGuesserDownVoted && !isGuesserUpVoted && (
-                          <div className="flex items-center gap-1 bg-error-container text-error text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full font-label animate-hen-pop">
-                            👎 shame
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <p
+                      className={`font-headline font-bold text-xl leading-tight text-center line-clamp-2 h-11 flex items-center justify-center mb-0.5 ${
+                        group.isDuplicate && !isVisible
+                          ? 'text-error line-through'
+                          : 'text-on-surface'
+                      }`}
+                    >
+                      {displayText}
+                    </p>
+                    <p className="text-xs text-on-surface-variant font-medium mb-1 font-body text-center leading-snug h-4 truncate">
+                      {renderAuthorNames(group.playerIds, isYours)}
+                      {group.isDuplicate && isYours && (
+                        <span className="text-error font-bold"> · -1</span>
+                      )}
+                      {group.isDuplicate && !isYours && (
+                        <span className="text-error font-bold uppercase text-[9px] tracking-wide"> · dup</span>
+                      )}
+                    </p>
 
-                    {/* Scoring badges for your own clue */}
-                    {isYours && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {isVisible && round.isCorrect && (
-                          <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full font-label">
+                    {((isVisible && round.isCorrect && isYours) || gotFastBonus) && (
+                      <div className="mb-1 flex items-center justify-center gap-1 overflow-hidden">
+                        {isVisible && round.isCorrect && isYours && (
+                          <span className="bg-primary-fixed text-on-primary-fixed text-[10px] font-bold px-2 py-0.5 rounded-full font-label whitespace-nowrap">
                             +{attemptPts} used
                           </span>
                         )}
                         {gotFastBonus && (
-                          <span className="bg-tertiary-container text-on-tertiary-container text-[10px] font-bold px-2 py-0.5 rounded-full font-label">
+                          <span className="bg-tertiary-container text-on-tertiary-container text-[10px] font-bold px-2 py-0.5 rounded-full font-label whitespace-nowrap">
                             ⚡ +{fastBonusMap[yourId]} fastest
-                          </span>
-                        )}
-                        {group.isDuplicate && (
-                          <span className="bg-error/10 text-error text-[10px] font-bold px-2 py-0.5 rounded-full font-label">
-                            -1 duplicate
                           </span>
                         )}
                       </div>
                     )}
 
-                    {/* Guesser vote buttons — visible clues only */}
-                    {canGuesserVote && !isYours && (
-                      <div className="mt-2 flex gap-2">
-                        <button
-                          onClick={(e) => handleGuesserUp(idx, e)}
-                          disabled={!round.isCorrect}
-                          className={`flex-1 h-8 flex items-center justify-center gap-1.5 rounded-lg text-xs font-bold font-label transition-all active:scale-[0.97] ${
-                            isGuesserUpVoted
-                              ? 'bg-primary-fixed text-on-primary-fixed shadow-sm'
-                              : round.isCorrect
-                              ? 'border-2 border-dashed border-primary/40 text-primary/70 hover:bg-primary-fixed/20'
-                              : 'border border-outline-variant/20 text-outline/40 cursor-not-allowed'
-                          }`}
-                        >
-                          👍 {round.isCorrect ? `+${guesserUpPts}` : ''}
-                        </button>
-                        <button
-                          onClick={(e) => handleGuesserDown(idx, e)}
-                          className={`flex-1 h-8 flex items-center justify-center gap-1.5 rounded-lg text-xs font-bold font-label transition-all active:scale-[0.97] ${
-                            isGuesserDownVoted
-                              ? 'bg-error-container text-error shadow-sm'
-                              : 'border-2 border-dashed border-error/30 text-error/60 hover:bg-error/10'
-                          }`}
-                        >
-                          👎 shame
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex gap-1.5">
+                      {round.isCorrect ? (
+                        <>
+                          <GiverNodCell count={giverUpCount} />
+                          {canGuesserVote && canGuesserStarUp ? (
+                            <button
+                              onClick={(e) => handleGuesserUp(idx, e)}
+                              title={`Award +5 MVP${group.playerIds.length > 1 ? ` (+${guesserUpPts} each)` : ''}`}
+                              className={`flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label shrink-0 transition-all active:scale-[0.97] ${
+                                isGuesserUpVoted
+                                  ? 'bg-primary-fixed shadow-sm'
+                                  : 'bg-surface-container-low'
+                              }`}
+                            >
+                              <StarIcon
+                                filled={isGuesserUpVoted}
+                                className={isGuesserUpVoted ? 'text-on-primary-fixed' : 'text-primary opacity-50'}
+                              />
+                              {isGuesserUpVoted && (
+                                <span className="text-[9px] font-bold leading-none text-on-primary-fixed">
+                                  +5
+                                </span>
+                              )}
+                            </button>
+                          ) : (
+                            <GuesserMvpCell
+                              active={isGuesserUpVoted}
+                              perAuthor={guesserUpPts}
+                              authorCount={group.playerIds.length}
+                            />
+                          )}
+                          <ShameCell
+                            giverCount={giverDownCount}
+                            guesserShamed={isGuesserDownVoted}
+                            interactive={canGuesserVote}
+                            isActive={isGuesserDownVoted}
+                            onClick={canGuesserVote ? (e) => handleGuesserDown(idx, e) : undefined}
+                          />
+                        </>
+                      ) : canGuesserVote ? (
+                        <>
+                          <GiverNodCell count={giverUpCount} />
+                          <ShameCell
+                            giverCount={giverDownCount}
+                            guesserShamed={isGuesserDownVoted}
+                            interactive
+                            wide
+                            isActive={isGuesserDownVoted}
+                            onClick={(e) => handleGuesserDown(idx, e)}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <GiverNodCell count={giverUpCount} />
+                          <GuesserMvpCell active={false} perAuthor={0} authorCount={1} />
+                          <ShameCell
+                            giverCount={giverDownCount}
+                            guesserShamed={isGuesserDownVoted}
+                          />
+                        </>
+                      )}
+                    </div>
                   </div>
                 )
               })}
