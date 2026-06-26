@@ -7,6 +7,9 @@ const FowlWordsGame = lazy(() => import('@fowl-words/pages/Game'))
 const FlockPreview = import.meta.env.DEV
   ? lazy(() => import('./dev/FlockPreview'))
   : null
+const FowlWordsPreview = import.meta.env.DEV
+  ? lazy(() => import('./dev/FowlWordsPreview'))
+  : null
 
 const Loading = () => (
   <div className="min-h-screen flex items-center justify-center bg-surface linen-texture">
@@ -33,6 +36,26 @@ export default function App() {
             element={
               <Suspense fallback={<Loading />}>
                 <FlockPreview />
+              </Suspense>
+            }
+          />
+        </>
+      )}
+      {FowlWordsPreview && (
+        <>
+          <Route
+            path="/dev/fowl-words"
+            element={
+              <Suspense fallback={<Loading />}>
+                <FowlWordsPreview />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dev/fowl-words/:screen"
+            element={
+              <Suspense fallback={<Loading />}>
+                <FowlWordsPreview />
               </Suspense>
             }
           />
