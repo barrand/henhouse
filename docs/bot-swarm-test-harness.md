@@ -7,7 +7,7 @@ Build an external local-emulator harness that lets the host use the real app UI 
 ## Key Changes
 
 - Add a root script: `npm run bots -- --code ABCD --count 5`.
-- Create a Node 22 CLI under `tools/bots/` using the existing Firebase client SDK and Gemini REST API.
+- Create a Node 22 CLI under `tools/bots/` using the existing Firebase client SDK and the Gemini SDK from `functions/node_modules`.
 - Each bot gets its own Firebase app/auth identity, joins through `joinGame`, listens to game/player/round state, and submits allowed player actions through callable functions.
 - Run v1 against local emulators only: Auth `9099`, Firestore `8080`, Functions `5001`, Realtime Database `9000`.
 - Read Firebase config from `.env`; require `GEMINI_API_KEY` from environment or `functions/.env`.
