@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:local": "./dev.sh",
+    "bots": "node tools/bots/index.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
