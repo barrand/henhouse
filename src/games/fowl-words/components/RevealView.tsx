@@ -149,6 +149,15 @@ export default function RevealView({
   }
 
   const allDuplicates = visibleSet.size === 0 && round.clueGroups.length > 0
+  const unlockedGroupIndex =
+    round.lastUnlockedGroupIndex != null && visibleSet.has(round.lastUnlockedGroupIndex)
+      ? round.lastUnlockedGroupIndex
+      : null
+  const unlockedGroup =
+    unlockedGroupIndex != null
+      ? round.clueGroups[unlockedGroupIndex]
+      : null
+  const unlockedClueText = unlockedGroup?.clueTexts[0]?.trim() ?? ''
 
   const clueGroupDisplayOrder = isGuesser
     ? round.clueGroups.map((_, idx) => idx).filter((idx) => visibleSet.has(idx))
@@ -176,13 +185,21 @@ export default function RevealView({
         {isGuesser ? (
           <div className="text-center">
             <h2 className="font-headline text-lg font-bold text-on-surface">
-              {allDuplicates ? 'All clues are duplicates!' : round.currentAttempt === 1 ? 'Your clues' : 'New clue unlocked!'}
+              {allDuplicates
+                ? 'All clues are duplicates!'
+                : round.currentAttempt === 1
+                ? 'Your clues'
+                : unlockedClueText
+                ? `Unlocked: ${unlockedClueText}`
+                : 'No new clues'}
             </h2>
             {(allDuplicates || round.currentAttempt > 1) && (
               <p className="text-on-surface-variant text-xs mt-0.5 font-body">
                 {allDuplicates
                   ? 'Everyone thought of the same thing. Unlock one to see it.'
-                  : 'Try again — points just dropped.'}
+                  : unlockedClueText
+                  ? 'Try again — points just dropped.'
+                  : 'Try again — same clues, fewer points.'}
               </p>
             )}
           </div>
@@ -250,7 +267,7 @@ export default function RevealView({
               const group = round.clueGroups[idx]
               const isVisible = visibleSet.has(idx)
               const displayText = group.clueTexts[0]?.trim() || '—'
-              const justUnlocked = round.lastUnlockedGroupIndex === idx
+              const justUnlocked = unlockedGroupIndex === idx
               const loveCount = countGroupPeerLoves(peerLoveVotes, idx)
               const booCount = countGroupPeerBoos(peerBooVotes, idx)
 

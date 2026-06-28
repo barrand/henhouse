@@ -2,7 +2,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { initializeApp, deleteApp } from 'firebase/app'
 import { getAuth, connectAuthEmulator, signInAnonymously } from 'firebase/auth'
 import { getFirestore, connectFirestoreEmulator, doc, onSnapshot, collection } from 'firebase/firestore'
@@ -13,7 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '../..')
 
 const DEFAULT_HOST = '127.0.0.1'
-const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models'
+const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash'
 
 const botNames = [
   'Henrietta',
@@ -34,6 +34,17 @@ const botNames = [
   'Opal',
 ]
 
+const clueStyles = [
+  'where it is found or used',
+  'what it does',
+  'what it sounds, looks, or feels like',
+  'who uses it',
+  'a common part or feature',
+  'a related action',
+  'a close category neighbor',
+  'a famous example or setting',
+]
+
 function usage() {
   console.log('Usage: npm run bots -- --code ABCD --count 5')
   console.log('')
@@ -41,11 +52,11 @@ function usage() {
   console.log('  --code <room>       Required room code to join')
   console.log('  --count <n>         Number of bots to join (default 5)')
   console.log('  --host <host>       Emulator host (default 127.0.0.1)')
-  console.log('  --model <model>     Gemini model (default GEMINI_MODEL or gemini-2.0-flash)')
+  console.log(`  --model <model>     Gemini model (default GEMINI_MODEL or ${DEFAULT_GEMINI_MODEL})`)
 }
 
 function parseArgs(argv) {
-  const args = { count: 5, host: process.env.VITE_EMULATOR_HOST || DEFAULT_HOST, model: process.env.GEMINI_MODEL || 'gemini-2.0-flash' }
+  const args = { count: 5, host: process.env.VITE_EMULATOR_HOST || DEFAULT_HOST, model: process.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL }
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
     if (arg === '--help' || arg === '-h') {
@@ -250,33 +261,33 @@ function sanitizeRound(round) {
 class GeminiClient {
   constructor({ apiKey, model, reporter }) {
     this.apiKey = apiKey
-    this.model = model
+    this.modelName = model
     this.reporter = reporter
   }
 
-  async generateText(task, prompt, { maxTokens = 32 } = {}) {
-    const url = `${GEMINI_ENDPOINT}/${encodeURIComponent(this.model)}:generateContent?key=${encodeURIComponent(this.apiKey)}`
-    this.reporter.event('gemini-prompt', { task, prompt: sanitizeModelOutput(prompt) })
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.8,
-          maxOutputTokens: maxTokens,
-        },
-      }),
+  async init() {
+    const modulePath = path.join(rootDir, 'functions/node_modules/@google/generative-ai/dist/index.mjs')
+    const { GoogleGenerativeAI } = await import(pathToFileURL(modulePath).href)
+    const genAI = new GoogleGenerativeAI(this.apiKey)
+    this.model = genAI.getGenerativeModel({ model: this.modelName })
+  }
+
+  async generateText(task, prompt, { maxTokens = null, responseMimeType = null } = {}) {
+    if (!this.model) await this.init()
+    this.reporter.event('gemini-prompt', { task, model: this.modelName, prompt })
+    const generationConfig = { temperature: 0.8 }
+    if (maxTokens !== null) generationConfig.maxOutputTokens = maxTokens
+    if (responseMimeType) generationConfig.responseMimeType = responseMimeType
+
+    const result = await this.model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig,
     })
-    if (!response.ok) {
-      const body = await response.text()
-      throw new Error(`Gemini ${task} failed (${response.status}): ${body.slice(0, 300)}`)
-    }
-    const data = await response.json()
-    this.reporter.geminiUsage(data.usageMetadata)
-    const text = data.candidates?.[0]?.content?.parts?.map((part) => part.text ?? '').join('').trim()
+
+    const text = result.response.text().trim()
     if (!text) throw new Error(`Gemini ${task} returned no text`)
-    this.reporter.event('gemini', { task, output: sanitizeModelOutput(text) })
+    this.reporter.geminiUsage(result.response.usageMetadata)
+    this.reporter.event('gemini', { task, model: this.modelName, output: text })
     return text
   }
 }
@@ -292,6 +303,12 @@ function oneWord(text) {
     .map((part) => part.trim())
     .find(Boolean)
   return (cleaned || '').replace(/[^a-zA-Z-]/g, '').slice(0, 50)
+}
+
+function parseClueResponse(text) {
+  const parsed = JSON.parse(text)
+  if (typeof parsed.clue !== 'string') throw new Error('Gemini clue response did not include a clue string')
+  return oneWord(parsed.clue)
 }
 
 function randomChoice(items) {
@@ -488,16 +505,39 @@ class Bot {
   }
 
   async makeClue(secretWord) {
+    const clueStyle = clueStyles[this.index % clueStyles.length]
     const prompt = [
-      'You are playing a party word game like Just One.',
+      'Return exactly one JSON object and nothing else.',
+      'The first character must be { and the last character must be }.',
+      'Do not include markdown, prose, labels, or introductory phrases.',
+      'JSON shape: {"clue":"singleword"}',
+      '',
+      'You are a thoughtful human player in a party word game like Just One.',
+      'Your goal is to help the guesser while avoiding duplicate clues from other players.',
       `Secret word: ${secretWord}`,
-      'Give exactly one helpful English clue word.',
-      'Do not use the secret word, a substring of it, punctuation, spaces, or explanation.',
+      `Your assigned clue strategy: ${clueStyle}`,
+      '',
+      'Choose ONE complete English word as your clue.',
+      'Think first about the most obvious clues other players might give, then choose a different clue that is still fair and helpful.',
+      'Use your assigned clue strategy only if it naturally fits the secret word.',
+      '',
+      'Good clue qualities:',
+      '- Complete word, not a prefix or abbreviation.',
+      '- Specific enough to be useful.',
+      '- Creative enough that it is less likely to match everyone else.',
+      '- Directly related to the secret word in a way the guesser can explain.',
+      '- A real clue a person might say at game night.',
+      '',
+      'Bad clue qualities:',
+      '- Generic category words that everyone would choose.',
+      '- Random words that only fit your assigned strategy but not the secret word.',
+      '- Forced associations, jokes, or vibes that are hard to justify.',
+      '- Partial words, initials, abbreviations, or unfinished text.',
+      '- The secret word itself, any substring of it, or a plural/stem of it.',
     ].join('\n')
-    const text = await this.gemini.generateText('fowl-clue', prompt)
-    const clue = oneWord(text)
-    if (!clue) throw new Error('Gemini did not produce a one-word clue')
-    if (secretWord.toLowerCase().includes(clue.toLowerCase())) throw new Error(`Generated clue "${clue}" is part of the secret word`)
+    const text = await this.gemini.generateText('fowl-clue', prompt, { responseMimeType: 'application/json' })
+    const clue = parseClueResponse(text)
+    if (!clue) throw new Error('Gemini did not produce a clue')
     return clue
   }
 
@@ -522,7 +562,7 @@ class Bot {
       `Prompt: ${question}`,
       'Return a short answer only. No explanation.',
     ].join('\n')
-    return sanitizeModelOutput(await this.gemini.generateText('flock-answer', prompt, { maxTokens: 48 })).slice(0, 100)
+    return sanitizeModelOutput(await this.gemini.generateText('flock-answer', prompt)).slice(0, 100)
   }
 
   async once(key, action) {

@@ -312,6 +312,7 @@ export async function handleGuess(
       tentativePoints: newTentative,
       attemptDeadline: newDeadline,
       attemptInProgress: false,
+      lastUnlockedGroupIndex: FieldValue.delete(),
     })
     return
   }
