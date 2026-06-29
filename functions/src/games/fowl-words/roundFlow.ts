@@ -14,6 +14,7 @@
 import * as admin from 'firebase-admin'
 import { Timestamp, FieldValue } from 'firebase-admin/firestore'
 import { detectDuplicateClues, evaluateGuess } from '../../shared/gemini'
+import { eligibleNonGuesserIds, getRoundEligiblePlayerIds } from '../../shared/roundEligibility'
 import {
   buildClueGroups,
   initialVisibleGroupIndexes,
@@ -47,24 +48,28 @@ function getSecondsForAttempt(attemptNum: number): number {
  */
 export async function finalizeWordSelection(gameId: string, roundNum: number): Promise<void> {
   const firestore = db()
+  const gameRef = firestore.collection('games').doc(gameId)
   const roundRef = firestore
-    .collection('games')
-    .doc(gameId)
+    .collection('games').doc(gameId)
     .collection('rounds')
     .doc(String(roundNum))
 
   await firestore.runTransaction(async (tx) => {
-    const snap = await tx.get(roundRef)
+    const [gameSnap, snap] = await Promise.all([tx.get(gameRef), tx.get(roundRef)])
     if (!snap.exists) return
+    if (!gameSnap.exists) return
+    const game = gameSnap.data()!
     const data = snap.data()!
     if (data.status !== 'word-selection') return // already finalized
 
     const wordOptions: string[] = data.wordOptions ?? []
     const wordVotes: Record<string, number> = data.wordVotes ?? {}
+    const eligibleVoterSet = new Set(eligibleNonGuesserIds(data, game))
 
     // Tally votes
     const tally = [0, 0, 0]
-    for (const [, idx] of Object.entries(wordVotes)) {
+    for (const [playerId, idx] of Object.entries(wordVotes)) {
+      if (!eligibleVoterSet.has(playerId)) continue
       if (idx >= 0 && idx <= 2) tally[idx]++
     }
 
@@ -101,12 +106,25 @@ export async function runDeduplication(gameId: string, roundNum: number): Promis
     .collection('rounds')
     .doc(String(roundNum))
 
-  // Mark as deduplicating (so UI can show spinner)
-  await roundRef.update({ status: 'deduplication' })
+  const claimed = await firestore.runTransaction(async (tx) => {
+    const snap = await tx.get(roundRef)
+    if (!snap.exists) return false
+    if (snap.data()?.status !== 'clue-submission') return false
+    tx.update(roundRef, { status: 'deduplication' })
+    return true
+  })
+  if (!claimed) return
 
   const roundSnap = await roundRef.get()
   const roundData = roundSnap.data()!
-  const cluesByPlayer: Record<string, string> = roundData.cluesByPlayer ?? {}
+  const gameSnap = await firestore.collection('games').doc(gameId).get()
+  const game = gameSnap.data() ?? {}
+  const eligibleClueSet = new Set(getRoundEligiblePlayerIds(roundData, game))
+  if (game.currentGuesser) eligibleClueSet.delete(game.currentGuesser)
+  const cluesByPlayer = Object.fromEntries(
+    Object.entries(roundData.cluesByPlayer ?? {})
+      .filter(([playerId]) => eligibleClueSet.has(playerId)),
+  ) as Record<string, string>
   const secretWord: string = roundData.secretWord
 
   console.log('[runDeduplication] Game:', gameId, 'Round:', roundNum, 'Secret word:', secretWord)
@@ -144,7 +162,7 @@ export async function runDeduplication(gameId: string, roundNum: number): Promis
   const maxAttempts = Math.max(3, Math.min(MAX_ATTEMPTS, Math.max(1, clueGroups.length)))
   const currentAttempt = 1
   const guesserId: string = await getGuesserId(gameId)
-  const giverCount: number = await getGiverCount(gameId)
+  const giverCount: number = await getGiverCount(gameId, roundNum)
 
   const rawTimestamps = roundSnap.data()?.clueTimestamps ?? {}
   const clueTimestamps = normalizeTimestamps(rawTimestamps)
@@ -219,7 +237,7 @@ export async function handleGuess(
 
   const isCorrect = await evaluateGuess(secretWord, guess)
   const clueTimestamps = normalizeTimestamps(roundData.clueTimestamps ?? {})
-  const giverCount = await getGiverCount(gameId)
+  const giverCount = await getGiverCount(gameId, roundNum)
 
   // ── Path 1: Correct ─────────────────────────────────────────────
   if (isCorrect) {
@@ -346,55 +364,80 @@ export async function skipToNextAttempt(gameId: string, roundNum: number): Promi
     .collection('rounds')
     .doc(String(roundNum))
 
-  const roundSnap = await roundRef.get()
-  if (!roundSnap.exists) throw new Error('Round not found')
-  const roundData = roundSnap.data()!
-
-  // Only allowed when there are no visible clues
-  const visibleGroupIndexes: number[] = roundData.visibleGroupIndexes ?? []
-  if (visibleGroupIndexes.length > 0) throw new Error('Cannot skip — there are visible clues')
-
-  const clueGroups = (roundData.clueGroups ?? []) as ClueGroup[]
-  const currentAttempt: number = roundData.currentAttempt ?? 1
-  const maxAttempts: number = roundData.maxAttempts ?? 1
-  const guesserId: string = await getGuesserId(gameId)
-  const giverCount: number = await getGiverCount(gameId)
-  const clueTimestamps = normalizeTimestamps(roundData.clueTimestamps ?? {})
-  const playerScores = await fetchPlayerScores(gameId)
-
-  const nextUnlockIdx = selectNextUnlockGroup(
-    clueGroups,
-    visibleGroupIndexes,
-    playerScores,
-    clueTimestamps,
-  )
-
-  if (nextUnlockIdx < 0) {
-    // Nothing to unlock — end the round with zero scores
-    const scores = computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, false, currentAttempt, clueTimestamps, giverCount)
-    await roundRef.update({
-      status: 'scored',
-      isCorrect: false,
-      pointsThisRound: scores,
-      tentativePoints: scores,
-    })
-    return
-  }
-
-  const newVisible = [nextUnlockIdx]
-  const newAttempt = currentAttempt + 1
-  const newTentative = computeTentativePoints(clueGroups, newVisible, guesserId, newAttempt, clueTimestamps, giverCount)
-  const newDeadline = Timestamp.fromMillis(Date.now() + getSecondsForAttempt(newAttempt) * 1000)
-
-  await roundRef.update({
-    status: 'reveal',
-    currentAttempt: Math.min(newAttempt, maxAttempts),
-    visibleGroupIndexes: newVisible,
-    tentativePoints: newTentative,
-    attemptDeadline: newDeadline,
-    lastUnlockedGroupIndex: nextUnlockIdx,
-    attemptInProgress: false,
+  const claimed = await firestore.runTransaction(async (tx) => {
+    const snap = await tx.get(roundRef)
+    if (!snap.exists) return false
+    const data = snap.data()!
+    if (data.status !== 'reveal' && data.status !== 'guess') return false
+    if (data.attemptInProgress === true) return false
+    const visibleGroupIndexes: number[] = data.visibleGroupIndexes ?? []
+    if (visibleGroupIndexes.length > 0) return false
+    tx.update(roundRef, { attemptInProgress: true })
+    return true
   })
+  if (!claimed) return
+
+  try {
+    const roundSnap = await roundRef.get()
+    if (!roundSnap.exists) {
+      await roundRef.update({ attemptInProgress: false }).catch(() => {})
+      return
+    }
+    const roundData = roundSnap.data()!
+
+    // Only allowed when there are no visible clues
+    const visibleGroupIndexes: number[] = roundData.visibleGroupIndexes ?? []
+    if (visibleGroupIndexes.length > 0) {
+      await roundRef.update({ attemptInProgress: false })
+      return
+    }
+
+    const clueGroups = (roundData.clueGroups ?? []) as ClueGroup[]
+    const currentAttempt: number = roundData.currentAttempt ?? 1
+    const maxAttempts: number = roundData.maxAttempts ?? 1
+    const guesserId: string = await getGuesserId(gameId)
+    const giverCount: number = await getGiverCount(gameId, roundNum)
+    const clueTimestamps = normalizeTimestamps(roundData.clueTimestamps ?? {})
+    const playerScores = await fetchPlayerScores(gameId)
+
+    const nextUnlockIdx = selectNextUnlockGroup(
+      clueGroups,
+      visibleGroupIndexes,
+      playerScores,
+      clueTimestamps,
+    )
+
+    if (nextUnlockIdx < 0) {
+      // Nothing to unlock — end the round with zero scores
+      const scores = computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, false, currentAttempt, clueTimestamps, giverCount)
+      await roundRef.update({
+        status: 'scored',
+        isCorrect: false,
+        pointsThisRound: scores,
+        tentativePoints: scores,
+        attemptInProgress: false,
+      })
+      return
+    }
+
+    const newVisible = [nextUnlockIdx]
+    const newAttempt = currentAttempt + 1
+    const newTentative = computeTentativePoints(clueGroups, newVisible, guesserId, newAttempt, clueTimestamps, giverCount)
+    const newDeadline = Timestamp.fromMillis(Date.now() + getSecondsForAttempt(newAttempt) * 1000)
+
+    await roundRef.update({
+      status: 'reveal',
+      currentAttempt: Math.min(newAttempt, maxAttempts),
+      visibleGroupIndexes: newVisible,
+      tentativePoints: newTentative,
+      attemptDeadline: newDeadline,
+      lastUnlockedGroupIndex: nextUnlockIdx,
+      attemptInProgress: false,
+    })
+  } catch (err) {
+    await roundRef.update({ attemptInProgress: false }).catch(() => {})
+    throw err
+  }
 }
 
 /**
@@ -403,69 +446,93 @@ export async function skipToNextAttempt(gameId: string, roundNum: number): Promi
 export async function advanceToNextRound(gameId: string): Promise<void> {
   const firestore = db()
   const gameRef = firestore.collection('games').doc(gameId)
-  const gameSnap = await gameRef.get()
-  const game = gameSnap.data()!
-
-  const totalRounds: number = game.settings?.totalRounds ?? 10
-  const currentRound: number = game.currentRound ?? 0
-
-  if (currentRound >= totalRounds) {
-    await gameRef.update({ status: 'finished' })
-    return
-  }
-
-  const cardsRemaining: string[] = [...(game.cardsRemaining ?? [])]
-
-  // Draw 3 words for voting; if fewer than 3 remain, use what we have
-  const wordOptions: string[] = []
-  for (let i = 0; i < 3 && cardsRemaining.length > 0; i++) {
-    wordOptions.push(cardsRemaining.shift()!)
-  }
-
-  if (wordOptions.length === 0) {
-    await gameRef.update({ status: 'finished' })
-    return
-  }
-
-  const nextRoundNum = currentRound + 1
-
-  // Rotate guesser
-  const playerIds: string[] = game.playerIds ?? []
-  const currentGuesserIdx = playerIds.indexOf(game.currentGuesser)
-  const nextGuesserIdx = (currentGuesserIdx + 1) % playerIds.length
-  const nextGuesser = playerIds[nextGuesserIdx]
-
-  const wordSelectionDeadline = Timestamp.fromMillis(Date.now() + WORD_SELECTION_SECONDS * 1000)
-
-  await gameRef.collection('rounds').doc(String(nextRoundNum)).set({
-    secretWord: '',           // set after word selection
-    wordOptions,
-    wordVotes: {},
-    wordSelectionDeadline,
-    status: 'word-selection',
-    currentAttempt: 1,
-    maxAttempts: 1,
-    attemptInProgress: false,
-    cluesByPlayer: {},
-    clueTimestamps: {},
-    clueGroups: [],
-    visibleGroupIndexes: [],
-    guessAttempts: [],
-    tentativePoints: {},
-    pointsThisRound: {},
-    eliminationReason: '',
-    cluePeerLoveVotes: {},
-    cluePeerBooVotes: {},
-    guesserMostHelpfulVote: null,
-    guesserBooVote: null,
-    eligiblePlayerCount: playerIds.length,
+  const claimed = await firestore.runTransaction(async (tx) => {
+    const gameSnap = await tx.get(gameRef)
+    if (!gameSnap.exists) return false
+    const game = gameSnap.data()!
+    const currentRound: number = game.currentRound ?? 0
+    if (game.status !== 'playing') return false
+    if (game.advanceInProgress === currentRound) return false
+    const roundRef = gameRef.collection('rounds').doc(String(currentRound))
+    const roundSnap = await tx.get(roundRef)
+    if (!roundSnap.exists || roundSnap.data()?.status !== 'scored') return false
+    tx.update(gameRef, { advanceInProgress: currentRound })
+    return true
   })
+  if (!claimed) return
 
-  await gameRef.update({
-    currentRound: nextRoundNum,
-    currentGuesser: nextGuesser,
-    cardsRemaining,
-  })
+  try {
+    const gameSnap = await gameRef.get()
+    const game = gameSnap.data()!
+
+    const totalRounds: number = game.settings?.totalRounds ?? 10
+    const currentRound: number = game.currentRound ?? 0
+
+    if (currentRound >= totalRounds) {
+      await gameRef.update({ status: 'finished', advanceInProgress: FieldValue.delete() })
+      return
+    }
+
+    const cardsRemaining: string[] = [...(game.cardsRemaining ?? [])]
+
+    // Draw 3 words for voting; if fewer than 3 remain, use what we have
+    const wordOptions: string[] = []
+    for (let i = 0; i < 3 && cardsRemaining.length > 0; i++) {
+      wordOptions.push(cardsRemaining.shift()!)
+    }
+
+    if (wordOptions.length === 0) {
+      await gameRef.update({ status: 'finished', advanceInProgress: FieldValue.delete() })
+      return
+    }
+
+    const nextRoundNum = currentRound + 1
+
+    // Rotate guesser
+    const playerIds: string[] = [...(game.playerIds ?? [])]
+    const currentGuesserIdx = playerIds.indexOf(game.currentGuesser)
+    const nextGuesserIdx = currentGuesserIdx >= 0
+      ? (currentGuesserIdx + 1) % playerIds.length
+      : 0
+    const nextGuesser = playerIds[nextGuesserIdx]
+
+    const wordSelectionDeadline = Timestamp.fromMillis(Date.now() + WORD_SELECTION_SECONDS * 1000)
+
+    await gameRef.collection('rounds').doc(String(nextRoundNum)).set({
+      secretWord: '',           // set after word selection
+      wordOptions,
+      wordVotes: {},
+      wordSelectionDeadline,
+      status: 'word-selection',
+      currentAttempt: 1,
+      maxAttempts: 1,
+      attemptInProgress: false,
+      cluesByPlayer: {},
+      clueTimestamps: {},
+      clueGroups: [],
+      visibleGroupIndexes: [],
+      guessAttempts: [],
+      tentativePoints: {},
+      pointsThisRound: {},
+      eliminationReason: '',
+      cluePeerLoveVotes: {},
+      cluePeerBooVotes: {},
+      guesserMostHelpfulVote: null,
+      guesserBooVote: null,
+      eligiblePlayerIds: playerIds,
+      eligiblePlayerCount: playerIds.length,
+    })
+
+    await gameRef.update({
+      currentRound: nextRoundNum,
+      currentGuesser: nextGuesser,
+      cardsRemaining,
+      advanceInProgress: FieldValue.delete(),
+    })
+  } catch (err) {
+    await gameRef.update({ advanceInProgress: FieldValue.delete() }).catch(() => {})
+    throw err
+  }
 }
 
 // ── helpers ────────────────────────────────────────────────────────
@@ -476,11 +543,16 @@ async function getGuesserId(gameId: string): Promise<string> {
   return (gameSnap.data()?.currentGuesser as string) ?? ''
 }
 
-async function getGiverCount(gameId: string): Promise<number> {
+async function getGiverCount(gameId: string, roundNum: number): Promise<number> {
   const firestore = db()
-  const gameSnap = await firestore.collection('games').doc(gameId).get()
-  const playerIds: string[] = gameSnap.data()?.playerIds ?? []
-  return Math.max(0, playerIds.length - 1) // total players minus the guesser
+  const gameRef = firestore.collection('games').doc(gameId)
+  const [gameSnap, roundSnap] = await Promise.all([
+    gameRef.get(),
+    gameRef.collection('rounds').doc(String(roundNum)).get(),
+  ])
+  const game = gameSnap.data() ?? {}
+  const round = roundSnap.data() ?? {}
+  return Math.max(0, getRoundEligiblePlayerIds(round, game).length - 1)
 }
 
 async function fetchPlayerScores(gameId: string): Promise<Record<string, number>> {

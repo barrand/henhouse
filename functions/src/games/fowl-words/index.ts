@@ -2,6 +2,7 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import * as admin from 'firebase-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import { claimRoomCode, releaseRoomCode } from '../../shared/roomCodes'
+import { eligibleNonGuesserIds, isRoundEligible } from '../../shared/roundEligibility'
 import { runDeduplication, handleGuess, advanceToNextRound, skipToNextAttempt, finalizeWordSelection } from './roundFlow'
 import { mostHelpfulSplitPts } from './peerLove'
 import {
@@ -162,6 +163,7 @@ export const fowlWordsStartGame = onCall(async (request) => {
 
   // Batch write so round doc and game status change are atomic — clients can't
   // see game.status === 'playing' without the round document already existing.
+  const eligiblePlayerIds = [...game.playerIds]
   const batch = firestore.batch()
   batch.set(gameRef.collection('rounds').doc('1'), {
     secretWord: '',
@@ -184,7 +186,8 @@ export const fowlWordsStartGame = onCall(async (request) => {
     cluePeerBooVotes: {},
     guesserMostHelpfulVote: null,
     guesserBooVote: null,
-    eligiblePlayerCount: game.playerIds.length,
+    eligiblePlayerIds,
+    eligiblePlayerCount: eligiblePlayerIds.length,
   })
   batch.update(gameRef, {
     status: 'playing',
@@ -210,6 +213,7 @@ export const submitClue = onCall(async (request) => {
 
   const [gameSnap, roundSnap] = await Promise.all([gameRef.get(), roundRef.get()])
 
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
   const game = gameSnap.data()!
   if (game.status === 'abandoned') throw new HttpsError('failed-precondition', 'Game has ended')
@@ -221,8 +225,16 @@ export const submitClue = onCall(async (request) => {
   }
 
   const roundData = roundSnap.data()!
+  if (!isRoundEligible(roundData, game, uid)) {
+    throw new HttpsError('permission-denied', 'You will join next round')
+  }
   const secretWord = roundData.secretWord?.toLowerCase().trim() ?? ''
   const normalizedClue = clue.trim().toLowerCase()
+
+  const clueDeadline = roundData.clueSubmissionDeadline?.toDate?.()
+  if (clueDeadline && Date.now() > clueDeadline.getTime()) {
+    throw new HttpsError('deadline-exceeded', 'Time is up')
+  }
 
   // Check if clue is a substring of the secret word
   if (secretWord && secretWord.includes(normalizedClue)) {
@@ -241,10 +253,13 @@ export const submitClue = onCall(async (request) => {
 
   // Check if all eligible non-guesser players have submitted
   // Use eligiblePlayerCount snapshotted at round creation so late joiners don't block dedup
-  const playersSnap = await gameRef.collection('players').get()
-  const nonGuesserCount = (roundSnap.data()!.eligiblePlayerCount ?? playersSnap.docs.length) - 1
+  const eligibleGiverIds = eligibleNonGuesserIds(roundData, game)
+  const eligibleGiverSet = new Set(eligibleGiverIds)
+  const nonGuesserCount = eligibleGiverIds.length
   const updatedRound = await roundRef.get()
-  const cluesCount = Object.keys(updatedRound.data()!.cluesByPlayer ?? {}).length
+  const cluesCount = Object.keys(updatedRound.data()!.cluesByPlayer ?? {})
+    .filter((playerId) => eligibleGiverSet.has(playerId))
+    .length
 
   if (cluesCount >= nonGuesserCount && nonGuesserCount > 0) {
     // All clues in — run dedup
@@ -262,11 +277,19 @@ export const submitGuess = onCall(async (request) => {
   if (guess.trim().length > 100) throw new HttpsError('invalid-argument', 'Guess too long')
 
   const firestore = db()
-  const gameSnap = await firestore.collection('games').doc(gameId).get()
+  const gameRef = firestore.collection('games').doc(gameId)
+  const roundRef = gameRef.collection('rounds').doc(String(roundNum))
+  const [gameSnap, roundSnap] = await Promise.all([gameRef.get(), roundRef.get()])
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+  if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
   const game = gameSnap.data()!
+  const round = roundSnap.data()!
 
   if (game.currentGuesser !== uid) {
     throw new HttpsError('permission-denied', 'Only the guesser can submit a guess')
+  }
+  if (!isRoundEligible(round, game, uid)) {
+    throw new HttpsError('permission-denied', 'You will join next round')
   }
 
   await handleGuess(gameId, roundNum, uid, guess)
@@ -297,6 +320,7 @@ export const fowlWordsSubmitWordVote = onCall(async (request) => {
 
   const firestore = db()
   const gameSnap = await firestore.collection('games').doc(gameId).get()
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
 
   // Guessers can't vote
@@ -305,16 +329,21 @@ export const fowlWordsSubmitWordVote = onCall(async (request) => {
   const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
   const roundSnap = await roundRef.get()
   if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
-  if (roundSnap.data()!.status !== 'word-selection') throw new HttpsError('failed-precondition', 'Not in word-selection phase')
+  const round = roundSnap.data()!
+  if (!isRoundEligible(round, game, uid)) throw new HttpsError('permission-denied', 'You will join next round')
+  if (round.status !== 'word-selection') throw new HttpsError('failed-precondition', 'Not in word-selection phase')
 
   await roundRef.update({ [`wordVotes.${uid}`]: wordIndex })
 
   // Auto-finalize if all eligible non-guessers have voted
   // Use eligiblePlayerCount snapshotted at round creation so late joiners don't block finalization
-  const playersSnap = await firestore.collection('games').doc(gameId).collection('players').get()
-  const nonGuesserCount = (roundSnap.data()!.eligiblePlayerCount ?? playersSnap.docs.length) - 1
+  const eligibleGiverIds = eligibleNonGuesserIds(round, game)
+  const eligibleGiverSet = new Set(eligibleGiverIds)
+  const nonGuesserCount = eligibleGiverIds.length
   const updatedRound = await roundRef.get()
-  const voteCount = Object.keys(updatedRound.data()!.wordVotes ?? {}).length
+  const voteCount = Object.keys(updatedRound.data()!.wordVotes ?? {})
+    .filter((playerId) => eligibleGiverSet.has(playerId))
+    .length
 
   if (voteCount >= nonGuesserCount && nonGuesserCount > 0) {
     await finalizeWordSelection(gameId, roundNum)
@@ -339,10 +368,15 @@ export const fowlWordsUnlockFirst = onCall(async (request) => {
   const firestore = db()
   const gameSnap = await firestore.collection('games').doc(gameId).get()
   const game = gameSnap.data()!
+  const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
+  const roundSnap = await roundRef.get()
+  if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
+  const round = roundSnap.data()!
 
   if (game.currentGuesser !== uid) {
     throw new HttpsError('permission-denied', 'Only the guesser can unlock the first clue')
   }
+  if (!isRoundEligible(round, game, uid)) throw new HttpsError('permission-denied', 'You will join next round')
 
   await skipToNextAttempt(gameId, roundNum)
 })
@@ -367,6 +401,7 @@ export const fowlWordsSubmitCluePeerLove = onCall(async (request) => {
   const roundSnap = await roundRef.get()
   if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
   const round = roundSnap.data()!
+  if (!isRoundEligible(round, game, uid)) throw new HttpsError('permission-denied', 'You will join next round')
 
   if (round.status !== 'reveal' && round.status !== 'guess') {
     throw new HttpsError('failed-precondition', 'Peer love can only be given during reveal/guess phase')
@@ -436,6 +471,7 @@ export const fowlWordsSubmitGuesserMostHelpful = onCall(async (request) => {
     const roundSnap = await tx.get(roundRef)
     if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
     const round = roundSnap.data()!
+    if (!isRoundEligible(round, game, uid)) throw new HttpsError('permission-denied', 'You will join next round')
 
     if (round.status !== 'scored') throw new HttpsError('failed-precondition', 'Round not yet scored')
     if (!round.isCorrect) throw new HttpsError('failed-precondition', 'Most Helpful only available after a correct guess')
@@ -506,6 +542,7 @@ export const fowlWordsSubmitCluePeerBoo = onCall(async (request) => {
   const roundSnap = await roundRef.get()
   if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
   const round = roundSnap.data()!
+  if (!isRoundEligible(round, game, uid)) throw new HttpsError('permission-denied', 'You will join next round')
 
   if (round.status !== 'reveal' && round.status !== 'guess') {
     throw new HttpsError('failed-precondition', 'Boo can only be given during reveal/guess phase')
@@ -571,6 +608,7 @@ export const fowlWordsSubmitGuesserBoo = onCall(async (request) => {
   const roundSnap = await roundRef.get()
   if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
   const round = roundSnap.data()!
+  if (!isRoundEligible(round, game, uid)) throw new HttpsError('permission-denied', 'You will join next round')
 
   if (round.status !== 'scored') throw new HttpsError('failed-precondition', 'Round not yet scored')
 

@@ -6,6 +6,7 @@ import { groupAnswersWithGemini, generateQuestionsFromCategories, GeminiGroupRes
 import { drawQuestion, seedQuestionPool, questionKey } from './questions'
 import { claimRoomCode, releaseRoomCode } from '../../shared/roomCodes'
 import { normalizeAnswer, fallbackGrouping, validateGeminiGroups } from '../../shared/normalizeAnswer'
+import { getRoundEligiblePlayerIds, isRoundEligible } from '../../shared/roundEligibility'
 
 const db = admin.firestore()
 const TOTAL_ROUNDS = 10
@@ -163,6 +164,8 @@ export const flockStartGame = onCall(async (request) => {
 
   const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
 
+  const eligiblePlayerIds = [...game.playerIds]
+
   await gameRef.collection('rounds').doc('1').set({
     question: question.text,
     source: question.source,
@@ -179,7 +182,8 @@ export const flockStartGame = onCall(async (request) => {
     flockAnswer: [],
     results: {},
     pointsThisRound: {},
-    eligiblePlayerCount: game.playerIds.length,
+    eligiblePlayerIds,
+    eligiblePlayerCount: eligiblePlayerIds.length,
   })
 
   await gameRef.update({ status: 'playing', currentRound: 1 })
@@ -193,11 +197,15 @@ export const submitAnswer = onCall(async (request) => {
   const { gameId, roundNum, answer } = request.data as { gameId: string; roundNum: number; answer: string }
   if (!answer?.trim()) throw new HttpsError('invalid-argument', 'Answer required')
 
-  const roundRef = db.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
-  const roundSnap = await roundRef.get()
+  const gameRef = db.collection('games').doc(gameId)
+  const roundRef = gameRef.collection('rounds').doc(String(roundNum))
+  const [gameSnap, roundSnap] = await Promise.all([gameRef.get(), roundRef.get()])
   if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+  const game = gameSnap.data()!
   const roundData = roundSnap.data()!
   if (roundData.status !== 'answering') throw new HttpsError('failed-precondition', 'Round not accepting answers')
+  if (!isRoundEligible(roundData, game, uid)) throw new HttpsError('permission-denied', 'You will join next round')
 
   const deadline = roundData.deadline?.toDate()
   if (deadline && Date.now() > deadline.getTime()) {
@@ -220,13 +228,16 @@ export const submitAnswer = onCall(async (request) => {
       text: trimmed,
       submittedAt: FieldValue.serverTimestamp(),
     })
-  } catch (err: any) {
-    if (err?.code !== 6 && err?.code !== 'already-exists') throw err
+  } catch (err: unknown) {
+    const code = typeof err === 'object' && err !== null && 'code' in err
+      ? (err as { code?: unknown }).code
+      : undefined
+    if (code !== 6 && code !== 'already-exists') throw err
   }
 
-  const answerState = await syncRoundAnswerState(roundRef)
-  const gameSnap = await db.collection('games').doc(gameId).get()
-  const playerCount = roundData.eligiblePlayerCount ?? gameSnap.data()!.playerIds.length
+  const eligiblePlayerIds = getRoundEligiblePlayerIds(roundData, game)
+  const answerState = await syncRoundAnswerState(roundRef, eligiblePlayerIds)
+  const playerCount = eligiblePlayerIds.length
 
   if (answerState.count >= playerCount) {
     await triggerScoring(gameId, roundNum)
@@ -393,6 +404,7 @@ export const flockAdvanceRound = onCall(async (request) => {
 
   const { gameId } = request.data as { gameId: string }
   const gameSnap = await db.collection('games').doc(gameId).get()
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   if (gameSnap.data()!.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can advance')
 
   await doAdvanceRound(gameId)
@@ -405,22 +417,26 @@ export const forceEndRound = onCall(async (request) => {
 
   const { gameId } = request.data as { gameId: string }
   const gameSnap = await db.collection('games').doc(gameId).get()
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   if (gameSnap.data()!.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can end round')
 
   const roundNum = gameSnap.data()!.currentRound
   const roundRef = db.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
   const roundSnap = await roundRef.get()
 
-  if (roundSnap.data()!.status !== 'answering') return
+  if (!roundSnap.exists || roundSnap.data()!.status !== 'answering') return
 
   await triggerScoring(gameId, roundNum)
 })
 
 // -- INTERNAL HELPERS --
 
-async function syncRoundAnswerState(roundRef: FirebaseFirestore.DocumentReference) {
+async function syncRoundAnswerState(roundRef: FirebaseFirestore.DocumentReference, eligiblePlayerIds?: string[]) {
   const answersSnap = await roundRef.collection('answers').get()
-  const answeredPlayerIds = answersSnap.docs.map((doc) => doc.id)
+  const eligibleSet = eligiblePlayerIds ? new Set(eligiblePlayerIds) : null
+  const answeredPlayerIds = answersSnap.docs
+    .map((doc) => doc.id)
+    .filter((id) => !eligibleSet || eligibleSet.has(id))
   await roundRef.update({
     answerCount: answeredPlayerIds.length,
     answeredPlayerIds,
@@ -439,20 +455,23 @@ async function triggerScoring(gameId: string, roundNum: number) {
   })
   if (!claimed) return
 
-  const answersSnap = await roundRef.collection('answers').get()
-  const rawAnswers: Record<string, string> = {}
-  const normalizedAnswers: Record<string, string> = {}
-  answersSnap.docs.forEach((d) => {
-    rawAnswers[d.id] = d.data().text
-    normalizedAnswers[d.id] = normalizeAnswer(d.data().text)
-  })
-
   const roundSnap = await roundRef.get()
   const roundData = roundSnap.data()!
   const questionText = roundData.question
   const roundType: 'open' | 'multiple_choice' = roundData.type === 'multiple_choice' ? 'multiple_choice' : 'open'
   const gameSnap = await db.collection('games').doc(gameId).get()
   const game = gameSnap.data()!
+  const eligiblePlayerIds = getRoundEligiblePlayerIds(roundData, game)
+  const eligibleSet = new Set(eligiblePlayerIds)
+
+  const answersSnap = await roundRef.collection('answers').get()
+  const rawAnswers: Record<string, string> = {}
+  const normalizedAnswers: Record<string, string> = {}
+  answersSnap.docs.forEach((d) => {
+    if (!eligibleSet.has(d.id)) return
+    rawAnswers[d.id] = d.data().text
+    normalizedAnswers[d.id] = normalizeAnswer(d.data().text)
+  })
 
   const normalizedValues = Object.values(normalizedAnswers)
   const uniqueNormalized = [...new Set(normalizedValues)]
@@ -484,7 +503,7 @@ async function triggerScoring(gameId: string, roundNum: number) {
   const scoring: ScoringResult = scoreRoundAnswers(
     normalizedAnswers,
     groups,
-    game.playerIds,
+    eligiblePlayerIds,
   )
 
   const hasFlock = Object.values(scoring.results).some((r) => r === 'flock')
@@ -546,54 +565,80 @@ async function triggerScoring(gameId: string, roundNum: number) {
 
 async function doAdvanceRound(gameId: string) {
   const gameRef = db.collection('games').doc(gameId)
-  const gameSnap = await gameRef.get()
-  const game = gameSnap.data()!
-
-  const nextRound = game.currentRound + 1
-  if (nextRound > game.settings.totalRounds) {
-    await gameRef.update({ status: 'finished' })
-    return
-  }
-
-  const recentTags: string[] = []
-  for (let r = Math.max(1, game.currentRound - 4); r <= game.currentRound; r++) {
-    const roundDoc = await gameRef.collection('rounds').doc(String(r)).get()
-    const tag = roundDoc.data()?.tag
-    if (tag) recentTags.push(tag)
-  }
-
-  const question = await drawQuestion(
-    gameId,
-    recentTags,
-    shouldDrawPatrioticQuestion(nextRound, game.includePatrioticQuestions ?? false),
-  )
-  if (!question) {
-    await gameRef.update({ status: 'finished' })
-    return
-  }
-
-  const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
-
-  await gameRef.collection('rounds').doc(String(nextRound)).set({
-    question: question.text,
-    source: question.source,
-    tag: question.tag ?? null,
-    submittedBy: question.submittedBy ?? null,
-    questionPoolId: question.poolDocId,
-    type: question.type,
-    options: question.options,
-    status: 'answering',
-    deadline: Timestamp.fromDate(deadline),
-    answerCount: 0,
-    answeredPlayerIds: [],
-    answerGroups: [],
-    flockAnswer: [],
-    results: {},
-    pointsThisRound: {},
-    eligiblePlayerCount: game.playerIds.length,
+  const claimed = await db.runTransaction(async (tx) => {
+    const gameSnap = await tx.get(gameRef)
+    if (!gameSnap.exists) return false
+    const game = gameSnap.data()!
+    const currentRound = game.currentRound ?? 0
+    if (game.status !== 'playing') return false
+    if (game.advanceInProgress === currentRound) return false
+    const roundRef = gameRef.collection('rounds').doc(String(currentRound))
+    const roundSnap = await tx.get(roundRef)
+    if (!roundSnap.exists || roundSnap.data()?.status !== 'scored') return false
+    tx.update(gameRef, { advanceInProgress: currentRound })
+    return true
   })
+  if (!claimed) return
 
-  await gameRef.update({ currentRound: nextRound })
+  try {
+    const gameSnap = await gameRef.get()
+    const game = gameSnap.data()!
+
+    const nextRound = game.currentRound + 1
+    if (nextRound > game.settings.totalRounds) {
+      await gameRef.update({ status: 'finished', advanceInProgress: FieldValue.delete() })
+      return
+    }
+
+    const recentTags: string[] = []
+    for (let r = Math.max(1, game.currentRound - 4); r <= game.currentRound; r++) {
+      const roundDoc = await gameRef.collection('rounds').doc(String(r)).get()
+      const tag = roundDoc.data()?.tag
+      if (tag) recentTags.push(tag)
+    }
+
+    const question = await drawQuestion(
+      gameId,
+      recentTags,
+      shouldDrawPatrioticQuestion(nextRound, game.includePatrioticQuestions ?? false),
+    )
+    if (!question) {
+      await gameRef.update({ status: 'finished', advanceInProgress: FieldValue.delete() })
+      return
+    }
+
+    const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
+
+    const eligiblePlayerIds = [...(game.playerIds ?? [])]
+
+    await gameRef.collection('rounds').doc(String(nextRound)).set({
+      question: question.text,
+      source: question.source,
+      tag: question.tag ?? null,
+      submittedBy: question.submittedBy ?? null,
+      questionPoolId: question.poolDocId,
+      type: question.type,
+      options: question.options,
+      status: 'answering',
+      deadline: Timestamp.fromDate(deadline),
+      answerCount: 0,
+      answeredPlayerIds: [],
+      answerGroups: [],
+      flockAnswer: [],
+      results: {},
+      pointsThisRound: {},
+      eligiblePlayerIds,
+      eligiblePlayerCount: eligiblePlayerIds.length,
+    })
+
+    await gameRef.update({
+      currentRound: nextRound,
+      advanceInProgress: FieldValue.delete(),
+    })
+  } catch (err) {
+    await gameRef.update({ advanceInProgress: FieldValue.delete() }).catch(() => {})
+    throw err
+  }
 }
 
 // -- ABANDON GAME (Flock Together) --

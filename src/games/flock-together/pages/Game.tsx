@@ -5,6 +5,7 @@ import { db } from '../../../lib/firebase'
 import { useAuth, useCurrentPlayer, useIsHost } from '../../../hooks/usePlayer'
 import { useGame, useRound } from '../hooks/useGame'
 import { setupPresence } from '../../../lib/presence'
+import { getEligiblePlayers, isCurrentPlayerWaiting } from '@shared/roundEligibility'
 import Lobby from '../components/Lobby'
 import GameHeader from '../components/GameHeader'
 import QuestionDisplay from '../components/QuestionDisplay'
@@ -22,6 +23,8 @@ export default function Game() {
   const round = useRound(gameId, game?.currentRound ?? null)
   const currentPlayer = useCurrentPlayer(players, uid)
   const isHost = useIsHost(game?.hostId, uid)
+  const eligiblePlayers = getEligiblePlayers(round, players)
+  const isWaitingForNextRound = isCurrentPlayerWaiting(round, uid)
 
   useEffect(() => {
     if (!code) return
@@ -109,6 +112,29 @@ export default function Game() {
 
   if (game.status === 'abandoned') return null
 
+  if (round && isWaitingForNextRound) {
+    return (
+      <div className="min-h-screen flex flex-col bg-surface linen-texture">
+        <GameHeader
+          game={game}
+          players={players}
+          currentPlayer={currentPlayer}
+          round={round}
+          isHost={isHost}
+        />
+        <main className="flex-1 flex items-center justify-center px-6 py-10">
+          <div className="max-w-md text-center space-y-4">
+            <img src="/images/generated-comic/hen-thinking.png" alt="" className="w-24 h-24 mx-auto animate-hen-bob" />
+            <h2 className="font-headline text-3xl font-bold text-on-surface">You&apos;re in!</h2>
+            <p className="text-on-surface-variant font-body">
+              This question already started, so you&apos;ll join on the next one.
+            </p>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-surface linen-texture">
       <GameHeader
@@ -124,7 +150,8 @@ export default function Game() {
           game={game}
           round={round}
           isHost={isHost}
-          players={players}
+          players={eligiblePlayers}
+          currentPlayerId={uid}
         />
       )}
 
@@ -132,7 +159,7 @@ export default function Game() {
         <RevealBoard
           game={game}
           round={round}
-          players={players}
+          players={eligiblePlayers}
           isHost={isHost}
           currentPlayerId={uid}
         />

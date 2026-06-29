@@ -5,6 +5,7 @@ import { db } from '../../../lib/firebase'
 import { useAuth, useCurrentPlayer, useIsHost } from '../../../hooks/usePlayer'
 import { useGame, useRound } from '../hooks/useGame'
 import { setupPresence } from '../../../lib/presence'
+import { getEligiblePlayers, isCurrentPlayerWaiting } from '@shared/roundEligibility'
 import Lobby from '../components/Lobby'
 import GameHeader from '../components/GameHeader'
 import WordSelectionView from '../components/WordSelectionView'
@@ -26,6 +27,8 @@ export default function Game() {
   const round = useRound(gameId, game?.currentRound ?? null)
   const currentPlayer = useCurrentPlayer(players, uid)
   const isHost = useIsHost(game?.hostId, uid)
+  const eligiblePlayers = getEligiblePlayers(round, players)
+  const isWaitingForNextRound = isCurrentPlayerWaiting(round, uid)
 
   useEffect(() => {
     if (!code) return
@@ -115,6 +118,23 @@ export default function Game() {
 
   const isGuesser = game.currentGuesser === uid
 
+  if (round && isWaitingForNextRound) {
+    return (
+      <div className="min-h-screen flex flex-col bg-surface linen-texture">
+        <GameHeader game={game} players={players} round={round} currentPlayer={currentPlayer} isHost={isHost} />
+        <main className="flex-1 flex items-center justify-center px-6 py-10">
+          <div className="max-w-md text-center space-y-4">
+            <img src="/images/generated-comic/hen-thinking.png" alt="" className="w-24 h-24 mx-auto animate-hen-bob" />
+            <h2 className="font-headline text-3xl font-bold text-on-surface">You&apos;re in!</h2>
+            <p className="text-on-surface-variant font-body">
+              This round already started, so you&apos;ll join on the next one.
+            </p>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-surface linen-texture">
       <GameHeader game={game} players={players} round={round} currentPlayer={currentPlayer} isHost={isHost} />
@@ -123,7 +143,7 @@ export default function Game() {
         <WordSelectionView
           game={game}
           round={round}
-          players={players}
+          players={eligiblePlayers}
           isGuesser={isGuesser}
           isHost={isHost}
         />
@@ -133,7 +153,7 @@ export default function Game() {
         <ClueSubmissionView
           game={game}
           round={round}
-          players={players}
+          players={eligiblePlayers}
           currentPlayer={currentPlayer}
           isGuesser={isGuesser}
           isHost={isHost}
@@ -148,7 +168,7 @@ export default function Game() {
         <RevealView
           game={game}
           round={round}
-          players={players}
+          players={eligiblePlayers}
           currentPlayer={currentPlayer}
           isGuesser={isGuesser}
           isHost={isHost}
@@ -159,7 +179,7 @@ export default function Game() {
         <GuessView
           game={game}
           round={round}
-          players={players}
+          players={eligiblePlayers}
           isGuesser={isGuesser}
           currentPlayerId={uid}
         />
@@ -169,7 +189,7 @@ export default function Game() {
         <RoundResultView
           game={game}
           round={round}
-          players={players}
+          players={eligiblePlayers}
           isHost={isHost}
           currentPlayerId={uid}
         />

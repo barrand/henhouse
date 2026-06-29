@@ -28,6 +28,8 @@ export interface RoundData {
   deadline: { seconds: number; nanoseconds: number }
   answerCount: number
   answeredPlayerIds?: string[]
+  eligiblePlayerIds?: string[]
+  eligiblePlayerCount?: number
   answerGroups: string[]
   flockAnswer: string[]
   results: Record<string, RoundResult>
