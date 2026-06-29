@@ -157,7 +157,7 @@ class Reporter {
       reason,
       game: sanitizeGame(game),
       round: sanitizeRound(round),
-      players: players.map((player) => ({ id: player.id, name: player.name, score: player.score, eggs: player.eggs, connected: player.connected })),
+      players: players.map((player) => ({ id: player.id, name: player.name, score: player.score, connected: player.connected })),
     })
     fs.writeFileSync(this.snapshotsPath, JSON.stringify(this.snapshots, null, 2))
   }
@@ -172,7 +172,7 @@ class Reporter {
     const elapsedMs = endedAt - startedAt
     const roughCost = ((this.inputTokens / 1_000_000) * 0.10) + ((this.outputTokens / 1_000_000) * 0.40)
     const finalScores = players
-      .map((player) => `- ${player.name}: ${gameType === 'flock-together' ? `${player.eggs ?? 0} eggs` : `${player.score ?? 0} pts`}`)
+      .map((player) => `- ${player.name}: ${player.score ?? 0} pts`)
       .join('\n') || '- No players snapshot captured'
     const stuckPhases = this.errors.filter((event) => event.code === 'stuck-phase')
     const failedCalls = this.errors.filter((event) => event.callable)
@@ -224,7 +224,6 @@ function sanitizeGame(game) {
     status: game.status,
     currentRound: game.currentRound,
     currentGuesser: game.currentGuesser,
-    rottenEggHolder: game.rottenEggHolder,
     playerCount: game.playerIds?.length ?? 0,
     settings: game.settings,
   }

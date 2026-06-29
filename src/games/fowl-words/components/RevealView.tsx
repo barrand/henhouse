@@ -220,7 +220,7 @@ export default function RevealView({
 
         {allDuplicates && (
           <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-6 text-center space-y-4 shadow-sm">
-            <img src="/images/hen-embarrassed.svg" alt="" className="w-16 h-16 mx-auto" />
+            <img src="/images/generated-comic/hen-embarrassed.png" alt="" className="w-16 h-16 mx-auto" />
             <div>
               <p className="font-headline text-lg font-bold text-on-surface">Every clue matched</p>
               <p className="text-on-surface-variant text-sm mt-1 font-body">

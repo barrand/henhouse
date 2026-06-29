@@ -3,13 +3,12 @@
 import type { BaseGameData, PlayerData as SharedPlayerData, QuestionType } from '@shared/types'
 
 export interface GameData extends BaseGameData {
-  rottenEggHolder: string | null
   categories: string[]
   includePatrioticQuestions: boolean
 }
 
 export interface PlayerData extends SharedPlayerData {
-  eggs: number
+  score: number
 }
 
 export type RoundResult = 'flock' | 'outlier' | 'rotten' | 'no-answer'
@@ -32,6 +31,7 @@ export interface RoundData {
   answerGroups: string[]
   flockAnswer: string[]
   results: Record<string, RoundResult>
+  pointsThisRound: Record<string, number>
   playerAnswers?: Record<string, string>
   commentary?: string
 }

@@ -17,12 +17,12 @@ export const PREVIEW_PLAYERS: PlayerData[] = PREVIEW_PLAYER_NAMES.map((name, i) 
   id: `p${i + 1}`,
   name,
   connected: i !== 8, // Ivy disconnected
-  eggs: [6, 4, 2, 5, 3, 1, 4, 0, 2, 7][i],
+  score: [6, 4, 2, 5, 3, 1, 4, 0, 2, 7][i],
 }))
 
 const PLAYER_IDS = PREVIEW_PLAYERS.map((p) => p.id)
 const HOST_ID = 'p1'
-const ROTTEN_ID = 'p3'
+const LONE_ODD_ID = 'p3'
 
 const now = () => Math.floor(Date.now() / 1000)
 
@@ -37,7 +37,6 @@ function baseGame(overrides: Partial<GameData> = {}): GameData {
     currentRound: 7,
     playerIds: PLAYER_IDS,
     settings: { totalRounds: 10, secondsPerRound: 60 },
-    rottenEggHolder: ROTTEN_ID,
     categories: ['Movies', 'Food', 'Travel'],
     includePatrioticQuestions: false,
     ...overrides,
@@ -57,6 +56,7 @@ function baseRound(overrides: Partial<RoundData> = {}): RoundData {
     answerGroups: [],
     flockAnswer: [],
     results: {},
+    pointsThisRound: {},
     playerAnswers: {},
     ...overrides,
   }
@@ -88,10 +88,10 @@ export const FLOCK_PREVIEW_SCREENS: { id: FlockPreviewScreen; label: string }[] 
   { id: 'reveal-loading', label: 'Reveal (loading)' },
   { id: 'reveal-flock', label: 'Reveal (flock wins)' },
   { id: 'reveal-no-flock', label: 'Reveal (no flock)' },
-  { id: 'leaderboard', label: 'Pecking order modal' },
+  { id: 'leaderboard', label: 'Standings modal' },
   { id: 'game-over-winner', label: 'Game over (winner)' },
   { id: 'game-over-tie', label: 'Game over (tie)' },
-  { id: 'game-over-empty', label: 'Game over (no eggs)' },
+  { id: 'game-over-empty', label: 'Game over (no points)' },
   { id: 'game-over-waiting', label: 'Game over (waiting)' },
 ]
 
@@ -116,9 +116,9 @@ export function getFlockPreviewScenario(
   switch (screen) {
     case 'lobby':
       return {
-        game: baseGame({ status: 'lobby', currentRound: 0, rottenEggHolder: null }),
+        game: baseGame({ status: 'lobby', currentRound: 0 }),
         round: null,
-        players: players.map((p) => ({ ...p, eggs: 0 })),
+        players: players.map((p) => ({ ...p, score: 0 })),
         isHost,
         currentPlayerId: asPlayerId,
       }
@@ -208,12 +208,15 @@ export function getFlockPreviewScenario(
       const flockIds = ['p1', 'p2', 'p4', 'p7']
       const results = Object.fromEntries(
         PLAYER_IDS.map((id) => {
-          if (id === ROTTEN_ID) return [id, 'rotten']
+          if (id === LONE_ODD_ID) return [id, 'rotten']
           if (flockIds.includes(id)) return [id, 'flock']
           if (id === 'p6') return [id, 'no-answer']
           return [id, 'outlier']
         }),
       ) as Record<string, RoundData['results'][string]>
+      const pointsThisRound = Object.fromEntries(
+        PLAYER_IDS.map((id) => [id, results[id] === 'flock' ? 1 : results[id] === 'rotten' ? -1 : 0]),
+      ) as Record<string, number>
       const playerAnswers: Record<string, string> = {
         p1: 'Gift',
         p2: 'Gift',
@@ -232,6 +235,7 @@ export function getFlockPreviewScenario(
           status: 'scored',
           flockAnswer: ['Gift'],
           results,
+          pointsThisRound,
           playerAnswers,
           answeredPlayerIds: PLAYER_IDS.filter((id) => id !== 'p6'),
           answerCount: 9,
@@ -244,8 +248,6 @@ export function getFlockPreviewScenario(
     }
 
     case 'reveal-no-flock': {
-      // No majority → everyone is outlier; rotten egg only applies when there IS a flock
-      // and exactly one player answered alone (see functions scoring.ts).
       const results = Object.fromEntries(
         PLAYER_IDS.map((id) => [id, 'outlier']),
       ) as Record<string, RoundData['results'][string]>
@@ -267,6 +269,7 @@ export function getFlockPreviewScenario(
           status: 'scored',
           flockAnswer: [],
           results,
+          pointsThisRound: Object.fromEntries(PLAYER_IDS.map((id) => [id, 0])),
           playerAnswers,
           answeredPlayerIds: PLAYER_IDS,
           answerCount: 10,
@@ -303,7 +306,7 @@ export function getFlockPreviewScenario(
         game: baseGame({ status: 'finished', currentRound: 10 }),
         round: null,
         players: players.map((p) =>
-          p.id === 'p2' || p.id === 'p10' ? { ...p, eggs: 7 } : { ...p, eggs: Math.min(p.eggs, 3) },
+          p.id === 'p2' || p.id === 'p10' ? { ...p, score: 7 } : { ...p, score: Math.min(p.score, 3) },
         ),
         isHost,
         currentPlayerId: asPlayerId,
@@ -314,7 +317,7 @@ export function getFlockPreviewScenario(
       return {
         game: baseGame({ status: 'finished', currentRound: 10 }),
         round: null,
-        players: players.map((p) => ({ ...p, eggs: 0 })),
+        players: players.map((p) => ({ ...p, score: 0 })),
         isHost,
         currentPlayerId: asPlayerId,
         isFinal: true,

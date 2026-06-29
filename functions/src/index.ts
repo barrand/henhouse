@@ -47,7 +47,7 @@ export const joinGame = onCall(async (request) => {
   if (gameType === 'flock-together') {
     await playerDocRef.set({
       name: playerName.trim(),
-      eggs: 0,
+      score: 0,
       connected: true,
     })
   } else {

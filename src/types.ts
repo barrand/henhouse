@@ -10,7 +10,6 @@ export interface GameData {
   originalHostId: string
   status: 'lobby' | 'playing' | 'finished'
   currentRound: number
-  rottenEggHolder: string | null
   categories: string[]
   playerIds: string[]
   settings: GameSettings
@@ -21,7 +20,7 @@ export interface GameData {
 export interface PlayerData {
   id: string
   name: string
-  eggs: number
+  score: number
   connected: boolean
 }
 
@@ -47,6 +46,7 @@ export interface RoundData {
   answerGroups: string[]
   flockAnswer: string[]
   results: Record<string, RoundResult>
+  pointsThisRound: Record<string, number>
   playerAnswers?: Record<string, string>
   commentary?: string
 }

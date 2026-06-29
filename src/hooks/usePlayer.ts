@@ -20,7 +20,7 @@ export function useAuth() {
   return { uid, loading }
 }
 
-// Generic over PlayerData shape — works for Flock (with `eggs`) and Fowl Words (with `score`)
+// Generic over game-specific player shapes.
 export function useCurrentPlayer<P extends { id: string }>(players: P[], uid: string | null): P | null {
   if (!uid) return null
   return players.find((p) => p.id === uid) ?? null

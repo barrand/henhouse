@@ -58,8 +58,8 @@ const SOURCE_WEIGHTS: Record<string, number> = {
   'ai-generated': 3,
   'custom': 3,
   'preset': 1,
-  // 'patriotic' is intentionally excluded: patriotic questions are drawn
-  // exclusively via the patrioticModeOnly path and never enter the weighted draw.
+  // 'patriotic' is intentionally excluded: patriotic questions are drawn only
+  // on patriotic rounds and never enter the normal weighted draw.
 }
 
 const TAG_COOLDOWNS: Record<string, number> = {
@@ -106,13 +106,13 @@ async function markQuestionUsed(
 export async function drawQuestion(
   gameId: string,
   recentTags: string[] = [],
-  patrioticModeOnly: boolean = false,
+  preferPatrioticQuestion: boolean = false,
 ): Promise<DrawnQuestion | null> {
   const db = getDb()
   const poolRef = db.collection('games').doc(gameId).collection('questionPool')
   const cooldowns = await fetchActiveCooldowns(db)
 
-  let chosen = await weightedDraw(poolRef, recentTags, cooldowns, patrioticModeOnly)
+  let chosen = await weightedDraw(poolRef, recentTags, cooldowns, preferPatrioticQuestion)
   if (chosen) return chosen
 
   // All available questions are either used in this game or on 48hr cooldown.
@@ -125,7 +125,7 @@ export async function drawQuestion(
   allSnap.docs.forEach((d) => resetBatch.update(d.ref, { used: false }))
   await resetBatch.commit()
 
-  return weightedDraw(poolRef, recentTags, cooldowns, patrioticModeOnly)
+  return weightedDraw(poolRef, recentTags, cooldowns, preferPatrioticQuestion)
 }
 
 function isTagOnCooldown(tag: string | null, recentTags: string[]): boolean {
@@ -140,7 +140,7 @@ async function weightedDraw(
   poolRef: FirebaseFirestore.CollectionReference,
   recentTags: string[],
   cooldowns: Set<string>,
-  patrioticModeOnly: boolean,
+  preferPatrioticQuestion: boolean,
 ): Promise<DrawnQuestion | null> {
   const db = getDb()
   const sources = Object.keys(SOURCE_WEIGHTS)
@@ -178,11 +178,13 @@ async function weightedDraw(
 
   let candidateDocs: FirebaseFirestore.QueryDocumentSnapshot[]
 
-  if (patrioticModeOnly && buckets['patriotic']?.length > 0) {
-    // Patriotic questions still available — draw exclusively from them
+  const drawingPatriotic = preferPatrioticQuestion && buckets['patriotic']?.length > 0
+
+  if (drawingPatriotic) {
+    // Patriotic questions are still available for this patriotic round.
     candidateDocs = buckets['patriotic']
   } else {
-    // Either patriotic mode is off, or patriotic questions are exhausted/on cooldown.
+    // Either this is a normal round, or patriotic questions are exhausted/on cooldown.
     // Fall back to a weighted draw across all non-patriotic sources.
     const fallbackSources = Object.keys(buckets).filter((s) => s !== 'patriotic')
     if (fallbackSources.length === 0) return null
@@ -199,10 +201,10 @@ async function weightedDraw(
   if (!candidateDocs || candidateDocs.length === 0) return null
 
   // Apply tag cooldowns for variety within a session.
-  // Skip tag filtering in patriotic mode — every question carries the 'patriotic'
+  // Skip tag filtering on patriotic draws — every question carries the 'patriotic'
   // tag, so the cooldown would fire constantly and add no value.
   const lastTag = recentTags.length > 0 ? recentTags[recentTags.length - 1] : null
-  const tagFiltered = patrioticModeOnly
+  const tagFiltered = drawingPatriotic
     ? candidateDocs
     : candidateDocs.filter((d) => {
         const tag = d.data().tag ?? null

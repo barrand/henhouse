@@ -81,7 +81,6 @@ export default function FlockPreview() {
             >
               {p.name}
               {p.id === 'p1' && ' ★'}
-              {p.id === 'p3' && ' 🥚'}
             </button>
           ))}
         </div>
@@ -143,7 +142,6 @@ export default function FlockPreview() {
 
         {scenario.showLeaderboard && (
           <LeaderboardModal
-            game={scenario.game}
             players={scenario.players}
             currentPlayerId={scenario.currentPlayerId}
             onClose={() => {}}

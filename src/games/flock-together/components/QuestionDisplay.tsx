@@ -162,7 +162,7 @@ export default function QuestionDisplay({
       <div className="mt-6 space-y-3">
         {expired && !submitted ? (
           <div className="text-center py-4">
-            <img src="/images/hen-sleeping.svg" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
+            <img src="/images/generated-comic/hen-sleeping.png" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
             <p className="text-error font-bold text-lg font-body">Too slow!</p>
             <p className="text-outline mt-1 font-body">You didn't answer in time.</p>
           </div>
@@ -211,7 +211,7 @@ export default function QuestionDisplay({
           )
         ) : (
           <div className="text-center py-4 rounded-xl border border-outline-variant/50 bg-surface-container-low px-4">
-            <img src="/images/hen-thinking.svg" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
+            <img src="/images/generated-comic/hen-thinking.png" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
             <p className="font-headline text-lg font-semibold text-on-surface">You&apos;re clucked in</p>
             {round.type === 'multiple_choice' && answer && (
               <p className="mt-2 inline-block rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-sm font-body font-semibold text-primary">

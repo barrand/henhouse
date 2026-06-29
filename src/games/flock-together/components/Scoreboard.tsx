@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
-import RottenEgg from './RottenEgg'
 import { flockRematch } from '../service'
 
 interface Props {
@@ -27,20 +26,21 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
     }
   }
 
-  const sorted = [...players].sort((a, b) => b.eggs - a.eggs)
-  const topScore = sorted[0]?.eggs ?? 0
-  const winner = isFinal && topScore > 0 ? sorted[0] : null
-  const isTie = isFinal && topScore > 0 && sorted.filter((p) => p.eggs === topScore).length > 1
+  const sorted = [...players].sort((a, b) => b.score - a.score)
+  const topScore = sorted[0]?.score ?? 0
+  const winners = isFinal && topScore > 0 ? sorted.filter((p) => p.score === topScore) : []
+  const winner = winners.length === 1 ? winners[0] : null
+  const isTie = winners.length > 1
 
   return (
     <div className="min-h-screen bg-surface linen-texture px-4 py-8">
       <div className="max-w-sm mx-auto space-y-6">
-        {isFinal && !winner && (
+        {isFinal && topScore <= 0 && (
           <div className="text-center space-y-2">
             <p className="font-headline text-3xl font-bold text-on-surface">GAME OVER!</p>
-            <img src="/images/hen-runner.svg" alt="" className="w-20 h-20 mx-auto" />
+            <img src="/images/generated-comic/hen-runner.png" alt="" className="w-20 h-20 mx-auto" />
             <p className="font-headline text-xl font-bold text-on-surface">
-              No one scored a single egg!
+              No one scored a single point!
             </p>
             <p className="text-on-surface-variant font-body">The whole flock went rogue.</p>
           </div>
@@ -50,30 +50,32 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
           <div className="text-center space-y-2">
             <p className="font-headline text-3xl font-bold text-on-surface">GAME OVER!</p>
             <div className="flex justify-center gap-2">
-              <img src="/images/hen-winner.svg" alt="" className="w-16 h-16" />
-              <img src="/images/hen-winner.svg" alt="" className="w-16 h-16" />
+              <img src="/images/generated-comic/hen-winner.png" alt="" className="w-16 h-16" />
+              <img src="/images/generated-comic/hen-winner.png" alt="" className="w-16 h-16" />
             </div>
             <p className="font-headline text-xl font-bold text-on-surface">
-              It's a tie at {topScore} eggs!
+              Shared victory at {topScore} points!
             </p>
-            <p className="text-on-surface-variant font-body">The flock couldn't pick a leader.</p>
+            <p className="text-on-surface-variant font-body">
+              {winners.map((p) => p.name).join(', ')} share the win.
+            </p>
           </div>
         )}
 
         {isFinal && winner && !isTie && (
           <div className="text-center space-y-2">
             <p className="font-headline text-3xl font-bold text-on-surface">GAME OVER!</p>
-            <img src="/images/hen-winner.svg" alt="" className="w-28 h-28 mx-auto animate-hen-celebrate" />
+            <img src="/images/generated-comic/hen-winner.png" alt="" className="w-36 h-36 mx-auto animate-hen-celebrate" />
             <p className="font-headline text-2xl font-bold text-on-surface">
               {winner.name} RULES THE ROOST!
             </p>
-            <p className="text-on-surface-variant font-body">with {winner.eggs} eggs</p>
+            <p className="text-on-surface-variant font-body">with {winner.score} points</p>
           </div>
         )}
 
         {!isFinal && (
           <div className="text-center">
-            <h2 className="font-headline text-2xl font-bold text-on-surface">THE PECKING ORDER</h2>
+            <h2 className="font-headline text-2xl font-bold text-on-surface">STANDINGS</h2>
             <p className="text-on-surface-variant mt-1 font-body">Round {game.currentRound} of {game.settings.totalRounds}</p>
           </div>
         )}
@@ -83,24 +85,11 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
             <li key={player.id} className="px-4 py-3 flex items-center justify-between">
               <span className="flex items-center gap-1.5 font-medium text-on-surface font-body">
                 {i + 1}. {player.name}
-                {game.rottenEggHolder === player.id && <RottenEgg size={18} />}
               </span>
-              <div className="flex items-center gap-2">
-                <span className="text-lg">{'🥚'.repeat(Math.min(player.eggs, 10))}</span>
-                {player.eggs > 10 && <span className="text-sm text-on-surface-variant font-body">x{player.eggs}</span>}
-              </div>
+              <span className="font-headline text-lg font-bold tabular-nums text-on-surface">{player.score}</span>
             </li>
           ))}
         </ul>
-
-        {game.rottenEggHolder && (
-          <div className="flex items-center justify-center gap-2 text-sm font-medium font-body">
-            <RottenEgg size={20} />
-            <span className="text-tertiary">
-              {players.find((p) => p.id === game.rottenEggHolder)?.name} has the Rotten Egg!
-            </span>
-          </div>
-        )}
 
         {isFinal && (
           <div className="space-y-3">

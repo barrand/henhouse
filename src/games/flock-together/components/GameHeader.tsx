@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
 import LeaderboardModal from './LeaderboardModal'
-import RottenEgg from './RottenEgg'
 import { flockAbandonGame } from '../service'
 
 interface Props {
@@ -57,15 +56,9 @@ export default function GameHeader({ game, players, currentPlayer, round: _round
         ) : (
           <div className="flex justify-between items-center mt-1">
             <div className="flex items-center gap-2 font-body">
-              <span className="flex items-center gap-1">
-                <img src="/images/egg-icon.svg" alt="" className="w-4 h-4 inline-block" /> x {currentPlayer?.eggs ?? 0}
+              <span className="font-bold tabular-nums">
+                {currentPlayer?.score ?? 0} pts
               </span>
-              {game.rottenEggHolder === currentPlayer?.id && (
-                <span className="flex items-center gap-1 bg-tertiary-container text-on-tertiary-container text-xs px-2 py-0.5 rounded-full font-bold">
-                  <RottenEgg size={14} />
-                  ROTTEN EGG
-                </span>
-              )}
             </div>
             <div className="flex items-center gap-3">
               {isHost && (
@@ -80,7 +73,7 @@ export default function GameHeader({ game, players, currentPlayer, round: _round
                 onClick={() => setShowLeaderboard(true)}
                 className="text-sm underline opacity-80 hover:opacity-100 font-body"
               >
-                Pecking Order
+                Standings
               </button>
             </div>
           </div>
@@ -89,7 +82,6 @@ export default function GameHeader({ game, players, currentPlayer, round: _round
 
       {showLeaderboard && (
         <LeaderboardModal
-          game={game}
           players={players}
           currentPlayerId={currentPlayer?.id ?? null}
           onClose={() => setShowLeaderboard(false)}

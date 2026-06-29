@@ -87,16 +87,16 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
     <div className="min-h-screen bg-surface linen-texture font-body text-on-surface relative overflow-hidden">
       {/* Background botanical decorations */}
       <div className="absolute -top-8 -left-8 opacity-[0.07] pointer-events-none -rotate-12">
-        <img src="/images/botanical-fern.png" alt="" className="w-52 h-52 object-contain" />
+        <img src="/images/generated-comic/botanical-fern.png" alt="" className="w-52 h-52 object-contain" />
       </div>
       <div className="absolute top-1/3 -right-12 opacity-[0.06] pointer-events-none rotate-[25deg]">
-        <img src="/images/botanical-wheat.png" alt="" className="w-56 h-56 object-contain" />
+        <img src="/images/generated-comic/botanical-wheat.png" alt="" className="w-56 h-56 object-contain" />
       </div>
       <div className="absolute bottom-24 -left-16 opacity-[0.05] pointer-events-none rotate-[200deg]">
-        <img src="/images/botanical-wheat.png" alt="" className="w-48 h-48 object-contain" />
+        <img src="/images/generated-comic/botanical-wheat.png" alt="" className="w-48 h-48 object-contain" />
       </div>
       <div className="absolute -bottom-6 -right-6 opacity-[0.07] pointer-events-none rotate-[140deg]">
-        <img src="/images/botanical-fern.png" alt="" className="w-44 h-44 object-contain" />
+        <img src="/images/generated-comic/botanical-fern.png" alt="" className="w-44 h-44 object-contain" />
       </div>
 
       <main className="max-w-md mx-auto px-6 pt-4 pb-32 relative z-10">
@@ -109,7 +109,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
             <span className="material-symbols-outlined">arrow_back</span>
             <span className="text-sm font-medium">Back</span>
           </button>
-          <img src="/images/hen-neutral.svg" alt="" className="w-24 h-24 mx-auto mb-3 animate-hen-bob" />
+          <img src="/images/generated-comic/hen-neutral.png" alt="" className="w-24 h-24 mx-auto mb-3 animate-hen-bob" />
           <h2 className="font-headline text-4xl font-bold text-on-surface mb-2 tracking-tight">FLOCK TOGETHER</h2>
           <p className="text-on-surface-variant text-sm">Waiting in the lobby</p>
 
@@ -131,7 +131,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
         {game.includePatrioticQuestions && (
           <div className="mb-6 bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-4 text-center">
             <p className="font-headline text-lg font-bold text-on-surface">🇺🇸 Patriotic Edition is ON</p>
-            <p className="text-on-surface-variant text-sm font-body mt-1">250th anniversary questions included</p>
+            <p className="text-on-surface-variant text-sm font-body mt-1">250th anniversary questions every other round</p>
           </div>
         )}
 
@@ -162,7 +162,6 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
                 </li>
               ))}
               <li className="col-span-2 pt-2 border-t border-outline-variant/10 text-center">
-                <img src="/images/hen-neutral.svg" alt="" className="w-12 h-12 mx-auto mb-1 opacity-70 animate-hen-bob" />
                 <p className="italic text-on-surface-variant text-sm">Waiting for others...</p>
               </li>
             </ul>
@@ -176,7 +175,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
             <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/60 flex items-center justify-between">
               <div className="flex-1">
                 <h4 className="font-headline text-base font-semibold text-on-surface mb-1">🎆 Add patriotic flavor to the game</h4>
-                <p className="text-xs text-on-surface-variant">Include America's 250th anniversary questions</p>
+                <p className="text-xs text-on-surface-variant">Mix America's 250th anniversary questions into every other round</p>
               </div>
               <button
                 onClick={handleTogglePatrioticMode}

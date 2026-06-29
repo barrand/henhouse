@@ -1,15 +1,13 @@
-import type { GameData, PlayerData } from '../types'
-import RottenEgg from './RottenEgg'
+import type { PlayerData } from '../types'
 
 interface Props {
-  game: GameData
   players: PlayerData[]
   currentPlayerId: string | null
   onClose: () => void
 }
 
-export default function LeaderboardModal({ game, players, currentPlayerId, onClose }: Props) {
-  const sorted = [...players].sort((a, b) => b.eggs - a.eggs)
+export default function LeaderboardModal({ players, currentPlayerId, onClose }: Props) {
+  const sorted = [...players].sort((a, b) => b.score - a.score)
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
@@ -20,8 +18,8 @@ export default function LeaderboardModal({ game, players, currentPlayerId, onClo
       >
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-2">
-            <img src="/images/hen-magnifying.svg" alt="" className="w-10 h-10 animate-hen-bob" />
-            <h2 className="font-headline text-xl font-bold text-on-surface">THE PECKING ORDER</h2>
+            <img src="/images/generated-comic/hen-magnifying.png" alt="" className="w-10 h-10 animate-hen-bob" />
+            <h2 className="font-headline text-xl font-bold text-on-surface">STANDINGS</h2>
           </div>
           <button onClick={onClose} className="text-outline hover:text-on-surface-variant text-2xl">&times;</button>
         </div>
@@ -39,13 +37,9 @@ export default function LeaderboardModal({ game, players, currentPlayerId, onClo
               >
                 <span className="flex items-center gap-1.5 font-medium text-on-surface">
                   {i + 1}. {player.name}
-                  {game.rottenEggHolder === player.id && <RottenEgg size={18} />}
                   {player.id === currentPlayerId && ' ←'}
                 </span>
-                <div className="flex items-center gap-2">
-                  <span>{'🥚'.repeat(Math.min(player.eggs, 8))}</span>
-                  {player.eggs > 8 && <span className="text-sm text-on-surface-variant">x{player.eggs}</span>}
-                </div>
+                <span className="font-headline text-lg font-bold tabular-nums text-on-surface">{player.score}</span>
               </li>
             ))}
           </ul>

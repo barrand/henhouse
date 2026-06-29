@@ -8,6 +8,11 @@ import { claimRoomCode, releaseRoomCode } from '../../shared/roomCodes'
 import { normalizeAnswer, fallbackGrouping, validateGeminiGroups } from '../../shared/normalizeAnswer'
 
 const db = admin.firestore()
+const TOTAL_ROUNDS = 10
+
+function shouldDrawPatrioticQuestion(roundNum: number, includePatrioticQuestions: boolean): boolean {
+  return includePatrioticQuestions && roundNum % 2 === 1
+}
 
 // -- CREATE GAME (Flock Together) --
 export const flockCreateGame = onCall(async (request) => {
@@ -34,16 +39,15 @@ export const flockCreateGame = onCall(async (request) => {
     originalHostId: uid,
     status: 'lobby',
     currentRound: 0,
-    rottenEggHolder: null,
     categories: [],
     playerIds: [uid],
-    settings: { totalRounds: 15, secondsPerRound: 45, autoAdvanceSeconds: 10 },
+    settings: { totalRounds: TOTAL_ROUNDS, secondsPerRound: 45, autoAdvanceSeconds: 10 },
     includePatrioticQuestions: false,
   })
 
   await gameRef.collection('players').doc(uid).set({
     name: playerName.trim(),
-    eggs: 0,
+    score: 0,
     connected: true,
   })
 
@@ -88,10 +92,9 @@ export const flockRematch = onCall(async (request) => {
     originalHostId: uid,
     status: 'lobby',
     currentRound: 0,
-    rottenEggHolder: null,
     categories: game.categories ?? [],
     playerIds: game.playerIds,
-    settings: game.settings,
+    settings: { ...(game.settings ?? {}), totalRounds: TOTAL_ROUNDS },
     includePatrioticQuestions: game.includePatrioticQuestions ?? false,
   })
 
@@ -100,7 +103,7 @@ export const flockRematch = onCall(async (request) => {
   playersSnap.docs.forEach((playerDoc) => {
     batch.set(newGameRef.collection('players').doc(playerDoc.id), {
       name: playerDoc.data().name,
-      eggs: 0,
+      score: 0,
       connected: false,
     })
   })
@@ -151,7 +154,11 @@ export const flockStartGame = onCall(async (request) => {
     }
   }
 
-  const question = await drawQuestion(gameId, [], game.includePatrioticQuestions ?? false)
+  const question = await drawQuestion(
+    gameId,
+    [],
+    shouldDrawPatrioticQuestion(1, game.includePatrioticQuestions ?? false),
+  )
   if (!question) throw new HttpsError('internal', 'No questions available in pool')
 
   const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
@@ -171,6 +178,7 @@ export const flockStartGame = onCall(async (request) => {
     answerGroups: [],
     flockAnswer: [],
     results: {},
+    pointsThisRound: {},
     eligiblePlayerCount: game.playerIds.length,
   })
 
@@ -207,26 +215,20 @@ export const submitAnswer = onCall(async (request) => {
   }
 
   const answerRef = roundRef.collection('answers').doc(uid)
-  const existingAnswer = await answerRef.get()
-  if (existingAnswer.exists) throw new HttpsError('already-exists', 'Already answered')
+  try {
+    await answerRef.create({
+      text: trimmed,
+      submittedAt: FieldValue.serverTimestamp(),
+    })
+  } catch (err: any) {
+    if (err?.code !== 6 && err?.code !== 'already-exists') throw err
+  }
 
-  await answerRef.set({
-    text: trimmed,
-    submittedAt: FieldValue.serverTimestamp(),
-  })
-
+  const answerState = await syncRoundAnswerState(roundRef)
   const gameSnap = await db.collection('games').doc(gameId).get()
   const playerCount = roundData.eligiblePlayerCount ?? gameSnap.data()!.playerIds.length
 
-  const newCount = await db.runTransaction(async (tx) => {
-    const rSnap = await tx.get(roundRef)
-    const current = rSnap.data()!.answerCount || 0
-    const updated = current + 1
-    tx.update(roundRef, { answerCount: updated, answeredPlayerIds: FieldValue.arrayUnion(uid) })
-    return updated
-  })
-
-  if (newCount >= playerCount) {
+  if (answerState.count >= playerCount) {
     await triggerScoring(gameId, roundNum)
   }
 })
@@ -264,7 +266,11 @@ export const skipQuestion = onCall(async (request) => {
   await delBatch.commit()
 
   // Skipped questions are intentionally left as "used" — they count against the 48hr cooldown
-  const newQuestion = await drawQuestion(gameId, recentTags, game.includePatrioticQuestions ?? false)
+  const newQuestion = await drawQuestion(
+    gameId,
+    recentTags,
+    shouldDrawPatrioticQuestion(roundNum, game.includePatrioticQuestions ?? false),
+  )
   if (!newQuestion) throw new HttpsError('internal', 'No more questions available')
 
   const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
@@ -284,6 +290,7 @@ export const skipQuestion = onCall(async (request) => {
     answerGroups: [],
     flockAnswer: [],
     results: {},
+    pointsThisRound: {},
     playerAnswers: {},
     commentary: FieldValue.delete(),
   })
@@ -411,6 +418,16 @@ export const forceEndRound = onCall(async (request) => {
 
 // -- INTERNAL HELPERS --
 
+async function syncRoundAnswerState(roundRef: FirebaseFirestore.DocumentReference) {
+  const answersSnap = await roundRef.collection('answers').get()
+  const answeredPlayerIds = answersSnap.docs.map((doc) => doc.id)
+  await roundRef.update({
+    answerCount: answeredPlayerIds.length,
+    answeredPlayerIds,
+  })
+  return { count: answeredPlayerIds.length, answeredPlayerIds }
+}
+
 async function triggerScoring(gameId: string, roundNum: number) {
   const roundRef = db.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
 
@@ -467,7 +484,6 @@ async function triggerScoring(gameId: string, roundNum: number) {
   const scoring: ScoringResult = scoreRoundAnswers(
     normalizedAnswers,
     groups,
-    game.rottenEggHolder,
     game.playerIds,
   )
 
@@ -500,6 +516,7 @@ async function triggerScoring(gameId: string, roundNum: number) {
     groups,
     playerCountPerGroup,
     results: scoring.results,
+    pointsThisRound: scoring.pointsThisRound,
     hasFlock,
     flockDisplayAnswer,
     commentary,
@@ -510,21 +527,20 @@ async function triggerScoring(gameId: string, roundNum: number) {
     answerGroups: groups.map((g) => JSON.stringify(g)),
     flockAnswer: flockDisplayAnswer,
     results: scoring.results,
+    pointsThisRound: scoring.pointsThisRound,
     playerAnswers: rawAnswers,
     commentary,
   })
 
   const batch = db.batch()
-  const gameUpdates: Record<string, any> = { rottenEggHolder: scoring.rottenEggHolder }
 
-  for (const [playerId, result] of Object.entries(scoring.results)) {
-    if (result === 'flock') {
+  for (const [playerId, pts] of Object.entries(scoring.pointsThisRound)) {
+    if (pts !== 0) {
       const playerRef = db.collection('games').doc(gameId).collection('players').doc(playerId)
-      batch.update(playerRef, { eggs: FieldValue.increment(1) })
+      batch.update(playerRef, { score: FieldValue.increment(pts) })
     }
   }
 
-  batch.update(db.collection('games').doc(gameId), gameUpdates)
   await batch.commit()
 }
 
@@ -532,15 +548,6 @@ async function doAdvanceRound(gameId: string) {
   const gameRef = db.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
   const game = gameSnap.data()!
-
-  const playersSnap = await gameRef.collection('players').get()
-  const winner = playersSnap.docs.find(
-    (d) => d.data().eggs >= 8 && d.id !== game.rottenEggHolder
-  )
-  if (winner) {
-    await gameRef.update({ status: 'finished' })
-    return
-  }
 
   const nextRound = game.currentRound + 1
   if (nextRound > game.settings.totalRounds) {
@@ -555,7 +562,11 @@ async function doAdvanceRound(gameId: string) {
     if (tag) recentTags.push(tag)
   }
 
-  const question = await drawQuestion(gameId, recentTags, game.includePatrioticQuestions ?? false)
+  const question = await drawQuestion(
+    gameId,
+    recentTags,
+    shouldDrawPatrioticQuestion(nextRound, game.includePatrioticQuestions ?? false),
+  )
   if (!question) {
     await gameRef.update({ status: 'finished' })
     return
@@ -578,6 +589,7 @@ async function doAdvanceRound(gameId: string) {
     answerGroups: [],
     flockAnswer: [],
     results: {},
+    pointsThisRound: {},
     eligiblePlayerCount: game.playerIds.length,
   })
 

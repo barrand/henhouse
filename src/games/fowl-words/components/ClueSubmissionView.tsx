@@ -138,7 +138,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
     return (
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-10">
         <div className="max-w-md w-full text-center space-y-6">
-          <img src="/images/hen-blindfold.svg" alt="" className="w-28 h-28 mx-auto animate-hen-bob" />
+          <img src="/images/generated-comic/hen-blindfold.png" alt="" className="w-28 h-28 mx-auto animate-hen-bob" />
           <h2 className="font-headline text-3xl font-bold text-on-surface">No peeking!</h2>
           <p className="text-on-surface-variant font-body">
             Keep your eyes on your own screen. The flock is writing clues for you.
@@ -235,7 +235,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
           </div>
         ) : (
           <div className="text-center py-4 rounded-xl border border-outline-variant/50 bg-surface-container-low px-4">
-            <img src="/images/hen-thinking.svg" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
+            <img src="/images/generated-comic/hen-thinking.png" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
             <p className="font-headline text-lg font-semibold text-on-surface">Clue locked in</p>
             <p className="text-on-surface-variant text-sm font-body mt-2">
               Waiting for the rest of the flock. Your clue stays hidden until the reveal.

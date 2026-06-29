@@ -2,8 +2,8 @@ type RoundResult = 'flock' | 'outlier' | 'rotten' | 'no-answer'
 
 export interface ScoringResult {
   results: Record<string, RoundResult>
-  rottenEggHolder: string | null
   flockGroupIndex: number
+  pointsThisRound: Record<string, number>
 }
 
 /**
@@ -14,19 +14,20 @@ export interface ScoringResult {
 export function scoreRoundAnswers(
   answers: Record<string, string>,
   groups: string[][],
-  currentRottenEggHolder: string | null,
   allPlayerIds: string[],
 ): ScoringResult {
   const results: Record<string, RoundResult> = {}
+  const pointsThisRound: Record<string, number> = {}
 
   for (const playerId of allPlayerIds) {
+    pointsThisRound[playerId] = 0
     if (!(playerId in answers)) {
       results[playerId] = 'no-answer'
     }
   }
 
   if (groups.length === 0) {
-    return { results, rottenEggHolder: currentRottenEggHolder, flockGroupIndex: -1 }
+    return { results, flockGroupIndex: -1, pointsThisRound }
   }
 
   const groupSets = groups.map((g) => new Set(g))
@@ -46,7 +47,7 @@ export function scoreRoundAnswers(
         results[playerId] = 'outlier'
       }
     }
-    return { results, rottenEggHolder: currentRottenEggHolder, flockGroupIndex: -1 }
+    return { results, flockGroupIndex: -1, pointsThisRound }
   }
 
   const flockIdx = indicesWithMax[0].i
@@ -54,10 +55,14 @@ export function scoreRoundAnswers(
 
   for (const [playerId, answer] of Object.entries(answers)) {
     if (playerId in results) continue
-    results[playerId] = flockSet.has(answer) ? 'flock' : 'outlier'
+    if (flockSet.has(answer)) {
+      results[playerId] = 'flock'
+      pointsThisRound[playerId] = 1
+    } else {
+      results[playerId] = 'outlier'
+    }
   }
 
-  let newRottenEggHolder = currentRottenEggHolder
   const soloIndices = playerCountPerGroup
     .map((count, i) => ({ count, i }))
     .filter(({ count }) => count === 1)
@@ -67,9 +72,9 @@ export function scoreRoundAnswers(
     const soloPlayerId = Object.entries(answers).find(([, a]) => soloSet.has(a))?.[0]
     if (soloPlayerId) {
       results[soloPlayerId] = 'rotten'
-      newRottenEggHolder = soloPlayerId
+      pointsThisRound[soloPlayerId] = -1
     }
   }
 
-  return { results, rottenEggHolder: newRottenEggHolder, flockGroupIndex: flockIdx }
+  return { results, flockGroupIndex: flockIdx, pointsThisRound }
 }

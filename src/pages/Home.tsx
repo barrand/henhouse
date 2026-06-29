@@ -77,10 +77,10 @@ export default function Home() {
     <div className="min-h-screen flex flex-col items-center justify-center px-8 py-12 bg-surface linen-texture font-body text-on-surface relative overflow-hidden">
       {/* Decorative botanical backgrounds */}
       <div className="absolute -top-10 -left-10 opacity-20 pointer-events-none -rotate-12">
-        <img src="/images/botanical-fern.png" alt="" className="w-48 h-48 object-contain" />
+        <img src="/images/generated-comic/botanical-fern.png" alt="" className="w-48 h-48 object-contain" />
       </div>
       <div className="absolute -bottom-10 -right-10 opacity-20 pointer-events-none rotate-45">
-        <img src="/images/botanical-wheat.png" alt="" className="w-64 h-64 object-contain" />
+        <img src="/images/generated-comic/botanical-wheat.png" alt="" className="w-64 h-64 object-contain" />
       </div>
 
       <div className="w-full max-w-2xl space-y-6 relative px-0">
@@ -161,8 +161,8 @@ export default function Home() {
             className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center">
-                <img src="/images/flock-icon.svg" alt="" className="w-10 h-10" />
+              <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center">
+                <img src="/images/generated-comic/flock-icon.png" alt="" className="w-14 h-14 object-contain" />
               </div>
               <span className="font-label text-[9px] font-bold uppercase tracking-[0.2em] text-secondary opacity-70">3+ players</span>
             </div>
@@ -183,8 +183,8 @@ export default function Home() {
             className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center">
-                <img src="/images/fowl-icon.svg" alt="" className="w-10 h-10" />
+              <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center">
+                <img src="/images/generated-comic/fowl-icon.png" alt="" className="w-14 h-14 object-contain" />
               </div>
               <span className="font-label text-[9px] font-bold uppercase tracking-[0.2em] text-secondary opacity-70">2+ players · new!</span>
             </div>
@@ -198,7 +198,7 @@ export default function Home() {
           </button>
         </div>
 
-        <img src="/images/footprint-divider.svg" alt="" className="w-full max-w-xs opacity-60 mx-auto mt-8" />
+        <img src="/images/generated-comic/footprint-divider.png" alt="" className="w-full max-w-xs h-14 object-contain opacity-60 mx-auto mt-8" />
       </div>
     </div>
   )

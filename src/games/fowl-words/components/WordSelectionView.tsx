@@ -63,7 +63,7 @@ export default function WordSelectionView({ game, round, players, isGuesser, isH
     return (
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-10">
         <div className="max-w-md w-full text-center space-y-5">
-          <img src="/images/hen-thinking.svg" alt="" className="w-24 h-24 mx-auto animate-hen-bob" />
+          <img src="/images/generated-comic/hen-thinking.png" alt="" className="w-24 h-24 mx-auto animate-hen-bob" />
           <h2 className="font-headline text-2xl font-bold text-on-surface">
             Picking your word…
           </h2>

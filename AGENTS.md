@@ -34,7 +34,7 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 
 ## Games
 
-**Flock Together** — Answer a question, score by matching the majority. One "rotten egg" player is secretly sabotaged each round.
+**Flock Together** — Answer a question, score points by matching the majority. A lone odd-one-out loses 1 point for that round.
 
 **Fowl Words** — Based on "Just One." One **guesser**, everyone else are **givers**.
 - Givers each write **ONE word** clue (enforced in frontend — button disabled if multi-word)
@@ -106,28 +106,64 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 - **Fixed-color info cards:** Never use `bg-primary-fixed`, `bg-secondary-fixed`, or `bg-tertiary-fixed` with an opacity modifier (e.g. `/50`) on cards that display primary information. Semi-transparent fixed colors over the dark surface produce a muddy mid-tone where both same-hue text and `text-on-surface` lose contrast. Always use the full-opacity token (`bg-primary-fixed`) paired with its semantic text tokens: `text-on-primary-fixed-variant` for labels/secondary text, `text-on-primary-fixed` for the main word/value. Apply the same rule to `secondary-fixed` and `tertiary-fixed` variants. Faint tints (`/20`) are fine for decorative row highlights where `text-on-surface` is the text color.
 
 ### Illustration rules
-- Prefer SVG from `public/images/` over emoji for any prominent visual moment (game states, loading screens, result screens)
-- Emoji OK only for: inline text badges, small accents within text runs
-- All character SVGs: bold `#2a1f0e` outlines, flat `#e8e2db`/`#d6c5a5` fills, `#f0c078` gold accents, expressive eyes
-- `<img>` tags: always `alt=""` (decorative); viewBox `0 0 200 200` for characters, `0 0 32 32` for icons, `0 0 320 48` for dividers
-- Character sizes: `w-24 h-24` hero moments, `w-16 h-16` supporting, `w-10 h-10` inline icons
-- Decorative overlays: `opacity-20` for corner art, `opacity-60` for dividers
+- Use generated comic-book PNG assets from `public/images/generated-comic/` for prominent game visuals (game states, loading screens, result screens, game icons, botanical decorations, footprint divider).
+- Keep the old SVG files in `public/images/` as historical fallback only; do not point new UI at them unless explicitly reverting the generated art direction.
+- Emoji OK only for: inline text badges, small accents within text runs.
+- `<img>` tags: always `alt=""` for decorative art.
+- Production character/icon/decorative PNGs must be transparent cutouts. Do not ship character assets with a baked `#262320` square background; they create visible dark boxes on light cards.
+- Use `#262320` (warm dark card/surface color) only for quick visual style previews in chat, not for final app assets.
+- Chroma-key generation background for production transparent assets: flat `#ff00ff`; remove it locally before using the asset in the app.
+- Character sizes: `w-24 h-24` hero/waiting moments, `w-16 h-16` supporting, `w-10 h-10` inline icons; final game-over winner art can be larger (`w-32`–`w-36`).
+- Home game tile icons are intentionally larger than the original SVG icons: `w-16 h-16` icon well with `w-14 h-14` image.
+- Decorative overlays: `opacity-20` for corner art, `opacity-60` for dividers.
+
+### Generated art style
+- Style: bold modern 2D comic-book cartoon, thick expressive dark ink outlines, cel-shaded warm colors, subtle halftone texture, playful high-contrast action-pose energy, readable at small mobile UI sizes.
+- Tone: funny, charming, party-game expressive; not babyish, not photorealistic, not 3D, not plush, not generic vector clipart.
+- Palette: warm cream feathers, golden ochre beak/feet, muted red-orange comb, subtle blush cheeks, sage green accents, dark brown/black outlines.
+- Character design: keep the mascot hen-like with rounded body, short wings, expressive eyes, smaller comb/wattle than a rooster, and no big rooster tail feathers unless intentionally needed.
+- Animations still apply to PNGs: `animate-hen-bob`, `animate-hen-pop`, `animate-hen-celebrate`, and `animate-hen-peck`.
+
+### Image generation prompt template
+Use this as the base for new Henhouse character/state assets:
+
+```text
+Use case: stylized-concept
+Asset type: mobile party game character illustration for Henhouse
+Asset name: <asset-name>
+Primary request: <specific character/action/emotion>
+
+Style: bold modern 2D comic-book cartoon, thick expressive dark ink outlines, cel-shaded warm colors, subtle halftone texture, playful high-contrast action-pose energy, readable at small mobile UI sizes. Funny and charming, not babyish.
+
+Character design: same friendly hen mascot as the existing generated-comic set: rounded cream-feather body, golden ochre beak and feet, small muted red-orange comb, subtle blush cheeks, expressive eyes, short wings, sage green accent details, dark brown/black outlines. Keep it hen-like, not rooster-like: small comb/wattle, no big rooster tail feathers.
+
+Scene/backdrop: for production app assets, use a perfectly flat solid #ff00ff chroma-key background for background removal; the background must be uniform with no shadows, gradients, texture, floor plane, or lighting variation, and #ff00ff must not appear in the subject. Use flat warm dark #262320 only for rough style previews that will not be shipped.
+
+Composition: square image, full-body character centered, generous padding, clean silhouette, no cropping.
+
+Constraints: no text, no letters, no speech bubbles, no watermark, no logo, no photorealism, no 3D, no plush, no emoji, no flat SVG/vector look.
+```
 
 ### Character vocabulary
 | File | Emotion | Reuse for |
 |------|---------|-----------|
-| `hen-neutral.svg` | Cheerful | Lobbies, home tiles |
-| `hen-thinking.svg` | Waiting/pondering | Word selection (guesser), GuessView, RevealBoard |
-| `hen-blindfold.svg` | Can't see | ClueSubmission (guesser) |
-| `hen-magnifying.svg` | Inspecting | DeduplicationView |
-| `hen-excited.svg` | Stars orbiting | First-attempt correct, Most Helpful moment |
-| `hen-winner.svg` | Wings up, laurel | Final win, NAILED IT (attempts 2-3) |
-| `hen-confused.svg` | Head tilt, question marks | NO LUCK result (ran out of guesses) |
-| `hen-embarrassed.svg` | Wings to cheeks | NO CLUES, duplicates, rotten egg reveal |
-| `hen-runner.svg` | Side profile, speed | No-winner scoreboard |
-| `hen-flying.svg` | Wings spread, gleeful escape | FLOWN THE COOP (outlier) result rows |
-| `flock-icon.svg` | Three birds clustered together | Flock Together home tile icon |
-| `fowl-icon.svg` | One chicken on coop, three below | Fowl Words home tile icon |
+| `generated-comic/hen-neutral.png` | Cheerful | Lobbies, home tiles |
+| `generated-comic/hen-thinking.png` | Waiting/pondering | Word selection (guesser), GuessView, RevealBoard |
+| `generated-comic/hen-blindfold.png` | Can't see | ClueSubmission (guesser) |
+| `generated-comic/hen-magnifying.png` | Inspecting | DeduplicationView |
+| `generated-comic/hen-excited.png` | Stars orbiting | First-attempt correct, Most Helpful moment |
+| `generated-comic/hen-winner.png` | Wings up, champion | Final win, NAILED IT (attempts 2-3) |
+| `generated-comic/hen-confused.png` | Head tilt, puzzled | NO LUCK result (ran out of guesses) |
+| `generated-comic/hen-embarrassed.png` | Wings to cheeks | NO CLUES, duplicates, lone odd-one-out result |
+| `generated-comic/hen-runner.png` | Side profile, speed | No-winner scoreboard |
+| `generated-comic/hen-flying.png` | Wings spread, gleeful escape | FLOWN THE COOP (outlier) result rows |
+| `generated-comic/hen-pecking.png` | Pecking | Flock Together reveal/counting transition |
+| `generated-comic/hen-sleeping.png` | Sleeping | Waiting for other players |
+| `generated-comic/flock-icon.png` | Three birds clustered together | Flock Together home tile icon |
+| `generated-comic/fowl-icon.png` | Chicken with clue cards | Fowl Words home tile icon |
+| `generated-comic/botanical-fern.png` | Comic fern | Home/lobby decorative corner art |
+| `generated-comic/botanical-wheat.png` | Comic wheat | Home/lobby decorative corner art |
+| `generated-comic/footprint-divider.png` | Footprints/feathers divider | Home bottom divider |
 
 ### Animation classes (defined in `src/index.css`)
 - `animate-hen-bob` — idle waiting states

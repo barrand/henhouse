@@ -1,0 +1,247 @@
+id,source,type,question,option1,option2,option3,option4,rating
+1,,multiple_choice,"What is a food that should never be put on pizza?","Pineapple","Anchovies","Olives",,x
+2,,multiple_choice,"Name a pizza topping everyone argues about","Pineapple","Anchovies","Olives",,x
+3,,multiple_choice,"What is the most awkward social situation?","Forgetting someone's name","Awkward silence","Running into an ex",,g
+4,,multiple_choice,"What is the most overrated holiday?","Valentine's Day","New Year's Eve","Christmas",,g
+5,,multiple_choice,"What is the biggest lie everyone tells?","I'm fine","I'm on my way","I read the terms and conditions",,g
+6,,multiple_choice,"What is something people need to stop bragging about?","Money","How busy they are","Social media followers",,g
+7,,multiple_choice,"What would be the worst thing to hear a doctor say?","It's cancer","It's terminal","We made a mistake",,rq
+8,,multiple_choice,"Is cereal a soup?","Yes","No",,,g
+9,,multiple_choice,"What is the universal sign that a party is boring?","Everyone on their phone","People leaving early","Awkward silence",,g
+10,,multiple_choice,"If you could make one food zero calories, what would it be?","Pizza","Chocolate","Ice cream",,x
+11,,multiple_choice,"What is the best guilty pleasure TV show?","The Bachelor","Love Island","Real Housewives of Beverly Hills",,ra
+12,,multiple_choice,"What would you bring to a deserted island?","Water filter","Knife","Lighter",,x
+13,,multiple_choice,"Toilet paper:","Over","Under",,,x
+14,,multiple_choice,"Name something adults do that they tell kids not to","Swearing","Staying up late","Interrupting",,ra
+15,,multiple_choice,"If you could ban one thing from existing, what would it be?","Mosquitoes","War","Hate",,g
+16,,multiple_choice,"What is the least attractive accent?","Southern American","Bostonian","Southern drawl",,x
+17,,multiple_choice,"If your pet could talk, what would they say about you?","Feed Me Now!","More Belly Rubs!","Let's Go Outside!","You're My Favorite",g
+18,,multiple_choice,"What do you pretend to understand but actually don't?","The Stock Market","Fine Art","Cryptocurrency","Sports Rules",g
+19,,multiple_choice,"What would be the worst superpower?","Read peoples thoughts�All of them","See through clothes�All of them","Super smell�All the smells",,r
+20,,multiple_choice,"Name something nobody looks cool doing","Eating a banana","Running for the bus","Applying sunscreen",,g
+21,,multiple_choice,"What is the most overrated food?","Avocado Toast","Sushi","Truffle Fries",,g
+22,,multiple_choice,"What is something you would never do for a million dollars?","Harm an innocent person","Kill an animal","Betray my family","Eat human waste",g
+23,,multiple_choice,"What is the worst thing to step on barefoot?","Lego","Glass shard","Dog poop",,x
+24,,multiple_choice,"What is the worst fashion trend of all time?","Bell bottoms","Mullets","Crocs",,g
+25,,multiple_choice,"Name something people always say they'll do but never do","Go to the gym","Stick to a diet","Clean the house",,g
+26,,multiple_choice,"What is the best thing about being home alone?","Peace and quiet","Doing whatever I want","No judgment",,g
+27,,multiple_choice,"What would be the worst job in the world?","Porta-potty cleaner","Sewer worker","Garbage collector",,x
+28,,multiple_choice,"What is a socially acceptable thing that is actually weird?","Saying ""bless you""","Tipping culture","Talking to pets like humans","Shaking hands when meeting someone",g
+29,,multiple_choice,"What is the worst food combination people actually eat?","Pineapple on pizza","Ketchup on eggs","Pickles and peanut butter",,x
+30,,multiple_choice,"What would be the worst theme for a party?","Funeral","Tax Audit","Hospital",,g
+31,,multiple_choice,"What is the most controversial condiment?","Mayonnaise","Ranch","Sriracha",,ra
+32,,multiple_choice,"What is the most overrated fast food chain?","McDonald's","Starbucks","Subway",,g
+33,,multiple_choice,"What small thing makes you unreasonably angry?","Loud chewing","People who don't use turn signals","Not replacing the toilet paper roll",,g
+34,,multiple_choice,"What is the most ridiculous thing you believed as a kid?","Swallowed Gum Stays","Quick Sand Everywhere","TV People Live Inside","Seeds Grow In Stomach",g
+35,,multiple_choice,"What is the worst way to break up with someone?","Ghosting","Via text message","Through a friend",,g
+36,,multiple_choice,"What is the one food everyone thinks they make well but don't?","Scrambled eggs","Mac and cheese","Grilled cheese",,x
+37,,multiple_choice,"What fictional character would be the worst coworker?","The Joker","Michael Scott","Dwight Schrute","Sheldon Cooper",g
+38,,multiple_choice,"What would you never name your child?","Karen","Adolf","Lucifer",,ra
+39,,multiple_choice,"What word is impossible to say in an angry voice?","Bubbles","Marshmallow","Giggles",,rq
+40,,open,"What everyday activity would be the funniest Olympic sport?",,,,,x
+41,,multiple_choice,"What is the weirdest thing that is considered normal?","Small Talk","Paying To Live","Shaking Hands","Saying 'Bless You'",g
+42,,multiple_choice,"Name a skill that is impressive but completely useless","Solving A Rubik's Cube","Expert Juggling","Unicycling","Card Flourishes",g
+43,,multiple_choice,"If you were a ghost, who would you haunt?","Donald Trump","My ex-boss","My high school bully",,g
+44,,multiple_choice,"What is the most suspicious thing you could buy at a hardware store?","Duct tape and zip ties","A large tarp and shovel","Bleach (gallons of it)",,rq
+45,,multiple_choice,"What is the cringiest thing you did as a teenager?","Terrible fashion choices","Trying too hard to be cool","Awkward attempts at flirting",,g
+46,,open,"Name something people argue about in the car",,,,,g
+47,,multiple_choice,"What is the worst household smell?","Rotten Food","Garbage","Sewage","Vomit",g
+48,,multiple_choice,"Name an actor who plays the same character in every movie","Dwayne Johnson","Jason Statham","Adam Sandler","Liam Neeson",x
+49,,multiple_choice,"What is the most overhyped city?","Los Angeles","New York City","Paris","Las Vegas",g
+50,,multiple_choice,"What is the most unromantic thing ever?","Doing Taxes Together","Cleaning The Toilet","Complaining Constantly","Loud Snoring",g
+51,,multiple_choice,"What job would you be terrible at?","Customer service","Accountant","Surgeon","Door to door sales",g
+52,,multiple_choice,"What two foods should never be combined?","Pickles And Chocolate","Sardines And Caramel","Cereal And Orange Juice","Ketchup And Ice Cream",g
+53,,multiple_choice,"What is a totally reasonable fear that people make fun of?","Spiders","Bugs","Clowns",,x
+54,,multiple_choice,"Name a celebrity who would be terrible at a party","Kanye West","Elon Musk","Gordon Ramsay","Ben Shapiro",g
+55,,multiple_choice,"What is the best fast food restaurant?","Chick-fil-A","McDonald's","In-N-Out Burger","Wendy's",g
+56,,multiple_choice,"If you could live in any fictional world, which one?","Marvel Universe","Middle-earth","Star Wars","Pokemon World",g
+57,,multiple_choice,"What is the most overplayed song of all time?","Don't Stop Believin'","Sweet Caroline","Bohemian Rhapsody","Happy",x
+58,,multiple_choice,"What is the worst movie sequel?","Speed 2: Cruise Control","Jaws: The Revenge","Matrix Revolutions","Star Wars: Episode I",g
+59,,multiple_choice,"What is the worst pizza topping?","Pineapple","Anchovies","Black Olives","Mushrooms",x
+60,,open,"Name a New Year's resolution nobody actually keeps",,,,,g
+61,,multiple_choice,"What is the hardest thing about being an adult?","Bills","Responsibility","Financial stress",,g
+62,,open,"What is the most useless school subject?",,,,,g
+63,,multiple_choice,"If aliens landed tomorrow, what would we show them first?","A Smartphone","A Map Of Earth","The Internet","Human Art",g
+64,,multiple_choice,"What animal would be the rudest if it could talk?","Cat","Goose","Honey Badger","Llama",x
+65,,multiple_choice,"If you could uninvent one thing, what would it be?","Social media","Nuclear weapons","Single-use plastics",,g
+66,,multiple_choice,"What age does someone become 'old'?","65","70","60",,g
+67,,multiple_choice,"What is the worst candy?","Black Licorice","Candy Corn","Circus Peanuts","Necco Wafers",x
+68,,multiple_choice,"What is the most divisive Thanksgiving food?","Green Bean Casserole","Cranberry sauce","Sweet Potato Casserole",,g
+69,,multiple_choice,"What movie do people quote too much?","Forrest Gump","Star Wars","Zoolander",,x
+70,,multiple_choice,"What is something expensive that feels cheap?","Designer Clothing","Printer Ink","College Textbooks","Theme Park Food",g
+71,,multiple_choice,"What is the worst thing to be allergic to?","Peanuts","Shellfish","Gluten","Bees",g
+72,,multiple_choice,"If animals could talk, which would be the most annoying?","Parrot","Chihuahua","Mosquito","Seagull",g
+73,,multiple_choice,"What would you put on your tombstone?","Still Loading...","Worth The Wait","Gone Fishing","I Told You I Was Sick",x
+74,,multiple_choice,"Dogs or cats?","Dogs","Cats",,,g
+75,,multiple_choice,"What is the best gas station snack?","Chips","Candy bar","Beef jerky",,x
+76,,multiple_choice,"What is the best dip for chips?","Salsa","French Onion Dip","Guacamole",,x
+77,,multiple_choice,"What is the best stadium food?","Hot Dog","Nachos","Popcorn",,x
+78,,multiple_choice,"What is the best movie for family night?","Toy Story","The Lion King","Home Alone",,x
+79,,multiple_choice,"What is the best type of french fry?","Shoestring","Waffle","Curly","Crinkle Cut",x
+80,,multiple_choice,"What is the best type of donut?","Glazed","Chocolate","Jelly",,x
+81,,multiple_choice,"What would be the hardest food to give up?","Pizza","Coffee","Chocolate","Cheese",g
+82,,multiple_choice,"Name something that is way harder than it looks","Juggling","Golf","Parenting","Learning A Language",x
+83,,multiple_choice,"Which holiday has the best food?","Thanksgiving","Christmas","Halloween","New Year's Eve",x
+84,,multiple_choice,"What is the best comfort show to rewatch?","The Office","Friends","Parks and Rec","Seinfeld",x
+85,,multiple_choice,"What is the most overused excuse?","Traffic","My Alarm Didn't Go Off","I Forgot","I Didn't See The Email",x
+86,,multiple_choice,"What is the best fast food breakfast?","Egg McMuffin","Chicken Biscuit","Breakfast Crunchwrap","Sausage Biscuit",x
+87,,multiple_choice,"What is the best Girl Scout cookie?","Thin Mints","Samoas","Tagalongs","Do-si-dos",x
+88,,multiple_choice,"What is the most stressful thing about the holidays?","Gift Shopping","Family Gatherings","Travel","Cooking",x
+89,,multiple_choice,"If you could eliminate one minor inconvenience forever, what?","Traffic Jams","Slow Wi-Fi","Wet Socks","Long Lines",g
+90,,multiple_choice,"What song would play every time you entered a room?","Eye of the Tiger","Welcome to the Jungle","Seven Nation Army","Thunderstruck",g
+91,,multiple_choice,"Is a hot dog a sandwich?","Yes","No",,,x
+92,,multiple_choice,"What is the ideal number of pillows on a bed?","4","2","3","1",g
+93,,multiple_choice,"Right way to cut a sandwich?","Diagonal","Straight",,,g
+94,,multiple_choice,"What is the correct cheese for a grilled cheese?","Cheddar","American","Swiss","Provolone",g
+95,,multiple_choice,"Cake or pie?","Cake","Pie",,,g
+96,,multiple_choice,"Boneless wings or bone-in wings?","Bone-in","Boneless",,,x
+97,,open,"What TV show went on at least two seasons too long?",,,,,g
+98,,multiple_choice,"Which children's character is secretly insufferable?","Caillou","Peppa Pig","Dora The Explorer","Elmo",x
+99,,multiple_choice,"Is it 'gif' with a hard G or a soft G?","Hard G","Soft G",,,g
+100,,multiple_choice,"Leaving voicemails:","Thoughtful","Waste Of Time",,,g
+101,,multiple_choice,"What is the worst public display of affection?","Deep Kissing","Baby Talk","Feeding Each Other","Touching Butts",g
+102,,multiple_choice,"What is the most suspicious neighborly favor to be asked?","Help Me Bury Something","Watch My House For Months","Drive Me Far Away","Hold This Briefcase",g
+103,,open,"What is the most inappropriate place to fall asleep in public?",,,,,g
+104,,open,"Who in this room would be the worst roommate?",,,,,g
+105,,open,"Who in this room would be the worst at keeping a secret?",,,,,g
+106,,open,"Who in this room would cry first during a sad movie?",,,,,g
+107,,open,"Who in this room would last the longest without their phone?",,,,,g
+108,,open,"Who in this room is most likely to start a fight over a board game?",,,,,g
+109,,open,"Who in this room would survive the longest in a horror movie?",,,,,g
+110,,open,"Who in this room would be the most dramatic over a paper cut?",,,,,g
+111,,open,"Who in this room has the worst taste in music?",,,,,g
+112,,open,"Who in this room would accidentally join a pyramid scheme?",,,,,g
+113,,open,"Who in this room would ruin a surprise party?",,,,,g
+114,,open,"Who in this room would panic and call 911 for a minor inconvenience?",,,,,g
+115,,open,"Who in this room would be the last to notice a fire in the building?",,,,,g
+116,,open,"Who in this room would win a hot dog eating contest?",,,,,g
+117,,multiple_choice,"Would you rather fight one horse-sized duck or a hundred duck-sized horses?","Fight One Horse-sized Duck","A Hundred Duck-sized Horses",,,g
+118,,multiple_choice,"Would you rather be the funniest person in the room or the smartest?","The Funniest Person In The Room","The Smartest",,,g
+119,,multiple_choice,"Would you rather be famous for something embarrassing or unknown forever?","Famous For Something Embarrassing","Unknown Forever",,,g
+120,,multiple_choice,"Would you rather always be 10 minutes late or 20 minutes early?","Always Be 10 Minutes Late","20 Minutes Early",,,g
+121,,multiple_choice,"Would you rather live without music or without movies?","Without Music","Without Movies",,,g
+122,,multiple_choice,"Would you rather have unlimited money or unlimited time?","Unlimited Money","Unlimited Time",,,g
+123,,multiple_choice,"Would you rather always speak your mind or never speak again?","Always Speak Your Mind","Never Speak Again",,,g
+124,,multiple_choice,"Would you rather sweat mayonnaise or cry hot sauce?","Sweat Mayonnaise","Cry Hot Sauce",,,g
+125,,multiple_choice,"Would you rather have no taste buds or be colorblind?","No Taste Buds","Be Colorblind",,,g
+126,,multiple_choice,"Would you rather never age physically or never age mentally?","Never Age Physically","Never Age Mentally",,,g
+127,,multiple_choice,"Would you rather your sweat smell like bleu cheese or your breath smell like tuna?","Your Sweat Smell Like Bleu Cheese","Your Breath Smell Like Tuna",,,g
+128,,multiple_choice,"Would you rather only communicate through dance or through opera singing?","Only Communicate Through Dance","Through Opera Singing",,,g
+129,,multiple_choice,"Would you rather have knees that bend both ways or elbows that only bend forward?","Knees That Bend Both Ways","Elbows That Only Bend Forward",,,g
+130,,multiple_choice,"Would you rather your bed always feel sandy or your shower always run ice cold?","Your Bed Always Feel Sandy","Your Shower Always Run Ice Cold",,,g
+131,,multiple_choice,"If you were abducted, who would you choose?","Aliens","Pirates","Ghosts","Vampires",g
+132,,multiple_choice,"Pick your permanent body scent:","Old Library Books","Fresh Cut Grass","New Car Smell","Fresh Baked Bread",g
+133,,multiple_choice,"You can only eat one cuisine forever?","Mexican","Italian","Japanese","Indian",g
+134,,multiple_choice,"Pick your nightmare roommate:","A Loud Chewer","A Sleep Talker","A Thermostat Dictator","A Food Thief",g
+135,,multiple_choice,"You're stuck in an elevator with one celebrity?","The Rock","Oprah Winfrey","Gordon Ramsay","Tom Hanks",g
+136,,multiple_choice,"Your shower now only dispenses one liquid:","Lukewarm Gravy","Flat Soda","Dish Soap","Maple Syrup",g
+137,,multiple_choice,"Pick your useless superpower:","Talk To Ants","Glow In The Dark","Taste Colors","Summon A Single Pigeon",g
+138,,multiple_choice,"You must wear one costume to work every day:","Hot Dog Suit","Banana Suit","Inflatable Dinosaur","Chicken Suit",rq
+139,,multiple_choice,"Pick your worst tattoo:","A Toilet","Your Ex's Face","A QR Code To A Rick Roll","A Misspelled Word",r
+140,,multiple_choice,"You can only listen to one artist forever?","Elevator Music","Autotuned Pop","Commercial Jingles",,g
+141,,multiple_choice,"Zombie apocalypse weapon?","Baseball Bat","Crowbar","Garden Hoe","Fire Poker",g
+142,,multiple_choice,"Your car horn is replaced with one sound?","Vuvuzela Blast","Baby Crying","Kazoo Solo","Laugh Track",g
+143,,multiple_choice,"Pick your new neighbor:","Constant Party Host","Barking Dog Owner","Early Morning Builder","Conspiracy Theorist",g
+144,,multiple_choice,"You must get a face tattoo?","Forehead Target","Giant Mole","Barcode","Permanent Unibrow",g
+145,,multiple_choice,"Pick your prison cellmate:","Constant Hummer","Nail Clipper","Finger Tapper","Never Talks",g
+146,,multiple_choice,"Your voice permanently changes to?","Darth Vader","A Chipmunk","Game Show Announcer","Pirate Accent",rq
+147,,multiple_choice,"You can only drink one thing forever?","Flat Soda","Warm Water","Unsweetened Tea","Tomato Juice",g
+148,,multiple_choice,"Worst haunted house ghost?","Replaces Sugar With Salt","Changes TV Channel","Leaves Wet Towels","Unties Your Shoes",g
+149,,multiple_choice,"You time travel but can only visit?","Medieval Times","Wild West","Roaring Twenties","Stone Age",g
+150,,multiple_choice,"You get one free crime with no consequences: what do you do?","Rob A Bank","Steal A Sports Car","Free Zoo Animals","Prank A Leader",g
+151,,multiple_choice,"Pick your apocalypse buddy:","Doctor","Mechanic","Farmer","Engineer",g
+152,,multiple_choice,"You can add one ridiculous rule to any sport — what is it?","Wear Silly Hats","Animal On Field","Rubber Chicken Ball","Must Play Blindfolded",g
+153,,multiple_choice,"You must rename yourself after a food — what's your new name?","Muffin","Noodle","Potato","Cookie",g
+154,,multiple_choice,"Which fictional villain actually had a point?","Thanos","Magneto","Killmonger","Syndrome",g
+155,,multiple_choice,"Pick your worst way to travel:","Pogo Stick","Unicycle","Roller Skates Uphill","Tandem With Stranger",g
+156,,multiple_choice,"Your life gets a laugh track — which situation would be the most annoying?","During An Argument","At A Funeral","Job Interview","First Date",g
+157,,multiple_choice,"You have to fight one animal:","Kangaroo","Ostrich","Angry Goose","Badger",g
+158,,multiple_choice,"Pick your personal hell:","Eternal Hold Music","Permanent Wet Socks","Never-Ending Hiccups","Always Slow Wifi",g
+159,,multiple_choice,"You wake up as an animal for a day?","House Cat","Dolphin","Eagle","Dog",g
+160,,multiple_choice,"Which mythical creature would be the most annoying roommate?","Goblin","Vampire","Werewolf","Unicorn",g
+161,,multiple_choice,"Celebrity narrating your life?","Morgan Freeman","David Attenborough","Ryan Reynolds","Kristen Bell",g
+162,,multiple_choice,"You can only use one condiment for the rest of your life — which one?","Ketchup","Mayonnaise","Hot Sauce","Soy Sauce",x
+163,,multiple_choice,"Which fast food mascot would win in a fight?","The Burger King","Ronald McDonald","Jack In The Box","Colonel Sanders",g
+164,,multiple_choice,"Pick your new ringtone that you can never change.","Baby Crying","Dial-Up Modem","The Macarena","Bagpipes",g
+165,,multiple_choice,"You must eat one weird combo every day?","Ketchup On Ice Cream","Mustard On Cereal","Mayonnaise On Cookies","Hot Sauce On Yogurt",g
+166,,multiple_choice,"Trapped in a movie for a week?","Jurassic Park","The Hunger Games","Titanic","A Quiet Place",g
+167,,multiple_choice,"Name a food that people eat wrong","Cupcakes","Sushi","Pizza","Tacos",g
+168,,multiple_choice,"What is a scam that we have all just agreed is fine?","Bottled Water","Printer Ink","Movie Popcorn","Extended Warranties",g
+169,,multiple_choice,"What is a dealbreaker on a road trip?","Bad Music Choices","Constant Complaining","Not Sharing Driving","Messy Car",g
+170,,multiple_choice,"What fictional character do you relate to the most?","Harry Potter","Hermione Granger","SpongeBob SquarePants","Simba",g
+171,,multiple_choice,"What is the funniest word in the English language?","Fart","Giggle","Poop","Wobbly",g
+172,,multiple_choice,"What is the best decade for music?","1980s","1990s","2000s","1970s",g
+173,,multiple_choice,"What is the one thing in your home you would save in a fire?","Photo Album","Pet","Important Documents","Sentimental Item",g
+174,,multiple_choice,"What common phrase makes absolutely no sense?","Break A Leg","Raining Cats And Dogs","Spill The Beans","Bite The Bullet",g
+175,,multiple_choice,"What is the best free thing in life?","Laughter","Sunshine","A Good Night's Sleep","Hugs",g
+176,,multiple_choice,"What makes someone immediately likeable?","Genuine Smile","Good Listener","Kindness","Sense Of Humor",g
+177,,multiple_choice,"What is the most satisfying sound?","Crackling Fire","Fresh Snow Crunch","Pen Clicking","Pouring Coffee",g
+178,,multiple_choice,"What is the most nostalgic smell?","Freshly Baked Cookies","Rain","Freshly Cut Grass","Campfire Smoke",g
+179,,open,"What is the first app you check in the morning?",,,,,g
+180,,open,"What childhood snack do you still eat as an adult?",,,,,x
+181,,multiple_choice,"What is the best midnight snack?","Cereal","Chips","Ice Cream","Toast",g
+182,,multiple_choice,"What is the scariest animal?","Shark","Snake","Spider",,g
+183,,multiple_choice,"What is the most annoying sound?","Nails on a chalkboard","Mosquito buzzing","Baby crying",,x
+184,,multiple_choice,"What is the best ice cream flavor?","Vanilla","Chocolate","Strawberry","Cookies And Cream",g
+185,,multiple_choice,"What is the best breakfast food?","Bacon","Pancakes","Eggs",,g
+186,,open,"If you won the lottery, what would you buy first?",,,,,x
+187,,multiple_choice,"Name a Disney movie everyone has seen","The Lion King","Frozen","Toy Story","Aladdin",x
+188,,multiple_choice,"What is the most annoying household chore?","Cleaning the bathroom","Doing dishes","Laundry",,g
+189,,open,"If you could eat one food forever, what would it be?",,,,,x
+190,,open,"Name a superhero everyone knows",,,,,x
+191,,multiple_choice,"What is the best Thanksgiving side dish?","Mashed Potatoes","Stuffing","Green Bean Casserole",,x
+192,,open,"What is the best Halloween candy?",,,,,x
+193,,open,"What is the most important invention ever?",,,,,x
+194,,multiple_choice,"What is the best thing about dogs?","Loyalty","Companionship","Nothing. Dogs are overrated",,x
+195,patriotic,open,"Name something you'd see at a Fourth of July parade.",,,,,x
+196,patriotic,open,"Name a president that everyone knows.",,,,,x
+197,patriotic,multiple_choice,"What is the best thing to grill on the 4th of July?","Burgers","Brats","Hot Dogs","Tofu",x
+198,patriotic,multiple_choice,"Where would you put America's capital?","Philadelphia","Washington D.C.","New York City","Hawaii",x
+199,patriotic,multiple_choice,"What would be the worst part of fighting in the Revolutionary War?","Marching barefoot in winter","Sleeping in mud and snow","Eating hardtack and rotten meat",,x
+200,patriotic,multiple_choice,"What would be the worst job during the Revolutionary War?","Cannon loader","Latrine digger","Surgeon with no anesthesia",,x
+201,patriotic,multiple_choice,"Where would you like to throw an epic dance party?","The White House","The Capitol","The Pentagon",,x
+202,patriotic,multiple_choice,"You get to be the face on some currency, what do you pick?","The penny (everyone hates it)","The $1 bill (most common)","The quarter (most recognized)","The $100 bill (most prestigious)",x
+203,patriotic,multiple_choice,"When another country is being crushed by a brutal dictator, should America step in?","Yes! We're the good guys — we stick up for the little guy!","No way, we can't solve everyone's problems","Only if things get really, really bad",,x
+204,patriotic,multiple_choice,"Should every state get to make its own rules, or should America have one rulebook for everyone?","Each state decides — they know their people best!","One set of rules for everyone — fairer that way!","Some national rules, but states get a say too",,x
+205,patriotic,multiple_choice,"Should the government put cameras everywhere for safety, even if it means less privacy?","Yes — safety first!","No — freedom is more important!","Depends how much privacy we're giving up",,x
+206,patriotic,multiple_choice,"America was built by immigrants. How open should the doors be today?","Wide open — everyone deserves a shot!","Controlled — smart rules make it fair","Closed — put Americans first",,x
+207,patriotic,multiple_choice,"Your teacher keeps adding unfair rules and won't listen to anyone. What do you do?","Protest loudly until they change it!","Write a petition and get everyone to sign","Just follow the rules and deal with it","Rebellion! Flip the desks!",x
+208,patriotic,multiple_choice,"Rich people should pay how much in taxes?","Way more — they can afford it!","The same percentage as everyone else — fair is fair!","Less — they built businesses and hired people!",,x
+209,patriotic,multiple_choice,"Should news channels be allowed to criticize the President on live TV?","Absolutely — especially when they do dumb stuff","Only if they can back it up with facts","No — we should respect our leaders",,x
+210,patriotic,multiple_choice,"Your town votes 7-3 to ban a religion from meeting in public. Is that OK?","Yes — majority rules, that's democracy","No — some things aren't up for a vote",,,x
+211,patriotic,multiple_choice,"America is trillions in debt. Should the government keep spending?","Yes — programs like Social Security and Medicare are worth it","No — we're just handing our kids the bill",,,?
+212,patriotic,multiple_choice,"A new factory would create 1,000 jobs but pollute a nearby river. Build it?","Yes — those families need jobs!","No — you can't drink money","Only if they pinky promise to keep the river clean",,?
+213,patriotic,multiple_choice,"Your neighbor is caught on camera robbing a store. Should they still get a full trial and a lawyer?","Yes — the moment we skip trials, anyone can be called ""obviously guilty""","No — we literally have them on camera, what's the trial for?",,,?
+214,patriotic,multiple_choice,"Should a politician who's been in office for 40 years be allowed to run again?","Yes — if people keep voting for them, democracy works!","No — give someone else a turn already","Two terms max, like the President",,?
+215,patriotic,multiple_choice,"What does the right to own a gun mean today?","Anyone who wants one should be able to get one","Strict rules — background checks, waiting periods, the works","Hunting rifles yes, military-style weapons no",,?
+216,patriotic,multiple_choice,"What is the greatest American landmark?","Statue of Liberty","Grand Canyon","Mount Rushmore","Golden Gate Bridge",?
+217,patriotic,multiple_choice,"What best represents the American spirit?","Bald Eagle","Liberty Bell","The Flag","Uncle Sam",?
+218,patriotic,multiple_choice,"Who was the greatest American president?","George Washington","Abraham Lincoln","Ronald Reagan","Donald Trump",?
+219,patriotic,multiple_choice,"What's the greatest American song?","Star Spangled Banner","America the Beautiful","Born in the USA","Party in the USA",?
+220,patriotic,multiple_choice,"Who was the coolest Founding Father?","George Washington","Benjamin Franklin","Thomas Jefferson","Alexander Hamilton",?
+221,patriotic,multiple_choice,"If you could only keep one American right, which would it be?","Freedom of speech","Right to own a gun","Freedom from unlawful search","Right to a fair trial",?
+222,patriotic,multiple_choice,"What was Benjamin Franklin's coolest achievement?","Discovered electricity","Invented bifocals","Outsmarted the British in Paris","Helped write the Constitution",?
+223,patriotic,multiple_choice,"What's America's most important founding document?","Declaration of Independence","The Constitution","The Bill of Rights",,?
+224,patriotic,multiple_choice,"Which Founding Father had the best life story?","George Washington","Benjamin Franklin","Alexander Hamilton","Thomas Jefferson",?
+225,patriotic,multiple_choice,"If the Founding Fathers had a group chat, who would send the most messages?","Benjamin Franklin","Alexander Hamilton","John Adams","Thomas Jefferson",?
+226,patriotic,multiple_choice,"What would George Washington think of America today?","Proud","Confused","Amazed","Deeply concerned",?
+227,preset,multiple_choice,"Would you rather walk a dog or play with a cat?","Walk a dog","Play with a cat",,,?
+228,preset,multiple_choice,"Would you rather live where it's hot or where it's cold?","Live where it's hot","Live where it's cold",,,?
+229,preset,multiple_choice,"Would you rather drive a monster truck or pilot an airplane?","Drive a monster truck","Pilot an airplane",,,?
+230,preset,multiple_choice,"Would you rather hear what everyone is thinking or see the future?","Hear what everyone is thinking","See the future",,,?
+231,preset,multiple_choice,"Would you rather drink with your nose or taste with your hands?","Drink with your nose","Taste with your hands",,,?
+232,preset,multiple_choice,"Would you rather stay outside all day or stay inside all day?","Stay outside all day","Stay inside all day",,,?
+233,preset,multiple_choice,"Would you rather make your own food or make your own clothes?","Make your own food","Make your own clothes",,,?
+234,preset,multiple_choice,"Would you rather fly with birds or swim with penguins?","Fly with birds","Swim with penguins",,,?
+235,preset,multiple_choice,"Would you rather live on the moon or live underwater?","Live on the moon","Live underwater",,,?
+236,preset,multiple_choice,"Would you rather visit the future or visit the past?","Visit the future","Visit the past",,,?
+237,preset,multiple_choice,"Would you rather have really long toes or really short fingers?","Really long toes","Really short fingers",,,?
+238,preset,multiple_choice,"Would you rather ride in a hot air balloon or ride in a submarine?","Ride in a hot air balloon","Ride in a submarine",,,?
+239,preset,multiple_choice,"Would you rather live in a tree house or live in a castle?","Live in a tree house","Live in a castle",,,?
+240,preset,multiple_choice,"Would you rather fight one horse-sized duck or 100 duck-sized horses?","Fight one horse-sized duck","Fight 100 duck-sized horses",,,?
+241,preset,multiple_choice,"Would you rather be able to speak to animals or speak all human languages?","Speak to animals","Speak all human languages",,,?
+242,preset,multiple_choice,"Would you rather grow an inch taller every year or an inch shorter every year?","Grow an inch taller every year","Grow an inch shorter every year",,,?
+243,preset,multiple_choice,"Would you rather live without music or live without movies?","Live without music","Live without movies",,,?
+244,preset,multiple_choice,"Would you rather have tiny hands or tiny feet?","Tiny hands","Tiny feet",,,?
+245,preset,multiple_choice,"Would you rather never need sleep or never need to eat?","Never need sleep","Never need to eat",,,?
+246,preset,multiple_choice,"Would you rather live in Hogwarts, Narnia, or Middle Earth?","Hogwarts","Narnia","Middle Earth",,?
