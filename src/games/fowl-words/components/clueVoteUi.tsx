@@ -110,6 +110,15 @@ export function PeerLoveChip({ count }: { count: number }) {
   )
 }
 
+export function PeerLoveChipPlaceholder() {
+  return (
+    <span className={`${SCORE_CHIP_SHELL} invisible`} aria-hidden="true">
+      <span>❤️</span>
+      <span>0</span>
+    </span>
+  )
+}
+
 export function PeerBooChip({ count }: { count: number }) {
   if (count <= 0) return null
   return (
@@ -119,6 +128,15 @@ export function PeerBooChip({ count }: { count: number }) {
     >
       {count}
     </ScoreChip>
+  )
+}
+
+export function PeerBooChipPlaceholder() {
+  return (
+    <span className={`${SCORE_CHIP_SHELL} invisible`} aria-hidden="true">
+      <span>👎</span>
+      <span>0</span>
+    </span>
   )
 }
 

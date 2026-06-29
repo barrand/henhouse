@@ -261,6 +261,8 @@ export default function RoundResultView({
                 const isGuesserBoo = activeGuesserBooIdx === idx
                 const canGuesserVote = isCurrentGuesser && isVisible && !isYours
                 const canAwardMostHelpful = canGuesserVote && round.isCorrect
+                const showPassiveMostHelpful = !canAwardMostHelpful && isMostHelpful
+                const showPassiveGuesserBoo = !canGuesserVote && isGuesserBoo
 
                 const showUsedBadge = isVisible && round.isCorrect && isYours
 
@@ -308,7 +310,7 @@ export default function RoundResultView({
                       )}
                     </div>
 
-                    <div className="flex gap-1.5 mt-auto shrink-0">
+                    <div className="flex gap-1.5 mt-auto shrink-0 min-h-9">
                       {round.isCorrect ? (
                         <>
                           {canAwardMostHelpful ? (
@@ -321,20 +323,26 @@ export default function RoundResultView({
                               title={`Most Helpful +${mvpPts}${group.playerIds.length > 1 ? ' each' : ''}`}
                               onClick={(e) => handleMostHelpfulVote(idx, e)}
                             />
-                          ) : (
+                          ) : showPassiveMostHelpful ? (
                             <MostHelpfulCell
                               active={isMostHelpful}
                               perAuthor={mvpPts}
                               authorCount={group.playerIds.length}
                             />
+                          ) : (
+                            <div className="flex-1" aria-hidden="true" />
                           )}
-                          <BooCell
-                            giverBooCount={canGuesserVote ? 0 : booCount}
-                            guesserBoo={isGuesserBoo}
-                            interactive={canGuesserVote}
-                            isActive={isGuesserBoo}
-                            onClick={canGuesserVote ? (e) => handleGuesserBoo(idx, e) : undefined}
-                          />
+                          {canGuesserVote || showPassiveGuesserBoo ? (
+                            <BooCell
+                              giverBooCount={canGuesserVote ? 0 : booCount}
+                              guesserBoo={isGuesserBoo}
+                              interactive={canGuesserVote}
+                              isActive={isGuesserBoo}
+                              onClick={canGuesserVote ? (e) => handleGuesserBoo(idx, e) : undefined}
+                            />
+                          ) : (
+                            <div className="flex-1" aria-hidden="true" />
+                          )}
                         </>
                       ) : canGuesserVote ? (
                         <BooCell
@@ -345,12 +353,14 @@ export default function RoundResultView({
                           isActive={isGuesserBoo}
                           onClick={(e) => handleGuesserBoo(idx, e)}
                         />
-                      ) : (
+                      ) : showPassiveGuesserBoo ? (
                         <BooCell
                           giverBooCount={booCount}
                           guesserBoo={isGuesserBoo}
                           wide
                         />
+                      ) : (
+                        <div className="flex-1" aria-hidden="true" />
                       )}
                     </div>
                   </div>

@@ -13,6 +13,8 @@ import {
   myLovedGroups,
   PeerLoveChip,
   PeerBooChip,
+  PeerLoveChipPlaceholder,
+  PeerBooChipPlaceholder,
   CARD_VOTE_TRANSITION,
   VOTE_COUNT_CLASS,
   clueCardBorderClass,
@@ -149,6 +151,7 @@ export default function RevealView({
   }
 
   const allDuplicates = visibleSet.size === 0 && round.clueGroups.length > 0
+  const lockedDuplicateCount = round.clueGroups.filter((group, idx) => group.isDuplicate && !visibleSet.has(idx)).length
   const unlockedGroupIndex =
     round.lastUnlockedGroupIndex != null && visibleSet.has(round.lastUnlockedGroupIndex)
       ? round.lastUnlockedGroupIndex
@@ -200,6 +203,14 @@ export default function RevealView({
                   : unlockedClueText
                   ? 'Try again — points just dropped.'
                   : 'Try again — same clues, fewer points.'}
+              </p>
+            )}
+            {!allDuplicates && lockedDuplicateCount > 0 && (
+              <p className="text-outline text-xs mt-1 font-body">
+                {lockedDuplicateCount} locked duplicate clue{lockedDuplicateCount !== 1 ? 's' : ''}{' '}
+                {round.currentAttempt < round.maxAttempts
+                  ? `could unlock if this guess is wrong.`
+                  : 'still hidden this round.'}
               </p>
             )}
           </div>
@@ -299,12 +310,10 @@ export default function RevealView({
                       <p className="text-on-surface-variant text-center font-body text-[10px] font-medium leading-snug h-4 truncate">
                         {author}
                       </p>
-                      {(loveCount > 0 || booCount > 0) && (
-                        <div className="mt-1 flex items-center justify-center gap-1">
-                          <PeerLoveChip count={loveCount} />
-                          <PeerBooChip count={booCount} />
-                        </div>
-                      )}
+                      <div className="mt-1 flex min-h-[18px] items-center justify-center gap-1">
+                        {loveCount > 0 ? <PeerLoveChip count={loveCount} /> : <PeerLoveChipPlaceholder />}
+                        {booCount > 0 ? <PeerBooChip count={booCount} /> : <PeerBooChipPlaceholder />}
+                      </div>
                     </div>
                   )
                 }
