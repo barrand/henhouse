@@ -233,6 +233,9 @@ export const submitClue = onCall(async (request) => {
 
   const clueDeadline = roundData.clueSubmissionDeadline?.toDate?.()
   if (clueDeadline && Date.now() > clueDeadline.getTime()) {
+    await runDeduplication(gameId, roundNum).catch((err) => {
+      console.error('submitClue deadline dedup trigger failed:', err)
+    })
     throw new HttpsError('deadline-exceeded', 'Time is up')
   }
 
@@ -645,14 +648,22 @@ export const fowlWordsForceDedup = onCall(async (request) => {
   const { gameId, roundNum } = request.data as { gameId: string; roundNum: number }
   const firestore = db()
   const gameSnap = await firestore.collection('games').doc(gameId).get()
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
-  if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can force dedup')
 
   const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
   const roundSnap = await roundRef.get()
   if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
-  if (roundSnap.data()!.status !== 'clue-submission') {
+  const round = roundSnap.data()!
+  if (round.status !== 'clue-submission') {
     throw new HttpsError('failed-precondition', 'Already past clue submission')
+  }
+  const clueDeadline = round.clueSubmissionDeadline?.toDate?.()
+  const deadlinePassed = !!clueDeadline && Date.now() > clueDeadline.getTime()
+  const isJoinedPlayer = Array.isArray(game.playerIds) && game.playerIds.includes(uid)
+
+  if (game.hostId !== uid && !(deadlinePassed && isJoinedPlayer)) {
+    throw new HttpsError('permission-denied', 'Only host can force dedup before time runs out')
   }
 
   await runDeduplication(gameId, roundNum)

@@ -18,16 +18,18 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
   const [timeLeft, setTimeLeft] = useState(60)
   const clueRef = useRef(clue)
   const autoSubmittedRef = useRef(false)
-  const hostForcedRef = useRef(false)
+  const timeoutForcedRef = useRef(false)
+  const myClueSubmittedRef = useRef(false)
 
   // Keep ref in sync so the timer callback can read current value
   useEffect(() => { clueRef.current = clue }, [clue])
+  useEffect(() => { myClueSubmittedRef.current = !!(currentPlayer?.id && round.cluesByPlayer[currentPlayer.id]) }, [currentPlayer?.id, round.cluesByPlayer])
 
   // Countdown timer — auto-submit on expiry
   useEffect(() => {
     if (!round.clueSubmissionDeadline) return
     autoSubmittedRef.current = false
-    hostForcedRef.current = false
+    timeoutForcedRef.current = false
 
     const deadlineMs = round.clueSubmissionDeadline.seconds * 1000
 
@@ -37,16 +39,16 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
 
       if (remaining === 0) {
         // Givers: auto-submit whatever they've typed (if anything and not yet submitted)
-        if (!isGuesser && !autoSubmittedRef.current && !myClueSubmitted) {
+        if (!isGuesser && !autoSubmittedRef.current && !myClueSubmittedRef.current) {
           autoSubmittedRef.current = true
           const currentClue = clueRef.current.trim()
           if (currentClue && currentClue.split(/\s+/).length === 1) {
             try { await submitClue(game.id, game.currentRound, currentClue) } catch { /* ignore */ }
           }
         }
-        // Host: force dedup after a short grace period (2s after individual auto-submits)
-        if (isHost && !hostForcedRef.current) {
-          hostForcedRef.current = true
+        // Any client can nudge dedup after deadline; backend keeps it idempotent.
+        if (!timeoutForcedRef.current) {
+          timeoutForcedRef.current = true
           setTimeout(async () => {
             try {
               await forceDedup(game.id, game.currentRound)
@@ -59,7 +61,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
     tick()
     const interval = setInterval(tick, 500)
     return () => clearInterval(interval)
-  }, [round.clueSubmissionDeadline?.seconds]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [game.id, game.currentRound, isGuesser, round.clueSubmissionDeadline])
 
   const myClueSubmitted = currentPlayer?.id && !!round.cluesByPlayer[currentPlayer.id]
   const cluesCount = Object.keys(round.cluesByPlayer).length
@@ -79,8 +81,9 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
     try {
       await submitClue(game.id, game.currentRound, clue)
       setClue("")
-    } catch (err: any) {
-      setError(err.message ?? "Couldn’t send your clue")
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Couldn’t send your clue"
+      setError(message)
     } finally {
       setSubmitting(false)
     }
@@ -93,8 +96,9 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
       } else {
         await forceDedup(game.id, game.currentRound)
       }
-    } catch (err: any) {
-      setError(err.message ?? "Couldn’t skip the wait")
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Couldn’t skip the wait"
+      setError(message)
     }
   }
 
