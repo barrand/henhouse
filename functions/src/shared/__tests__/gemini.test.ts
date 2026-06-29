@@ -55,6 +55,13 @@ describe('fuzzyMatch', () => {
     expect(fuzzyMatch('city', 'cities')).toBe(true)
   })
 
+  it('matches simple base words with -ing and -ed endings', () => {
+    expect(fuzzyMatch('surfboarding', 'surfboard')).toBe(true)
+    expect(fuzzyMatch('surfboard', 'surfboarding')).toBe(true)
+    expect(fuzzyMatch('snowboarded', 'snowboard')).toBe(true)
+    expect(fuzzyMatch('snowboard', 'snowboarded')).toBe(true)
+  })
+
   it('does not match different words', () => {
     expect(fuzzyMatch('happy', 'joy')).toBe(false)
     expect(fuzzyMatch('ocean', 'beach')).toBe(false)

@@ -363,6 +363,11 @@ export function fuzzyMatch(guess: string, secret: string): boolean {
   if (g.endsWith('y') && g.slice(0, -1) + 'ies' === s) return true
   if (s.endsWith('y') && s.slice(0, -1) + 'ies' === g) return true
 
+  // Simple verb/noun form: surfboard/surfboarding, snowboard/snowboarded.
+  // Keep this conservative so unrelated short words do not match.
+  if (s.length >= 5 && (g === s + 'ing' || g === s + 'ed')) return true
+  if (g.length >= 5 && (s === g + 'ing' || s === g + 'ed')) return true
+
   return false
 }
 
