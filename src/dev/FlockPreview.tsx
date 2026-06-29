@@ -1,4 +1,5 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { useEffect } from 'react'
 import Lobby from '@flock/components/Lobby'
 import GameHeader from '@flock/components/GameHeader'
 import QuestionDisplay from '@flock/components/QuestionDisplay'
@@ -31,6 +32,10 @@ export default function FlockPreview() {
     next.set('as', id)
     setSearchParams(next, { replace: true })
   }
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [screen, asPlayerId, scenario.game.status, scenario.round?.status, scenario.isFinal, scenario.showLeaderboard])
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">

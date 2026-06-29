@@ -34,7 +34,7 @@ const CLUSTER_STYLES: Record<ClusterType, {
   outlier: {
     cardClass: 'bg-surface-container border border-outline-variant/60',
     textClass: 'text-on-surface',
-    henImg: '/images/generated-comic/hen-sleeping.png',
+    henImg: '/images/generated-comic/hen-embarrassed.png',
     badge: 'MINORITY',
     badgeClass: 'bg-secondary-fixed text-on-secondary-fixed',
   },
@@ -136,7 +136,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
           : { img: '/images/generated-comic/hen-confused.png', label: 'No flock formed this round', points: null }
       case 'outlier':
         return hasFlock
-          ? { img: '/images/generated-comic/hen-sleeping.png', label: 'You were in the minority', points: null }
+          ? { img: '/images/generated-comic/hen-embarrassed.png', label: 'You were in the minority', points: null }
           : { img: '/images/generated-comic/hen-confused.png', label: 'No flock formed this round', points: null }
       case 'rotten':
         return { img: '/images/generated-comic/hen-embarrassed.png', label: 'Lone odd one out', points: '−1 pt' }

@@ -74,6 +74,10 @@ export default function Game() {
     }
   }, [lookupError, navigate])
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [game?.status, round?.status, isWaitingForNextRound, lookupError])
+
   if (authLoading || gameLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface linen-texture">

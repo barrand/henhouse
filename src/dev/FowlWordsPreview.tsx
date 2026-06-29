@@ -119,6 +119,10 @@ export default function FowlWordsPreview() {
     setSearchParams(next, { replace: true })
   }
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [screen, asPlayerId, scenario.game.status, previewRound?.status, scenario.isFinal, scenario.showLeaderboard])
+
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <div className="bg-secondary text-on-secondary text-center text-[11px] font-label font-bold py-1.5 px-3 tracking-wide">
