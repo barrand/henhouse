@@ -1,23 +1,5 @@
 [
   {
-    "text": "What is a food that should never be put on pizza?",
-    "type": "multiple_choice",
-    "options": [
-      "Pineapple",
-      "Anchovies",
-      "Olives"
-    ]
-  },
-  {
-    "text": "Name a pizza topping everyone argues about",
-    "type": "multiple_choice",
-    "options": [
-      "Pineapple",
-      "Anchovies",
-      "Olives"
-    ]
-  },
-  {
     "text": "What is the most awkward social situation?",
     "type": "multiple_choice",
     "options": [
@@ -32,7 +14,7 @@
     "options": [
       "Valentine's Day",
       "New Year's Eve",
-      "Christmas"
+      "St Patricks Day"
     ]
   },
   {
@@ -54,15 +36,6 @@
     ]
   },
   {
-    "text": "What would be the worst thing to hear a doctor say?",
-    "type": "multiple_choice",
-    "options": [
-      "It's cancer",
-      "It's terminal",
-      "We made a mistake"
-    ]
-  },
-  {
     "text": "Is cereal a soup?",
     "type": "multiple_choice",
     "options": [
@@ -80,38 +53,12 @@
     ]
   },
   {
-    "text": "If you could make one food zero calories, what would it be?",
-    "type": "multiple_choice",
-    "options": [
-      "Pizza",
-      "Chocolate",
-      "Ice cream"
-    ]
-  },
-  {
-    "text": "What is the best guilty pleasure TV show?",
-    "type": "multiple_choice",
-    "options": [
-      "The Bachelor",
-      "Love Island",
-      "Real Housewives of Beverly Hills"
-    ]
-  },
-  {
     "text": "What would you bring to a deserted island?",
     "type": "multiple_choice",
     "options": [
-      "Water filter",
+      "A book",
       "Knife",
       "Lighter"
-    ]
-  },
-  {
-    "text": "Toilet paper:",
-    "type": "multiple_choice",
-    "options": [
-      "Over",
-      "Under"
     ]
   },
   {
@@ -133,11 +80,11 @@
     ]
   },
   {
-    "text": "What is the least attractive accent?",
+    "text": "What is the most attractive accent?",
     "type": "multiple_choice",
     "options": [
       "Southern American",
-      "Bostonian",
+      "British",
       "Southern drawl"
     ]
   },
@@ -159,15 +106,6 @@
       "Fine Art",
       "Cryptocurrency",
       "Sports Rules"
-    ]
-  },
-  {
-    "text": "What would be the worst superpower?",
-    "type": "multiple_choice",
-    "options": [
-      "Read peoples thoughts�All of them",
-      "See through clothes�All of them",
-      "Super smell�All the smells"
     ]
   },
   {
@@ -221,26 +159,8 @@
     "type": "multiple_choice",
     "options": [
       "Go to the gym",
-      "Stick to a diet",
+      "Call",
       "Clean the house"
-    ]
-  },
-  {
-    "text": "What is the best thing about being home alone?",
-    "type": "multiple_choice",
-    "options": [
-      "Peace and quiet",
-      "Doing whatever I want",
-      "No judgment"
-    ]
-  },
-  {
-    "text": "What would be the worst job in the world?",
-    "type": "multiple_choice",
-    "options": [
-      "Porta-potty cleaner",
-      "Sewer worker",
-      "Garbage collector"
     ]
   },
   {
@@ -254,30 +174,12 @@
     ]
   },
   {
-    "text": "What is the worst food combination people actually eat?",
-    "type": "multiple_choice",
-    "options": [
-      "Pineapple on pizza",
-      "Ketchup on eggs",
-      "Pickles and peanut butter"
-    ]
-  },
-  {
     "text": "What would be the worst theme for a party?",
     "type": "multiple_choice",
     "options": [
       "Funeral",
       "Tax Audit",
       "Hospital"
-    ]
-  },
-  {
-    "text": "What is the most controversial condiment?",
-    "type": "multiple_choice",
-    "options": [
-      "Mayonnaise",
-      "Ranch",
-      "Sriracha"
     ]
   },
   {
@@ -318,54 +220,12 @@
     ]
   },
   {
-    "text": "What is the one food everyone thinks they make well but don't?",
-    "type": "multiple_choice",
-    "options": [
-      "Scrambled eggs",
-      "Mac and cheese",
-      "Grilled cheese"
-    ]
-  },
-  {
     "text": "What fictional character would be the worst coworker?",
     "type": "multiple_choice",
     "options": [
       "The Joker",
       "Michael Scott",
-      "Dwight Schrute",
-      "Sheldon Cooper"
-    ]
-  },
-  {
-    "text": "What would you never name your child?",
-    "type": "multiple_choice",
-    "options": [
-      "Karen",
-      "Adolf",
-      "Lucifer"
-    ]
-  },
-  {
-    "text": "What word is impossible to say in an angry voice?",
-    "type": "multiple_choice",
-    "options": [
-      "Bubbles",
-      "Marshmallow",
-      "Giggles"
-    ]
-  },
-  {
-    "text": "What everyday activity would be the funniest Olympic sport?",
-    "type": "open"
-  },
-  {
-    "text": "What is the weirdest thing that is considered normal?",
-    "type": "multiple_choice",
-    "options": [
-      "Small Talk",
-      "Paying To Live",
-      "Shaking Hands",
-      "Saying 'Bless You'"
+      "Darth Vader"
     ]
   },
   {
@@ -373,18 +233,8 @@
     "type": "multiple_choice",
     "options": [
       "Solving A Rubik's Cube",
-      "Expert Juggling",
-      "Unicycling",
-      "Card Flourishes"
-    ]
-  },
-  {
-    "text": "If you were a ghost, who would you haunt?",
-    "type": "multiple_choice",
-    "options": [
-      "Donald Trump",
-      "My ex-boss",
-      "My high school bully"
+      "Juggling",
+      "Unicycling"
     ]
   },
   {
@@ -397,15 +247,6 @@
     ]
   },
   {
-    "text": "What is the cringiest thing you did as a teenager?",
-    "type": "multiple_choice",
-    "options": [
-      "Terrible fashion choices",
-      "Trying too hard to be cool",
-      "Awkward attempts at flirting"
-    ]
-  },
-  {
     "text": "Name something people argue about in the car",
     "type": "open"
   },
@@ -414,19 +255,8 @@
     "type": "multiple_choice",
     "options": [
       "Rotten Food",
-      "Garbage",
-      "Sewage",
-      "Vomit"
-    ]
-  },
-  {
-    "text": "Name an actor who plays the same character in every movie",
-    "type": "multiple_choice",
-    "options": [
-      "Dwayne Johnson",
-      "Jason Statham",
-      "Adam Sandler",
-      "Liam Neeson"
+      "Vomit",
+      "Dirty Diapers"
     ]
   },
   {
@@ -437,16 +267,6 @@
       "New York City",
       "Paris",
       "Las Vegas"
-    ]
-  },
-  {
-    "text": "What is the most unromantic thing ever?",
-    "type": "multiple_choice",
-    "options": [
-      "Doing Taxes Together",
-      "Cleaning The Toilet",
-      "Complaining Constantly",
-      "Loud Snoring"
     ]
   },
   {
@@ -470,22 +290,12 @@
     ]
   },
   {
-    "text": "What is a totally reasonable fear that people make fun of?",
-    "type": "multiple_choice",
-    "options": [
-      "Spiders",
-      "Bugs",
-      "Clowns"
-    ]
-  },
-  {
     "text": "Name a celebrity who would be terrible at a party",
     "type": "multiple_choice",
     "options": [
       "Kanye West",
       "Elon Musk",
-      "Gordon Ramsay",
-      "Ben Shapiro"
+      "Gordon Ramsay"
     ]
   },
   {
@@ -515,45 +325,8 @@
       "Don't Stop Believin'",
       "Sweet Caroline",
       "Bohemian Rhapsody",
-      "Happy"
+      "Thriller"
     ]
-  },
-  {
-    "text": "What is the worst movie sequel?",
-    "type": "multiple_choice",
-    "options": [
-      "Speed 2: Cruise Control",
-      "Jaws: The Revenge",
-      "Matrix Revolutions",
-      "Star Wars: Episode I"
-    ]
-  },
-  {
-    "text": "What is the worst pizza topping?",
-    "type": "multiple_choice",
-    "options": [
-      "Pineapple",
-      "Anchovies",
-      "Black Olives",
-      "Mushrooms"
-    ]
-  },
-  {
-    "text": "Name a New Year's resolution nobody actually keeps",
-    "type": "open"
-  },
-  {
-    "text": "What is the hardest thing about being an adult?",
-    "type": "multiple_choice",
-    "options": [
-      "Bills",
-      "Responsibility",
-      "Financial stress"
-    ]
-  },
-  {
-    "text": "What is the most useless school subject?",
-    "type": "open"
   },
   {
     "text": "If aliens landed tomorrow, what would we show them first?",
@@ -588,9 +361,9 @@
     "text": "What age does someone become 'old'?",
     "type": "multiple_choice",
     "options": [
+      "50",
       "65",
-      "70",
-      "60"
+      "75"
     ]
   },
   {
@@ -599,8 +372,8 @@
     "options": [
       "Black Licorice",
       "Candy Corn",
-      "Circus Peanuts",
-      "Necco Wafers"
+      "Sour Warheads",
+      "Peeps"
     ]
   },
   {
@@ -610,15 +383,6 @@
       "Green Bean Casserole",
       "Cranberry sauce",
       "Sweet Potato Casserole"
-    ]
-  },
-  {
-    "text": "What movie do people quote too much?",
-    "type": "multiple_choice",
-    "options": [
-      "Forrest Gump",
-      "Star Wars",
-      "Zoolander"
     ]
   },
   {
@@ -652,16 +416,6 @@
     ]
   },
   {
-    "text": "What would you put on your tombstone?",
-    "type": "multiple_choice",
-    "options": [
-      "Still Loading...",
-      "Worth The Wait",
-      "Gone Fishing",
-      "I Told You I Was Sick"
-    ]
-  },
-  {
     "text": "Dogs or cats?",
     "type": "multiple_choice",
     "options": [
@@ -675,7 +429,8 @@
     "options": [
       "Chips",
       "Candy bar",
-      "Beef jerky"
+      "Beef jerky",
+      "Sunflower Seeds"
     ]
   },
   {
@@ -688,40 +443,13 @@
     ]
   },
   {
-    "text": "What is the best stadium food?",
-    "type": "multiple_choice",
-    "options": [
-      "Hot Dog",
-      "Nachos",
-      "Popcorn"
-    ]
-  },
-  {
-    "text": "What is the best movie for family night?",
-    "type": "multiple_choice",
-    "options": [
-      "Toy Story",
-      "The Lion King",
-      "Home Alone"
-    ]
-  },
-  {
     "text": "What is the best type of french fry?",
     "type": "multiple_choice",
     "options": [
       "Shoestring",
       "Waffle",
       "Curly",
-      "Crinkle Cut"
-    ]
-  },
-  {
-    "text": "What is the best type of donut?",
-    "type": "multiple_choice",
-    "options": [
-      "Glazed",
-      "Chocolate",
-      "Jelly"
+      "Traditional"
     ]
   },
   {
@@ -735,36 +463,6 @@
     ]
   },
   {
-    "text": "Name something that is way harder than it looks",
-    "type": "multiple_choice",
-    "options": [
-      "Juggling",
-      "Golf",
-      "Parenting",
-      "Learning A Language"
-    ]
-  },
-  {
-    "text": "Which holiday has the best food?",
-    "type": "multiple_choice",
-    "options": [
-      "Thanksgiving",
-      "Christmas",
-      "Halloween",
-      "New Year's Eve"
-    ]
-  },
-  {
-    "text": "What is the best comfort show to rewatch?",
-    "type": "multiple_choice",
-    "options": [
-      "The Office",
-      "Friends",
-      "Parks and Rec",
-      "Seinfeld"
-    ]
-  },
-  {
     "text": "What is the most overused excuse?",
     "type": "multiple_choice",
     "options": [
@@ -775,16 +473,6 @@
     ]
   },
   {
-    "text": "What is the best fast food breakfast?",
-    "type": "multiple_choice",
-    "options": [
-      "Egg McMuffin",
-      "Chicken Biscuit",
-      "Breakfast Crunchwrap",
-      "Sausage Biscuit"
-    ]
-  },
-  {
     "text": "What is the best Girl Scout cookie?",
     "type": "multiple_choice",
     "options": [
@@ -792,16 +480,6 @@
       "Samoas",
       "Tagalongs",
       "Do-si-dos"
-    ]
-  },
-  {
-    "text": "What is the most stressful thing about the holidays?",
-    "type": "multiple_choice",
-    "options": [
-      "Gift Shopping",
-      "Family Gatherings",
-      "Travel",
-      "Cooking"
     ]
   },
   {
@@ -877,28 +555,6 @@
     ]
   },
   {
-    "text": "What TV show went on at least two seasons too long?",
-    "type": "open"
-  },
-  {
-    "text": "Which children's character is secretly insufferable?",
-    "type": "multiple_choice",
-    "options": [
-      "Caillou",
-      "Peppa Pig",
-      "Dora The Explorer",
-      "Elmo"
-    ]
-  },
-  {
-    "text": "Is it 'gif' with a hard G or a soft G?",
-    "type": "multiple_choice",
-    "options": [
-      "Hard G",
-      "Soft G"
-    ]
-  },
-  {
     "text": "Leaving voicemails:",
     "type": "multiple_choice",
     "options": [
@@ -925,10 +581,6 @@
       "Drive Me Far Away",
       "Hold This Briefcase"
     ]
-  },
-  {
-    "text": "What is the most inappropriate place to fall asleep in public?",
-    "type": "open"
   },
   {
     "text": "Who in this room would be the worst roommate?",
@@ -1071,14 +723,6 @@
     ]
   },
   {
-    "text": "Would you rather only communicate through dance or through opera singing?",
-    "type": "multiple_choice",
-    "options": [
-      "Only Communicate Through Dance",
-      "Through Opera Singing"
-    ]
-  },
-  {
     "text": "Would you rather have knees that bend both ways or elbows that only bend forward?",
     "type": "multiple_choice",
     "options": [
@@ -1105,16 +749,6 @@
     ]
   },
   {
-    "text": "Pick your permanent body scent:",
-    "type": "multiple_choice",
-    "options": [
-      "Old Library Books",
-      "Fresh Cut Grass",
-      "New Car Smell",
-      "Fresh Baked Bread"
-    ]
-  },
-  {
     "text": "You can only eat one cuisine forever?",
     "type": "multiple_choice",
     "options": [
@@ -1135,7 +769,7 @@
     ]
   },
   {
-    "text": "You're stuck in an elevator with one celebrity?",
+    "text": "Pick a celebrity to be stuck in an elevator with you",
     "type": "multiple_choice",
     "options": [
       "The Rock",
@@ -1175,26 +809,7 @@
     ]
   },
   {
-    "text": "Pick your worst tattoo:",
-    "type": "multiple_choice",
-    "options": [
-      "A Toilet",
-      "Your Ex's Face",
-      "A QR Code To A Rick Roll",
-      "A Misspelled Word"
-    ]
-  },
-  {
-    "text": "You can only listen to one artist forever?",
-    "type": "multiple_choice",
-    "options": [
-      "Elevator Music",
-      "Autotuned Pop",
-      "Commercial Jingles"
-    ]
-  },
-  {
-    "text": "Zombie apocalypse weapon?",
+    "text": "Best zombie apocalypse weapon?",
     "type": "multiple_choice",
     "options": [
       "Baseball Bat",
@@ -1207,14 +822,14 @@
     "text": "Your car horn is replaced with one sound?",
     "type": "multiple_choice",
     "options": [
-      "Vuvuzela Blast",
       "Baby Crying",
       "Kazoo Solo",
-      "Laugh Track"
+      "Laugh Track",
+      "Wah-wah"
     ]
   },
   {
-    "text": "Pick your new neighbor:",
+    "text": "Worst new neighbor?",
     "type": "multiple_choice",
     "options": [
       "Constant Party Host",
@@ -1224,7 +839,7 @@
     ]
   },
   {
-    "text": "You must get a face tattoo?",
+    "text": "Worst face tatoo?",
     "type": "multiple_choice",
     "options": [
       "Forehead Target",
@@ -1234,17 +849,7 @@
     ]
   },
   {
-    "text": "Pick your prison cellmate:",
-    "type": "multiple_choice",
-    "options": [
-      "Constant Hummer",
-      "Nail Clipper",
-      "Finger Tapper",
-      "Never Talks"
-    ]
-  },
-  {
-    "text": "Your voice permanently changes to?",
+    "text": "Pick your permanent voice mod",
     "type": "multiple_choice",
     "options": [
       "Darth Vader",
@@ -1254,7 +859,7 @@
     ]
   },
   {
-    "text": "You can only drink one thing forever?",
+    "text": "You can only drink one thing forever:",
     "type": "multiple_choice",
     "options": [
       "Flat Soda",
@@ -1274,12 +879,12 @@
     ]
   },
   {
-    "text": "You time travel but can only visit?",
+    "text": "When do you go with your new time machine?",
     "type": "multiple_choice",
     "options": [
       "Medieval Times",
       "Wild West",
-      "Roaring Twenties",
+      "Jurassic park...IRL",
       "Stone Age"
     ]
   },
@@ -1289,8 +894,7 @@
     "options": [
       "Rob A Bank",
       "Steal A Sports Car",
-      "Free Zoo Animals",
-      "Prank A Leader"
+      "Free Zoo Animals"
     ]
   },
   {
@@ -1304,16 +908,6 @@
     ]
   },
   {
-    "text": "You can add one ridiculous rule to any sport — what is it?",
-    "type": "multiple_choice",
-    "options": [
-      "Wear Silly Hats",
-      "Animal On Field",
-      "Rubber Chicken Ball",
-      "Must Play Blindfolded"
-    ]
-  },
-  {
     "text": "You must rename yourself after a food — what's your new name?",
     "type": "multiple_choice",
     "options": [
@@ -1321,16 +915,6 @@
       "Noodle",
       "Potato",
       "Cookie"
-    ]
-  },
-  {
-    "text": "Which fictional villain actually had a point?",
-    "type": "multiple_choice",
-    "options": [
-      "Thanos",
-      "Magneto",
-      "Killmonger",
-      "Syndrome"
     ]
   },
   {
@@ -1374,7 +958,7 @@
     ]
   },
   {
-    "text": "You wake up as an animal for a day?",
+    "text": "Your pick for transforming into an animal for a day:",
     "type": "multiple_choice",
     "options": [
       "House Cat",
@@ -1404,16 +988,6 @@
     ]
   },
   {
-    "text": "You can only use one condiment for the rest of your life — which one?",
-    "type": "multiple_choice",
-    "options": [
-      "Ketchup",
-      "Mayonnaise",
-      "Hot Sauce",
-      "Soy Sauce"
-    ]
-  },
-  {
     "text": "Which fast food mascot would win in a fight?",
     "type": "multiple_choice",
     "options": [
@@ -1424,43 +998,13 @@
     ]
   },
   {
-    "text": "Pick your new ringtone that you can never change.",
-    "type": "multiple_choice",
-    "options": [
-      "Baby Crying",
-      "Dial-Up Modem",
-      "The Macarena",
-      "Bagpipes"
-    ]
-  },
-  {
-    "text": "You must eat one weird combo every day?",
-    "type": "multiple_choice",
-    "options": [
-      "Ketchup On Ice Cream",
-      "Mustard On Cereal",
-      "Mayonnaise On Cookies",
-      "Hot Sauce On Yogurt"
-    ]
-  },
-  {
-    "text": "Trapped in a movie for a week?",
+    "text": "Worst movie to be trapped in for a week?",
     "type": "multiple_choice",
     "options": [
       "Jurassic Park",
       "The Hunger Games",
       "Titanic",
       "A Quiet Place"
-    ]
-  },
-  {
-    "text": "Name a food that people eat wrong",
-    "type": "multiple_choice",
-    "options": [
-      "Cupcakes",
-      "Sushi",
-      "Pizza",
-      "Tacos"
     ]
   },
   {
@@ -1477,9 +1021,9 @@
     "text": "What is a dealbreaker on a road trip?",
     "type": "multiple_choice",
     "options": [
-      "Bad Music Choices",
+      "Bad Music",
       "Constant Complaining",
-      "Not Sharing Driving",
+      "Driving too slow",
       "Messy Car"
     ]
   },
@@ -1519,8 +1063,7 @@
     "options": [
       "Photo Album",
       "Pet",
-      "Important Documents",
-      "Sentimental Item"
+      "Important Documents"
     ]
   },
   {
@@ -1549,7 +1092,6 @@
     "options": [
       "Genuine Smile",
       "Good Listener",
-      "Kindness",
       "Sense Of Humor"
     ]
   },
@@ -1560,7 +1102,7 @@
       "Crackling Fire",
       "Fresh Snow Crunch",
       "Pen Clicking",
-      "Pouring Coffee"
+      "Opening Soda"
     ]
   },
   {
@@ -1575,10 +1117,6 @@
   },
   {
     "text": "What is the first app you check in the morning?",
-    "type": "open"
-  },
-  {
-    "text": "What childhood snack do you still eat as an adult?",
     "type": "open"
   },
   {
@@ -1610,16 +1148,6 @@
     ]
   },
   {
-    "text": "What is the best ice cream flavor?",
-    "type": "multiple_choice",
-    "options": [
-      "Vanilla",
-      "Chocolate",
-      "Strawberry",
-      "Cookies And Cream"
-    ]
-  },
-  {
     "text": "What is the best breakfast food?",
     "type": "multiple_choice",
     "options": [
@@ -1633,16 +1161,6 @@
     "type": "open"
   },
   {
-    "text": "Name a Disney movie everyone has seen",
-    "type": "multiple_choice",
-    "options": [
-      "The Lion King",
-      "Frozen",
-      "Toy Story",
-      "Aladdin"
-    ]
-  },
-  {
     "text": "What is the most annoying household chore?",
     "type": "multiple_choice",
     "options": [
@@ -1650,14 +1168,6 @@
       "Doing dishes",
       "Laundry"
     ]
-  },
-  {
-    "text": "If you could eat one food forever, what would it be?",
-    "type": "open"
-  },
-  {
-    "text": "Name a superhero everyone knows",
-    "type": "open"
   },
   {
     "text": "What is the best Thanksgiving side dish?",
@@ -1673,15 +1183,11 @@
     "type": "open"
   },
   {
-    "text": "What is the most important invention ever?",
-    "type": "open"
-  },
-  {
     "text": "What is the best thing about dogs?",
     "type": "multiple_choice",
     "options": [
       "Loyalty",
-      "Companionship",
+      "They are always happy",
       "Nothing. Dogs are overrated"
     ]
   },
@@ -1723,7 +1229,7 @@
     "options": [
       "Marching barefoot in winter",
       "Sleeping in mud and snow",
-      "Eating hardtack and rotten meat"
+      "Eating rotten horse meat"
     ],
     "source": "patriotic"
   },
@@ -1748,10 +1254,10 @@
     "source": "patriotic"
   },
   {
-    "text": "You get to be the face on some currency, what do you pick?",
+    "text": "You get to be the face on a currency, what do you pick?",
     "type": "multiple_choice",
     "options": [
-      "The penny (everyone hates it)",
+      "The penny (you are instantly vintage!)",
       "The $1 bill (most common)",
       "The quarter (most recognized)",
       "The $100 bill (most prestigious)"
@@ -1774,7 +1280,7 @@
     "options": [
       "Each state decides — they know their people best!",
       "One set of rules for everyone — fairer that way!",
-      "Some national rules, but states get a say too"
+      "A bit of both"
     ],
     "source": "patriotic"
   },
@@ -1783,13 +1289,13 @@
     "type": "multiple_choice",
     "options": [
       "Yes — safety first!",
-      "No — freedom is more important!",
+      "No — freedom first!",
       "Depends how much privacy we're giving up"
     ],
     "source": "patriotic"
   },
   {
-    "text": "America was built by immigrants. How open should the doors be today?",
+    "text": "America was built by immigrants. How should we feel about letting them in now?",
     "type": "multiple_choice",
     "options": [
       "Wide open — everyone deserves a shot!",
@@ -1830,15 +1336,6 @@
     "source": "patriotic"
   },
   {
-    "text": "Your town votes 7-3 to ban a religion from meeting in public. Is that OK?",
-    "type": "multiple_choice",
-    "options": [
-      "Yes — majority rules, that's democracy",
-      "No — some things aren't up for a vote"
-    ],
-    "source": "patriotic"
-  },
-  {
     "text": "America is trillions in debt. Should the government keep spending?",
     "type": "multiple_choice",
     "options": [
@@ -1851,7 +1348,7 @@
     "text": "A new factory would create 1,000 jobs but pollute a nearby river. Build it?",
     "type": "multiple_choice",
     "options": [
-      "Yes — those families need jobs!",
+      "Yes — jobs are good",
       "No — you can't drink money",
       "Only if they pinky promise to keep the river clean"
     ],
@@ -1861,8 +1358,9 @@
     "text": "Your neighbor is caught on camera robbing a store. Should they still get a full trial and a lawyer?",
     "type": "multiple_choice",
     "options": [
-      "Yes — the moment we skip trials, anyone can be called \"obviously guilty\"",
-      "No — we literally have them on camera, what's the trial for?"
+      "Yes, everyone gets the full process",
+      "No, the video is enough",
+      "Yes, but keep it brief"
     ],
     "source": "patriotic"
   },
@@ -1873,16 +1371,6 @@
       "Yes — if people keep voting for them, democracy works!",
       "No — give someone else a turn already",
       "Two terms max, like the President"
-    ],
-    "source": "patriotic"
-  },
-  {
-    "text": "What does the right to own a gun mean today?",
-    "type": "multiple_choice",
-    "options": [
-      "Anyone who wants one should be able to get one",
-      "Strict rules — background checks, waiting periods, the works",
-      "Hunting rifles yes, military-style weapons no"
     ],
     "source": "patriotic"
   },
@@ -2007,123 +1495,166 @@
     "source": "patriotic"
   },
   {
-    "text": "Would you rather walk a dog or play with a cat?",
-    "type": "multiple_choice",
-    "options": ["Walk a dog", "Play with a cat"],
-    "source": "preset"
-  },
-  {
     "text": "Would you rather live where it's hot or where it's cold?",
     "type": "multiple_choice",
-    "options": ["Live where it's hot", "Live where it's cold"],
+    "options": [
+      "Live where it's hot",
+      "Live where it's cold"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather drive a monster truck or pilot an airplane?",
     "type": "multiple_choice",
-    "options": ["Drive a monster truck", "Pilot an airplane"],
+    "options": [
+      "Drive a monster truck",
+      "Pilot an airplane"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather hear what everyone is thinking or see the future?",
     "type": "multiple_choice",
-    "options": ["Hear what everyone is thinking", "See the future"],
+    "options": [
+      "Hear what everyone is thinking",
+      "See the future"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather drink with your nose or taste with your hands?",
     "type": "multiple_choice",
-    "options": ["Drink with your nose", "Taste with your hands"],
+    "options": [
+      "Drink with your nose",
+      "Taste with your hands"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather stay outside all day or stay inside all day?",
     "type": "multiple_choice",
-    "options": ["Stay outside all day", "Stay inside all day"],
+    "options": [
+      "Stay outside all day",
+      "Stay inside all day"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather make your own food or make your own clothes?",
     "type": "multiple_choice",
-    "options": ["Make your own food", "Make your own clothes"],
+    "options": [
+      "Make your own food",
+      "Make your own clothes"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather fly with birds or swim with penguins?",
     "type": "multiple_choice",
-    "options": ["Fly with birds", "Swim with penguins"],
+    "options": [
+      "Fly with birds",
+      "Swim with penguins"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather live on the moon or live underwater?",
     "type": "multiple_choice",
-    "options": ["Live on the moon", "Live underwater"],
-    "source": "preset"
-  },
-  {
-    "text": "Would you rather visit the future or visit the past?",
-    "type": "multiple_choice",
-    "options": ["Visit the future", "Visit the past"],
+    "options": [
+      "Live on the moon",
+      "Live underwater"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather have really long toes or really short fingers?",
     "type": "multiple_choice",
-    "options": ["Really long toes", "Really short fingers"],
+    "options": [
+      "Really long toes",
+      "Really short fingers"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather ride in a hot air balloon or ride in a submarine?",
     "type": "multiple_choice",
-    "options": ["Ride in a hot air balloon", "Ride in a submarine"],
+    "options": [
+      "Ride in a hot air balloon",
+      "Ride in a submarine"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather live in a tree house or live in a castle?",
     "type": "multiple_choice",
-    "options": ["Live in a tree house", "Live in a castle"],
+    "options": [
+      "Live in a tree house",
+      "Live in a castle"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather fight one horse-sized duck or 100 duck-sized horses?",
     "type": "multiple_choice",
-    "options": ["Fight one horse-sized duck", "Fight 100 duck-sized horses"],
+    "options": [
+      "Fight one horse-sized duck",
+      "Fight 100 duck-sized horses"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather be able to speak to animals or speak all human languages?",
     "type": "multiple_choice",
-    "options": ["Speak to animals", "Speak all human languages"],
+    "options": [
+      "Speak to animals",
+      "Speak all human languages"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather grow an inch taller every year or an inch shorter every year?",
     "type": "multiple_choice",
-    "options": ["Grow an inch taller every year", "Grow an inch shorter every year"],
+    "options": [
+      "Grow an inch taller every year",
+      "Grow an inch shorter every year"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather live without music or live without movies?",
     "type": "multiple_choice",
-    "options": ["Live without music", "Live without movies"],
+    "options": [
+      "Live without music",
+      "Live without movies"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather have tiny hands or tiny feet?",
     "type": "multiple_choice",
-    "options": ["Tiny hands", "Tiny feet"],
+    "options": [
+      "Tiny hands",
+      "Tiny feet"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather never need sleep or never need to eat?",
     "type": "multiple_choice",
-    "options": ["Never need sleep", "Never need to eat"],
+    "options": [
+      "Never need sleep",
+      "Never need to eat"
+    ],
     "source": "preset"
   },
   {
     "text": "Would you rather live in Hogwarts, Narnia, or Middle Earth?",
     "type": "multiple_choice",
-    "options": ["Hogwarts", "Narnia", "Middle Earth"],
+    "options": [
+      "Hogwarts",
+      "Narnia",
+      "Middle Earth"
+    ],
     "source": "preset"
   }
 ]

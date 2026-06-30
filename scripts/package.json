@@ -11,7 +11,8 @@
     "csv:export": "npx tsx questions-csv.ts export",
     "csv:import": "npx tsx questions-csv.ts import",
     "csv:apply-suggestions": "npx tsx apply-suggestions.ts",
-    "csv:rewrite": "npx tsx rewrite-options.ts"
+    "csv:rewrite": "npx tsx rewrite-options.ts",
+    "review:hand-ratings": "npx tsx review-hand-rated-questions.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1"

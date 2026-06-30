@@ -11,7 +11,7 @@ export interface PresetQuestion {
   source?: 'preset' | 'patriotic'
 }
 
-export const QUESTIONS_PATH = path.resolve(__dirname, '../../functions/src/data/questions.json')
+export const QUESTIONS_PATH = path.resolve(__dirname, '../../functions/src/games/flock-together/data/questions.json')
 
 export function loadQuestions(): PresetQuestion[] {
   const raw = fs.readFileSync(QUESTIONS_PATH, 'utf-8')
@@ -65,7 +65,7 @@ export interface ValidationIssue {
 }
 
 const MAX_TEXT_LEN = 100
-const MAX_OPTION_LEN = 40
+const MAX_OPTION_LEN = 80
 const MIN_OPTION_DISTANCE = 3
 const MIN_OPTIONS = 2
 const MAX_OPTIONS = 4
