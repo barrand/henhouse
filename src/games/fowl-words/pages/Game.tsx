@@ -143,11 +143,12 @@ export default function Game() {
     <div className="min-h-screen flex flex-col bg-surface linen-texture">
       <GameHeader game={game} players={players} round={round} currentPlayer={currentPlayer} isHost={isHost} />
 
-      {round?.status === 'word-selection' && (
+      {(round?.status === 'word-selection' || round?.status === 'word-selected') && (
         <WordSelectionView
           game={game}
           round={round}
           players={eligiblePlayers}
+          currentPlayerId={uid}
           isGuesser={isGuesser}
           isHost={isHost}
         />

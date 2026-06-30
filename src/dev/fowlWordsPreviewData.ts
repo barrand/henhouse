@@ -185,6 +185,7 @@ function baseRound(overrides: Partial<RoundData> = {}): RoundData {
 export type FowlWordsPreviewScreen =
   | 'lobby'
   | 'word-selection'
+  | 'word-selected'
   | 'clue-submission'
   | 'clue-submission-waiting'
   | 'deduplication'
@@ -205,6 +206,7 @@ export type FowlWordsPreviewScreen =
 export const FOWL_WORDS_PREVIEW_SCREENS: { id: FowlWordsPreviewScreen; label: string }[] = [
   { id: 'lobby', label: 'Lobby' },
   { id: 'word-selection', label: 'Word vote' },
+  { id: 'word-selected', label: 'Word spotlight' },
   { id: 'clue-submission', label: 'Clue (writing)' },
   { id: 'clue-submission-waiting', label: 'Clue (submitted)' },
   { id: 'deduplication', label: 'Dedup (loading)' },
@@ -267,6 +269,29 @@ export function getFowlWordsPreviewScenario(
         currentPlayerId: asPlayerId,
       }
     }
+
+    case 'word-selected':
+      return {
+        game: baseGame(),
+        round: baseRound({
+          status: 'word-selected',
+          secretWord: 'Volcano',
+          selectedWordIndex: 1,
+          wordSelectedDeadline: { seconds: now() + 99, nanoseconds: 0 },
+          wordVotes: {
+            p1: 0,
+            p3: 1,
+            p4: 1,
+            p5: 2,
+            p6: 1,
+            p7: 0,
+            p8: 1,
+          },
+        }),
+        players,
+        isHost,
+        currentPlayerId: asPlayerId,
+      }
 
     case 'clue-submission':
       return {

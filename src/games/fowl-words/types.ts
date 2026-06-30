@@ -13,6 +13,7 @@ export interface PlayerData extends SharedPlayerData {
 
 export type RoundStatus =
   | 'word-selection'
+  | 'word-selected'
   | 'clue-submission'
   | 'deduplication'
   | 'reveal'
@@ -32,9 +33,11 @@ export interface RoundData {
   // Word-selection phase
   wordOptions: string[]                   // 3 candidate words shown to clue-givers
   wordVotes: Record<string, number>       // playerId → index (0|1|2) of their vote
+  selectedWordIndex?: number
   eligiblePlayerIds?: string[]
   eligiblePlayerCount?: number
   wordSelectionDeadline?: { seconds: number; nanoseconds: number }
+  wordSelectedDeadline?: { seconds: number; nanoseconds: number }
   clueSubmissionDeadline?: { seconds: number; nanoseconds: number }
   currentAttempt: number                // 1–4
   maxAttempts: number                   // min(4, max(1, totalClueGroups))

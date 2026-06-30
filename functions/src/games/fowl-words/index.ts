@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import { claimRoomCode, releaseRoomCode } from '../../shared/roomCodes'
 import { eligibleNonGuesserIds, isRoundEligible } from '../../shared/roundEligibility'
-import { runDeduplication, handleGuess, advanceToNextRound, skipToNextAttempt, finalizeWordSelection } from './roundFlow'
+import { runDeduplication, handleGuess, advanceToNextRound, skipToNextAttempt, finalizeWordSelection, beginClueSubmission } from './roundFlow'
 import { mostHelpfulSplitPts } from './peerLove'
 import {
   giverLovesForPlayer,
@@ -360,6 +360,29 @@ export const fowlWordsFinalizeWordSelection = onCall(async (request) => {
 
   const { gameId, roundNum } = request.data as { gameId: string; roundNum: number }
   await finalizeWordSelection(gameId, roundNum)
+})
+
+// -- BEGIN CLUE SUBMISSION (after selected-word spotlight) --
+export const fowlWordsBeginClueSubmission = onCall(async (request) => {
+  const uid = request.auth?.uid
+  if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
+
+  const { gameId, roundNum } = request.data as { gameId: string; roundNum: number }
+  const firestore = db()
+  const gameSnap = await firestore.collection('games').doc(gameId).get()
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+  const game = gameSnap.data()!
+
+  const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
+  const roundSnap = await roundRef.get()
+  if (!roundSnap.exists) throw new HttpsError('not-found', 'Round not found')
+  const round = roundSnap.data()!
+  const isJoinedPlayer = Array.isArray(game.playerIds) && game.playerIds.includes(uid)
+  if (!isRoundEligible(round, game, uid) && !isJoinedPlayer) {
+    throw new HttpsError('permission-denied', 'You will join next round')
+  }
+
+  await beginClueSubmission(gameId, roundNum)
 })
 
 // -- UNLOCK FIRST CLUE (when all clues are duplicates, guesser has no visible clues) --

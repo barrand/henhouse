@@ -215,11 +215,12 @@ export default function FowlWordsPreview() {
               isHost={scenario.isHost}
             />
 
-            {previewRound.status === 'word-selection' && (
+            {(previewRound.status === 'word-selection' || previewRound.status === 'word-selected') && (
               <WordSelectionView
                 game={scenario.game}
                 round={previewRound}
                 players={scenario.players}
+                currentPlayerId={scenario.currentPlayerId}
                 isGuesser={isGuesser}
                 isHost={scenario.isHost}
               />

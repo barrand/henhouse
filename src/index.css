@@ -170,6 +170,22 @@
 }
 .animate-star-float { animation: star-float 0.95s ease-out forwards; }
 
+@keyframes word-selected-card {
+  0%   { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(240, 192, 120, 0); }
+  45%  { transform: scale(1.12); box-shadow: 0 0 0 10px rgba(240, 192, 120, 0.28); }
+  100% { transform: scale(1.08); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28); }
+}
+.animate-word-selected-card { animation: word-selected-card 0.65s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+@keyframes word-spark {
+  0%   { transform: scale(0.35) rotate(-18deg); opacity: 0; }
+  35%  { transform: scale(1.35) rotate(10deg); opacity: 1; }
+  100% { transform: scale(0.7) rotate(24deg); opacity: 0; }
+}
+.animate-word-spark { animation: word-spark 0.95s ease-out infinite; }
+.animate-word-spark-delayed { animation: word-spark 0.95s ease-out 0.18s infinite; }
+.animate-word-spark-late { animation: word-spark 0.95s ease-out 0.34s infinite; }
+
 @keyframes card-pulse-mvp {
   0%, 100% { box-shadow: 0 0 0 0 rgba(240, 192, 120, 0); }
   50%      { box-shadow: 0 0 0 8px rgba(240, 192, 120, 0.35); }
@@ -179,5 +195,6 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-heart-float, .animate-boo-float, .animate-star-float,
   .animate-card-pulse-love, .animate-card-pulse-mvp, .animate-card-unlock-pulse,
-  .animate-card-shake, .animate-star-stamp { animation: none !important; }
+  .animate-card-shake, .animate-star-stamp, .animate-word-selected-card,
+  .animate-word-spark, .animate-word-spark-delayed, .animate-word-spark-late { animation: none !important; }
 }

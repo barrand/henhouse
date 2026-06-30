@@ -1,7 +1,7 @@
 // Fowl Words round flow helpers: state machine for the round lifecycle (multi-attempt)
 //
 // State machine:
-//   clue-submission → deduplication → reveal ← ─────┐
+//   word-selection → word-selected → clue-submission → deduplication → reveal ← ─────┐
 //                                       ↓            │
 //                                     guess          │
 //                                       ↓            │
@@ -30,6 +30,7 @@ import type { ClueGroup } from './types'
 const db = admin.firestore
 const SECONDS_PER_CLUE_SUBMISSION = 60
 const WORD_SELECTION_SECONDS = 15
+const WORD_SELECTED_SPOTLIGHT_MS = 2500
 
 // Timer decreases with each attempt to keep game paced (shorter time as more clues visible)
 function getSecondsForAttempt(attemptNum: number): number {
@@ -39,12 +40,12 @@ function getSecondsForAttempt(attemptNum: number): number {
 }
 
 /**
- * Finalize the word-selection vote and transition to clue-submission.
+ * Finalize the word-selection vote and transition to a short selected-word spotlight.
  * Safe to call multiple times — uses a transaction to only process once.
  * Called when: timer expires (frontend) OR all non-guessers have voted.
  *
  * All vote tallying and the secretWord write happen inside the transaction so
- * clients never see a clue-submission phase without the secret word present.
+ * clients never see the selected-word spotlight without the secret word present.
  */
 export async function finalizeWordSelection(gameId: string, roundNum: number): Promise<void> {
   const firestore = db()
@@ -79,17 +80,47 @@ export async function finalizeWordSelection(gameId: string, roundNum: number): P
     for (let i = 0; i < 3; i++) {
       if (tally[i] > maxVotes) { maxVotes = tally[i]; winnerIdx = i }
     }
-    if (maxVotes === 0) winnerIdx = Math.floor(Math.random() * wordOptions.length)
+    if (maxVotes === 0 && wordOptions.length > 0) winnerIdx = Math.floor(Math.random() * wordOptions.length)
 
     const secretWord = wordOptions[winnerIdx] ?? wordOptions[0] ?? ''
-    const clueSubmissionDeadline = Timestamp.fromMillis(Date.now() + SECONDS_PER_CLUE_SUBMISSION * 1000)
+    const wordSelectedDeadline = Timestamp.fromMillis(Date.now() + WORD_SELECTED_SPOTLIGHT_MS)
+
+    tx.update(roundRef, {
+      status: 'word-selected',
+      secretWord,
+      selectedWordIndex: winnerIdx,
+      wordSelectedDeadline,
+      cluesByPlayer: {},
+      clueTimestamps: {},
+      clueSubmissionDeadline: FieldValue.delete(),
+    })
+  })
+}
+
+/**
+ * Transition from the selected-word spotlight into clue submission.
+ * Safe to call from multiple clients after the spotlight deadline.
+ */
+export async function beginClueSubmission(gameId: string, roundNum: number): Promise<void> {
+  const firestore = db()
+  const roundRef = firestore
+    .collection('games').doc(gameId)
+    .collection('rounds')
+    .doc(String(roundNum))
+
+  await firestore.runTransaction(async (tx) => {
+    const snap = await tx.get(roundRef)
+    if (!snap.exists) return
+    const data = snap.data()!
+    if (data.status !== 'word-selected') return
+
+    const deadline = data.wordSelectedDeadline?.toMillis?.()
+      ?? ((data.wordSelectedDeadline?.seconds ?? 0) * 1000)
+    if (deadline && Date.now() < deadline) return
 
     tx.update(roundRef, {
       status: 'clue-submission',
-      secretWord,
-      cluesByPlayer: {},
-      clueTimestamps: {},
-      clueSubmissionDeadline,
+      clueSubmissionDeadline: Timestamp.fromMillis(Date.now() + SECONDS_PER_CLUE_SUBMISSION * 1000),
     })
   })
 }

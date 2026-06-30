@@ -7,6 +7,8 @@ export interface ClueGroup {
 }
 
 export type RoundStatus =
+  | 'word-selection'
+  | 'word-selected'
   | 'clue-submission'
   | 'deduplication'
   | 'reveal'
