@@ -10,6 +10,7 @@ export default defineConfig({
       '@shared': path.resolve(__dirname, './src/shared'),
       '@flock': path.resolve(__dirname, './src/games/flock-together'),
       '@fowl-words': path.resolve(__dirname, './src/games/fowl-words'),
+      '@truth-or-turd': path.resolve(__dirname, './src/games/truth-or-turd'),
     },
   },
 })

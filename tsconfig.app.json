@@ -19,7 +19,8 @@
     "paths": {
       "@shared/*": ["src/shared/*"],
       "@flock/*": ["src/games/flock-together/*"],
-      "@fowl-words/*": ["src/games/fowl-words/*"]
+      "@fowl-words/*": ["src/games/fowl-words/*"],
+      "@truth-or-turd/*": ["src/games/truth-or-turd/*"]
     },
 
     /* Linting */

@@ -5,6 +5,7 @@ import type { BaseGameData, PlayerData as SharedPlayerData } from '@shared/types
 export interface GameData extends BaseGameData {
   currentGuesser: string | null    // playerId of current guesser (null in lobby)
   cardsRemaining: string[]         // word stack for remaining rounds
+  includePatrioticQuestions?: boolean
 }
 
 export interface PlayerData extends SharedPlayerData {

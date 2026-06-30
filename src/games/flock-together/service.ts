@@ -8,7 +8,7 @@ import { db } from '../../lib/firebase'
 
 // -- Flock Callable Functions --
 
-const flockCreateGameFn = httpsCallable<{ playerName: string }, { gameId: string; code: string }>(functions, 'flockCreateGame')
+const flockCreateGameFn = httpsCallable<{ playerName: string; includePatrioticQuestions?: boolean }, { gameId: string; code: string }>(functions, 'flockCreateGame')
 const flockRematchFn = httpsCallable<{ gameId: string }, { code: string }>(functions, 'flockRematch')
 const startGameFn = httpsCallable<{ gameId: string }, void>(functions, 'flockStartGame')
 const submitAnswerFn = httpsCallable<{ gameId: string; roundNum: number; answer: string }, void>(functions, 'submitAnswer')
@@ -20,8 +20,8 @@ const setPatrioticModeFn = httpsCallable<{ gameId: string; enabled: boolean }, v
 const resetQuestionCooldownsFn = httpsCallable<{ gameId: string }, void>(functions, 'resetQuestionCooldowns')
 const submitCustomQuestionFn = httpsCallable<{ gameId: string; text: string }, void>(functions, 'submitCustomQuestion')
 
-export async function flockCreateGame(playerName: string) {
-  const result = await flockCreateGameFn({ playerName })
+export async function flockCreateGame(playerName: string, includePatrioticQuestions: boolean = false) {
+  const result = await flockCreateGameFn({ playerName, includePatrioticQuestions })
   return result.data
 }
 

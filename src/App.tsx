@@ -4,6 +4,7 @@ import Home from './pages/Home'
 
 const FlockGame = lazy(() => import('@flock/pages/Game'))
 const FowlWordsGame = lazy(() => import('@fowl-words/pages/Game'))
+const TruthOrTurdGame = lazy(() => import('@truth-or-turd/pages/Game'))
 const FlockPreview = import.meta.env.DEV
   ? lazy(() => import('./dev/FlockPreview'))
   : null
@@ -74,6 +75,14 @@ export default function App() {
         element={
           <Suspense fallback={<Loading />}>
             <FowlWordsGame />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/truth-or-turd/:code"
+        element={
+          <Suspense fallback={<Loading />}>
+            <TruthOrTurdGame />
           </Suspense>
         }
       />

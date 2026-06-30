@@ -30,6 +30,8 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 - Bot run artifacts land in `bot-runs/<timestamp>/`
 - Details: `docs/bot-swarm-test-harness.md`
 
+**Adding games:** Follow `docs/new-game-playbook.md` for module structure, callable naming, Firestore contracts, UI patterns, content standards, and testing expectations.
+
 ---
 
 ## Games
@@ -47,6 +49,15 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 **Round flow:** `word-selection` → `clue-submission` → `deduplication` → `reveal` ↔ `guess` → `scored`
 
 **Word selection:** Before each round, givers vote on 1 of 3 candidate words (15s timer). Guesser is blind. 2 losing words are burned. Game draws `totalRounds × 3` words at start.
+
+**Truth or Turd** — Fast true/false trivia. Everyone sees the same statement and answers **Truth** or **Turd**.
+- Default 15 rounds, 30 seconds per question.
+- Scores are server-authoritative: +1 for correct, 0 for wrong or no answer.
+- No live Truth/Turd counts during answering; players see only their own submitted choice and who has answered.
+- Reveal immediately when everyone answers, or when the host forces reveal after at least one answer, or when the timer expires.
+- Reveal shows the correct label, a short funny/enlightening explanation, grouped Truth/Turd picks, no-answer players, points, and standings.
+- Patriotic Edition is patriotic-only for this game.
+- Final ties are allowed.
 
 ### Fowl Words — how you win
 - **Guesser** wins the round by guessing the secret word within 4 attempts.
@@ -92,6 +103,7 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 - Dedup uses **tier-1 fast match first** (normalization + plurals, no API call), Gemini only as fallback
 - Award naming: **❤️ Peer love** (givers), **⭐ Most Helpful** (guesser), **👎 Boo** (anyone) — never use nod/shame/MVP/star in copy or code comments
 - Peer love pays out **win-only** — `applyPeerLoveVotes` called only on correct-guess path in `roundFlow.ts`
+- Truth or Turd answer/explanation data must not be written to the round doc until reveal; keep unrevealed correct answers out of client-readable documents.
 
 ---
 

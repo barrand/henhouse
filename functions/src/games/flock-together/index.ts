@@ -20,8 +20,14 @@ export const flockCreateGame = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
-  const { playerName } = request.data as { playerName: string }
+  const { playerName, includePatrioticQuestions = false } = request.data as {
+    playerName: string
+    includePatrioticQuestions?: boolean
+  }
   if (!playerName?.trim()) throw new HttpsError('invalid-argument', 'Name required')
+  if (typeof includePatrioticQuestions !== 'boolean') {
+    throw new HttpsError('invalid-argument', 'includePatrioticQuestions must be a boolean')
+  }
 
   const gameRef = db.collection('games').doc()
   const gameId = gameRef.id
@@ -43,7 +49,7 @@ export const flockCreateGame = onCall(async (request) => {
     categories: [],
     playerIds: [uid],
     settings: { totalRounds: TOTAL_ROUNDS, secondsPerRound: 45, autoAdvanceSeconds: 10 },
-    includePatrioticQuestions: false,
+    includePatrioticQuestions,
   })
 
   await gameRef.collection('players').doc(uid).set({

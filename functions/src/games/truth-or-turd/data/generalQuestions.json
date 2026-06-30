@@ -1,0 +1,646 @@
+[
+  {
+    "statement": "Bananas are berries, but strawberries are not.",
+    "answer": "truth",
+    "explanation": "Botanically, bananas develop from one flower with one ovary and have seeds inside. Strawberries are aggregate fruits, which is rude but accurate.",
+    "source": "preset",
+    "tag": "food"
+  },
+  {
+    "statement": "Lightning avoids places it has already struck.",
+    "answer": "turd",
+    "explanation": "Lightning can strike the same place many times. Tall buildings and towers get repeat visits like they owe the sky money.",
+    "source": "preset",
+    "tag": "science"
+  },
+  {
+    "statement": "Octopuses have three hearts.",
+    "answer": "truth",
+    "explanation": "Two hearts pump blood to the gills, and one pumps it to the rest of the body. That is a lot of emotional infrastructure.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "Most of the human brain stays inactive during ordinary thinking.",
+    "answer": "turd",
+    "explanation": "Brain imaging shows we use many brain regions across ordinary tasks. The 10 percent idea is a movie-friendly myth.",
+    "source": "preset",
+    "tag": "body"
+  },
+  {
+    "statement": "A group of flamingos can be called a flamboyance.",
+    "answer": "truth",
+    "explanation": "It is a real collective noun, and honestly the birds earned it.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "A goldfish forgets a new routine within a few seconds.",
+    "answer": "turd",
+    "explanation": "Goldfish can learn routines and remember things far longer than three seconds. The insult is doing most of the swimming here.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "The Eiffel Tower can grow taller in hot weather.",
+    "answer": "truth",
+    "explanation": "Metal expands when heated, so the tower can rise several inches on hot days. Summer gives it a little stretch.",
+    "source": "preset",
+    "tag": "places"
+  },
+  {
+    "statement": "Bats are blind.",
+    "answer": "turd",
+    "explanation": "Bats can see, and many also use echolocation. They are not flying around on vibes alone.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "Honey can last for thousands of years without spoiling if sealed well.",
+    "answer": "truth",
+    "explanation": "Honey's low moisture and acidity make it hostile to many microbes. Ancient honey can still be recognizable honey.",
+    "source": "preset",
+    "tag": "food"
+  },
+  {
+    "statement": "The Great Wall of China is clearly visible from the Moon with the naked eye.",
+    "answer": "turd",
+    "explanation": "Astronauts have repeatedly pushed back on this myth. From the Moon, human-made structures are not easy naked-eye targets.",
+    "source": "preset",
+    "tag": "space"
+  },
+  {
+    "statement": "Sharks existed before trees.",
+    "answer": "truth",
+    "explanation": "Shark ancestors are hundreds of millions of years old, older than the earliest forests. Sharks were vintage before shade was trendy.",
+    "source": "preset",
+    "tag": "nature"
+  },
+  {
+    "statement": "Coffee beans are actually beans.",
+    "answer": "turd",
+    "explanation": "They are seeds from coffee cherries. We call them beans because apparently breakfast needed more confusion.",
+    "source": "preset",
+    "tag": "food"
+  },
+  {
+    "statement": "There is a species of jellyfish often described as biologically immortal.",
+    "answer": "truth",
+    "explanation": "Turritopsis dohrnii can revert to an earlier life stage under stress. It is less superhero and more extreme reset button.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "Mount Everest is the closest point on Earth to the Moon.",
+    "answer": "turd",
+    "explanation": "Because Earth bulges at the equator, Mount Chimborazo in Ecuador reaches farther from Earth's center than Everest.",
+    "source": "preset",
+    "tag": "places"
+  },
+  {
+    "statement": "A day on Venus is longer than a year on Venus.",
+    "answer": "truth",
+    "explanation": "Venus rotates very slowly, taking longer to spin once than to orbit the Sun. Its calendar is a scheduling nightmare.",
+    "source": "preset",
+    "tag": "space"
+  },
+  {
+    "statement": "Chameleons mainly change color to match any background perfectly.",
+    "answer": "turd",
+    "explanation": "Color changes often signal mood, temperature, light, or communication. They are not tiny living paint samples.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "Wombat poop is cube-shaped.",
+    "answer": "truth",
+    "explanation": "Wombats produce unusually cube-like droppings, likely shaped by their intestines. Nature has very specific hobbies.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "Sugar makes kids hyper.",
+    "answer": "turd",
+    "explanation": "Studies have not found a consistent sugar-hyperactivity effect. Birthday parties may be the real culprit.",
+    "source": "preset",
+    "tag": "body"
+  },
+  {
+    "statement": "The shortest war in recorded history lasted under an hour.",
+    "answer": "truth",
+    "explanation": "The Anglo-Zanzibar War of 1896 is commonly cited at about 38 to 45 minutes. Some meetings last longer and do less.",
+    "source": "preset",
+    "tag": "history"
+  },
+  {
+    "statement": "Fortune cookies were invented in China.",
+    "answer": "turd",
+    "explanation": "Modern fortune cookies are strongly associated with Japanese and Chinese immigrant businesses in the United States, especially California.",
+    "source": "preset",
+    "tag": "food"
+  },
+  {
+    "statement": "A shrimp's heart is located in its head area.",
+    "answer": "truth",
+    "explanation": "A shrimp's heart sits in the cephalothorax, near what people casually call the head. Shrimp anatomy is not here for our categories.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "Penguins live naturally at the North Pole.",
+    "answer": "turd",
+    "explanation": "Wild penguins live in the Southern Hemisphere. The Arctic has polar bears; penguins wisely skipped that neighborhood.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "The first oranges were not necessarily orange.",
+    "answer": "truth",
+    "explanation": "Some oranges can stay greenish in warm climates even when ripe. The fruit and the color had a branding meeting later.",
+    "source": "preset",
+    "tag": "food"
+  },
+  {
+    "statement": "U.S. courts have treated tomatoes as fruit when applying import taxes.",
+    "answer": "turd",
+    "explanation": "Botanically it is a fruit, but the U.S. Supreme Court treated tomatoes as vegetables for tariff purposes in 1893.",
+    "source": "preset",
+    "tag": "food"
+  },
+  {
+    "statement": "Sound travels faster in water than in air.",
+    "answer": "truth",
+    "explanation": "Sound moves faster through water because its particles transmit vibrations more efficiently than air.",
+    "source": "preset",
+    "tag": "science"
+  },
+  {
+    "statement": "The tongue has separate zones for sweet, salty, sour, and bitter tastes.",
+    "answer": "turd",
+    "explanation": "Taste receptors are distributed broadly across the tongue. The old tongue map is a classroom fossil.",
+    "source": "preset",
+    "tag": "body"
+  },
+  {
+    "statement": "Some turtles can breathe through their rear end.",
+    "answer": "truth",
+    "explanation": "Some aquatic turtles can absorb oxygen through cloacal bursae. It is called cloacal respiration, because science says things directly.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "The Sahara Desert is the largest desert on Earth.",
+    "answer": "turd",
+    "explanation": "Antarctica is the largest desert by precipitation standards. Deserts are about dryness, not just sand drama.",
+    "source": "preset",
+    "tag": "places"
+  },
+  {
+    "statement": "The dot over a lowercase i or j has a name.",
+    "answer": "truth",
+    "explanation": "It is called a tittle. Tiny dot, excellent vocabulary.",
+    "source": "preset",
+    "tag": "language"
+  },
+  {
+    "statement": "Cracking your knuckles causes arthritis.",
+    "answer": "turd",
+    "explanation": "Research has not shown that knuckle cracking causes arthritis. It may annoy nearby people, which is a separate diagnosis.",
+    "source": "preset",
+    "tag": "body"
+  },
+  {
+    "statement": "Century years can skip being leap years.",
+    "answer": "truth",
+    "explanation": "Years like 1900 are not leap years unless they are divisible by 400. Calendar rules enjoy tiny plot twists.",
+    "source": "preset",
+    "tag": "time"
+  },
+  {
+    "statement": "The North Star is the brightest star in the night sky.",
+    "answer": "turd",
+    "explanation": "Polaris is useful for navigation, but Sirius is brighter. Fame and brightness are different departments.",
+    "source": "preset",
+    "tag": "space"
+  },
+  {
+    "statement": "Some cats are allergic to humans.",
+    "answer": "truth",
+    "explanation": "Cats can react to human dander or products people use. The judgmental look may have paperwork behind it.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "A peanut is a true tree nut.",
+    "answer": "turd",
+    "explanation": "Peanuts are legumes, related to beans and peas. They just hang out in nut mixes.",
+    "source": "preset",
+    "tag": "food"
+  },
+  {
+    "statement": "The human body has more bacterial cells than human cells by a huge 10-to-1 margin.",
+    "answer": "turd",
+    "explanation": "That old ratio has been revised downward; current estimates are much closer. Still plenty of microscopic roommates.",
+    "source": "preset",
+    "tag": "body"
+  },
+  {
+    "statement": "An adult human has fewer bones than a newborn baby.",
+    "answer": "truth",
+    "explanation": "Babies have around 270 bones, and many fuse as they grow, leaving adults with 206.",
+    "source": "preset",
+    "tag": "body"
+  },
+  {
+    "statement": "Napoleon Bonaparte was extremely short for his time.",
+    "answer": "turd",
+    "explanation": "He was around average height for a Frenchman of his era. The short-Napoleon idea got a lot of help from propaganda.",
+    "source": "preset",
+    "tag": "history"
+  },
+  {
+    "statement": "The word laser started as an acronym.",
+    "answer": "truth",
+    "explanation": "LASER comes from Light Amplification by Stimulated Emission of Radiation. Somehow the acronym is easier.",
+    "source": "preset",
+    "tag": "language"
+  },
+  {
+    "statement": "Camels store water in their humps.",
+    "answer": "turd",
+    "explanation": "Camel humps store fat, not water. The water-saving magic is mostly in their physiology.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "The unicorn is the national animal of Scotland.",
+    "answer": "truth",
+    "explanation": "Scotland has used the unicorn as a heraldic symbol for centuries. Completely imaginary, fully official energy.",
+    "source": "preset",
+    "tag": "culture"
+  },
+  {
+    "statement": "The five Olympic rings represent the five original Olympic sports.",
+    "answer": "turd",
+    "explanation": "The rings represent the union of inhabited continents and athletes meeting from around the world, not five sports.",
+    "source": "preset",
+    "tag": "sports"
+  },
+  {
+    "statement": "Some metals can explode when dropped into water.",
+    "answer": "truth",
+    "explanation": "Alkali metals like sodium and potassium react violently with water. Do not season soup with laboratory sodium.",
+    "source": "preset",
+    "tag": "science"
+  },
+  {
+    "statement": "A desert is classified by heat rather than rainfall.",
+    "answer": "turd",
+    "explanation": "Deserts are defined by low precipitation, so cold deserts exist too. Antarctica is the chilly champion.",
+    "source": "preset",
+    "tag": "places"
+  },
+  {
+    "statement": "The plastic tips on shoelaces are called aglets.",
+    "answer": "truth",
+    "explanation": "Aglets keep laces from fraying and make them easier to thread. Tiny heroes, weird name.",
+    "source": "preset",
+    "tag": "language"
+  },
+  {
+    "statement": "A dog sweats mainly through its tongue.",
+    "answer": "turd",
+    "explanation": "Dogs cool themselves by panting, but their sweat glands are mostly in their paw pads.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "Glass is technically an amorphous solid, not a very slow liquid.",
+    "answer": "truth",
+    "explanation": "Old windows are uneven because of old manufacturing, not because glass slowly flowed down the pane.",
+    "source": "preset",
+    "tag": "science"
+  },
+  {
+    "statement": "The color red makes bulls angry.",
+    "answer": "turd",
+    "explanation": "Bulls react to movement more than color. The cape is theatrical, not personally offensive.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "The first product with a barcode scanned in a store was a pack of gum.",
+    "answer": "truth",
+    "explanation": "A pack of Wrigley's gum was famously scanned in Ohio in 1974. Tiny gum, giant retail moment.",
+    "source": "preset",
+    "tag": "history"
+  },
+  {
+    "statement": "At a mountaintop campsite, water boils hotter than it does at sea level.",
+    "answer": "turd",
+    "explanation": "That is true at sea level under standard pressure. Change altitude or pressure, and the boiling point changes.",
+    "source": "preset",
+    "tag": "science"
+  },
+  {
+    "statement": "The hashtag symbol is also called an octothorpe.",
+    "answer": "truth",
+    "explanation": "Octothorpe is a real name for #. It sounds like a tiny wizard but is punctuation.",
+    "source": "preset",
+    "tag": "language"
+  },
+  {
+    "statement": "Balance is handled by the five classic senses.",
+    "answer": "turd",
+    "explanation": "Beyond the classic five, we sense balance, body position, temperature, pain, and more.",
+    "source": "preset",
+    "tag": "body"
+  },
+  {
+    "statement": "A blue whale's heart can weigh as much as a small car.",
+    "answer": "truth",
+    "explanation": "Blue whale hearts are enormous and can weigh hundreds of pounds. Ocean cardio is serious business.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "The microwave oven was invented after a candy bar melted near radar equipment.",
+    "answer": "truth",
+    "explanation": "Percy Spencer noticed microwaves could heat food after radar equipment melted candy in his pocket.",
+    "source": "preset",
+    "tag": "history"
+  },
+  {
+    "statement": "You can see the color pink as one wavelength of light.",
+    "answer": "turd",
+    "explanation": "Pink is perceived from a mix of wavelengths, especially red and blue/violet. There is no single pink wavelength in the rainbow.",
+    "source": "preset",
+    "tag": "science"
+  },
+  {
+    "statement": "The word robot comes from a Czech word connected to forced labor.",
+    "answer": "truth",
+    "explanation": "Robot was popularized by Karel Capek's play R.U.R. and comes from robota, meaning forced labor or drudgery.",
+    "source": "preset",
+    "tag": "language"
+  },
+  {
+    "statement": "An ostrich hides its head in the sand when scared.",
+    "answer": "turd",
+    "explanation": "Ostriches do not bury their heads to hide. They may lower their heads near nests, which looks suspicious from far away.",
+    "source": "preset",
+    "tag": "animals"
+  },
+  {
+    "statement": "Some clouds can weigh more than a million pounds.",
+    "answer": "truth",
+    "explanation": "Cloud droplets are tiny and spread out, but together they can add up to enormous mass.",
+    "source": "preset",
+    "tag": "science"
+  },
+  {
+    "statement": "A flight recorder's nickname comes from its dark exterior.",
+    "answer": "turd",
+    "explanation": "Flight recorders are usually bright orange to make them easier to find after an accident. The nickname is dramatic, not descriptive.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "A jiffy is sometimes used as a real unit of time.",
+    "answer": "truth",
+    "explanation": "In different technical contexts, a jiffy can mean a tiny specific time interval. Grandma was almost doing physics.",
+    "source": "preset",
+    "tag": "time"
+  },
+  {
+    "statement": "Eating carrots gives humans night vision.",
+    "answer": "turd",
+    "explanation": "Carrots support eye health because of vitamin A, but they will not turn you into a snack-powered owl.",
+    "source": "preset",
+    "tag": "body"
+  },
+  {
+    "statement": "Nintendo started as a company that made playing cards.",
+    "answer": "truth",
+    "explanation": "Nintendo began in Kyoto in 1889 making hanafuda playing cards. Before plumbers and princesses, there were cards.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "Bubble wrap was first pitched as textured wallpaper.",
+    "answer": "truth",
+    "explanation": "Its inventors originally tried to sell the air-bubble plastic as wallpaper. The wall decor failed, but the shipping world got a poppable hero.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "Play-Doh began as a cleaner for wallpaper.",
+    "answer": "truth",
+    "explanation": "The compound was first used to lift soot from wallpaper before it was reworked into a children's modeling toy.",
+    "source": "preset",
+    "tag": "culture"
+  },
+  {
+    "statement": "QR codes were invented to help track car parts.",
+    "answer": "truth",
+    "explanation": "Denso Wave created QR codes in Japan in the 1990s for automotive manufacturing. Restaurant menus were not the original villain.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "The first computer mouse had a wooden shell.",
+    "answer": "truth",
+    "explanation": "Douglas Engelbart's early mouse prototype used a small wooden case. Very high tech, very shop class.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "Bluetooth is named after a Scandinavian king.",
+    "answer": "truth",
+    "explanation": "Bluetooth is named after Harald Bluetooth, a king associated with uniting parts of Denmark and Norway. The tech name is a historical nerd wink.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "Velcro was inspired by burrs sticking to clothing and fur.",
+    "answer": "truth",
+    "explanation": "Engineer George de Mestral studied burrs under magnification and turned their hook-like structure into a fastener idea.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "Oxford University is older than the Aztec Empire.",
+    "answer": "truth",
+    "explanation": "Teaching at Oxford goes back to the 1000s, while the Aztec Empire rose centuries later. Medieval homework beat them to it.",
+    "source": "preset",
+    "tag": "history"
+  },
+  {
+    "statement": "Cleopatra lived closer in time to the first Moon landing than to the building of the Great Pyramid.",
+    "answer": "truth",
+    "explanation": "The Great Pyramid was already ancient in Cleopatra's day. She is closer to NASA than to pyramid construction on the timeline.",
+    "source": "preset",
+    "tag": "history"
+  },
+  {
+    "statement": "High heels were worn by Persian horsemen before becoming European fashion.",
+    "answer": "truth",
+    "explanation": "Heeled footwear helped riders brace in stirrups. Later, European elites made it a fashion flex.",
+    "source": "preset",
+    "tag": "culture"
+  },
+  {
+    "statement": "The tiny pocket on jeans was originally meant for pocket watches.",
+    "answer": "truth",
+    "explanation": "That little denim pocket comes from a time when watch pockets were useful, not just mysterious.",
+    "source": "preset",
+    "tag": "objects"
+  },
+  {
+    "statement": "Many restaurant wasabi servings are mostly horseradish.",
+    "answer": "truth",
+    "explanation": "Real wasabi is expensive and delicate, so many places serve a horseradish-based substitute with green color.",
+    "source": "preset",
+    "tag": "food"
+  },
+  {
+    "statement": "Cashews grow attached to a fruit often called a cashew apple.",
+    "answer": "truth",
+    "explanation": "The cashew nut grows below a swollen fruit-like stem called a cashew apple. It looks like the nut is hanging on for dear life.",
+    "source": "preset",
+    "tag": "food"
+  },
+  {
+    "statement": "The first webcam watched a coffee pot.",
+    "answer": "truth",
+    "explanation": "Researchers at Cambridge used an early webcam to check whether the coffee pot had coffee before walking over. Noble technology.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "The Celsius and Fahrenheit scales meet at -40 degrees.",
+    "answer": "truth",
+    "explanation": "-40 degrees is the same temperature in Celsius and Fahrenheit. It is also the temperature where everyone agrees to stay inside.",
+    "source": "preset",
+    "tag": "science"
+  },
+  {
+    "statement": "The word robot entered English through a Czech play.",
+    "answer": "truth",
+    "explanation": "Karel Capek's 1920 play R.U.R. helped introduce robot to English from a Czech word tied to forced labor.",
+    "source": "preset",
+    "tag": "language"
+  },
+  {
+    "statement": "The Monopoly mascot wears a monocle.",
+    "answer": "turd",
+    "explanation": "Rich Uncle Pennybags has a top hat and mustache, but no monocle. Your brain may be borrowing one from Mr. Peanut.",
+    "source": "preset",
+    "tag": "culture"
+  },
+  {
+    "statement": "Darth Vader says, \"Luke, I am your father.\"",
+    "answer": "turd",
+    "explanation": "The famous line is actually, \"No, I am your father.\" The misquote has been doing heavy breathing for decades.",
+    "source": "preset",
+    "tag": "culture"
+  },
+  {
+    "statement": "Sherlock Holmes says \"Elementary, my dear Watson\" in the original stories.",
+    "answer": "turd",
+    "explanation": "Holmes says versions of \"elementary\" and \"my dear Watson,\" but the exact famous phrase was popularized later.",
+    "source": "preset",
+    "tag": "culture"
+  },
+  {
+    "statement": "White chocolate gets its color from cocoa powder.",
+    "answer": "turd",
+    "explanation": "White chocolate uses cocoa butter, not cocoa solids. That is why it is pale and why chocolate arguments begin.",
+    "source": "preset",
+    "tag": "food"
+  },
+  {
+    "statement": "Pineapples grow on trees.",
+    "answer": "turd",
+    "explanation": "Pineapples grow from low plants near the ground. The tree version is tropical fan fiction.",
+    "source": "preset",
+    "tag": "food"
+  },
+  {
+    "statement": "Vikings wore horned helmets into battle.",
+    "answer": "turd",
+    "explanation": "The horned-helmet image mostly comes from later art and stage costumes, not battlefield evidence.",
+    "source": "preset",
+    "tag": "history"
+  },
+  {
+    "statement": "The Great Pyramid of Giza was built by Romans.",
+    "answer": "turd",
+    "explanation": "The Great Pyramid was built in ancient Egypt thousands of years before Rome became an empire.",
+    "source": "preset",
+    "tag": "history"
+  },
+  {
+    "statement": "The first iPhone launched with an App Store.",
+    "answer": "turd",
+    "explanation": "The original iPhone launched in 2007, and the App Store arrived in 2008. Early iPhone life was weirdly app-less.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "The @ symbol was invented for email addresses.",
+    "answer": "turd",
+    "explanation": "The @ symbol existed long before email. Email gave it a comeback tour, not a birth certificate.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "Microwave ovens were invented to dry wet newspapers faster.",
+    "answer": "turd",
+    "explanation": "The microwave oven story traces to radar equipment heating food, famously melting candy near engineer Percy Spencer.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "A person weighs slightly more at the equator than at the poles.",
+    "answer": "turd",
+    "explanation": "Because of Earth's rotation and shape, a person weighs slightly less at the equator than at the poles.",
+    "source": "preset",
+    "tag": "science"
+  },
+  {
+    "statement": "Astronauts can chat through open space without radios if they are close enough.",
+    "answer": "turd",
+    "explanation": "Sound needs a medium like air to travel. In open space, radios do the talking.",
+    "source": "preset",
+    "tag": "space"
+  },
+  {
+    "statement": "The first email was sent from a smartphone.",
+    "answer": "turd",
+    "explanation": "Email predates smartphones by decades. The first networked email experiments happened on early computer networks.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "The Q in QR code stands for quality.",
+    "answer": "turd",
+    "explanation": "QR stands for Quick Response. The code was designed to be scanned quickly, not to compliment itself.",
+    "source": "preset",
+    "tag": "technology"
+  },
+  {
+    "statement": "A piano has fewer strings than keys.",
+    "answer": "turd",
+    "explanation": "Most pianos have more strings than keys because many notes use multiple strings. The instrument is secretly a string party.",
+    "source": "preset",
+    "tag": "music"
+  },
+  {
+    "statement": "The first printed book made with movable metal type in Europe was a cookbook.",
+    "answer": "turd",
+    "explanation": "Gutenberg is famous for printing the Bible with movable type in Europe, not a medieval casserole collection.",
+    "source": "preset",
+    "tag": "history"
+  }
+]

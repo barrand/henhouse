@@ -7,7 +7,7 @@ import { doc, onSnapshot } from 'firebase/firestore'
 
 // -- Fowl Words Callable Functions --
 
-const fowlWordsCreateGameFn = httpsCallable<{ playerName: string }, { gameId: string; code: string }>(functions, 'fowlWordsCreateGame')
+const fowlWordsCreateGameFn = httpsCallable<{ playerName: string; includePatrioticQuestions?: boolean }, { gameId: string; code: string }>(functions, 'fowlWordsCreateGame')
 const fowlWordsRematchFn = httpsCallable<{ gameId: string }, { code: string }>(functions, 'fowlWordsRematch')
 const fowlWordsStartGameFn = httpsCallable<{ gameId: string }, void>(functions, 'fowlWordsStartGame')
 const submitClueFn = httpsCallable<{ gameId: string; roundNum: number; clue: string }, void>(functions, 'submitClue')
@@ -32,8 +32,8 @@ const fowlWordsSubmitGuesserStarVoteFn = httpsCallable<{ gameId: string; roundNu
 /** @deprecated legacy alias — calls fowlWordsSubmitGuesserBoo */
 const fowlWordsSubmitGuesserThumbsDownVoteFn = httpsCallable<{ gameId: string; roundNum: number; groupIndex: number }, void>(functions, 'fowlWordsSubmitGuesserThumbsDown')
 
-export async function fowlWordsCreateGame(playerName: string) {
-  const result = await fowlWordsCreateGameFn({ playerName })
+export async function fowlWordsCreateGame(playerName: string, includePatrioticQuestions: boolean = false) {
+  const result = await fowlWordsCreateGameFn({ playerName, includePatrioticQuestions })
   return result.data
 }
 

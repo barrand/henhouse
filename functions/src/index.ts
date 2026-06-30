@@ -108,3 +108,6 @@ export * from './games/flock-together/index'
 
 // ── Fowl Words ────────────────────────────────────────────────────────────────
 export * from './games/fowl-words/index'
+
+// ── Truth or Turd ─────────────────────────────────────────────────────────────
+export * from './games/truth-or-turd/index'

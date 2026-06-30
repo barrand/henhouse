@@ -8,13 +8,14 @@ export interface GameSettings {
 export interface BaseGameData {
   id: string
   code: string
-  gameType: 'flock-together' | 'fowl-words'
+  gameType: 'flock-together' | 'fowl-words' | 'truth-or-turd'
   hostId: string
   originalHostId: string
   status: 'lobby' | 'playing' | 'finished' | 'abandoned'
   currentRound: number
   playerIds: string[]
   settings: GameSettings
+  includePatrioticQuestions?: boolean
   rematchCode?: string
 }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
-import { startGame, updateCategories, setPatrioticMode, resetQuestionCooldowns, submitCustomQuestion, onCustomQuestionsUpdate } from '../service'
+import { startGame, updateCategories, resetQuestionCooldowns, submitCustomQuestion, onCustomQuestionsUpdate } from '../service'
 import CategoryInput from './CategoryInput'
 import QuestionSubmission from './QuestionSubmission'
 
@@ -49,14 +49,6 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
       await updateCategories(game.id, game.categories.filter((c) => c !== category))
     } catch (err: any) {
       setError(err.message ?? 'Failed to remove category')
-    }
-  }
-
-  const handleTogglePatrioticMode = async () => {
-    try {
-      await setPatrioticMode(game.id, !game.includePatrioticQuestions)
-    } catch (err: any) {
-      setError(err.message ?? 'Failed to update patriotic mode')
     }
   }
 
@@ -130,7 +122,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
         {/* Patriotic Edition Banner */}
         {game.includePatrioticQuestions && (
           <div className="mb-6 bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-4 text-center">
-            <p className="font-headline text-lg font-bold text-on-surface">🇺🇸 Patriotic Edition is ON</p>
+            <p className="font-headline text-lg font-bold text-on-surface">Patriotic Edition is ON</p>
             <p className="text-on-surface-variant text-sm font-body mt-1">250th anniversary questions every other round</p>
           </div>
         )}
@@ -169,27 +161,9 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
           </div>
         </section>
 
-        {/* Patriotic Mode Toggle */}
+        {/* Host Tools */}
         {isHost && (
-          <section className="mb-8 space-y-3">
-            <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/60 flex items-center justify-between">
-              <div className="flex-1">
-                <h4 className="font-headline text-base font-semibold text-on-surface mb-1">🎆 Add patriotic flavor to the game</h4>
-                <p className="text-xs text-on-surface-variant">Mix America's 250th anniversary questions into every other round</p>
-              </div>
-              <button
-                onClick={handleTogglePatrioticMode}
-                className={`ml-4 w-12 h-6 rounded-full transition-colors flex items-center ${
-                  game.includePatrioticQuestions
-                    ? 'bg-primary'
-                    : 'bg-outline-variant'
-                }`}
-              >
-                <div className={`w-5 h-5 rounded-full bg-surface-container transition-transform ${
-                  game.includePatrioticQuestions ? 'translate-x-6' : 'translate-x-0.5'
-                }`} />
-              </button>
-            </div>
+          <section className="mb-8">
             <button
               onClick={handleResetQuestionCooldowns}
               className="w-full bg-surface-container-low hover:bg-surface-container p-3 rounded-xl border border-outline-variant/60 transition-colors flex items-center justify-center gap-2 text-on-surface text-sm font-medium"

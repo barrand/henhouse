@@ -63,6 +63,13 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
           </div>
         </div>
 
+        {game.includePatrioticQuestions && (
+          <div className="mb-6 bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-4 text-center">
+            <p className="font-headline text-lg font-bold text-on-surface">Patriotic Edition is ON</p>
+            <p className="text-on-surface-variant text-sm font-body mt-1">America-themed cards every other round</p>
+          </div>
+        )}
+
         {/* Players */}
         <section className="mb-6">
           <div className="flex justify-between items-end mb-2 px-1">

@@ -25,6 +25,7 @@ import {
   MAX_ATTEMPTS,
 } from './scoring'
 import { applyPeerLoveVotes, effectivePeerLoveVotesFromRound } from './peerLove'
+import { addFowlWordCooldownWrites } from './cooldowns'
 import type { ClueGroup } from './types'
 
 const db = admin.firestore
@@ -529,7 +530,8 @@ export async function advanceToNextRound(gameId: string): Promise<void> {
 
     const wordSelectionDeadline = Timestamp.fromMillis(Date.now() + WORD_SELECTION_SECONDS * 1000)
 
-    await gameRef.collection('rounds').doc(String(nextRoundNum)).set({
+    const batch = firestore.batch()
+    batch.set(gameRef.collection('rounds').doc(String(nextRoundNum)), {
       secretWord: '',           // set after word selection
       wordOptions,
       wordVotes: {},
@@ -554,12 +556,14 @@ export async function advanceToNextRound(gameId: string): Promise<void> {
       eligiblePlayerCount: playerIds.length,
     })
 
-    await gameRef.update({
+    batch.update(gameRef, {
       currentRound: nextRoundNum,
       currentGuesser: nextGuesser,
       cardsRemaining,
       advanceInProgress: FieldValue.delete(),
     })
+    addFowlWordCooldownWrites(batch, game.originalHostId ?? game.hostId, wordOptions)
+    await batch.commit()
   } catch (err) {
     await gameRef.update({ advanceInProgress: FieldValue.delete() }).catch(() => {})
     throw err

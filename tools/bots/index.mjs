@@ -254,6 +254,11 @@ function sanitizeRound(round) {
     base.type = round.type
     base.options = round.options
   }
+  if (round.statement) {
+    base.statement = round.statement
+    base.correctAnswer = round.correctAnswer
+    base.explanation = round.explanation
+  }
   return base
 }
 
@@ -400,6 +405,7 @@ class Bot {
     if (!roundMatchesGame(game, round)) return
     if (game.gameType === 'fowl-words') await this.handleFowlWords(game, round)
     if (game.gameType === 'flock-together') await this.handleFlockTogether(game, round)
+    if (game.gameType === 'truth-or-turd') await this.handleTruthOrTurd(game, round)
   }
 
   async handleFowlWords(game, round) {
@@ -459,6 +465,17 @@ class Bot {
       if (!answer) throw new Error('No answer available for round')
       await this.call('submitAnswer', { gameId: this.gameId, roundNum, answer })
       this.reporter.event('bot-action', { botName: this.name, action: `answered "${answer}"`, roundNum })
+    })
+  }
+
+  async handleTruthOrTurd(game, round) {
+    const roundNum = game.currentRound
+    if (round.status !== 'answering') return
+    if ((round.answeredPlayerIds ?? []).includes(this.uid)) return
+    await this.once(`truth-or-turd:answer:${roundNum}`, async () => {
+      const answer = Math.random() < 0.5 ? 'truth' : 'turd'
+      await this.call('truthOrTurdSubmitAnswer', { gameId: this.gameId, roundNum, answer })
+      this.reporter.event('bot-action', { botName: this.name, action: `picked ${answer}`, roundNum })
     })
   }
 

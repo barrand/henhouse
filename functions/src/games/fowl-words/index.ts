@@ -5,6 +5,8 @@ import { claimRoomCode, releaseRoomCode } from '../../shared/roomCodes'
 import { eligibleNonGuesserIds, isRoundEligible } from '../../shared/roundEligibility'
 import { runDeduplication, handleGuess, advanceToNextRound, skipToNextAttempt, finalizeWordSelection, beginClueSubmission } from './roundFlow'
 import { mostHelpfulSplitPts } from './peerLove'
+import { buildFowlWordsDeck } from './deck'
+import { addFowlWordCooldownWrites, fetchActiveFowlWordCooldowns } from './cooldowns'
 import {
   giverLovesForPlayer,
   giverBooForPlayer,
@@ -16,13 +18,21 @@ const db = admin.firestore
 
 const TOTAL_ROUNDS = 10 // Reduced from 13 after playtest feedback
 
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
+async function buildCardsRemaining(
+  totalRounds: number,
+  includePatrioticQuestions: boolean,
+  originalHostId: string,
+): Promise<string[]> {
+  const words = (await import('./data/words.json')).default as string[]
+  const patrioticWords = (await import('./data/patrioticWords.json')).default as string[]
+  const activeCooldownKeys = await fetchActiveFowlWordCooldowns(originalHostId)
+  return buildFowlWordsDeck({
+    words,
+    patrioticWords,
+    totalRounds,
+    includePatrioticQuestions,
+    activeCooldownKeys,
+  })
 }
 
 // -- CREATE GAME (Fowl Words) --
@@ -30,8 +40,14 @@ export const fowlWordsCreateGame = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
-  const { playerName } = request.data as { playerName: string }
+  const { playerName, includePatrioticQuestions = false } = request.data as {
+    playerName: string
+    includePatrioticQuestions?: boolean
+  }
   if (!playerName?.trim()) throw new HttpsError('invalid-argument', 'Name required')
+  if (typeof includePatrioticQuestions !== 'boolean') {
+    throw new HttpsError('invalid-argument', 'includePatrioticQuestions must be a boolean')
+  }
 
   const firestore = db()
   const gameRef = firestore.collection('games').doc()
@@ -44,11 +60,6 @@ export const fowlWordsCreateGame = onCall(async (request) => {
     throw new HttpsError('internal', 'Could not generate room code')
   }
 
-  // Load and shuffle word list — draw 3 words per round (2 burned after voting)
-  const words = (await import('./data/words.json')).default as string[]
-  const shuffled = shuffle(words)
-  const cardsRemaining = shuffled.slice(0, TOTAL_ROUNDS * 3)
-
   await gameRef.set({
     code,
     gameType: 'fowl-words',
@@ -57,9 +68,10 @@ export const fowlWordsCreateGame = onCall(async (request) => {
     status: 'lobby',
     currentRound: 0,
     currentGuesser: null,
-    cardsRemaining,
+    cardsRemaining: [],
     playerIds: [uid],
     settings: { totalRounds: TOTAL_ROUNDS, secondsPerRound: 60, autoAdvanceSeconds: 10 },
+    includePatrioticQuestions,
   })
 
   await gameRef.collection('players').doc(uid).set({
@@ -100,21 +112,20 @@ export const fowlWordsRematch = onCall(async (request) => {
 
   await releaseRoomCode(game.code)
 
-  const words = (await import('./data/words.json')).default as string[]
-  const shuffled = shuffle(words)
-  const cardsRemaining = shuffled.slice(0, TOTAL_ROUNDS * 3)
+  const includePatrioticQuestions = game.includePatrioticQuestions ?? false
 
   await newGameRef.set({
     code: newCode,
     gameType: 'fowl-words',
     hostId: uid,
-    originalHostId: uid,
+    originalHostId: game.originalHostId ?? uid,
     status: 'lobby',
     currentRound: 0,
     currentGuesser: null,
-    cardsRemaining,
+    cardsRemaining: [],
     playerIds: game.playerIds,
     settings: game.settings,
+    includePatrioticQuestions,
   })
 
   const batch = firestore.batch()
@@ -149,7 +160,10 @@ export const fowlWordsStartGame = onCall(async (request) => {
 
   // First guesser = host (originalHostId)
   const firstGuesser = uid
-  const cardsRemaining = [...(game.cardsRemaining ?? [])]
+  const totalRounds: number = game.settings?.totalRounds ?? TOTAL_ROUNDS
+  const originalHostId: string = game.originalHostId ?? game.hostId
+  const includePatrioticQuestions = game.includePatrioticQuestions ?? false
+  const cardsRemaining = await buildCardsRemaining(totalRounds, includePatrioticQuestions, originalHostId)
 
   // Draw 3 words for the first word-selection vote
   const wordOptions: string[] = []
@@ -195,6 +209,7 @@ export const fowlWordsStartGame = onCall(async (request) => {
     currentGuesser: firstGuesser,
     cardsRemaining,
   })
+  addFowlWordCooldownWrites(batch, originalHostId, wordOptions)
   await batch.commit()
 })
 

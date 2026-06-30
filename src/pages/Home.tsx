@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/usePlayer'
 import { flockCreateGame } from '@flock/service'
 import { fowlWordsCreateGame } from '@fowl-words/service'
+import { truthOrTurdCreateGame } from '@truth-or-turd/service'
 import { joinGame } from '@shared/gameService'
+
+function errorMessage(err: unknown, fallback: string) {
+  return err instanceof Error ? err.message : fallback
+}
 
 export default function Home() {
   const { loading: authLoading } = useAuth()
@@ -13,11 +18,21 @@ export default function Home() {
   const [error, setError] = useState('')
   const [creatingFlock, setCreatingFlock] = useState(false)
   const [creatingFowlWords, setCreatingFowlWords] = useState(false)
+  const [creatingTruthOrTurd, setCreatingTruthOrTurd] = useState(false)
   const [joining, setJoining] = useState(false)
+  const [includePatrioticQuestions, setIncludePatrioticQuestions] = useState(() => localStorage.getItem('includePatrioticQuestions') === 'true')
 
   const saveName = (n: string) => {
     setName(n)
     localStorage.setItem('playerName', n)
+  }
+
+  const togglePatrioticEdition = () => {
+    setIncludePatrioticQuestions((current) => {
+      const next = !current
+      localStorage.setItem('includePatrioticQuestions', String(next))
+      return next
+    })
   }
 
   const handleCreateFlock = async () => {
@@ -25,10 +40,10 @@ export default function Home() {
     setError('')
     setCreatingFlock(true)
     try {
-      const { code } = await flockCreateGame(name.trim())
+      const { code } = await flockCreateGame(name.trim(), includePatrioticQuestions)
       navigate(`/flock/${code}`)
-    } catch (err: any) {
-      setError(err.message ?? 'Failed to create game')
+    } catch (err: unknown) {
+      setError(errorMessage(err, 'Failed to create game'))
     } finally {
       setCreatingFlock(false)
     }
@@ -39,12 +54,26 @@ export default function Home() {
     setError('')
     setCreatingFowlWords(true)
     try {
-      const { code } = await fowlWordsCreateGame(name.trim())
+      const { code } = await fowlWordsCreateGame(name.trim(), includePatrioticQuestions)
       navigate(`/fowl-words/${code}`)
-    } catch (err: any) {
-      setError(err.message ?? 'Failed to create game')
+    } catch (err: unknown) {
+      setError(errorMessage(err, 'Failed to create game'))
     } finally {
       setCreatingFowlWords(false)
+    }
+  }
+
+  const handleCreateTruthOrTurd = async () => {
+    if (!name.trim()) return setError('Enter your name first')
+    setError('')
+    setCreatingTruthOrTurd(true)
+    try {
+      const { code } = await truthOrTurdCreateGame(name.trim(), includePatrioticQuestions)
+      navigate(`/truth-or-turd/${code}`)
+    } catch (err: unknown) {
+      setError(errorMessage(err, 'Failed to create game'))
+    } finally {
+      setCreatingTruthOrTurd(false)
     }
   }
 
@@ -56,10 +85,15 @@ export default function Home() {
     try {
       const result = await joinGame(roomCode.trim(), name.trim())
       const upperCode = roomCode.trim().toUpperCase()
-      const route = result.gameType === 'fowl-words' ? `/fowl-words/${upperCode}` : `/flock/${upperCode}`
+      const route =
+        result.gameType === 'fowl-words'
+          ? `/fowl-words/${upperCode}`
+          : result.gameType === 'truth-or-turd'
+          ? `/truth-or-turd/${upperCode}`
+          : `/flock/${upperCode}`
       navigate(route)
-    } catch (err: any) {
-      setError(err.message ?? 'Failed to join game')
+    } catch (err: unknown) {
+      setError(errorMessage(err, 'Failed to join game'))
     } finally {
       setJoining(false)
     }
@@ -151,13 +185,39 @@ export default function Home() {
           <div className="h-px flex-1 bg-outline-variant/40" />
         </div>
 
-        {/* Create Section: Two Game Tiles */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Shared Settings */}
+        <button
+          type="button"
+          onClick={togglePatrioticEdition}
+          className="w-full rounded-xl border border-outline-variant/60 bg-surface-container-low px-4 py-3 flex items-center justify-between gap-4 text-left hover:bg-surface-container transition-all"
+          aria-pressed={includePatrioticQuestions}
+        >
+          <span className="min-w-0">
+            <span className="block font-headline text-base font-bold text-on-surface">Patriotic Edition</span>
+            <span className="block text-xs text-on-surface-variant font-body leading-snug mt-0.5">
+              Adds America-themed questions, trivia, and Fowl Words cards.
+            </span>
+          </span>
+          <span
+            className={`shrink-0 w-12 h-6 rounded-full transition-colors flex items-center ${
+              includePatrioticQuestions ? 'bg-primary' : 'bg-outline-variant'
+            }`}
+          >
+            <span
+              className={`w-5 h-5 rounded-full bg-surface-container transition-transform ${
+                includePatrioticQuestions ? 'translate-x-6' : 'translate-x-0.5'
+              }`}
+            />
+          </span>
+        </button>
+
+        {/* Create Section: Game Tiles */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Flock Together Tile */}
           <button
             type="button"
             onClick={handleCreateFlock}
-            disabled={creatingFlock || creatingFowlWords}
+            disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd}
             className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
@@ -179,7 +239,7 @@ export default function Home() {
           <button
             type="button"
             onClick={handleCreateFowlWords}
-            disabled={creatingFlock || creatingFowlWords}
+            disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd}
             className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
@@ -194,6 +254,28 @@ export default function Home() {
             </p>
             <div className="bg-primary text-on-primary h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
               {creatingFowlWords ? 'CREATING…' : 'CREATE'}
+            </div>
+          </button>
+
+          {/* Truth or Turd Tile */}
+          <button
+            type="button"
+            onClick={handleCreateTruthOrTurd}
+            disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd}
+            className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center">
+                <img src="/images/generated-comic/rotten-egg.png" alt="" className="w-14 h-14 object-contain" />
+              </div>
+              <span className="font-label text-[9px] font-bold uppercase tracking-[0.2em] text-secondary opacity-70">1+ players · new!</span>
+            </div>
+            <h3 className="font-headline text-xl font-bold text-on-surface mb-1">Truth or Turd</h3>
+            <p className="text-on-surface-variant text-xs font-body leading-snug mb-4">
+              Decide if oddball trivia is true or total nonsense.
+            </p>
+            <div className="bg-primary text-on-primary h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
+              {creatingTruthOrTurd ? 'CREATING…' : 'CREATE'}
             </div>
           </button>
         </div>
