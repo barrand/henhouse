@@ -266,7 +266,7 @@ export default function Home() {
           >
             <div className="flex items-start justify-between mb-3">
               <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center">
-                <img src="/images/generated-comic/rotten-egg.png" alt="" className="w-14 h-14 object-contain" />
+                <img src="/images/generated-comic/truth-or-turd-icon.png" alt="" className="w-14 h-14 object-contain" />
               </div>
               <span className="font-label text-[9px] font-bold uppercase tracking-[0.2em] text-secondary opacity-70">1+ players · new!</span>
             </div>

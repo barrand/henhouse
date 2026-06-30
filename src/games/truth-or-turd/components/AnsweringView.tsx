@@ -83,6 +83,7 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
   }
 
   const timerPercent = Math.max(0, (timeLeft / game.settings.secondsPerRound) * 100)
+  const isPatrioticRound = round.tags?.includes('patriotic') || round.source === 'patriotic'
 
   return (
     <main className="flex-1 flex flex-col px-4 py-6">
@@ -100,10 +101,10 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
       </div>
 
       <section className="rounded-2xl border-2 p-6 text-center shadow-sm relative bg-surface-container-lowest border-outline-variant/60">
-        {round.source === 'patriotic' && (
+        {isPatrioticRound && (
           <div className="absolute top-3 right-3 text-2xl" aria-hidden>🇺🇸</div>
         )}
-        <img src="/images/generated-comic/hen-thinking.png" alt="" className="w-20 h-20 mx-auto mb-3 animate-hen-bob" />
+        <img src="/images/generated-comic/truth-or-turd-thinking.png" alt="" className="w-20 h-20 mx-auto mb-3 animate-hen-bob" />
         <p className="font-headline text-xl font-bold text-on-surface leading-relaxed">
           {round.statement}
         </p>

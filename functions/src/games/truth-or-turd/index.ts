@@ -6,20 +6,19 @@ import { getRoundEligiblePlayerIds, isRoundEligible } from '../../shared/roundEl
 import {
   drawTruthOrTurdQuestion,
   findTruthOrTurdQuestion,
+  selectTruthOrTurdQuestions,
   TruthOrTurdAnswer,
   TruthOrTurdQuestion,
 } from './deck'
 import { scoreTruthOrTurdRound } from './scoring'
+import questions from './data/questions.json'
 
 const db = admin.firestore()
 const TOTAL_ROUNDS = 15
 const SECONDS_PER_ROUND = 30
 
-async function loadQuestionBank(includePatrioticQuestions: boolean): Promise<TruthOrTurdQuestion[]> {
-  if (includePatrioticQuestions) {
-    return (await import('./data/patrioticQuestions.json')).default as TruthOrTurdQuestion[]
-  }
-  return (await import('./data/generalQuestions.json')).default as TruthOrTurdQuestion[]
+function loadQuestionBank(includePatrioticQuestions: boolean): TruthOrTurdQuestion[] {
+  return selectTruthOrTurdQuestions(questions as TruthOrTurdQuestion[], includePatrioticQuestions)
 }
 
 function isAnswerChoice(value: unknown): value is TruthOrTurdAnswer {
@@ -27,8 +26,8 @@ function isAnswerChoice(value: unknown): value is TruthOrTurdAnswer {
 }
 
 async function drawQuestionForGame(game: FirebaseFirestore.DocumentData) {
-  const questions = await loadQuestionBank(game.includePatrioticQuestions ?? false)
-  return drawTruthOrTurdQuestion(questions, game.usedTruthOrTurdQuestionKeys ?? [])
+  const questionBank = loadQuestionBank(game.includePatrioticQuestions ?? false)
+  return drawTruthOrTurdQuestion(questionBank, game.usedTruthOrTurdQuestionKeys ?? [])
 }
 
 async function createRound(
@@ -42,8 +41,7 @@ async function createRound(
 
   await gameRef.collection('rounds').doc(String(roundNum)).set({
     statement: question.statement,
-    source: question.source,
-    tag: question.tag ?? null,
+    tags: question.tags,
     questionKey: question.questionKey,
     status: 'answering',
     deadline,

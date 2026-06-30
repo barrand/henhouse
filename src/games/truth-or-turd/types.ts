@@ -17,7 +17,8 @@ export interface PlayerData extends SharedPlayerData {
 export interface RoundData {
   id: string
   statement: string
-  source: 'preset' | 'patriotic'
+  tags?: string[]
+  source?: 'preset' | 'patriotic'
   tag?: string | null
   questionKey: string
   status: TruthOrTurdRoundStatus

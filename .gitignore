@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 bot-runs/
+scripts/review-output/
 *.local
 .env
 .env.local

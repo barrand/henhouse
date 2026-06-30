@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { drawTruthOrTurdQuestion, findTruthOrTurdQuestion, truthOrTurdQuestionKey, TruthOrTurdQuestion } from '../deck'
+import {
+  drawTruthOrTurdQuestion,
+  findTruthOrTurdQuestion,
+  selectTruthOrTurdQuestions,
+  truthOrTurdQuestionKey,
+  TruthOrTurdQuestion,
+} from '../deck'
 
 const questions: TruthOrTurdQuestion[] = [
-  { statement: 'A chicken can dream.', answer: 'truth', explanation: 'Birds show sleep patterns associated with dreaming.', source: 'preset' },
-  { statement: 'The moon is made of cheese.', answer: 'turd', explanation: 'It is rock, not dairy.', source: 'preset' },
-  { statement: 'A chicken can dream.', answer: 'truth', explanation: 'Duplicate statement should be ignored.', source: 'preset' },
+  { statement: 'A chicken can dream.', answer: 'truth', explanation: 'Birds show sleep patterns associated with dreaming.', tags: ['animals'] },
+  { statement: 'The moon is made of cheese.', answer: 'turd', explanation: 'It is rock, not dairy.', tags: ['space'] },
+  { statement: 'A chicken can dream.', answer: 'truth', explanation: 'Duplicate statement should be ignored.', tags: ['animals'] },
+  { statement: 'The Liberty Bell cracked.', answer: 'truth', explanation: 'It has a famous crack.', tags: ['patriotic', 'symbols'] },
 ]
 
 describe('Truth or Turd deck', () => {
@@ -26,5 +33,15 @@ describe('Truth or Turd deck', () => {
     const key = truthOrTurdQuestionKey('The moon is made of cheese.')
 
     expect(findTruthOrTurdQuestion(questions, key)?.answer).toBe('turd')
+  })
+
+  it('filters patriotic questions from a single tagged bank', () => {
+    expect(selectTruthOrTurdQuestions(questions, false).map((question) => question.statement)).toEqual([
+      'A chicken can dream.',
+      'The moon is made of cheese.',
+    ])
+    expect(selectTruthOrTurdQuestions(questions, true).map((question) => question.statement)).toEqual([
+      'The Liberty Bell cracked.',
+    ])
   })
 })

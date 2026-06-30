@@ -75,7 +75,8 @@ Phone-first interaction is the default. Use large tap targets, stable dimensions
 - If a global mode such as Patriotic Edition applies, define exact behavior per game.
 - Trivia/factual content must be checked before shipping.
 - Keep wording family party-safe unless the game explicitly chooses otherwise.
-- Store enough metadata for variety, such as `source` and optional `tag`.
+- Prefer one source-of-truth content bank per game. Use a `tags` array for variants such as `patriotic` instead of creating parallel JSON files.
+- Store enough metadata for variety, such as topic tags and optional difficulty/audience tags.
 
 ## Testing Checklist
 

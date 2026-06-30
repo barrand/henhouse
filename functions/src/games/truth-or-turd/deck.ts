@@ -6,8 +6,7 @@ export interface TruthOrTurdQuestion {
   statement: string
   answer: TruthOrTurdAnswer
   explanation: string
-  source: 'preset' | 'patriotic'
-  tag?: string
+  tags: string[]
 }
 
 export interface DrawnTruthOrTurdQuestion extends TruthOrTurdQuestion {
@@ -48,6 +47,16 @@ export function findTruthOrTurdQuestion(
     ...question,
     questionKey,
   }
+}
+
+export function selectTruthOrTurdQuestions(
+  questions: TruthOrTurdQuestion[],
+  includePatrioticQuestions: boolean,
+): TruthOrTurdQuestion[] {
+  return uniqueQuestions(questions).filter((question) => {
+    const isPatriotic = question.tags.includes('patriotic')
+    return includePatrioticQuestions ? isPatriotic : !isPatriotic
+  })
 }
 
 function uniqueQuestions(questions: TruthOrTurdQuestion[]): TruthOrTurdQuestion[] {

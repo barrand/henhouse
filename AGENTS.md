@@ -57,6 +57,7 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 - Reveal immediately when everyone answers, or when the host forces reveal after at least one answer, or when the timer expires.
 - Reveal shows the correct label, a short funny/enlightening explanation, grouped Truth/Turd picks, no-answer players, points, and standings.
 - Patriotic Edition is patriotic-only for this game.
+- Question content lives in one tagged bank: `functions/src/games/truth-or-turd/data/questions.json`; patriotic questions use the `patriotic` tag.
 - Final ties are allowed.
 
 ### Fowl Words — how you win
@@ -173,6 +174,10 @@ Constraints: no text, no letters, no speech bubbles, no watermark, no logo, no p
 | `generated-comic/hen-sleeping.png` | Sleeping | Waiting for other players |
 | `generated-comic/flock-icon.png` | Three birds clustered together | Flock Together home tile icon |
 | `generated-comic/fowl-icon.png` | Chicken with clue cards | Fowl Words home tile icon |
+| `generated-comic/truth-or-turd-icon.png` | Chicken with Truth/Turd paddles | Truth or Turd home tile icon |
+| `generated-comic/truth-or-turd-thinking.png` | Deciding between Truth/Turd | Truth or Turd answering state |
+| `generated-comic/truth-or-turd-correct.png` | Celebrating correct answer | Truth or Turd correct reveal |
+| `generated-comic/truth-or-turd-wrong.png` | Stepped near comic splat | Truth or Turd wrong reveal |
 | `generated-comic/botanical-fern.png` | Comic fern | Home/lobby decorative corner art |
 | `generated-comic/botanical-wheat.png` | Comic wheat | Home/lobby decorative corner art |
 | `generated-comic/footprint-divider.png` | Footprints/feathers divider | Home bottom divider |
