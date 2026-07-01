@@ -1,5 +1,6 @@
 [
   {
+    "kind": "binary",
     "statement": "Bananas are berries, but strawberries are not.",
     "answer": "truth",
     "explanation": "Botanically, bananas develop from one flower with one ovary and have seeds inside. Strawberries are aggregate fruits, which is rude but accurate.",
@@ -8,6 +9,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Lightning avoids places it has already struck.",
     "answer": "turd",
     "explanation": "Lightning can strike the same place many times. Tall buildings and towers get repeat visits like they owe the sky money.",
@@ -16,6 +18,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Octopuses have three hearts.",
     "answer": "truth",
     "explanation": "Two hearts pump blood to the gills, and one pumps it to the rest of the body. That is a lot of emotional infrastructure.",
@@ -24,6 +27,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Most of the human brain stays inactive during ordinary thinking.",
     "answer": "turd",
     "explanation": "Brain imaging shows we use many brain regions across ordinary tasks. The 10 percent idea is a movie-friendly myth.",
@@ -32,6 +36,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "A group of flamingos can be called a flamboyance.",
     "answer": "truth",
     "explanation": "It is a real collective noun, and honestly the birds earned it.",
@@ -40,6 +45,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "A goldfish forgets a new routine within a few seconds.",
     "answer": "turd",
     "explanation": "Goldfish can learn routines and remember things far longer than three seconds. The insult is doing most of the swimming here.",
@@ -48,6 +54,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The Eiffel Tower can grow taller in hot weather.",
     "answer": "truth",
     "explanation": "Metal expands when heated, so the tower can rise several inches on hot days. Summer gives it a little stretch.",
@@ -56,6 +63,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Bats are blind.",
     "answer": "turd",
     "explanation": "Bats can see, and many also use echolocation. They are not flying around on vibes alone.",
@@ -64,6 +72,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Honey can last for thousands of years without spoiling if sealed well.",
     "answer": "truth",
     "explanation": "Honey's low moisture and acidity make it hostile to many microbes. Ancient honey can still be recognizable honey.",
@@ -72,6 +81,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The Great Wall of China is clearly visible from the Moon with the naked eye.",
     "answer": "turd",
     "explanation": "Astronauts have repeatedly pushed back on this myth. From the Moon, human-made structures are not easy naked-eye targets.",
@@ -80,6 +90,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Sharks existed before trees.",
     "answer": "truth",
     "explanation": "Shark ancestors are hundreds of millions of years old, older than the earliest forests. Sharks were vintage before shade was trendy.",
@@ -88,6 +99,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Coffee beans are actually beans.",
     "answer": "turd",
     "explanation": "They are seeds from coffee cherries. We call them beans because apparently breakfast needed more confusion.",
@@ -96,6 +108,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "There is a species of jellyfish often described as biologically immortal.",
     "answer": "truth",
     "explanation": "Turritopsis dohrnii can revert to an earlier life stage under stress. It is less superhero and more extreme reset button.",
@@ -104,6 +117,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Mount Everest is the closest point on Earth to the Moon.",
     "answer": "turd",
     "explanation": "Because Earth bulges at the equator, Mount Chimborazo in Ecuador reaches farther from Earth's center than Everest.",
@@ -112,6 +126,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "A day on Venus is longer than a year on Venus.",
     "answer": "truth",
     "explanation": "Venus rotates very slowly, taking longer to spin once than to orbit the Sun. Its calendar is a scheduling nightmare.",
@@ -120,6 +135,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Chameleons mainly change color to match any background perfectly.",
     "answer": "turd",
     "explanation": "Color changes often signal mood, temperature, light, or communication. They are not tiny living paint samples.",
@@ -128,6 +144,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Wombat poop is cube-shaped.",
     "answer": "truth",
     "explanation": "Wombats produce unusually cube-like droppings, likely shaped by their intestines. Nature has very specific hobbies.",
@@ -136,6 +153,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Sugar makes kids hyper.",
     "answer": "turd",
     "explanation": "Studies have not found a consistent sugar-hyperactivity effect. Birthday parties may be the real culprit.",
@@ -144,6 +162,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The shortest war in recorded history lasted under an hour.",
     "answer": "truth",
     "explanation": "The Anglo-Zanzibar War of 1896 is commonly cited at about 38 to 45 minutes. Some meetings last longer and do less.",
@@ -152,6 +171,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Fortune cookies were invented in China.",
     "answer": "turd",
     "explanation": "Modern fortune cookies are strongly associated with Japanese and Chinese immigrant businesses in the United States, especially California.",
@@ -160,6 +180,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "A shrimp's heart is located in its head area.",
     "answer": "truth",
     "explanation": "A shrimp's heart sits in the cephalothorax, near what people casually call the head. Shrimp anatomy is not here for our categories.",
@@ -168,6 +189,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Penguins live naturally at the North Pole.",
     "answer": "turd",
     "explanation": "Wild penguins live in the Southern Hemisphere. The Arctic has polar bears; penguins wisely skipped that neighborhood.",
@@ -176,6 +198,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The first oranges were not necessarily orange.",
     "answer": "truth",
     "explanation": "Some oranges can stay greenish in warm climates even when ripe. The fruit and the color had a branding meeting later.",
@@ -184,6 +207,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "U.S. courts have treated tomatoes as fruit when applying import taxes.",
     "answer": "turd",
     "explanation": "Botanically it is a fruit, but the U.S. Supreme Court treated tomatoes as vegetables for tariff purposes in 1893.",
@@ -192,6 +216,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Sound travels faster in water than in air.",
     "answer": "truth",
     "explanation": "Sound moves faster through water because its particles transmit vibrations more efficiently than air.",
@@ -200,6 +225,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The tongue has separate zones for sweet, salty, sour, and bitter tastes.",
     "answer": "turd",
     "explanation": "Taste receptors are distributed broadly across the tongue. The old tongue map is a classroom fossil.",
@@ -208,6 +234,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Some turtles can breathe through their rear end.",
     "answer": "truth",
     "explanation": "Some aquatic turtles can absorb oxygen through cloacal bursae. It is called cloacal respiration, because science says things directly.",
@@ -216,6 +243,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The Sahara Desert is the largest desert on Earth.",
     "answer": "turd",
     "explanation": "Antarctica is the largest desert by precipitation standards. Deserts are about dryness, not just sand drama.",
@@ -224,6 +252,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The dot over a lowercase i or j has a name.",
     "answer": "truth",
     "explanation": "It is called a tittle. Tiny dot, excellent vocabulary.",
@@ -232,6 +261,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Cracking your knuckles causes arthritis.",
     "answer": "turd",
     "explanation": "Research has not shown that knuckle cracking causes arthritis. It may annoy nearby people, which is a separate diagnosis.",
@@ -240,6 +270,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Century years can skip being leap years.",
     "answer": "truth",
     "explanation": "Years like 1900 are not leap years unless they are divisible by 400. Calendar rules enjoy tiny plot twists.",
@@ -248,6 +279,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The North Star is the brightest star in the night sky.",
     "answer": "turd",
     "explanation": "Polaris is useful for navigation, but Sirius is brighter. Fame and brightness are different departments.",
@@ -256,6 +288,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Some cats are allergic to humans.",
     "answer": "truth",
     "explanation": "Cats can react to human dander or products people use. The judgmental look may have paperwork behind it.",
@@ -264,6 +297,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "A peanut is a true tree nut.",
     "answer": "turd",
     "explanation": "Peanuts are legumes, related to beans and peas. They just hang out in nut mixes.",
@@ -272,6 +306,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The human body has more bacterial cells than human cells by a huge 10-to-1 margin.",
     "answer": "turd",
     "explanation": "That old ratio has been revised downward; current estimates are much closer. Still plenty of microscopic roommates.",
@@ -280,6 +315,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "An adult human has fewer bones than a newborn baby.",
     "answer": "truth",
     "explanation": "Babies have around 270 bones, and many fuse as they grow, leaving adults with 206.",
@@ -288,6 +324,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Napoleon Bonaparte was extremely short for his time.",
     "answer": "turd",
     "explanation": "He was around average height for a Frenchman of his era. The short-Napoleon idea got a lot of help from propaganda.",
@@ -296,6 +333,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The word laser started as an acronym.",
     "answer": "truth",
     "explanation": "LASER comes from Light Amplification by Stimulated Emission of Radiation. Somehow the acronym is easier.",
@@ -304,6 +342,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Camels store water in their humps.",
     "answer": "turd",
     "explanation": "Camel humps store fat, not water. The water-saving magic is mostly in their physiology.",
@@ -312,6 +351,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The unicorn is the national animal of Scotland.",
     "answer": "truth",
     "explanation": "Scotland has used the unicorn as a heraldic symbol for centuries. Completely imaginary, fully official energy.",
@@ -320,6 +360,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The five Olympic rings represent the five original Olympic sports.",
     "answer": "turd",
     "explanation": "The rings represent the union of inhabited continents and athletes meeting from around the world, not five sports.",
@@ -328,6 +369,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Some metals can explode when dropped into water.",
     "answer": "truth",
     "explanation": "Alkali metals like sodium and potassium react violently with water. Do not season soup with laboratory sodium.",
@@ -336,6 +378,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "A desert is classified by heat rather than rainfall.",
     "answer": "turd",
     "explanation": "Deserts are defined by low precipitation, so cold deserts exist too. Antarctica is the chilly champion.",
@@ -344,6 +387,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The plastic tips on shoelaces are called aglets.",
     "answer": "truth",
     "explanation": "Aglets keep laces from fraying and make them easier to thread. Tiny heroes, weird name.",
@@ -352,6 +396,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "A dog sweats mainly through its tongue.",
     "answer": "turd",
     "explanation": "Dogs cool themselves by panting, but their sweat glands are mostly in their paw pads.",
@@ -360,6 +405,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Glass is technically an amorphous solid, not a very slow liquid.",
     "answer": "truth",
     "explanation": "Old windows are uneven because of old manufacturing, not because glass slowly flowed down the pane.",
@@ -368,6 +414,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The color red makes bulls angry.",
     "answer": "turd",
     "explanation": "Bulls react to movement more than color. The cape is theatrical, not personally offensive.",
@@ -376,6 +423,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The first product with a barcode scanned in a store was a pack of gum.",
     "answer": "truth",
     "explanation": "A pack of Wrigley's gum was famously scanned in Ohio in 1974. Tiny gum, giant retail moment.",
@@ -384,6 +432,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "At a mountaintop campsite, water boils hotter than it does at sea level.",
     "answer": "turd",
     "explanation": "That is true at sea level under standard pressure. Change altitude or pressure, and the boiling point changes.",
@@ -392,6 +441,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The hashtag symbol is also called an octothorpe.",
     "answer": "truth",
     "explanation": "Octothorpe is a real name for #. It sounds like a tiny wizard but is punctuation.",
@@ -400,6 +450,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Balance is handled by the five classic senses.",
     "answer": "turd",
     "explanation": "Beyond the classic five, we sense balance, body position, temperature, pain, and more.",
@@ -408,6 +459,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "A blue whale's heart can weigh as much as a small car.",
     "answer": "truth",
     "explanation": "Blue whale hearts are enormous and can weigh hundreds of pounds. Ocean cardio is serious business.",
@@ -416,6 +468,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The microwave oven was invented after a candy bar melted near radar equipment.",
     "answer": "truth",
     "explanation": "Percy Spencer noticed microwaves could heat food after radar equipment melted candy in his pocket.",
@@ -424,6 +477,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "You can see the color pink as one wavelength of light.",
     "answer": "turd",
     "explanation": "Pink is perceived from a mix of wavelengths, especially red and blue/violet. There is no single pink wavelength in the rainbow.",
@@ -432,6 +486,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The word robot comes from a Czech word connected to forced labor.",
     "answer": "truth",
     "explanation": "Robot was popularized by Karel Capek's play R.U.R. and comes from robota, meaning forced labor or drudgery.",
@@ -440,6 +495,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "An ostrich hides its head in the sand when scared.",
     "answer": "turd",
     "explanation": "Ostriches do not bury their heads to hide. They may lower their heads near nests, which looks suspicious from far away.",
@@ -448,6 +504,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Some clouds can weigh more than a million pounds.",
     "answer": "truth",
     "explanation": "Cloud droplets are tiny and spread out, but together they can add up to enormous mass.",
@@ -456,6 +513,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "A flight recorder's nickname comes from its dark exterior.",
     "answer": "turd",
     "explanation": "Flight recorders are usually bright orange to make them easier to find after an accident. The nickname is dramatic, not descriptive.",
@@ -464,6 +522,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "A jiffy is sometimes used as a real unit of time.",
     "answer": "truth",
     "explanation": "In different technical contexts, a jiffy can mean a tiny specific time interval. Grandma was almost doing physics.",
@@ -472,6 +531,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Eating carrots gives humans night vision.",
     "answer": "turd",
     "explanation": "Carrots support eye health because of vitamin A, but they will not turn you into a snack-powered owl.",
@@ -480,6 +540,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Nintendo started as a company that made playing cards.",
     "answer": "truth",
     "explanation": "Nintendo began in Kyoto in 1889 making hanafuda playing cards. Before plumbers and princesses, there were cards.",
@@ -488,6 +549,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Bubble wrap was first pitched as textured wallpaper.",
     "answer": "truth",
     "explanation": "Its inventors originally tried to sell the air-bubble plastic as wallpaper. The wall decor failed, but the shipping world got a poppable hero.",
@@ -496,6 +558,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Play-Doh began as a cleaner for wallpaper.",
     "answer": "truth",
     "explanation": "The compound was first used to lift soot from wallpaper before it was reworked into a children's modeling toy.",
@@ -504,6 +567,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "QR codes were invented to help track car parts.",
     "answer": "truth",
     "explanation": "Denso Wave created QR codes in Japan in the 1990s for automotive manufacturing. Restaurant menus were not the original villain.",
@@ -512,6 +576,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The first computer mouse had a wooden shell.",
     "answer": "truth",
     "explanation": "Douglas Engelbart's early mouse prototype used a small wooden case. Very high tech, very shop class.",
@@ -520,6 +585,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Bluetooth is named after a Scandinavian king.",
     "answer": "truth",
     "explanation": "Bluetooth is named after Harald Bluetooth, a king associated with uniting parts of Denmark and Norway. The tech name is a historical nerd wink.",
@@ -528,6 +594,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Velcro was inspired by burrs sticking to clothing and fur.",
     "answer": "truth",
     "explanation": "Engineer George de Mestral studied burrs under magnification and turned their hook-like structure into a fastener idea.",
@@ -536,6 +603,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Oxford University is older than the Aztec Empire.",
     "answer": "truth",
     "explanation": "Teaching at Oxford goes back to the 1000s, while the Aztec Empire rose centuries later. Medieval homework beat them to it.",
@@ -544,6 +612,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Cleopatra lived closer in time to the first Moon landing than to the building of the Great Pyramid.",
     "answer": "truth",
     "explanation": "The Great Pyramid was already ancient in Cleopatra's day. She is closer to NASA than to pyramid construction on the timeline.",
@@ -552,6 +621,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "High heels were worn by Persian horsemen before becoming European fashion.",
     "answer": "truth",
     "explanation": "Heeled footwear helped riders brace in stirrups. Later, European elites made it a fashion flex.",
@@ -560,6 +630,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The tiny pocket on jeans was originally meant for pocket watches.",
     "answer": "truth",
     "explanation": "That little denim pocket comes from a time when watch pockets were useful, not just mysterious.",
@@ -568,6 +639,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Many restaurant wasabi servings are mostly horseradish.",
     "answer": "truth",
     "explanation": "Real wasabi is expensive and delicate, so many places serve a horseradish-based substitute with green color.",
@@ -576,6 +648,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Cashews grow attached to a fruit often called a cashew apple.",
     "answer": "truth",
     "explanation": "The cashew nut grows below a swollen fruit-like stem called a cashew apple. It looks like the nut is hanging on for dear life.",
@@ -584,6 +657,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The first webcam watched a coffee pot.",
     "answer": "truth",
     "explanation": "Researchers at Cambridge used an early webcam to check whether the coffee pot had coffee before walking over. Noble technology.",
@@ -592,6 +666,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The Celsius and Fahrenheit scales meet at -40 degrees.",
     "answer": "truth",
     "explanation": "-40 degrees is the same temperature in Celsius and Fahrenheit. It is also the temperature where everyone agrees to stay inside.",
@@ -600,6 +675,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The word robot entered English through a Czech play.",
     "answer": "truth",
     "explanation": "Karel Capek's 1920 play R.U.R. helped introduce robot to English from a Czech word tied to forced labor.",
@@ -608,6 +684,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The Monopoly mascot wears a monocle.",
     "answer": "turd",
     "explanation": "Rich Uncle Pennybags has a top hat and mustache, but no monocle. Your brain may be borrowing one from Mr. Peanut.",
@@ -616,6 +693,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Darth Vader says, \"Luke, I am your father.\"",
     "answer": "turd",
     "explanation": "The famous line is actually, \"No, I am your father.\" The misquote has been doing heavy breathing for decades.",
@@ -624,6 +702,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Sherlock Holmes says \"Elementary, my dear Watson\" in the original stories.",
     "answer": "turd",
     "explanation": "Holmes says versions of \"elementary\" and \"my dear Watson,\" but the exact famous phrase was popularized later.",
@@ -632,6 +711,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "White chocolate gets its color from cocoa powder.",
     "answer": "turd",
     "explanation": "White chocolate uses cocoa butter, not cocoa solids. That is why it is pale and why chocolate arguments begin.",
@@ -640,6 +720,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Pineapples grow on trees.",
     "answer": "turd",
     "explanation": "Pineapples grow from low plants near the ground. The tree version is tropical fan fiction.",
@@ -648,6 +729,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Vikings wore horned helmets into battle.",
     "answer": "turd",
     "explanation": "The horned-helmet image mostly comes from later art and stage costumes, not battlefield evidence.",
@@ -656,6 +738,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The Great Pyramid of Giza was built by Romans.",
     "answer": "turd",
     "explanation": "The Great Pyramid was built in ancient Egypt thousands of years before Rome became an empire.",
@@ -664,6 +747,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The first iPhone launched with an App Store.",
     "answer": "turd",
     "explanation": "The original iPhone launched in 2007, and the App Store arrived in 2008. Early iPhone life was weirdly app-less.",
@@ -672,6 +756,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The @ symbol was invented for email addresses.",
     "answer": "turd",
     "explanation": "The @ symbol existed long before email. Email gave it a comeback tour, not a birth certificate.",
@@ -680,6 +765,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Microwave ovens were invented to dry wet newspapers faster.",
     "answer": "turd",
     "explanation": "The microwave oven story traces to radar equipment heating food, famously melting candy near engineer Percy Spencer.",
@@ -688,6 +774,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "A person weighs slightly more at the equator than at the poles.",
     "answer": "turd",
     "explanation": "Because of Earth's rotation and shape, a person weighs slightly less at the equator than at the poles.",
@@ -696,6 +783,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "Astronauts can chat through open space without radios if they are close enough.",
     "answer": "turd",
     "explanation": "Sound needs a medium like air to travel. In open space, radios do the talking.",
@@ -704,6 +792,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The first email was sent from a smartphone.",
     "answer": "turd",
     "explanation": "Email predates smartphones by decades. The first networked email experiments happened on early computer networks.",
@@ -712,6 +801,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The Q in QR code stands for quality.",
     "answer": "turd",
     "explanation": "QR stands for Quick Response. The code was designed to be scanned quickly, not to compliment itself.",
@@ -720,6 +810,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "A piano has fewer strings than keys.",
     "answer": "turd",
     "explanation": "Most pianos have more strings than keys because many notes use multiple strings. The instrument is secretly a string party.",
@@ -728,6 +819,7 @@
     ]
   },
   {
+    "kind": "binary",
     "statement": "The first printed book made with movable metal type in Europe was a cookbook.",
     "answer": "turd",
     "explanation": "Gutenberg is famous for printing the Bible with movable type in Europe, not a medieval casserole collection.",
@@ -736,543 +828,1960 @@
     ]
   },
   {
-    "statement": "Benjamin Franklin officially proposed the turkey as the national bird of the United States.",
-    "answer": "turd",
-    "explanation": "Franklin criticized the bald eagle and praised the turkey in a private letter, but he did not officially propose the turkey as national bird.",
+    "kind": "multiple-choice",
+    "prompt": "In Benjamin Franklin's famous bird complaint, which bird did he call a creature of 'bad moral character'?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The bald eagle"
+      },
+      {
+        "id": "b",
+        "text": "The turkey"
+      },
+      {
+        "id": "c",
+        "text": "The raven"
+      },
+      {
+        "id": "d",
+        "text": "The Canada goose, somehow already acting suspicious"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Franklin privately criticized the bald eagle and praised the turkey as more respectable. He did not officially nominate the turkey, which is a missed mascot opportunity.",
     "tags": [
       "patriotic",
-      "founding"
+      "founding",
+      "symbols",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://founders.archives.gov/documents/Franklin/01-39-02-0170"
     ]
   },
   {
-    "statement": "The Liberty Bell was originally known as the Pennsylvania State House Bell.",
-    "answer": "truth",
-    "explanation": "It hung in the Pennsylvania State House. The Liberty Bell name became popular later, especially through abolitionist use.",
+    "kind": "multiple-choice",
+    "prompt": "Before people called it the Liberty Bell, what was the bell commonly known as?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The Pennsylvania State House Bell"
+      },
+      {
+        "id": "b",
+        "text": "Hancock's Dinner Bell"
+      },
+      {
+        "id": "c",
+        "text": "The Continental Congress Bell"
+      },
+      {
+        "id": "d",
+        "text": "The Freedom Clanger"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "It hung in the Pennsylvania State House, so the original name was practical rather than inspirational. Branding arrived later.",
     "tags": [
       "patriotic",
-      "symbols"
+      "symbols",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/inde/learn/historyculture/stories-libertybell.htm"
     ]
   },
   {
-    "statement": "George Washington was the first person to sign the Declaration of Independence.",
-    "answer": "turd",
-    "explanation": "Washington was commanding the Continental Army in New York. John Hancock is famous for signing first and signing big.",
+    "kind": "multiple-choice",
+    "prompt": "Where was George Washington when the Declaration of Independence was being signed in Philadelphia?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "In New York with the Continental Army"
+      },
+      {
+        "id": "b",
+        "text": "On a Philadelphia balcony waiting for his turn"
+      },
+      {
+        "id": "c",
+        "text": "At Mount Vernon testing a new plow"
+      },
+      {
+        "id": "d",
+        "text": "In Boston asking if anyone saved the tea receipt"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Washington was commanding the army in New York, not signing in Philadelphia. Founding a country involved scheduling conflicts.",
     "tags": [
       "patriotic",
-      "founding"
+      "founding",
+      "revolutionary-war",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.mountvernon.org/library/digitalhistory/digital-encyclopedia/article/declaration-of-independence/"
     ]
   },
   {
-    "statement": "The first official American flag had 13 stars and 13 stripes.",
-    "answer": "truth",
-    "explanation": "The 1777 flag resolution called for 13 stripes and 13 stars, representing the original states.",
+    "kind": "multiple-choice",
+    "prompt": "What did Congress actually do with the Declaration of Independence on July 4, 1776?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Approved the final text"
+      },
+      {
+        "id": "b",
+        "text": "Had every delegate sign it"
+      },
+      {
+        "id": "c",
+        "text": "Rang the Liberty Bell for live coverage"
+      },
+      {
+        "id": "d",
+        "text": "Mailed the king a glittery breakup card"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "July 4 marks approval of the text. Most of the famous signing came later, because even revolutions have paperwork lag.",
     "tags": [
       "patriotic",
-      "symbols"
+      "founding",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.archives.gov/founding-docs/declaration"
     ]
   },
   {
-    "statement": "Ketchup was once sold as medicine in the 1830s.",
-    "answer": "truth",
-    "explanation": "Dr. John Cook Bennett promoted tomato-based pills for various ailments. Medical ketchup: deliciously suspicious.",
+    "kind": "multiple-choice",
+    "prompt": "When did many delegates sign the engrossed Declaration of Independence?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "August 2, 1776"
+      },
+      {
+        "id": "b",
+        "text": "July 4, 1776, during one dramatic group signing"
+      },
+      {
+        "id": "c",
+        "text": "December 25, 1776, after crossing the Delaware"
+      },
+      {
+        "id": "d",
+        "text": "April 1, because the king needed a prank"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The formal parchment signing mostly happened on August 2. July 4 still gets the fireworks, which feels politically efficient.",
     "tags": [
       "patriotic",
-      "oddities"
+      "founding",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.archives.gov/founding-docs/declaration"
     ]
   },
   {
-    "statement": "The Statue of Liberty once served as an official lighthouse.",
-    "answer": "truth",
-    "explanation": "For years after its dedication, the statue was operated as a lighthouse, though the light was not especially effective.",
+    "kind": "multiple-choice",
+    "prompt": "Congress originally sent the states how many proposed amendments in what became the Bill of Rights package?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Twelve"
+      },
+      {
+        "id": "b",
+        "text": "Ten, exactly as ratified"
+      },
+      {
+        "id": "c",
+        "text": "Twenty-seven, one for each powdered wig"
+      },
+      {
+        "id": "d",
+        "text": "Five, with very optimistic margins"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Congress proposed twelve amendments; ten were ratified in 1791 as the Bill of Rights. Two got voted off the island.",
     "tags": [
       "patriotic",
-      "symbols"
+      "constitution",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.archives.gov/milestone-documents/bill-of-rights"
     ]
   },
   {
-    "statement": "The Star-Spangled Banner was written during the Revolutionary War.",
-    "answer": "turd",
-    "explanation": "Francis Scott Key wrote it in 1814 during the War of 1812 after seeing Fort McHenry survive bombardment.",
+    "kind": "multiple-choice",
+    "prompt": "On the Great Seal of the United States, what does the eagle hold?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Arrows and an olive branch"
+      },
+      {
+        "id": "b",
+        "text": "A flag and a quill pen"
+      },
+      {
+        "id": "c",
+        "text": "A turkey's rejected job application"
+      },
+      {
+        "id": "d",
+        "text": "A bell and a map of Philadelphia"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The arrows represent war and the olive branch represents peace. The eagle is basically holding the national mood board.",
     "tags": [
       "patriotic",
-      "music"
+      "symbols",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.state.gov/the-great-seal-of-the-united-states/"
     ]
   },
   {
-    "statement": "Abraham Lincoln is honored in the National Wrestling Hall of Fame.",
-    "answer": "truth",
-    "explanation": "Lincoln had a strong wrestling reputation as a young man and is honored as an Outstanding American.",
+    "kind": "multiple-choice",
+    "prompt": "Who designed the 50-star U.S. flag that became official?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "High school student Robert G. Heft"
+      },
+      {
+        "id": "b",
+        "text": "A NASA design committee"
+      },
+      {
+        "id": "c",
+        "text": "Betsy Ross's grandson"
+      },
+      {
+        "id": "d",
+        "text": "A patriotic bird with excellent spacing instincts"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Robert G. Heft designed it as a school project. The assignment became the flag, which is a pretty aggressive extra-credit outcome.",
     "tags": [
       "patriotic",
-      "presidents"
+      "symbols",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://americanhistory.si.edu/collections/object/nmah_463576"
     ]
   },
   {
-    "statement": "The White House has always been officially called the White House.",
-    "answer": "turd",
-    "explanation": "It had names like the President's House before Theodore Roosevelt made White House the official name in 1901.",
+    "kind": "multiple-choice",
+    "prompt": "The United States bought Alaska from which country?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Russia"
+      },
+      {
+        "id": "b",
+        "text": "Great Britain"
+      },
+      {
+        "id": "c",
+        "text": "France, during a buy-one-territory-get-one sale"
+      },
+      {
+        "id": "d",
+        "text": "Canada, after misplacing the receipt"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The 1867 Alaska Purchase was from Russia. Critics mocked it as Seward's Folly, which aged poorly once Alaska kept being Alaska.",
     "tags": [
       "patriotic",
-      "presidents"
+      "expansion",
+      "states",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://history.state.gov/milestones/1866-1898/alaska-purchase"
     ]
   },
   {
-    "statement": "America's first capital city under the Constitution was Washington, D.C.",
-    "answer": "turd",
-    "explanation": "New York City was the first capital under the Constitution, followed by Philadelphia before the government moved to D.C.",
+    "kind": "multiple-choice",
+    "prompt": "The Louisiana Purchase was bought from whom?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "France"
+      },
+      {
+        "id": "b",
+        "text": "Spain"
+      },
+      {
+        "id": "c",
+        "text": "Great Britain"
+      },
+      {
+        "id": "d",
+        "text": "Napoleon's cousin with a suspicious briefcase"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The United States bought the territory from France in 1803. Napoleon apparently looked at a giant map and said cash sounded nice.",
     "tags": [
       "patriotic",
-      "founding"
+      "expansion",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://history.state.gov/milestones/1801-1829/louisiana-purchase"
     ]
   },
   {
-    "statement": "The Declaration of Independence was approved by Congress on July 4, 1776.",
-    "answer": "truth",
-    "explanation": "Congress voted for independence on July 2, then approved the Declaration text on July 4. The calendar picked a favorite.",
+    "kind": "multiple-choice",
+    "prompt": "Which president was the first born after the United States declared independence?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Martin Van Buren"
+      },
+      {
+        "id": "b",
+        "text": "Thomas Jefferson"
+      },
+      {
+        "id": "c",
+        "text": "James Madison"
+      },
+      {
+        "id": "d",
+        "text": "Abraham Lincoln, arriving fashionably late"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Van Buren was born in 1782, making him the first president born after independence. Earlier presidents were colonial-era babies.",
     "tags": [
       "patriotic",
-      "founding"
+      "presidents",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.whitehouse.gov/about-the-white-house/presidents/martin-van-buren/"
     ]
   },
   {
-    "statement": "The Declaration of Independence was signed by every delegate on July 4, 1776.",
-    "answer": "turd",
-    "explanation": "The famous signing mostly happened later, especially on August 2. July 4 was the text approval date.",
+    "kind": "multiple-choice",
+    "prompt": "What structure knocked the Washington Monument out of the \"world's tallest\" title?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The Eiffel Tower"
+      },
+      {
+        "id": "b",
+        "text": "The Empire State Building"
+      },
+      {
+        "id": "c",
+        "text": "The Statue of Liberty standing on tiptoe"
+      },
+      {
+        "id": "d",
+        "text": "The Brooklyn Bridge, by being dramatic"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The Washington Monument briefly held the title after completion, then the Eiffel Tower took it in 1889. Tallness is a competitive hobby.",
     "tags": [
       "patriotic",
-      "founding"
+      "symbols",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/wamo/learn/historyculture/index.htm"
     ]
   },
   {
-    "statement": "The original U.S. Constitution did not include the Bill of Rights when first ratified.",
-    "answer": "truth",
-    "explanation": "The first ten amendments were added later and ratified in 1791 after debates about protecting individual liberties.",
+    "kind": "multiple-choice",
+    "prompt": "How many justices did the Supreme Court have when it first met?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Six"
+      },
+      {
+        "id": "b",
+        "text": "Nine"
+      },
+      {
+        "id": "c",
+        "text": "Thirteen, one per original state"
+      },
+      {
+        "id": "d",
+        "text": "One very stressed judge"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The Court started with six justices. The familiar number nine came later, after Congress changed the size more than once.",
     "tags": [
       "patriotic",
-      "constitution"
+      "government",
+      "constitution",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.supremecourt.gov/about/institution.aspx"
     ]
   },
   {
-    "statement": "The Bill of Rights contains the first twelve amendments.",
-    "answer": "turd",
-    "explanation": "The Bill of Rights is the first ten amendments. Congress proposed twelve, but only ten were ratified at the time.",
+    "kind": "multiple-choice",
+    "prompt": "What was the name of George Washington's Revolutionary War spy network around New York?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The Culper Spy Ring"
+      },
+      {
+        "id": "b",
+        "text": "The Liberty Birds"
+      },
+      {
+        "id": "c",
+        "text": "The Midnight Cluckers"
+      },
+      {
+        "id": "d",
+        "text": "The Continental Snoopers"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The Culper Spy Ring passed intelligence to Washington. The Revolution had code names, invisible ink, and absolutely no chill.",
     "tags": [
       "patriotic",
-      "constitution"
+      "revolutionary-war",
+      "spies",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://www.mountvernon.org/library/digitalhistory/digital-encyclopedia/article/culper-spy-ring/"
     ]
   },
   {
-    "statement": "The U.S. national anthem began as a poem.",
-    "answer": "truth",
-    "explanation": "Francis Scott Key's words began as a poem called Defence of Fort M'Henry before being set to music.",
+    "kind": "multiple-choice",
+    "prompt": "George Washington's dentures were not wooden. What were they made from?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Ivory, human and animal teeth, and metal"
+      },
+      {
+        "id": "b",
+        "text": "Polished cherry wood"
+      },
+      {
+        "id": "c",
+        "text": "Porcelain imported from France"
+      },
+      {
+        "id": "d",
+        "text": "Corn cobs with presidential confidence"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The wooden-teeth story is a myth. The real materials were more complicated, more expensive, and honestly more unsettling.",
     "tags": [
       "patriotic",
-      "music"
+      "presidents",
+      "oddities",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.mountvernon.org/library/digitalhistory/digital-encyclopedia/article/george-washingtons-teeth/"
     ]
   },
   {
-    "statement": "The bald eagle became the official national bird in the 1700s.",
-    "answer": "turd",
-    "explanation": "The eagle has been a national symbol since the Great Seal, but Congress formally designated it the national bird much later.",
+    "kind": "multiple-choice",
+    "prompt": "Which American victory helped convince France to formally ally with the United States?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Saratoga"
+      },
+      {
+        "id": "b",
+        "text": "Bunker Hill"
+      },
+      {
+        "id": "c",
+        "text": "Valley Forge"
+      },
+      {
+        "id": "d",
+        "text": "The Boston Tea Party, judged on splash quality"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Saratoga showed France the American cause had a real shot. International friendship sometimes needs a battlefield receipt.",
     "tags": [
       "patriotic",
-      "symbols"
+      "revolutionary-war",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/sara/learn/historyculture/index.htm"
     ]
   },
   {
-    "statement": "The Great Seal of the United States shows an eagle holding both arrows and an olive branch.",
-    "answer": "truth",
-    "explanation": "The eagle holds arrows for war and an olive branch for peace. Subtle? No. Effective? Yes.",
+    "kind": "multiple-choice",
+    "prompt": "Which winter encampment became famous for the Continental Army's brutal hardship and training?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Valley Forge"
+      },
+      {
+        "id": "b",
+        "text": "Yorktown"
+      },
+      {
+        "id": "c",
+        "text": "Fort McHenry"
+      },
+      {
+        "id": "d",
+        "text": "Camp Blanketless, apparently"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Valley Forge was miserable, but it also became a training ground. The team-building exercise was hypothermia with paperwork.",
     "tags": [
       "patriotic",
-      "symbols"
+      "revolutionary-war",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/vafo/learn/historyculture/index.htm"
     ]
   },
   {
-    "statement": "The president lives in the Capitol Building.",
-    "answer": "turd",
-    "explanation": "The president lives and works at the White House. The Capitol is where Congress meets.",
+    "kind": "multiple-choice",
+    "prompt": "Which battle effectively ended major fighting in the Revolutionary War?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Yorktown"
+      },
+      {
+        "id": "b",
+        "text": "Lexington and Concord"
+      },
+      {
+        "id": "c",
+        "text": "Trenton"
+      },
+      {
+        "id": "d",
+        "text": "The Battle of Philadelphia Parking"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The British surrender at Yorktown in 1781 effectively ended major fighting, though the formal peace treaty came later.",
     "tags": [
       "patriotic",
-      "government"
+      "revolutionary-war",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/york/learn/historyculture/siege-of-yorktown.htm"
     ]
   },
   {
-    "statement": "The U.S. flag has had more than 25 official versions.",
-    "answer": "truth",
-    "explanation": "Each time states were added, the flag changed. The current 50-star design is one chapter in a very stripy saga.",
+    "kind": "multiple-choice",
+    "prompt": "Paul Revere's famous ride was not a solo mission. Which two riders are often named with him?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "William Dawes and Samuel Prescott"
+      },
+      {
+        "id": "b",
+        "text": "Alexander Hamilton and Aaron Burr"
+      },
+      {
+        "id": "c",
+        "text": "Benjamin Franklin and Thomas Jefferson"
+      },
+      {
+        "id": "d",
+        "text": "Thunder and Committee Meeting, two very tired horses"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Revere was part of a larger alarm system. Dawes and Prescott deserve more than a historical \"also starring.\"",
     "tags": [
       "patriotic",
-      "symbols"
+      "revolutionary-war",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/articles/000/paul-revere-s-ride.htm"
     ]
   },
   {
-    "statement": "The 50-star flag was designed by a high school student.",
-    "answer": "truth",
-    "explanation": "Robert G. Heft designed a 50-star flag as a school project, and his design was later chosen.",
+    "kind": "multiple-choice",
+    "prompt": "At the Boston Tea Party, whose tea did protesters dump into the harbor?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The British East India Company's tea"
+      },
+      {
+        "id": "b",
+        "text": "King George III's private breakfast stash"
+      },
+      {
+        "id": "c",
+        "text": "Dutch tea from New Amsterdam"
+      },
+      {
+        "id": "d",
+        "text": "Harbor-brand iced tea, poorly sealed"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The tea belonged to the East India Company. The protest was political, caffeinated, and extremely bad for harbor flavor.",
     "tags": [
       "patriotic",
-      "symbols"
+      "revolutionary-war",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/bost/learn/historyculture/the-boston-tea-party.htm"
     ]
   },
   {
-    "statement": "The Pledge of Allegiance was written by George Washington.",
-    "answer": "turd",
-    "explanation": "Francis Bellamy wrote the pledge in 1892, long after Washington's lifetime.",
+    "kind": "multiple-choice",
+    "prompt": "What was the first U.S. capital city under the Constitution?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "New York City"
+      },
+      {
+        "id": "b",
+        "text": "Philadelphia"
+      },
+      {
+        "id": "c",
+        "text": "Washington, D.C."
+      },
+      {
+        "id": "d",
+        "text": "Wherever Washington parked his horse"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "New York City was the first capital under the Constitution. D.C. had to wait its turn like everyone else.",
     "tags": [
       "patriotic",
-      "symbols"
+      "founding",
+      "government",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.senate.gov/about/origins-foundations/senate-and-constitution/constitution.htm"
     ]
   },
   {
-    "statement": "The words under God were added to the Pledge of Allegiance in the 1950s.",
-    "answer": "truth",
-    "explanation": "Congress added under God in 1954 during the Cold War era.",
+    "kind": "multiple-choice",
+    "prompt": "Who made \"White House\" the official name of the president's residence?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Theodore Roosevelt"
+      },
+      {
+        "id": "b",
+        "text": "George Washington"
+      },
+      {
+        "id": "c",
+        "text": "Abraham Lincoln"
+      },
+      {
+        "id": "d",
+        "text": "A very persuasive paint salesman"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Theodore Roosevelt made the name official in 1901. Before that, the building had more aliases than a spy ring.",
     "tags": [
       "patriotic",
-      "symbols"
+      "presidents",
+      "symbols",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.whitehousehistory.org/questions/why-is-the-white-house-white"
     ]
   },
   {
-    "statement": "Mount Rushmore includes Thomas Jefferson, Abraham Lincoln, Theodore Roosevelt, and George Washington.",
-    "answer": "truth",
-    "explanation": "Those four presidents are carved into the memorial. It is basically the biggest group portrait homework ever.",
+    "kind": "multiple-choice",
+    "prompt": "The words to \"The Star-Spangled Banner\" were set to which tune?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "\"To Anacreon in Heaven\""
+      },
+      {
+        "id": "b",
+        "text": "\"Yankee Doodle\""
+      },
+      {
+        "id": "c",
+        "text": "\"Hail, Columbia\""
+      },
+      {
+        "id": "d",
+        "text": "An eagle karaoke standard"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Francis Scott Key's poem was paired with an existing tune. National anthems apparently can have cover-song energy.",
     "tags": [
       "patriotic",
-      "presidents"
+      "music",
+      "symbols",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/fomc/learn/historyculture/the-star-spangled-banner.htm"
     ]
   },
   {
-    "statement": "Mount Rushmore includes Benjamin Franklin.",
-    "answer": "turd",
-    "explanation": "Franklin was important, but he is not on Mount Rushmore. The four faces are Washington, Jefferson, Roosevelt, and Lincoln.",
+    "kind": "multiple-choice",
+    "prompt": "What color was the Statue of Liberty before weather turned it green?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Coppery brown"
+      },
+      {
+        "id": "b",
+        "text": "White marble"
+      },
+      {
+        "id": "c",
+        "text": "Bright blue"
+      },
+      {
+        "id": "d",
+        "text": "Pre-pickled green"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The statue is copper, and its green patina formed over time. Liberty aged into her signature look.",
     "tags": [
       "patriotic",
-      "presidents"
+      "symbols",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/stli/learn/historyculture/index.htm"
     ]
   },
   {
-    "statement": "The United States bought Alaska from Russia.",
-    "answer": "truth",
-    "explanation": "The Alaska Purchase happened in 1867. Critics called it Seward's Folly, which aged about as well as milk.",
+    "kind": "multiple-choice",
+    "prompt": "For a while after dedication, the Statue of Liberty also served what practical job?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Lighthouse"
+      },
+      {
+        "id": "b",
+        "text": "Weather station"
+      },
+      {
+        "id": "c",
+        "text": "Customs office"
+      },
+      {
+        "id": "d",
+        "text": "World's least portable candle"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "It served as a lighthouse, though not a very effective one. Symbolism: excellent. Beam strength: needs improvement.",
     "tags": [
       "patriotic",
-      "states"
+      "symbols",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/stli/learn/historyculture/index.htm"
     ]
   },
   {
-    "statement": "Hawaii was the 49th state admitted to the Union.",
-    "answer": "turd",
-    "explanation": "Alaska was 49th in January 1959. Hawaii became the 50th state in August 1959.",
+    "kind": "multiple-choice",
+    "prompt": "Who wrote the Pledge of Allegiance?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Francis Bellamy"
+      },
+      {
+        "id": "b",
+        "text": "George Washington"
+      },
+      {
+        "id": "c",
+        "text": "Thomas Jefferson"
+      },
+      {
+        "id": "d",
+        "text": "The Committee of Very Serious Hats"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Francis Bellamy wrote the pledge in 1892. Washington was busy being long deceased.",
     "tags": [
       "patriotic",
-      "states"
+      "symbols",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.ushistory.org/documents/pledge.htm"
     ]
   },
   {
-    "statement": "The Louisiana Purchase roughly doubled the size of the United States.",
-    "answer": "truth",
-    "explanation": "The 1803 purchase added a massive territory west of the Mississippi. It was a real estate glow-up.",
+    "kind": "multiple-choice",
+    "prompt": "When were the words \"under God\" added to the Pledge of Allegiance?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "1954"
+      },
+      {
+        "id": "b",
+        "text": "1776"
+      },
+      {
+        "id": "c",
+        "text": "1865"
+      },
+      {
+        "id": "d",
+        "text": "Whenever the rhyming committee found room"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Congress added the words in 1954 during the Cold War era. The pledge had a patch update.",
     "tags": [
       "patriotic",
-      "expansion"
+      "symbols",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.ushistory.org/documents/pledge.htm"
     ]
   },
   {
-    "statement": "The Louisiana Purchase was bought from Spain.",
-    "answer": "turd",
-    "explanation": "The United States bought the Louisiana Territory from France, led by Napoleon.",
+    "kind": "multiple-choice",
+    "prompt": "Which document served as the United States' first national constitution before the current Constitution?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The Articles of Confederation"
+      },
+      {
+        "id": "b",
+        "text": "The Declaration of Independence"
+      },
+      {
+        "id": "c",
+        "text": "The Federalist Papers"
+      },
+      {
+        "id": "d",
+        "text": "A group text called \"New Country Who Dis\""
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The Articles of Confederation came first and created a very weak central government. The Constitution was the redesign.",
     "tags": [
       "patriotic",
-      "expansion"
+      "constitution",
+      "founding",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.archives.gov/milestone-documents/articles-of-confederation"
     ]
   },
   {
-    "statement": "The first U.S. president born after American independence was Martin Van Buren.",
-    "answer": "truth",
-    "explanation": "Van Buren was born in 1782, after the Declaration of Independence. The earlier presidents were colonial-era babies.",
+    "kind": "multiple-choice",
+    "prompt": "Where did the Constitutional Convention meet in 1787?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Philadelphia"
+      },
+      {
+        "id": "b",
+        "text": "New York City"
+      },
+      {
+        "id": "c",
+        "text": "Boston"
+      },
+      {
+        "id": "d",
+        "text": "A secret basement under a tavern"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The Convention met in Philadelphia. The weather was hot, the windows were closed, and compromise smelled difficult.",
     "tags": [
       "patriotic",
-      "presidents"
+      "constitution",
+      "founding",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.archives.gov/founding-docs/constitution"
     ]
   },
   {
-    "statement": "George Washington lived in the White House while president.",
-    "answer": "turd",
-    "explanation": "Washington helped choose the capital site, but the White House was not ready before he left office.",
+    "kind": "multiple-choice",
+    "prompt": "The Federalist Papers were published under what shared pen name?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Publius"
+      },
+      {
+        "id": "b",
+        "text": "Cincinnatus"
+      },
+      {
+        "id": "c",
+        "text": "Common Sense"
+      },
+      {
+        "id": "d",
+        "text": "Definitely Not Hamilton"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Hamilton, Madison, and Jay wrote as Publius. Anonymous political posting has been with us for a while.",
     "tags": [
       "patriotic",
-      "presidents"
+      "constitution",
+      "founding",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://guides.loc.gov/federalist-papers/full-text"
     ]
   },
   {
-    "statement": "The Washington Monument was once the tallest structure in the world.",
-    "answer": "truth",
-    "explanation": "When completed in 1884, it briefly held the tallest-structure title before the Eiffel Tower took over.",
+    "kind": "multiple-choice",
+    "prompt": "Who wrote the largest number of Federalist Papers essays?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Alexander Hamilton"
+      },
+      {
+        "id": "b",
+        "text": "James Madison"
+      },
+      {
+        "id": "c",
+        "text": "John Jay"
+      },
+      {
+        "id": "d",
+        "text": "Aaron Burr, after asking politely"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Hamilton wrote the most essays. The man saw a blank page and attacked.",
     "tags": [
       "patriotic",
-      "symbols"
+      "constitution",
+      "founding",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://guides.loc.gov/federalist-papers/full-text"
     ]
   },
   {
-    "statement": "The Washington Monument is made mostly of wood.",
-    "answer": "turd",
-    "explanation": "It is a stone obelisk made of marble, granite, and gneiss. Not exactly lumberyard vibes.",
+    "kind": "multiple-choice",
+    "prompt": "What was the name of the first printed broadside of the Declaration of Independence?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The Dunlap Broadside"
+      },
+      {
+        "id": "b",
+        "text": "The Hancock Handbill"
+      },
+      {
+        "id": "c",
+        "text": "The Liberty Leaflet"
+      },
+      {
+        "id": "d",
+        "text": "The Royal Breakup Poster"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Printer John Dunlap produced the first broadside copies. Before screenshots, you needed a printer with revolutionary deadlines.",
     "tags": [
       "patriotic",
-      "symbols"
+      "founding",
+      "documents",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://www.loc.gov/exhibits/declara/declara2.html"
     ]
   },
   {
-    "statement": "The U.S. Constitution is shorter than many state constitutions.",
-    "answer": "truth",
-    "explanation": "The federal Constitution is famously concise compared with many state constitutions, which can get extremely detailed.",
+    "kind": "multiple-choice",
+    "prompt": "Who wrote the pamphlet \"Common Sense\"?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Thomas Paine"
+      },
+      {
+        "id": "b",
+        "text": "Benjamin Franklin"
+      },
+      {
+        "id": "c",
+        "text": "John Adams"
+      },
+      {
+        "id": "d",
+        "text": "An anonymous chicken with a printing press"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Thomas Paine wrote \"Common Sense,\" a wildly influential argument for independence. Subtle title, not subtle impact.",
     "tags": [
       "patriotic",
-      "constitution"
+      "founding",
+      "documents",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.loc.gov/item/2006681049/"
     ]
   },
   {
-    "statement": "The Constitution starts with the words We the Government.",
-    "answer": "turd",
-    "explanation": "It starts We the People. The people got top billing.",
+    "kind": "multiple-choice",
+    "prompt": "Who wrote to John Adams in 1776 asking him to \"remember the ladies\"?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Abigail Adams"
+      },
+      {
+        "id": "b",
+        "text": "Martha Washington"
+      },
+      {
+        "id": "c",
+        "text": "Mercy Otis Warren"
+      },
+      {
+        "id": "d",
+        "text": "The Ladies Remembering Committee, with excellent stationery"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Abigail Adams wrote the famous line to John Adams. Founding-era group chat would have been spicy.",
     "tags": [
       "patriotic",
-      "constitution"
+      "founding",
+      "people",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.masshist.org/digitaladams/archive/doc?id=L17760331aa"
     ]
   },
   {
-    "statement": "The first ten amendments are called the Bill of Rights.",
-    "answer": "truth",
-    "explanation": "They protect freedoms including speech, religion, press, assembly, due process, and more.",
+    "kind": "multiple-choice",
+    "prompt": "Who disguised herself as a man and served in the Continental Army?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Deborah Sampson"
+      },
+      {
+        "id": "b",
+        "text": "Betsy Ross"
+      },
+      {
+        "id": "c",
+        "text": "Phillis Wheatley"
+      },
+      {
+        "id": "d",
+        "text": "Aunt Liberty, who had range"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Deborah Sampson served disguised as a man. The Revolution had plot twists the textbooks sometimes sprint past.",
     "tags": [
       "patriotic",
-      "constitution"
+      "revolutionary-war",
+      "people",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/people/deborah-sampson.htm"
     ]
   },
   {
-    "statement": "The First Amendment only protects freedom of speech.",
-    "answer": "turd",
-    "explanation": "It also protects religion, press, assembly, and petition. It is not a one-trick amendment.",
+    "kind": "multiple-choice",
+    "prompt": "Which Prussian officer helped train the Continental Army at Valley Forge?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Baron von Steuben"
+      },
+      {
+        "id": "b",
+        "text": "Marquis de Lafayette"
+      },
+      {
+        "id": "c",
+        "text": "Lord Cornwallis"
+      },
+      {
+        "id": "d",
+        "text": "Baron von Cluck"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Von Steuben drilled the army into a more disciplined force. Valley Forge got a very intense coach.",
     "tags": [
       "patriotic",
-      "constitution"
+      "revolutionary-war",
+      "people",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/vafo/learn/historyculture/baron-von-steuben.htm"
     ]
   },
   {
-    "statement": "The Supreme Court has had nine justices for most of its history, but not all of it.",
-    "answer": "truth",
-    "explanation": "The number changed several times before settling at nine in 1869.",
+    "kind": "multiple-choice",
+    "prompt": "Which young French aristocrat became a major American ally in the Revolutionary War?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Marquis de Lafayette"
+      },
+      {
+        "id": "b",
+        "text": "Napoleon Bonaparte"
+      },
+      {
+        "id": "c",
+        "text": "Maximilien Robespierre"
+      },
+      {
+        "id": "d",
+        "text": "Monsieur Fireworks"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Lafayette became a key ally and symbol of French support. He was basically the Revolution's favorite exchange student.",
     "tags": [
       "patriotic",
-      "government"
+      "revolutionary-war",
+      "people",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.mountvernon.org/library/digitalhistory/digital-encyclopedia/article/marquis-de-lafayette/"
     ]
   },
   {
-    "statement": "The Supreme Court has always had exactly nine justices.",
-    "answer": "turd",
-    "explanation": "The Court started with six justices and changed size more than once.",
+    "kind": "multiple-choice",
+    "prompt": "\"Molly Pitcher\" is best understood as what?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A nickname/legend linked to women who aided soldiers"
+      },
+      {
+        "id": "b",
+        "text": "One official Continental Army general"
+      },
+      {
+        "id": "c",
+        "text": "A privateer ship"
+      },
+      {
+        "id": "d",
+        "text": "A colonial sports drink brand"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Molly Pitcher is a legendary nickname associated with women such as Mary Ludwig Hays. History loves a composite character.",
     "tags": [
       "patriotic",
-      "government"
+      "revolutionary-war",
+      "people",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/people/molly-pitcher.htm"
     ]
   },
   {
-    "statement": "The U.S. Senate gives every state the same number of senators.",
-    "answer": "truth",
-    "explanation": "Each state has two senators, whether it has more people than a country or fewer people than a concert tour.",
+    "kind": "multiple-choice",
+    "prompt": "The Quartering Acts were mostly about what?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Housing British troops in the colonies"
+      },
+      {
+        "id": "b",
+        "text": "Putting eagles on quarters"
+      },
+      {
+        "id": "c",
+        "text": "Dividing farms into quarters"
+      },
+      {
+        "id": "d",
+        "text": "Leaving passive-aggressive tavern reviews"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The Quartering Acts dealt with housing and supplying British troops. Colonists were not thrilled about the room-service policy.",
     "tags": [
       "patriotic",
-      "government"
+      "revolutionary-war",
+      "laws",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/articles/000/the-quartering-act.htm"
     ]
   },
   {
-    "statement": "The House of Representatives gives every state exactly two representatives.",
-    "answer": "turd",
-    "explanation": "House seats are based on population, though every state gets at least one.",
+    "kind": "multiple-choice",
+    "prompt": "The \"Intolerable Acts\" were officially known by what less dramatic name?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The Coercive Acts"
+      },
+      {
+        "id": "b",
+        "text": "The Tea Fixes"
+      },
+      {
+        "id": "c",
+        "text": "The Boston Timeout Rules"
+      },
+      {
+        "id": "d",
+        "text": "King George's Strongly Worded Memo"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Americans called them Intolerable; Britain called them Coercive. Either way, the vibes were bad.",
     "tags": [
       "patriotic",
-      "government"
+      "revolutionary-war",
+      "laws",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/articles/000/the-coercive-intolerable-acts.htm"
     ]
   },
   {
-    "statement": "Independence Day celebrates the adoption of the Declaration, not the final victory in the Revolutionary War.",
-    "answer": "truth",
-    "explanation": "The war continued for years after 1776. Fireworks celebrate the declaration, not a same-day mic drop.",
+    "kind": "multiple-choice",
+    "prompt": "The \"Great Compromise\" at the Constitutional Convention created what arrangement?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A two-house Congress with different representation rules"
+      },
+      {
+        "id": "b",
+        "text": "Two presidents, one for weekdays and one for weekends"
+      },
+      {
+        "id": "c",
+        "text": "No federal courts"
+      },
+      {
+        "id": "d",
+        "text": "A permanent capital in Boston"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The compromise helped create the Senate and House structure. The founders solved conflict by inventing more meetings.",
     "tags": [
       "patriotic",
-      "founding"
+      "constitution",
+      "government",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.senate.gov/about/origins-foundations/senate-and-constitution/constitution.htm"
     ]
   },
   {
-    "statement": "The Revolutionary War ended in 1776.",
-    "answer": "turd",
-    "explanation": "The war continued until the Treaty of Paris in 1783.",
+    "kind": "multiple-choice",
+    "prompt": "Which state refused to send delegates to the Constitutional Convention?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Rhode Island"
+      },
+      {
+        "id": "b",
+        "text": "Virginia"
+      },
+      {
+        "id": "c",
+        "text": "Pennsylvania"
+      },
+      {
+        "id": "d",
+        "text": "The State of Tiny Stubbornness"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Rhode Island skipped the Convention. Even in 1787, someone was declining the calendar invite.",
     "tags": [
       "patriotic",
-      "founding"
+      "constitution",
+      "states",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://www.archives.gov/founding-docs/constitution"
     ]
   },
   {
-    "statement": "The Boston Tea Party involved protesters dumping tea into Boston Harbor.",
-    "answer": "truth",
-    "explanation": "In 1773, colonists dumped East India Company tea into the harbor to protest tea policy and taxation.",
+    "kind": "multiple-choice",
+    "prompt": "Which president was the first to live in the White House?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "John Adams"
+      },
+      {
+        "id": "b",
+        "text": "George Washington"
+      },
+      {
+        "id": "c",
+        "text": "Thomas Jefferson"
+      },
+      {
+        "id": "d",
+        "text": "The contractor, technically, for one very dusty week"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "John Adams moved in before it was fully finished. Nothing says prestige like damp plaster and national responsibility.",
     "tags": [
       "patriotic",
-      "founding"
+      "presidents",
+      "symbols",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.whitehousehistory.org/questions/who-was-the-first-president-to-live-in-the-white-house"
     ]
   },
   {
-    "statement": "The Boston Tea Party happened because colonists wanted coffee to be the national drink.",
-    "answer": "turd",
-    "explanation": "It was about taxes, representation, and British tea policy, not an official coffee campaign.",
+    "kind": "multiple-choice",
+    "prompt": "Who burned the White House in 1814?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "British forces"
+      },
+      {
+        "id": "b",
+        "text": "Canada acting alone"
+      },
+      {
+        "id": "c",
+        "text": "Chesapeake pirates"
+      },
+      {
+        "id": "d",
+        "text": "A deeply untrustworthy kitchen oven"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "British forces burned public buildings in Washington during the War of 1812. The house got a very involuntary renovation.",
     "tags": [
       "patriotic",
-      "founding"
+      "presidents",
+      "war-of-1812",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.whitehousehistory.org/the-burning-of-washington"
     ]
   },
   {
-    "statement": "The first U.S. presidential inauguration took place in New York City.",
-    "answer": "truth",
-    "explanation": "George Washington took the oath in New York City in 1789.",
+    "kind": "multiple-choice",
+    "prompt": "Who wrote most of the Declaration of Independence?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Thomas Jefferson"
+      },
+      {
+        "id": "b",
+        "text": "Benjamin Franklin"
+      },
+      {
+        "id": "c",
+        "text": "John Hancock"
+      },
+      {
+        "id": "d",
+        "text": "A committee that wrote only in all caps"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Jefferson drafted most of it, with edits from others. Even founding documents have group-project energy.",
     "tags": [
       "patriotic",
-      "presidents"
+      "founding",
+      "documents",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.archives.gov/founding-docs/declaration"
     ]
   },
   {
-    "statement": "Every U.S. presidential inauguration has taken place in Washington, D.C.",
-    "answer": "turd",
-    "explanation": "Washington's first inauguration was in New York, and John Adams was inaugurated in Philadelphia.",
+    "kind": "multiple-choice",
+    "prompt": "Which group drafted the Declaration before Congress edited and approved it?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The Committee of Five"
+      },
+      {
+        "id": "b",
+        "text": "The Committee of Thirteen"
+      },
+      {
+        "id": "c",
+        "text": "The Sons of Liberty"
+      },
+      {
+        "id": "d",
+        "text": "The Subcommittee on Snacks and Treason"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The Committee of Five included Jefferson, Adams, Franklin, Sherman, and Livingston. Five people, one historic breakup note.",
     "tags": [
       "patriotic",
-      "presidents"
+      "founding",
+      "documents",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.archives.gov/founding-docs/declaration"
     ]
   },
   {
-    "statement": "The Lincoln Memorial has 36 columns for the states in the Union at Lincoln's death.",
-    "answer": "truth",
-    "explanation": "The columns represent the 36 states at the time Lincoln died. Architecture loves symbolism.",
+    "kind": "multiple-choice",
+    "prompt": "\"Yankee Doodle\" began as what kind of song?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "A song mocking colonial Americans"
+      },
+      {
+        "id": "b",
+        "text": "The first official U.S. anthem"
+      },
+      {
+        "id": "c",
+        "text": "A Navy marching song"
+      },
+      {
+        "id": "d",
+        "text": "An advertisement for very patriotic pasta"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The tune was used to mock colonists, who later embraced it. Revolutionary confidence includes stealing the insult and dancing with it.",
     "tags": [
       "patriotic",
-      "symbols"
+      "music",
+      "revolutionary-war",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://www.loc.gov/item/ihas.200000025/"
     ]
   },
   {
-    "statement": "The Lincoln Memorial is shaped like a giant log cabin.",
-    "answer": "turd",
-    "explanation": "It was designed like a classical Greek temple, not a frontier cabin.",
+    "kind": "multiple-choice",
+    "prompt": "The first official U.S. flag resolution in 1777 did NOT specify what?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The arrangement of the stars"
+      },
+      {
+        "id": "b",
+        "text": "That it had stripes"
+      },
+      {
+        "id": "c",
+        "text": "That the colors were red, white, and blue"
+      },
+      {
+        "id": "d",
+        "text": "The exact level of patriotic vibes"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The resolution called for 13 stars and 13 stripes, but not the star pattern. Early flag design had room for jazz.",
     "tags": [
       "patriotic",
-      "symbols"
+      "symbols",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://www.loc.gov/item/today-in-history/june-14/"
     ]
   },
   {
-    "statement": "The Statue of Liberty was a gift from France.",
-    "answer": "truth",
-    "explanation": "France gave the statue to the United States as a symbol of friendship and liberty.",
+    "kind": "multiple-choice",
+    "prompt": "On the Great Seal, which way does the eagle face?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Toward the olive branch"
+      },
+      {
+        "id": "b",
+        "text": "Toward the arrows"
+      },
+      {
+        "id": "c",
+        "text": "Straight at the viewer"
+      },
+      {
+        "id": "d",
+        "text": "Toward whatever snacks eagles like"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The eagle faces the olive branch, symbolically favoring peace. Still holding arrows, though, because subtlety took the day off.",
     "tags": [
       "patriotic",
-      "symbols"
+      "symbols",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.state.gov/the-great-seal-of-the-united-states/"
     ]
   },
   {
-    "statement": "The Statue of Liberty was a gift from Great Britain after the Revolutionary War.",
-    "answer": "turd",
-    "explanation": "It came from France and was dedicated in 1886, long after the Revolutionary War.",
+    "kind": "multiple-choice",
+    "prompt": "Which president operated a large whiskey distillery at Mount Vernon after leaving office?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "George Washington"
+      },
+      {
+        "id": "b",
+        "text": "Thomas Jefferson"
+      },
+      {
+        "id": "c",
+        "text": "Andrew Jackson"
+      },
+      {
+        "id": "d",
+        "text": "Uncle Sam, for morale"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Washington's Mount Vernon distillery became one of the largest in America. The father of his country also understood party supplies.",
     "tags": [
       "patriotic",
-      "symbols"
+      "presidents",
+      "oddities",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://www.mountvernon.org/the-estate-gardens/distillery-gristmill/"
     ]
   },
   {
-    "statement": "Ellis Island processed millions of immigrants entering the United States.",
-    "answer": "truth",
-    "explanation": "From 1892 to 1954, Ellis Island was a major immigration station for millions of arrivals.",
+    "kind": "multiple-choice",
+    "prompt": "Benjamin Franklin served as the first person in which national postal role?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Postmaster General"
+      },
+      {
+        "id": "b",
+        "text": "Official Stamp Designer"
+      },
+      {
+        "id": "c",
+        "text": "Mailbox Inspector Supreme"
+      },
+      {
+        "id": "d",
+        "text": "Director of Experimental Turkey Mail"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Franklin became the first Postmaster General under the Continental Congress. He was networking before email ruined everything.",
     "tags": [
       "patriotic",
-      "immigration"
+      "founding",
+      "people",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://about.usps.com/who/profile/history/pmg-franklin.htm"
     ]
   },
   {
-    "statement": "Ellis Island is located in the middle of the Mississippi River.",
-    "answer": "turd",
-    "explanation": "Ellis Island sits in New York Harbor near the Statue of Liberty.",
+    "kind": "multiple-choice",
+    "prompt": "What was \"Old Ironsides\"?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The USS Constitution"
+      },
+      {
+        "id": "b",
+        "text": "George Washington's horse"
+      },
+      {
+        "id": "c",
+        "text": "A cannon at Bunker Hill"
+      },
+      {
+        "id": "d",
+        "text": "The founders' workout nickname"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Old Ironsides is the nickname of the USS Constitution. The ship earned a nickname with serious superhero posture.",
     "tags": [
       "patriotic",
-      "immigration"
+      "symbols",
+      "war-of-1812",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.navy.mil/Resources/Fact-Files/Display-FactFiles/Article/2169735/uss-constitution/"
     ]
   },
   {
-    "statement": "The Pony Express operated for less than two years.",
-    "answer": "truth",
-    "explanation": "It ran from 1860 to 1861. It became legendary despite having a shorter run than many TV shows.",
+    "kind": "multiple-choice",
+    "prompt": "What was the first U.S. national park?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Yellowstone"
+      },
+      {
+        "id": "b",
+        "text": "Yosemite"
+      },
+      {
+        "id": "c",
+        "text": "Grand Canyon"
+      },
+      {
+        "id": "d",
+        "text": "Liberty Lawn, bring your own eagle"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Yellowstone became the first U.S. national park in 1872. America looked at geothermal chaos and said, \"protect that.\"",
     "tags": [
       "patriotic",
-      "west"
+      "parks",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/yell/learn/historyculture/index.htm"
     ]
   },
   {
-    "statement": "The Pony Express delivered mail for more than fifty years.",
-    "answer": "turd",
-    "explanation": "Telegraph expansion helped end it quickly. The legend lasted much longer than the business.",
+    "kind": "multiple-choice",
+    "prompt": "How long did the Pony Express operate?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Less than two years"
+      },
+      {
+        "id": "b",
+        "text": "More than fifty years"
+      },
+      {
+        "id": "c",
+        "text": "About ten years"
+      },
+      {
+        "id": "d",
+        "text": "Still running, if the horse is motivated"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The Pony Express ran from 1860 to 1861. Its legend has had a much better run than its business model.",
     "tags": [
       "patriotic",
-      "west"
+      "west",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/poex/learn/historyculture/index.htm"
     ]
   },
   {
-    "statement": "The first national park in the United States was Yellowstone.",
-    "answer": "truth",
-    "explanation": "Yellowstone became the first U.S. national park in 1872.",
+    "kind": "multiple-choice",
+    "prompt": "Where is Ellis Island located?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "New York Harbor"
+      },
+      {
+        "id": "b",
+        "text": "The Mississippi River"
+      },
+      {
+        "id": "c",
+        "text": "Chesapeake Bay"
+      },
+      {
+        "id": "d",
+        "text": "Under the Statue of Liberty's basement"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Ellis Island sits in New York Harbor near the Statue of Liberty. Geography put the symbols close together for dramatic effect.",
     "tags": [
       "patriotic",
-      "parks"
+      "immigration",
+      "symbols",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/elis/learn/historyculture/index.htm"
     ]
   },
   {
-    "statement": "Yosemite was the first U.S. national park.",
-    "answer": "turd",
-    "explanation": "Yosemite was protected early and became a national park later, but Yellowstone was first.",
+    "kind": "multiple-choice",
+    "prompt": "Which amendment moved presidential inauguration day from March to January?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The 20th Amendment"
+      },
+      {
+        "id": "b",
+        "text": "The 1st Amendment"
+      },
+      {
+        "id": "c",
+        "text": "The 13th Amendment"
+      },
+      {
+        "id": "d",
+        "text": "The Calendar Had Enough Amendment"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The 20th Amendment shortened the lame-duck period and moved inauguration to January 20. The calendar got a constitutional tune-up.",
     "tags": [
       "patriotic",
-      "parks"
+      "constitution",
+      "presidents",
+      "spicy"
+    ],
+    "sourceRefs": [
+      "https://constitution.congress.gov/constitution/amendment-20/"
     ]
   },
   {
-    "statement": "The U.S. flag should never touch the ground according to flag etiquette.",
-    "answer": "truth",
-    "explanation": "Flag etiquette says the flag should not touch anything beneath it, including the ground.",
+    "kind": "multiple-choice",
+    "prompt": "Who led the expedition that explored much of the Louisiana Purchase?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Meriwether Lewis and William Clark"
+      },
+      {
+        "id": "b",
+        "text": "Daniel Boone and Davy Crockett"
+      },
+      {
+        "id": "c",
+        "text": "Hamilton and Madison"
+      },
+      {
+        "id": "d",
+        "text": "Two guys and one aggressively folded map"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Lewis and Clark led the Corps of Discovery. The road trip had fewer gas stations and more diplomatic complexity.",
     "tags": [
       "patriotic",
-      "symbols"
+      "expansion",
+      "west",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/lecl/learn/historyculture/index.htm"
     ]
   },
   {
-    "statement": "A U.S. flag that touches the ground must always be destroyed immediately.",
-    "answer": "turd",
-    "explanation": "A flag should be retired when it is no longer fit for display. Touching the ground is not an automatic destruction command.",
+    "kind": "multiple-choice",
+    "prompt": "Sacagawea is best known for helping which expedition?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The Lewis and Clark Expedition"
+      },
+      {
+        "id": "b",
+        "text": "The Pony Express"
+      },
+      {
+        "id": "c",
+        "text": "The Alaska Purchase negotiation"
+      },
+      {
+        "id": "d",
+        "text": "The Emergency Flag Folding Committee"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Sacagawea assisted the Lewis and Clark Expedition as interpreter and guide. She was more useful than several maps combined.",
     "tags": [
       "patriotic",
-      "symbols"
+      "expansion",
+      "people",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/people/sacagawea.htm"
     ]
   },
   {
-    "statement": "Uncle Sam became a famous personification of the United States.",
-    "answer": "truth",
-    "explanation": "Uncle Sam became a national symbol, especially through recruiting posters and political cartoons.",
+    "kind": "multiple-choice",
+    "prompt": "What did the Treaty of Paris of 1783 do?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "Formally ended the Revolutionary War"
+      },
+      {
+        "id": "b",
+        "text": "Bought the Louisiana Territory"
+      },
+      {
+        "id": "c",
+        "text": "Created the U.S. Constitution"
+      },
+      {
+        "id": "d",
+        "text": "Invented freedom fries early"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "The Treaty of Paris formally ended the war and recognized U.S. independence. The breakup became legally official.",
     "tags": [
       "patriotic",
-      "symbols"
+      "revolutionary-war",
+      "founding",
+      "medium"
+    ],
+    "sourceRefs": [
+      "https://www.archives.gov/milestone-documents/treaty-of-paris"
     ]
   },
   {
-    "statement": "Uncle Sam was the first U.S. president.",
-    "answer": "turd",
-    "explanation": "Uncle Sam is a symbol, not a president. George Washington keeps that first-president title.",
+    "kind": "multiple-choice",
+    "prompt": "What happened at Lexington and Concord in April 1775?",
+    "choices": [
+      {
+        "id": "a",
+        "text": "The first major fighting of the Revolutionary War"
+      },
+      {
+        "id": "b",
+        "text": "The Declaration was signed"
+      },
+      {
+        "id": "c",
+        "text": "The Constitution was written"
+      },
+      {
+        "id": "d",
+        "text": "Tea was dumped with improved aim"
+      }
+    ],
+    "correctChoiceId": "a",
+    "explanation": "Lexington and Concord marked the outbreak of armed conflict. The argument had officially left the comments section.",
     "tags": [
       "patriotic",
-      "symbols"
+      "revolutionary-war",
+      "easy"
+    ],
+    "sourceRefs": [
+      "https://www.nps.gov/mima/learn/historyculture/april-19-1775.htm"
     ]
   }
 ]

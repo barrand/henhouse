@@ -2,19 +2,41 @@ import { createHash } from 'crypto'
 
 export type TruthOrTurdAnswer = 'truth' | 'turd'
 
-export interface TruthOrTurdQuestion {
+export interface TruthOrTurdBinaryQuestion {
+  kind: 'binary'
   statement: string
   answer: TruthOrTurdAnswer
   explanation: string
   tags: string[]
+  sourceRefs?: string[]
 }
 
-export interface DrawnTruthOrTurdQuestion extends TruthOrTurdQuestion {
-  questionKey: string
+export interface TruthOrTurdChoice {
+  id: string
+  text: string
 }
 
-export function truthOrTurdQuestionKey(statement: string): string {
-  return createHash('md5').update(statement.trim().toLowerCase()).digest('hex').slice(0, 16)
+export interface TruthOrTurdMultipleChoiceQuestion {
+  kind: 'multiple-choice'
+  prompt: string
+  choices: TruthOrTurdChoice[]
+  correctChoiceId: string
+  explanation: string
+  tags: string[]
+  sourceRefs: string[]
+}
+
+export type TruthOrTurdQuestion = TruthOrTurdBinaryQuestion | TruthOrTurdMultipleChoiceQuestion
+
+export type DrawnTruthOrTurdQuestion = TruthOrTurdQuestion & { questionKey: string }
+
+export function getTruthOrTurdQuestionText(question: TruthOrTurdQuestion): string {
+  return question.kind === 'multiple-choice' ? question.prompt : question.statement
+}
+
+export function truthOrTurdQuestionKey(questionOrText: TruthOrTurdQuestion | string): string {
+  const text = typeof questionOrText === 'string' ? questionOrText : getTruthOrTurdQuestionText(questionOrText)
+  return createHash('md5').update(text.trim().toLowerCase()).digest('hex').slice(0, 16)
 }
 
 export function drawTruthOrTurdQuestion(
@@ -24,14 +46,14 @@ export function drawTruthOrTurdQuestion(
 ): DrawnTruthOrTurdQuestion | null {
   const used = new Set(usedQuestionKeys)
   const available = uniqueQuestions(questions).filter((question) => {
-    return !used.has(truthOrTurdQuestionKey(question.statement))
+    return !used.has(truthOrTurdQuestionKey(question))
   })
   if (available.length === 0) return null
 
   const question = available[Math.floor(rng() * available.length)]
   return {
     ...question,
-    questionKey: truthOrTurdQuestionKey(question.statement),
+    questionKey: truthOrTurdQuestionKey(question),
   }
 }
 
@@ -40,7 +62,7 @@ export function findTruthOrTurdQuestion(
   questionKey: string,
 ): DrawnTruthOrTurdQuestion | null {
   const question = uniqueQuestions(questions).find((candidate) => {
-    return truthOrTurdQuestionKey(candidate.statement) === questionKey
+    return truthOrTurdQuestionKey(candidate) === questionKey
   })
   if (!question) return null
   return {
@@ -64,7 +86,7 @@ function uniqueQuestions(questions: TruthOrTurdQuestion[]): TruthOrTurdQuestion[
   const unique: TruthOrTurdQuestion[] = []
 
   for (const question of questions) {
-    const key = truthOrTurdQuestionKey(question.statement)
+    const key = truthOrTurdQuestionKey(question)
     if (seen.has(key)) continue
     seen.add(key)
     unique.push(question)

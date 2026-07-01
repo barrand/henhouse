@@ -50,14 +50,17 @@ Mobile party game collection. React + TypeScript + Firebase + Tailwind (Material
 
 **Word selection:** Before each round, givers vote on 1 of 3 candidate words (15s timer). Guesser is blind. 2 losing words are burned. Game draws `totalRounds × 3` words at start.
 
-**Truth or Turd** — Fast true/false trivia. Everyone sees the same statement and answers **Truth** or **Turd**.
+**Truth or Turd** — Fast trivia with reveal explanations and grouped picks.
 - Default 15 rounds, 30 seconds per question.
 - Scores are server-authoritative: +1 for correct, 0 for wrong or no answer.
-- No live Truth/Turd counts during answering; players see only their own submitted choice and who has answered.
+- Standard mode is binary: everyone sees the same statement and answers **Truth** or **Turd**.
+- Patriotic Edition is multiple-choice: everyone sees the same U.S. history/civics question and four shuffled choices.
+- No live answer counts during answering; players see only their own submitted choice and who has answered.
 - Reveal immediately when everyone answers, or when the host forces reveal after at least one answer, or when the timer expires.
-- Reveal shows the correct label, a short funny/enlightening explanation, grouped Truth/Turd picks, no-answer players, points, and standings.
+- Reveal shows the correct answer, a short funny/enlightening explanation, grouped picks, no-answer players, points, and standings.
 - Patriotic Edition is patriotic-only for this game.
-- Question content lives in one tagged bank: `functions/src/games/truth-or-turd/data/questions.json`; patriotic questions use the `patriotic` tag.
+- Question content lives in one tagged bank: `functions/src/games/truth-or-turd/data/questions.json`; patriotic questions use the `patriotic` tag and include `sourceRefs`.
+- Correct answers/explanations are stored under each round's server-only `secrets/answer` doc until reveal; client-readable round docs contain only prompt/statement, choices, tags, and answer state.
 - Final ties are allowed.
 
 ### Fowl Words — how you win

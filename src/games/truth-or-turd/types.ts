@@ -1,8 +1,14 @@
 import type { BaseGameData, PlayerData as SharedPlayerData } from '@shared/types'
 
 export type TruthOrTurdAnswer = 'truth' | 'turd'
+export type TruthOrTurdSubmittedAnswer = string
 export type TruthOrTurdRoundStatus = 'answering' | 'revealing' | 'revealed'
 export type TruthOrTurdRoundResult = 'correct' | 'incorrect' | 'no-answer'
+
+export interface TruthOrTurdChoice {
+  id: string
+  text: string
+}
 
 export interface GameData extends BaseGameData {
   gameType: 'truth-or-turd'
@@ -16,7 +22,10 @@ export interface PlayerData extends SharedPlayerData {
 
 export interface RoundData {
   id: string
-  statement: string
+  kind?: 'binary' | 'multiple-choice'
+  statement?: string
+  prompt?: string
+  choices?: TruthOrTurdChoice[]
   tags?: string[]
   source?: 'preset' | 'patriotic'
   tag?: string | null
@@ -28,8 +37,11 @@ export interface RoundData {
   eligiblePlayerIds?: string[]
   eligiblePlayerCount?: number
   correctAnswer?: TruthOrTurdAnswer
+  correctChoiceId?: string
+  correctChoiceText?: string
   explanation?: string
   results: Record<string, TruthOrTurdRoundResult>
   pointsThisRound: Record<string, number>
-  playerAnswers?: Record<string, TruthOrTurdAnswer>
+  playerAnswers?: Record<string, TruthOrTurdSubmittedAnswer>
+  sourceRefs?: string[]
 }

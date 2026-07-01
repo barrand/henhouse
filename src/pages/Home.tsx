@@ -224,7 +224,6 @@ export default function Home() {
               <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center">
                 <img src="/images/generated-comic/flock-icon.png" alt="" className="w-14 h-14 object-contain" />
               </div>
-              <span className="font-label text-[9px] font-bold uppercase tracking-[0.2em] text-secondary opacity-70">3+ players</span>
             </div>
             <h3 className="font-headline text-xl font-bold text-on-surface mb-1">Flock Together</h3>
             <p className="text-on-surface-variant text-xs font-body leading-snug mb-4">
@@ -246,7 +245,6 @@ export default function Home() {
               <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center">
                 <img src="/images/generated-comic/fowl-icon.png" alt="" className="w-14 h-14 object-contain" />
               </div>
-              <span className="font-label text-[9px] font-bold uppercase tracking-[0.2em] text-secondary opacity-70">2+ players · new!</span>
             </div>
             <h3 className="font-headline text-xl font-bold text-on-surface mb-1">Fowl Words</h3>
             <p className="text-on-surface-variant text-xs font-body leading-snug mb-4">
@@ -268,7 +266,6 @@ export default function Home() {
               <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center">
                 <img src="/images/generated-comic/truth-or-turd-icon.png" alt="" className="w-14 h-14 object-contain" />
               </div>
-              <span className="font-label text-[9px] font-bold uppercase tracking-[0.2em] text-secondary opacity-70">1+ players · new!</span>
             </div>
             <h3 className="font-headline text-xl font-bold text-on-surface mb-1">Truth or Turd</h3>
             <p className="text-on-surface-variant text-xs font-body leading-snug mb-4">

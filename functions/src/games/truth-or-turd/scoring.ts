@@ -1,5 +1,3 @@
-import type { TruthOrTurdAnswer } from './deck'
-
 export type TruthOrTurdRoundResult = 'correct' | 'incorrect' | 'no-answer'
 
 export interface TruthOrTurdScoringResult {
@@ -8,8 +6,8 @@ export interface TruthOrTurdScoringResult {
 }
 
 export function scoreTruthOrTurdRound(
-  playerAnswers: Record<string, TruthOrTurdAnswer>,
-  correctAnswer: TruthOrTurdAnswer,
+  playerAnswers: Record<string, string>,
+  correctAnswer: string,
   eligiblePlayerIds: string[],
 ): TruthOrTurdScoringResult {
   const results: Record<string, TruthOrTurdRoundResult> = {}

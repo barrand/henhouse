@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { GameData, PlayerData, RoundData, TruthOrTurdAnswer } from '../types'
+import type { GameData, PlayerData, RoundData, TruthOrTurdAnswer, TruthOrTurdChoice, TruthOrTurdSubmittedAnswer } from '../types'
 import { forceReveal, submitAnswer } from '../service'
 
 interface Props {
@@ -16,7 +16,7 @@ const ANSWER_COPY: Record<TruthOrTurdAnswer, { label: string; helper: string; ic
 }
 
 export default function AnsweringView({ game, round, players, isHost, currentPlayerId }: Props) {
-  const [selected, setSelected] = useState<TruthOrTurdAnswer | null>(null)
+  const [selected, setSelected] = useState<TruthOrTurdSubmittedAnswer | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [timeLeft, setTimeLeft] = useState(0)
   const [expired, setExpired] = useState(false)
@@ -56,7 +56,7 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
     })
   }, [expired, game.id, isHost])
 
-  const handleSubmit = async (answer: TruthOrTurdAnswer) => {
+  const handleSubmit = async (answer: TruthOrTurdSubmittedAnswer) => {
     if (submitting || alreadyAnswered || expired) return
     setSelected(answer)
     setSubmitting(true)
@@ -84,6 +84,40 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
 
   const timerPercent = Math.max(0, (timeLeft / game.settings.secondsPerRound) * 100)
   const isPatrioticRound = round.tags?.includes('patriotic') || round.source === 'patriotic'
+  const isMultipleChoice = round.kind === 'multiple-choice'
+  const prompt = isMultipleChoice ? round.prompt : round.statement
+  const selectedLabel = selected
+    ? isMultipleChoice
+      ? round.choices?.find((choice) => choice.id === selected)?.text ?? selected
+      : ANSWER_COPY[selected as TruthOrTurdAnswer]?.label ?? selected
+    : null
+
+  const renderChoiceButton = (choice: TruthOrTurdChoice, index: number) => {
+    const active = selected === choice.id
+    const letter = String.fromCharCode(65 + index)
+    return (
+      <button
+        key={choice.id}
+        type="button"
+        onClick={() => handleSubmit(choice.id)}
+        disabled={submitting || alreadyAnswered || expired}
+        className={`rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] disabled:opacity-55 ${
+          active
+            ? 'bg-primary-fixed border-primary text-on-primary-fixed animate-answer-card-lock'
+            : 'bg-surface-container-low border-outline-variant/60 hover:border-primary hover:bg-primary/10 text-on-surface'
+        }`}
+      >
+        <span className="flex items-center gap-3">
+          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 font-headline text-lg font-bold ${
+            active ? 'border-primary text-on-primary-fixed bg-primary/20' : 'border-outline-variant text-secondary'
+          }`}>
+            {letter}
+          </span>
+          <span className="font-body text-base font-semibold leading-snug">{choice.text}</span>
+        </span>
+      </button>
+    )
+  }
 
   return (
     <main className="flex-1 flex flex-col px-4 py-6">
@@ -106,36 +140,38 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
         )}
         <img src="/images/generated-comic/truth-or-turd-thinking.png" alt="" className="w-20 h-20 mx-auto mb-3 animate-hen-bob" />
         <p className="font-headline text-xl font-bold text-on-surface leading-relaxed">
-          {round.statement}
+          {prompt}
         </p>
       </section>
 
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {(['truth', 'turd'] as const).map((answer) => {
-          const copy = ANSWER_COPY[answer]
-          const active = selected === answer
-          return (
-            <button
-              key={answer}
-              type="button"
-              onClick={() => handleSubmit(answer)}
-              disabled={submitting || alreadyAnswered || expired}
-              className={`rounded-2xl border-2 p-5 text-left transition-all active:scale-[0.98] disabled:opacity-55 ${
-                active
-                  ? 'bg-primary-fixed border-primary text-on-primary-fixed'
-                  : 'bg-surface-container-low border-outline-variant/60 hover:border-primary hover:bg-primary/10 text-on-surface'
-              }`}
-            >
-              <span className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-3xl">{copy.icon}</span>
-                <span>
-                  <span className="block font-headline text-2xl font-bold">{copy.label}</span>
-                  <span className="block text-sm font-body text-on-surface-variant">{copy.helper}</span>
-                </span>
-              </span>
-            </button>
-          )
-        })}
+      <div className={`mt-6 grid grid-cols-1 gap-3 ${isMultipleChoice ? '' : 'sm:grid-cols-2'}`}>
+        {isMultipleChoice
+          ? (round.choices ?? []).map(renderChoiceButton)
+          : (['truth', 'turd'] as const).map((answer) => {
+              const copy = ANSWER_COPY[answer]
+              const active = selected === answer
+              return (
+                <button
+                  key={answer}
+                  type="button"
+                  onClick={() => handleSubmit(answer)}
+                  disabled={submitting || alreadyAnswered || expired}
+                  className={`rounded-2xl border-2 p-5 text-left transition-all active:scale-[0.98] disabled:opacity-55 ${
+                    active
+                      ? 'bg-primary-fixed border-primary text-on-primary-fixed animate-answer-card-lock'
+                      : 'bg-surface-container-low border-outline-variant/60 hover:border-primary hover:bg-primary/10 text-on-surface'
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-3xl">{copy.icon}</span>
+                    <span>
+                      <span className="block font-headline text-2xl font-bold">{copy.label}</span>
+                      <span className="block text-sm font-body text-on-surface-variant">{copy.helper}</span>
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
       </div>
 
       {alreadyAnswered || selected ? (
@@ -143,7 +179,7 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
           <p className="font-headline text-lg font-semibold text-on-surface">You&apos;re clucked in</p>
           {selected && (
             <p className="mt-2 inline-block rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-sm font-body font-semibold text-primary">
-              {ANSWER_COPY[selected].label}
+              {selectedLabel}
             </p>
           )}
           <p className="text-on-surface-variant text-sm font-body mt-2">

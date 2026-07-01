@@ -255,8 +255,16 @@ function sanitizeRound(round) {
     base.options = round.options
   }
   if (round.statement) {
+    base.kind = round.kind
     base.statement = round.statement
     base.correctAnswer = round.correctAnswer
+    base.explanation = round.explanation
+  }
+  if (round.prompt) {
+    base.kind = round.kind
+    base.prompt = round.prompt
+    base.choiceCount = round.choices?.length ?? 0
+    base.correctChoiceId = round.correctChoiceId
     base.explanation = round.explanation
   }
   return base
@@ -473,7 +481,10 @@ class Bot {
     if (round.status !== 'answering') return
     if ((round.answeredPlayerIds ?? []).includes(this.uid)) return
     await this.once(`truth-or-turd:answer:${roundNum}`, async () => {
-      const answer = Math.random() < 0.5 ? 'truth' : 'turd'
+      const answer = round.kind === 'multiple-choice'
+        ? randomChoice(round.choices ?? [])?.id
+        : Math.random() < 0.5 ? 'truth' : 'turd'
+      if (!answer) throw new Error('No answer available for Truth or Turd round')
       await this.call('truthOrTurdSubmitAnswer', { gameId: this.gameId, roundNum, answer })
       this.reporter.event('bot-action', { botName: this.name, action: `picked ${answer}`, roundNum })
     })

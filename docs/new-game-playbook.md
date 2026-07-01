@@ -42,6 +42,10 @@ Phone-first interaction is the default. Use large tap targets, stable dimensions
 - Capture `eligiblePlayerIds` at round start so late joiners wait until the next round.
 - Timer, reveal, dedup, scoring, and advance transitions must be idempotent. Multiple clients may nudge the same transition.
 - Do not store future answers, secrets, or unrevealed correct answers in client-readable documents.
+- For trivia/quiz games, split visible round data from secret answer data:
+  - client-readable round doc: prompt/statement, choices, tags, deadline, answer state, and reveal state
+  - server-only subdoc, for example `rounds/{roundNum}/secrets/answer`: correct answer, explanation, and source refs
+  - on reveal, copy only the now-public answer/explanation fields onto the round doc
 
 ## Interaction Patterns
 
@@ -55,6 +59,7 @@ Phone-first interaction is the default. Use large tap targets, stable dimensions
   - who has answered when appropriate
 - Avoid revealing live answer counts if it would influence remaining players.
 - Reveals should show the outcome, points, and standings before the host advances.
+- Multiple-choice reveals should group players by displayed choice and keep no-answer players visible.
 - Final scoreboard supports rematch and back-to-home.
 - Host abandon should send all players home.
 
@@ -76,6 +81,8 @@ Phone-first interaction is the default. Use large tap targets, stable dimensions
 - Trivia/factual content must be checked before shipping.
 - Keep wording family party-safe unless the game explicitly chooses otherwise.
 - Prefer one source-of-truth content bank per game. Use a `tags` array for variants such as `patriotic` instead of creating parallel JSON files.
+- If a game has multiple question formats, use an explicit `kind` discriminator such as `binary` or `multiple-choice`.
+- Multiple-choice items should include stable choice ids, exactly one correct id, plausible distractors, explanations, and source refs for factual/trivia content.
 - Store enough metadata for variety, such as topic tags and optional difficulty/audience tags.
 
 ## Testing Checklist

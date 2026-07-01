@@ -8,6 +8,7 @@ import {
   findTruthOrTurdQuestion,
   selectTruthOrTurdQuestions,
   TruthOrTurdAnswer,
+  TruthOrTurdChoice,
   TruthOrTurdQuestion,
 } from './deck'
 import { scoreTruthOrTurdRound } from './scoring'
@@ -21,8 +22,65 @@ function loadQuestionBank(includePatrioticQuestions: boolean): TruthOrTurdQuesti
   return selectTruthOrTurdQuestions(questions as TruthOrTurdQuestion[], includePatrioticQuestions)
 }
 
-function isAnswerChoice(value: unknown): value is TruthOrTurdAnswer {
+function isSubmittedAnswer(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0 && value.trim().length <= 64
+}
+
+function isBinaryAnswer(value: unknown): value is TruthOrTurdAnswer {
   return value === 'truth' || value === 'turd'
+}
+
+function shuffledChoices(choices: TruthOrTurdChoice[]): TruthOrTurdChoice[] {
+  const shuffled = choices.map((choice) => ({ ...choice }))
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
+function visibleRoundData(question: NonNullable<Awaited<ReturnType<typeof drawQuestionForGame>>>) {
+  if (question.kind === 'multiple-choice') {
+    return {
+      kind: question.kind,
+      prompt: question.prompt,
+      choices: shuffledChoices(question.choices),
+      tags: question.tags,
+      questionKey: question.questionKey,
+    }
+  }
+  return {
+    kind: 'binary',
+    statement: question.statement,
+    tags: question.tags,
+    questionKey: question.questionKey,
+  }
+}
+
+function secretRoundData(question: NonNullable<Awaited<ReturnType<typeof drawQuestionForGame>>>) {
+  if (question.kind === 'multiple-choice') {
+    const correctChoiceText = question.choices.find((choice) => choice.id === question.correctChoiceId)?.text ?? ''
+    return {
+      kind: question.kind,
+      correctChoiceId: question.correctChoiceId,
+      correctChoiceText,
+      explanation: question.explanation,
+      sourceRefs: question.sourceRefs,
+    }
+  }
+  return {
+    kind: 'binary',
+    correctAnswer: question.answer,
+    explanation: question.explanation,
+    sourceRefs: question.sourceRefs ?? [],
+  }
+}
+
+function validAnswerForRound(round: FirebaseFirestore.DocumentData, answer: string) {
+  if ((round.kind ?? 'binary') === 'multiple-choice') {
+    return (round.choices ?? []).some((choice: { id?: unknown }) => choice.id === answer)
+  }
+  return isBinaryAnswer(answer)
 }
 
 async function drawQuestionForGame(game: FirebaseFirestore.DocumentData) {
@@ -39,10 +97,11 @@ async function createRound(
   const deadline = Timestamp.fromMillis(Date.now() + (game.settings?.secondsPerRound ?? SECONDS_PER_ROUND) * 1000)
   const eligiblePlayerIds = [...(game.playerIds ?? [])]
 
-  await gameRef.collection('rounds').doc(String(roundNum)).set({
-    statement: question.statement,
-    tags: question.tags,
-    questionKey: question.questionKey,
+  const roundRef = gameRef.collection('rounds').doc(String(roundNum))
+  const batch = db.batch()
+
+  batch.set(roundRef, {
+    ...visibleRoundData(question),
     status: 'answering',
     deadline,
     answerCount: 0,
@@ -54,10 +113,12 @@ async function createRound(
     playerAnswers: {},
   })
 
-  await gameRef.update({
+  batch.set(roundRef.collection('secrets').doc('answer'), secretRoundData(question))
+  batch.update(gameRef, {
     currentRound: roundNum,
     usedTruthOrTurdQuestionKeys: FieldValue.arrayUnion(question.questionKey),
   })
+  await batch.commit()
 }
 
 // -- CREATE GAME (Truth or Turd) --
@@ -188,7 +249,7 @@ export const truthOrTurdSubmitAnswer = onCall(async (request) => {
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
   const { gameId, roundNum, answer } = request.data as { gameId: string; roundNum: number; answer: unknown }
-  if (!isAnswerChoice(answer)) throw new HttpsError('invalid-argument', 'Answer must be truth or turd')
+  if (!isSubmittedAnswer(answer)) throw new HttpsError('invalid-argument', 'Answer required')
 
   const gameRef = db.collection('games').doc(gameId)
   const roundRef = gameRef.collection('rounds').doc(String(roundNum))
@@ -201,6 +262,7 @@ export const truthOrTurdSubmitAnswer = onCall(async (request) => {
   if (game.gameType !== 'truth-or-turd') throw new HttpsError('failed-precondition', 'Wrong game type')
   if (round.status !== 'answering') throw new HttpsError('failed-precondition', 'Round not accepting answers')
   if (!isRoundEligible(round, game, uid)) throw new HttpsError('permission-denied', 'You will join next round')
+  if (!validAnswerForRound(round, answer)) throw new HttpsError('invalid-argument', 'Invalid answer choice')
 
   const deadline = round.deadline?.toDate()
   if (deadline && Date.now() > deadline.getTime()) {
@@ -303,6 +365,7 @@ async function syncRoundAnswerState(
 async function triggerReveal(gameId: string, roundNum: number) {
   const gameRef = db.collection('games').doc(gameId)
   const roundRef = gameRef.collection('rounds').doc(String(roundNum))
+  const secretRef = roundRef.collection('secrets').doc('answer')
 
   const claimed = await db.runTransaction(async (tx) => {
     const roundSnap = await tx.get(roundRef)
@@ -312,36 +375,56 @@ async function triggerReveal(gameId: string, roundNum: number) {
   })
   if (!claimed) return
 
-  const [gameSnap, roundSnap] = await Promise.all([gameRef.get(), roundRef.get()])
+  const [gameSnap, roundSnap, secretSnap] = await Promise.all([gameRef.get(), roundRef.get(), secretRef.get()])
   if (!gameSnap.exists || !roundSnap.exists) throw new HttpsError('not-found', 'Game or round not found')
   const game = gameSnap.data()!
   const round = roundSnap.data()!
   const questionKey = round.questionKey as string | undefined
   if (!questionKey) throw new HttpsError('internal', 'Round is missing question key')
 
-  const bank = await loadQuestionBank(game.includePatrioticQuestions ?? false)
-  const question = findTruthOrTurdQuestion(bank, questionKey)
-  if (!question) throw new HttpsError('internal', 'Question not found')
+  let secret = secretSnap.exists ? secretSnap.data()! : null
+  if (!secret) {
+    const bank = loadQuestionBank(game.includePatrioticQuestions ?? false)
+    const question = findTruthOrTurdQuestion(bank, questionKey)
+    if (!question) throw new HttpsError('internal', 'Question not found')
+    secret = secretRoundData(question)
+  }
+
+  const kind = (secret.kind ?? round.kind ?? 'binary') as 'binary' | 'multiple-choice'
+  const correctAnswer = kind === 'multiple-choice'
+    ? secret.correctChoiceId as string | undefined
+    : secret.correctAnswer as string | undefined
+  if (!correctAnswer) throw new HttpsError('internal', 'Round is missing correct answer')
 
   const eligiblePlayerIds = getRoundEligiblePlayerIds(round, game)
   const eligibleSet = new Set(eligiblePlayerIds)
   const answersSnap = await roundRef.collection('answers').get()
-  const playerAnswers: Record<string, TruthOrTurdAnswer> = {}
+  const playerAnswers: Record<string, string> = {}
   answersSnap.docs.forEach((doc) => {
     if (!eligibleSet.has(doc.id)) return
     const answer = doc.data().answer
-    if (isAnswerChoice(answer)) playerAnswers[doc.id] = answer
+    if (isSubmittedAnswer(answer) && validAnswerForRound(round, answer)) playerAnswers[doc.id] = answer
   })
 
-  const scoring = scoreTruthOrTurdRound(playerAnswers, question.answer, eligiblePlayerIds)
+  const scoring = scoreTruthOrTurdRound(playerAnswers, correctAnswer, eligiblePlayerIds)
   const answeredPlayerIds = Object.keys(playerAnswers)
+
+  const revealData = kind === 'multiple-choice'
+    ? {
+        correctChoiceId: correctAnswer,
+        correctChoiceText: secret.correctChoiceText ?? '',
+      }
+    : {
+        correctAnswer: correctAnswer as TruthOrTurdAnswer,
+      }
 
   await roundRef.update({
     status: 'revealed',
     answerCount: answeredPlayerIds.length,
     answeredPlayerIds,
-    correctAnswer: question.answer,
-    explanation: question.explanation,
+    ...revealData,
+    explanation: secret.explanation ?? '',
+    sourceRefs: secret.sourceRefs ?? [],
     results: scoring.results,
     pointsThisRound: scoring.pointsThisRound,
     playerAnswers,

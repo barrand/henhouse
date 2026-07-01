@@ -2,12 +2,12 @@ import { httpsCallable } from 'firebase/functions'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db, functions } from '../../lib/firebase'
 import { onGameUpdate as sharedOnGameUpdate, onPlayersUpdate as sharedOnPlayersUpdate } from '@shared/gameService'
-import type { GameData, PlayerData, RoundData, TruthOrTurdAnswer } from './types'
+import type { GameData, PlayerData, RoundData, TruthOrTurdSubmittedAnswer } from './types'
 
 const truthOrTurdCreateGameFn = httpsCallable<{ playerName: string; includePatrioticQuestions?: boolean }, { gameId: string; code: string }>(functions, 'truthOrTurdCreateGame')
 const truthOrTurdRematchFn = httpsCallable<{ gameId: string }, { code: string }>(functions, 'truthOrTurdRematch')
 const truthOrTurdStartGameFn = httpsCallable<{ gameId: string }, void>(functions, 'truthOrTurdStartGame')
-const truthOrTurdSubmitAnswerFn = httpsCallable<{ gameId: string; roundNum: number; answer: TruthOrTurdAnswer }, void>(functions, 'truthOrTurdSubmitAnswer')
+const truthOrTurdSubmitAnswerFn = httpsCallable<{ gameId: string; roundNum: number; answer: TruthOrTurdSubmittedAnswer }, void>(functions, 'truthOrTurdSubmitAnswer')
 const truthOrTurdForceRevealFn = httpsCallable<{ gameId: string }, void>(functions, 'truthOrTurdForceReveal')
 const truthOrTurdAdvanceRoundFn = httpsCallable<{ gameId: string }, void>(functions, 'truthOrTurdAdvanceRound')
 const truthOrTurdAbandonGameFn = httpsCallable<{ gameId: string }, void>(functions, 'truthOrTurdAbandonGame')
@@ -26,7 +26,7 @@ export async function startGame(gameId: string) {
   await truthOrTurdStartGameFn({ gameId })
 }
 
-export async function submitAnswer(gameId: string, roundNum: number, answer: TruthOrTurdAnswer) {
+export async function submitAnswer(gameId: string, roundNum: number, answer: TruthOrTurdSubmittedAnswer) {
   await truthOrTurdSubmitAnswerFn({ gameId, roundNum, answer })
 }
 
