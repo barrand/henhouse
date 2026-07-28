@@ -3,10 +3,21 @@ import * as admin from 'firebase-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import { claimRoomCode, releaseRoomCode } from '../../shared/roomCodes'
 import { eligibleNonGuesserIds, isRoundEligible } from '../../shared/roundEligibility'
-import { runDeduplication, handleGuess, advanceToNextRound, skipToNextAttempt, finalizeWordSelection, beginClueSubmission } from './roundFlow'
+import {
+  runDeduplication,
+  handleGuess,
+  advanceToNextRound,
+  skipToNextAttempt,
+  finalizeWordSelection,
+  beginClueSubmission,
+  skipWordSelectionPrivacyHandoff,
+  WORD_SELECTION_PRIVACY_SECONDS,
+  WORD_SELECTION_SECONDS,
+} from './roundFlow'
 import { mostHelpfulSplitPts } from './peerLove'
 import { buildFowlWordsDeck } from './deck'
 import { addFowlWordCooldownWrites, fetchActiveFowlWordCooldowns } from './cooldowns'
+import { validateClueForSubmission, validateClueShape } from './clueValidation'
 import {
   giverLovesForPlayer,
   giverBooForPlayer,
@@ -173,7 +184,10 @@ export const fowlWordsStartGame = onCall(async (request) => {
   if (wordOptions.length === 0) throw new HttpsError('internal', 'No words available')
 
   const { Timestamp } = await import('firebase-admin/firestore')
-  const wordSelectionDeadline = Timestamp.fromMillis(Date.now() + 15 * 1000)
+  const wordSelectionStartsAt = Timestamp.fromMillis(Date.now() + WORD_SELECTION_PRIVACY_SECONDS * 1000)
+  const wordSelectionDeadline = Timestamp.fromMillis(
+    wordSelectionStartsAt.toMillis() + WORD_SELECTION_SECONDS * 1000,
+  )
 
   // Batch write so round doc and game status change are atomic — clients can't
   // see game.status === 'playing' without the round document already existing.
@@ -183,6 +197,7 @@ export const fowlWordsStartGame = onCall(async (request) => {
     secretWord: '',
     wordOptions,
     wordVotes: {},
+    wordSelectionStartsAt,
     wordSelectionDeadline,
     status: 'word-selection',
     currentAttempt: 1,
@@ -218,9 +233,19 @@ export const submitClue = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
-  const { gameId, roundNum, clue } = request.data as { gameId: string; roundNum: number; clue: string }
-  if (!clue?.trim()) throw new HttpsError('invalid-argument', 'Clue required')
-  if (clue.trim().length > 50) throw new HttpsError('invalid-argument', 'Clue too long (max 50 chars)')
+  const { gameId, roundNum, clue } = request.data as { gameId: string; roundNum: number; clue: unknown }
+  const clueShape = validateClueShape(clue)
+  if (!clueShape.valid) {
+    const messages = {
+      empty: 'Clue required',
+      'too-long': 'Clue too long (max 50 chars)',
+      'invalid-characters': 'Use one real word — no emoji, spaces, numbers, or symbols.',
+      'joined-words': 'That looks like more than one word. Try a single word instead.',
+      'too-close-to-secret': 'That clue is too close to the secret word. Try a different angle.',
+    } satisfies Record<typeof clueShape.reason, string>
+    throw new HttpsError('invalid-argument', messages[clueShape.reason])
+  }
+  const cleanClue = clueShape.clue
 
   const firestore = db()
   const gameRef = firestore.collection('games').doc(gameId)
@@ -243,8 +268,7 @@ export const submitClue = onCall(async (request) => {
   if (!isRoundEligible(roundData, game, uid)) {
     throw new HttpsError('permission-denied', 'You will join next round')
   }
-  const secretWord = roundData.secretWord?.toLowerCase().trim() ?? ''
-  const normalizedClue = clue.trim().toLowerCase()
+  const secretWord = roundData.secretWord?.trim() ?? ''
 
   const clueDeadline = roundData.clueSubmissionDeadline?.toDate?.()
   if (clueDeadline && Date.now() > clueDeadline.getTime()) {
@@ -254,9 +278,14 @@ export const submitClue = onCall(async (request) => {
     throw new HttpsError('deadline-exceeded', 'Time is up')
   }
 
-  // Check if clue is a substring of the secret word
-  if (secretWord && secretWord.includes(normalizedClue)) {
-    throw new HttpsError('invalid-argument', `Clue cannot be part of the secret word`)
+  // Run the semantic check only for a valid, eligible, in-progress submission.
+  // This keeps malformed or stale calls from spending a Gemini request.
+  const clueValidation = await validateClueForSubmission(cleanClue, secretWord)
+  if (!clueValidation.valid) {
+    const message = clueValidation.reason === 'too-close-to-secret'
+      ? 'That clue is too close to the secret word. Try a different angle.'
+      : 'That looks like more than one word. Try a single word instead.'
+    throw new HttpsError('invalid-argument', message)
   }
 
   const existing = roundData.cluesByPlayer ?? {}
@@ -265,7 +294,7 @@ export const submitClue = onCall(async (request) => {
   }
 
   await roundRef.update({
-    [`cluesByPlayer.${uid}`]: clue.trim(),
+    [`cluesByPlayer.${uid}`]: cleanClue,
     [`clueTimestamps.${uid}`]: FieldValue.serverTimestamp(),
   })
 
@@ -350,6 +379,11 @@ export const fowlWordsSubmitWordVote = onCall(async (request) => {
   const round = roundSnap.data()!
   if (!isRoundEligible(round, game, uid)) throw new HttpsError('permission-denied', 'You will join next round')
   if (round.status !== 'word-selection') throw new HttpsError('failed-precondition', 'Not in word-selection phase')
+  const wordSelectionStartsAt = round.wordSelectionStartsAt?.toMillis?.()
+    ?? ((round.wordSelectionStartsAt?.seconds ?? 0) * 1000)
+  if (wordSelectionStartsAt && Date.now() < wordSelectionStartsAt) {
+    throw new HttpsError('failed-precondition', 'Word vote has not started')
+  }
 
   await roundRef.update({ [`wordVotes.${uid}`]: wordIndex })
 
@@ -374,7 +408,26 @@ export const fowlWordsFinalizeWordSelection = onCall(async (request) => {
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
   const { gameId, roundNum } = request.data as { gameId: string; roundNum: number }
-  await finalizeWordSelection(gameId, roundNum)
+  const firestore = db()
+  const gameSnap = await firestore.collection('games').doc(gameId).get()
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+  await finalizeWordSelection(gameId, roundNum, { allowEarly: gameSnap.data()!.hostId === uid })
+})
+
+// -- SKIP WORD PRIVACY HANDOFF (host only) --
+export const fowlWordsSkipWordSelectionPrivacyHandoff = onCall(async (request) => {
+  const uid = request.auth?.uid
+  if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
+
+  const { gameId, roundNum } = request.data as { gameId: string; roundNum: number }
+  const firestore = db()
+  const gameSnap = await firestore.collection('games').doc(gameId).get()
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+  if (gameSnap.data()!.hostId !== uid) {
+    throw new HttpsError('permission-denied', 'Only host can skip the privacy handoff')
+  }
+
+  await skipWordSelectionPrivacyHandoff(gameId, roundNum)
 })
 
 // -- BEGIN CLUE SUBMISSION (after selected-word spotlight) --

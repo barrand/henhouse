@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { normalizeGuess, fuzzyMatch } from '../gemini'
+import { normalizeGuess, fuzzyMatch, detectDuplicateClues } from '../gemini'
 
 describe('normalizeGuess', () => {
   it('lowercases the string', () => {
@@ -85,5 +85,22 @@ describe('fuzzyMatch', () => {
 
     // Words that are substrings
     expect(fuzzyMatch('cat', 'catalog')).toBe(false)
+  })
+})
+
+describe('detectDuplicateClues', () => {
+  it('groups singular, plural, and common conjugations before reveal', async () => {
+    await expect(detectDuplicateClues('omelet', {
+      alice: 'Fold',
+      bob: 'FOLDED',
+      carol: 'folds',
+      dave: 'chef',
+    })).resolves.toMatchObject({
+      groups: expect.arrayContaining([
+        expect.arrayContaining(['alice', 'bob', 'carol']),
+        ['dave'],
+      ]),
+      reason: 'Exact match + common variations detected (no Gemini)',
+    })
   })
 })

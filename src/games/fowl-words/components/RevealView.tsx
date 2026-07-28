@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type KeyboardEvent, type PointerEvent } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
 import { submitGuess, unlockFirst, advanceRound, submitCluePeerLoveVote, submitCluePeerBooVote } from '../service'
 import PointCounter from './PointCounter'
@@ -42,6 +42,7 @@ export default function RevealView({
   const [unlocking, setUnlocking] = useState(false)
   const [error, setError] = useState('')
   const [timeLeft, setTimeLeft] = useState(60)
+  const [isPeeking, setIsPeeking] = useState(false)
   const guessRef = useRef(guess)
   const autoSubmittedRef = useRef(false)
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({})
@@ -150,6 +151,27 @@ export default function RevealView({
     }
   }
 
+  const revealSecretWord = (event: PointerEvent<HTMLButtonElement>) => {
+    event.currentTarget.setPointerCapture(event.pointerId)
+    setIsPeeking(true)
+  }
+
+  const hideSecretWord = () => setIsPeeking(false)
+
+  const handlePeekKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === ' ' || event.key === 'Enter') {
+      event.preventDefault()
+      setIsPeeking(true)
+    }
+  }
+
+  const handlePeekKeyUp = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === ' ' || event.key === 'Enter') {
+      event.preventDefault()
+      setIsPeeking(false)
+    }
+  }
+
   const allDuplicates = visibleSet.size === 0 && round.clueGroups.length > 0
   const lockedDuplicateCount = round.clueGroups.filter((group, idx) => group.isDuplicate && !visibleSet.has(idx)).length
   const unlockedGroupIndex =
@@ -173,14 +195,34 @@ export default function RevealView({
     <main className="flex-1 flex flex-col px-4 py-4">
       <div className="max-w-md w-full mx-auto space-y-3">
         {!isGuesser && (
-          <div className="bg-primary-fixed border-2 border-primary-fixed-dim rounded-2xl px-4 py-3 text-center shadow-sm">
-            <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-primary-fixed-variant font-bold mb-0.5">
-              The secret word
-            </p>
-            <p className="font-headline text-3xl font-bold text-on-primary-fixed tracking-tight">
-              {round.secretWord}
-            </p>
-          </div>
+          <button
+            type="button"
+            onPointerDown={revealSecretWord}
+            onPointerUp={hideSecretWord}
+            onPointerCancel={hideSecretWord}
+            onLostPointerCapture={hideSecretWord}
+            onBlur={hideSecretWord}
+            onKeyDown={handlePeekKeyDown}
+            onKeyUp={handlePeekKeyUp}
+            aria-pressed={isPeeking}
+            className="w-full rounded-2xl border-2 border-outline-variant/60 bg-surface-container-low px-4 py-3 text-center touch-none select-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          >
+            <span className="flex items-center justify-center gap-2 text-secondary">
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">
+                {isPeeking ? 'visibility' : 'visibility_off'}
+              </span>
+              <span className="font-label text-[10px] uppercase tracking-[0.2em] font-bold">Secret word</span>
+            </span>
+            {isPeeking && round.secretWord ? (
+              <span className="block mt-2 font-headline text-3xl font-bold text-on-surface tracking-tight animate-hen-pop">
+                {round.secretWord}
+              </span>
+            ) : (
+              <span className="block mt-2 text-sm text-on-surface-variant font-body">
+                Press and hold to peek
+              </span>
+            )}
+          </button>
         )}
 
         <PointCounter currentAttempt={round.currentAttempt} maxAttempts={round.maxAttempts} compact={true} />

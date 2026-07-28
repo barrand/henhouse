@@ -37,6 +37,7 @@ export interface RoundData {
   selectedWordIndex?: number
   eligiblePlayerIds?: string[]
   eligiblePlayerCount?: number
+  wordSelectionStartsAt?: { seconds: number; nanoseconds: number }
   wordSelectionDeadline?: { seconds: number; nanoseconds: number }
   wordSelectedDeadline?: { seconds: number; nanoseconds: number }
   clueSubmissionDeadline?: { seconds: number; nanoseconds: number }

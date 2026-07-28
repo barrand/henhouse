@@ -8,6 +8,7 @@ import { setupPresence } from '../../../lib/presence'
 import { getEligiblePlayers, isCurrentPlayerWaiting } from '@shared/roundEligibility'
 import Lobby from '../components/Lobby'
 import GameHeader from '../components/GameHeader'
+import PrivacyHandoffView from '../components/PrivacyHandoffView'
 import WordSelectionView from '../components/WordSelectionView'
 import ClueSubmissionView from '../components/ClueSubmissionView'
 import DeduplicationView from '../components/DeduplicationView'
@@ -22,6 +23,7 @@ export default function Game() {
   const navigate = useNavigate()
   const [gameId, setGameId] = useState<string | null>(null)
   const [lookupError, setLookupError] = useState('')
+  const [completedHandoffKey, setCompletedHandoffKey] = useState<string | null>(null)
 
   const { game, players, loading: gameLoading } = useGame(gameId)
   const round = useRound(gameId, game?.currentRound ?? null)
@@ -121,6 +123,15 @@ export default function Game() {
   if (game.status === 'abandoned') return null
 
   const isGuesser = game.currentGuesser === uid
+  const wordSelectionStartsAt = round?.wordSelectionStartsAt
+    ? round.wordSelectionStartsAt.seconds * 1000 + Math.floor(round.wordSelectionStartsAt.nanoseconds / 1_000_000)
+    : null
+  const handoffKey = round && wordSelectionStartsAt ? `${round.id}:${wordSelectionStartsAt}` : null
+  const isPrivacyHandoff = !!(
+    round?.status === 'word-selection'
+    && wordSelectionStartsAt
+    && completedHandoffKey !== handoffKey
+  )
 
   if (round && isWaitingForNextRound) {
     return (
@@ -136,6 +147,19 @@ export default function Game() {
           </div>
         </main>
       </div>
+    )
+  }
+
+  if (round && isPrivacyHandoff) {
+    const guesserName = players.find((player) => player.id === game.currentGuesser)?.name ?? 'Guesser'
+    return (
+      <PrivacyHandoffView
+        game={game}
+        round={round}
+        guesserName={guesserName}
+        isHost={isHost}
+        onComplete={() => setCompletedHandoffKey(handoffKey)}
+      />
     )
   }
 

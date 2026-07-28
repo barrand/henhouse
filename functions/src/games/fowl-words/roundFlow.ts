@@ -30,8 +30,16 @@ import type { ClueGroup } from './types'
 
 const db = admin.firestore
 const SECONDS_PER_CLUE_SUBMISSION = 60
-const WORD_SELECTION_SECONDS = 15
+export const WORD_SELECTION_SECONDS = 15
+export const WORD_SELECTION_PRIVACY_SECONDS = 4
 const WORD_SELECTED_SPOTLIGHT_MS = 2500
+
+function timestampMillis(timestamp: unknown): number | undefined {
+  if (!timestamp || typeof timestamp !== 'object') return undefined
+  const value = timestamp as { toMillis?: () => number; seconds?: number }
+  if (typeof value.toMillis === 'function') return value.toMillis()
+  return typeof value.seconds === 'number' ? value.seconds * 1000 : undefined
+}
 
 // Timer decreases with each attempt to keep game paced (shorter time as more clues visible)
 function getSecondsForAttempt(attemptNum: number): number {
@@ -48,7 +56,11 @@ function getSecondsForAttempt(attemptNum: number): number {
  * All vote tallying and the secretWord write happen inside the transaction so
  * clients never see the selected-word spotlight without the secret word present.
  */
-export async function finalizeWordSelection(gameId: string, roundNum: number): Promise<void> {
+export async function finalizeWordSelection(
+  gameId: string,
+  roundNum: number,
+  options: { allowEarly?: boolean } = {},
+): Promise<void> {
   const firestore = db()
   const gameRef = firestore.collection('games').doc(gameId)
   const roundRef = firestore
@@ -67,6 +79,16 @@ export async function finalizeWordSelection(gameId: string, roundNum: number): P
     const wordOptions: string[] = data.wordOptions ?? []
     const wordVotes: Record<string, number> = data.wordVotes ?? {}
     const eligibleVoterSet = new Set(eligibleNonGuesserIds(data, game))
+    const wordSelectionStartsAt = timestampMillis(data.wordSelectionStartsAt)
+    const wordSelectionDeadline = timestampMillis(data.wordSelectionDeadline)
+    if (wordSelectionStartsAt && Date.now() < wordSelectionStartsAt) return
+
+    const eligibleVoteCount = Object.keys(wordVotes)
+      .filter((playerId) => eligibleVoterSet.has(playerId))
+      .length
+    const allEligibleVoted = eligibleVoterSet.size > 0 && eligibleVoteCount >= eligibleVoterSet.size
+    const deadlinePassed = !wordSelectionDeadline || Date.now() >= wordSelectionDeadline
+    if (!options.allowEarly && !allEligibleVoted && !deadlinePassed) return
 
     // Tally votes
     const tally = [0, 0, 0]
@@ -94,6 +116,25 @@ export async function finalizeWordSelection(gameId: string, roundNum: number): P
       cluesByPlayer: {},
       clueTimestamps: {},
       clueSubmissionDeadline: FieldValue.delete(),
+    })
+  })
+}
+
+export async function skipWordSelectionPrivacyHandoff(gameId: string, roundNum: number): Promise<void> {
+  const firestore = db()
+  const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
+
+  await firestore.runTransaction(async (tx) => {
+    const snap = await tx.get(roundRef)
+    if (!snap.exists || snap.data()?.status !== 'word-selection') return
+
+    const now = Date.now()
+    const wordSelectionStartsAt = timestampMillis(snap.data()?.wordSelectionStartsAt)
+    if (wordSelectionStartsAt && now >= wordSelectionStartsAt) return
+
+    tx.update(roundRef, {
+      wordSelectionStartsAt: Timestamp.fromMillis(now),
+      wordSelectionDeadline: Timestamp.fromMillis(now + WORD_SELECTION_SECONDS * 1000),
     })
   })
 }
@@ -528,13 +569,17 @@ export async function advanceToNextRound(gameId: string): Promise<void> {
       : 0
     const nextGuesser = playerIds[nextGuesserIdx]
 
-    const wordSelectionDeadline = Timestamp.fromMillis(Date.now() + WORD_SELECTION_SECONDS * 1000)
+    const wordSelectionStartsAt = Timestamp.fromMillis(Date.now() + WORD_SELECTION_PRIVACY_SECONDS * 1000)
+    const wordSelectionDeadline = Timestamp.fromMillis(
+      wordSelectionStartsAt.toMillis() + WORD_SELECTION_SECONDS * 1000,
+    )
 
     const batch = firestore.batch()
     batch.set(gameRef.collection('rounds').doc(String(nextRoundNum)), {
       secretWord: '',           // set after word selection
       wordOptions,
       wordVotes: {},
+      wordSelectionStartsAt,
       wordSelectionDeadline,
       status: 'word-selection',
       currentAttempt: 1,
