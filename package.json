@@ -7,6 +7,7 @@
     "dev": "vite",
     "dev:local": "./dev.sh",
     "bots": "node tools/bots/index.mjs",
+    "validate:jev": "node tools/jev-validation/index.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

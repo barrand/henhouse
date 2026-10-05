@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "clueValidation": [
+    { "id": "clue-valid-rainbow", "clue": "rainbow", "secret": "pumpkin", "expected": "accept", "critical": true },
+    { "id": "clue-joined-icecream", "clue": "icecream", "secret": "pumpkin", "expected": "reject-joined", "critical": true },
+    { "id": "clue-secret-plural", "clue": "pumpkins", "secret": "pumpkin", "expected": "reject-secret", "critical": true },
+    { "id": "clue-secret-synonym", "clue": "squash", "secret": "pumpkin", "expected": "accept", "critical": true },
+    { "id": "clue-symbol", "clue": "ice-cream", "secret": "pumpkin", "expected": "reject-shape", "critical": false }
+  ],
+  "guessEvaluation": [
+    { "id": "guess-exact", "guess": "pumpkin", "secret": "pumpkin", "expected": true, "critical": true },
+    { "id": "guess-plural", "guess": "pumpkins", "secret": "pumpkin", "expected": true, "critical": true },
+    { "id": "guess-related", "guess": "squash", "secret": "pumpkin", "expected": false, "critical": true },
+    { "id": "guess-category-neighbor", "guess": "beach", "secret": "ocean", "expected": false, "critical": true }
+  ],
+  "flockRounds": [
+    {
+      "id": "flock-basic",
+      "answers": { "p1": "dog", "p2": "dogs", "p3": "cat", "p4": "dog" },
+      "groups": [["dog", "dogs"], ["cat"]],
+      "expectedPoints": { "p1": 1, "p2": 1, "p3": -1, "p4": 1 },
+      "expectedResults": { "p1": "flock", "p2": "flock", "p3": "rotten", "p4": "flock" }
+    },
+    {
+      "id": "flock-tie",
+      "answers": { "p1": "tea", "p2": "coffee", "p3": "tea", "p4": "coffee" },
+      "groups": [["tea"], ["coffee"]],
+      "expectedPoints": { "p1": 0, "p2": 0, "p3": 0, "p4": 0 },
+      "expectedResults": { "p1": "outlier", "p2": "outlier", "p3": "outlier", "p4": "outlier" }
+    },
+    {
+      "id": "flock-rotten",
+      "answers": { "p1": "pizza", "p2": "pizza", "p3": "pasta", "p4": "sushi" },
+      "groups": [["pizza"], ["pasta"], ["sushi"]],
+      "expectedPoints": { "p1": 1, "p2": 1, "p3": 0, "p4": 0 },
+      "expectedResults": { "p1": "flock", "p2": "flock", "p3": "outlier", "p4": "outlier" }
+    }
+  ]
+}
