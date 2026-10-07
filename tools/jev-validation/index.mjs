@@ -38,6 +38,19 @@ if (args['self-test'] === 'fail') {
   checks.push({ id: 'intentional-missing-prerequisite', status: 'incomplete', message: 'intentional missing prerequisite' })
 } else if (!validPhases.has(phase)) {
   checks.push({ id: 'phase', status: 'fail', message: 'unsupported phase: ' + phase })
+} else if (phase === 'S0') {
+  const firebase = await resolveCommand('firebase')
+  const java = await resolveCommand('java')
+  await check('s0-experiment-boundary', async () => {
+    if (!firebase || !java) return { status: 'incomplete', message: 'Firebase CLI and Java are required for S0 emulator evidence' }
+    if ((await run(java, ['-version'], { cwd: rootDir })).code !== 0) return { status: 'incomplete', message: 'Java is unavailable; Firestore emulator cannot start' }
+    assertLoopback(process.env.JEV_EMULATOR_HOST ?? '127.0.0.1')
+    const scenario = path.join(rootDir, 'tools', 'jev-validation', 'scenarios', 's0-actors.mjs')
+    const command = '"' + process.execPath + '" "' + scenario + '"'
+    const result = await run(firebase, ['emulators:exec', '--only', 'auth,firestore,functions', '--project', 'flock-together-game', command], { cwd: rootDir, env: { JEV_EMULATOR_HOST: '127.0.0.1' }, timeoutMs: 240000 })
+    if (result.code !== 0) throw new Error('S0 emulator scenario failed: ' + shortOutput(result))
+    return 'admission, immutable room metadata, protected config, joining, and disabled rematch passed'
+  })
 } else if (phase !== 'foundation') {
   checks.push({ id: 'phase-scope', status: 'incomplete', message: phase + ' validation is not implemented; complete the foundation phase first' })
 } else {
