@@ -18,7 +18,7 @@ export function reportStatus(checks) {
       : 'pass'
 }
 
-export async function createReport({ rootDir, phase, profile, fixtureVersion, checks }) {
+export async function createReport({ rootDir, phase, profile, fixtureVersion, checks, events = [] }) {
   const runId = `${nowId()}-${process.pid}`
   const runDir = path.join(rootDir, 'validation-runs', 'jev', runId)
   await mkdir(runDir, { recursive: true })
@@ -35,6 +35,7 @@ export async function createReport({ rootDir, phase, profile, fixtureVersion, ch
   }
   const redacted = JSON.stringify(report, null, 2)
   await writeFile(path.join(runDir, 'report.json'), redacted, 'utf8')
+  await writeFile(path.join(runDir, 'events.jsonl'), events.map((event) => JSON.stringify(event)).join('\n') + (events.length ? '\n' : ''), 'utf8')
   const summary = [
     `# Jev validation: ${phase}`,
     '',

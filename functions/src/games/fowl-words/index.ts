@@ -24,6 +24,7 @@ import {
   guesserMostHelpfulFromRound,
   guesserBooFromRound,
 } from './voteHelpers'
+import { experimentForCreation, requireExperimentRematch } from '../../shared/aiExperiment'
 
 const db = admin.firestore
 
@@ -51,14 +52,17 @@ export const fowlWordsCreateGame = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
-  const { playerName, includePatrioticQuestions = false } = request.data as {
+  const { playerName, includePatrioticQuestions = false, experimental = false } = request.data as {
     playerName: string
     includePatrioticQuestions?: boolean
+    experimental?: boolean
   }
   if (!playerName?.trim()) throw new HttpsError('invalid-argument', 'Name required')
   if (typeof includePatrioticQuestions !== 'boolean') {
     throw new HttpsError('invalid-argument', 'includePatrioticQuestions must be a boolean')
   }
+  if (typeof experimental !== 'boolean') throw new HttpsError('invalid-argument', 'experimental must be a boolean')
+  const aiExperiment = await experimentForCreation(uid, experimental)
 
   const firestore = db()
   const gameRef = firestore.collection('games').doc()
@@ -83,6 +87,7 @@ export const fowlWordsCreateGame = onCall(async (request) => {
     playerIds: [uid],
     settings: { totalRounds: TOTAL_ROUNDS, secondsPerRound: 60, autoAdvanceSeconds: 10 },
     includePatrioticQuestions,
+    aiExperiment,
   })
 
   await gameRef.collection('players').doc(uid).set({
@@ -124,6 +129,7 @@ export const fowlWordsRematch = onCall(async (request) => {
   await releaseRoomCode(game.code)
 
   const includePatrioticQuestions = game.includePatrioticQuestions ?? false
+  const aiExperiment = await requireExperimentRematch(uid, game.aiExperiment)
 
   await newGameRef.set({
     code: newCode,
@@ -137,6 +143,7 @@ export const fowlWordsRematch = onCall(async (request) => {
     playerIds: game.playerIds,
     settings: game.settings,
     includePatrioticQuestions,
+    aiExperiment,
   })
 
   const batch = firestore.batch()

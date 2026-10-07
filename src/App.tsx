@@ -22,6 +22,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/jev" element={<Home experimental />} />
       {FlockPreview && (
         <>
           <Route

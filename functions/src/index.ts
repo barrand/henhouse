@@ -2,11 +2,16 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import { onValueWritten } from 'firebase-functions/v2/database'
 import * as admin from 'firebase-admin'
 import { FieldValue } from 'firebase-admin/firestore'
+import { sanitizedExperimentCapabilities } from './shared/aiExperiment'
 
 admin.initializeApp()
 
 const db = admin.firestore()
 
+export const jevExperimentCapabilities = onCall(async (request) => {
+  if (!request.auth?.uid) throw new HttpsError('unauthenticated', 'Must be signed in')
+  return sanitizedExperimentCapabilities(request.auth.uid)
+})
 // ── Shared: Join Game ─────────────────────────────────────────────────────────
 // joinGame is shared across all games — it looks up the room, adds the player,
 // and returns gameType so the frontend routes to the correct game module.

@@ -7,6 +7,7 @@ import { drawQuestion, seedQuestionPool, questionKey } from './questions'
 import { claimRoomCode, releaseRoomCode } from '../../shared/roomCodes'
 import { normalizeAnswer, fallbackGrouping, validateGeminiGroups } from '../../shared/normalizeAnswer'
 import { getRoundEligiblePlayerIds, isRoundEligible } from '../../shared/roundEligibility'
+import { experimentForCreation, requireExperimentRematch } from '../../shared/aiExperiment'
 
 const db = admin.firestore()
 const TOTAL_ROUNDS = 10
@@ -20,14 +21,17 @@ export const flockCreateGame = onCall(async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
-  const { playerName, includePatrioticQuestions = false } = request.data as {
+  const { playerName, includePatrioticQuestions = false, experimental = false } = request.data as {
     playerName: string
     includePatrioticQuestions?: boolean
+    experimental?: boolean
   }
   if (!playerName?.trim()) throw new HttpsError('invalid-argument', 'Name required')
   if (typeof includePatrioticQuestions !== 'boolean') {
     throw new HttpsError('invalid-argument', 'includePatrioticQuestions must be a boolean')
   }
+  if (typeof experimental !== 'boolean') throw new HttpsError('invalid-argument', 'experimental must be a boolean')
+  const aiExperiment = await experimentForCreation(uid, experimental)
 
   const gameRef = db.collection('games').doc()
   const gameId = gameRef.id
@@ -50,6 +54,7 @@ export const flockCreateGame = onCall(async (request) => {
     playerIds: [uid],
     settings: { totalRounds: TOTAL_ROUNDS, secondsPerRound: 45, autoAdvanceSeconds: 10 },
     includePatrioticQuestions,
+    aiExperiment,
   })
 
   await gameRef.collection('players').doc(uid).set({
@@ -72,6 +77,7 @@ export const flockRematch = onCall(async (request) => {
 
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
+  const aiExperiment = await requireExperimentRematch(uid, game.aiExperiment)
   if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can start a rematch')
   if (game.status !== 'finished') throw new HttpsError('failed-precondition', 'Game is not finished')
 
@@ -103,6 +109,7 @@ export const flockRematch = onCall(async (request) => {
     playerIds: game.playerIds,
     settings: { ...(game.settings ?? {}), totalRounds: TOTAL_ROUNDS },
     includePatrioticQuestions: game.includePatrioticQuestions ?? false,
+    aiExperiment,
   })
 
   // Copy all players into the new game with reset scores

@@ -10,7 +10,7 @@ function errorMessage(err: unknown, fallback: string) {
   return err instanceof Error ? err.message : fallback
 }
 
-export default function Home() {
+export default function Home({ experimental = false }: { experimental?: boolean }) {
   const { loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [name, setName] = useState(() => localStorage.getItem('playerName') ?? '')
@@ -40,7 +40,7 @@ export default function Home() {
     setError('')
     setCreatingFlock(true)
     try {
-      const { code } = await flockCreateGame(name.trim(), includePatrioticQuestions)
+      const { code } = await flockCreateGame(name.trim(), includePatrioticQuestions, experimental)
       navigate(`/flock/${code}`)
     } catch (err: unknown) {
       setError(errorMessage(err, 'Failed to create game'))
@@ -54,7 +54,7 @@ export default function Home() {
     setError('')
     setCreatingFowlWords(true)
     try {
-      const { code } = await fowlWordsCreateGame(name.trim(), includePatrioticQuestions)
+      const { code } = await fowlWordsCreateGame(name.trim(), includePatrioticQuestions, experimental)
       navigate(`/fowl-words/${code}`)
     } catch (err: unknown) {
       setError(errorMessage(err, 'Failed to create game'))
@@ -123,6 +123,7 @@ export default function Home() {
             HENHOUSE
           </h1>
           <p className="text-on-surface-variant font-body text-sm">Party games for the whole flock</p>
+          {experimental && <p className="mt-3 inline-flex rounded-full bg-primary-fixed px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.14em] text-on-primary-fixed-variant">Experimental Jev Mode · server admission required</p>}
         </div>
 
         {/* Name */}

@@ -10,8 +10,13 @@ service cloud.firestore {
 
     match /games/{gameId} {
       allow read: if request.auth != null;
-      allow update: if request.auth.uid == resource.data.hostId;
+      allow update: if request.auth.uid == resource.data.hostId
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['aiExperiment']);
       allow create, delete: if false;
+    }
+
+    match /aiExperimentConfig/{configId} {
+      allow read, write: if false;
     }
 
     match /games/{gameId}/players/{playerId} {
