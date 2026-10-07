@@ -77,9 +77,9 @@ export const flockRematch = onCall(async (request) => {
 
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
-  const aiExperiment = await requireExperimentRematch(uid, game.aiExperiment)
   if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can start a rematch')
   if (game.status !== 'finished') throw new HttpsError('failed-precondition', 'Game is not finished')
+  const aiExperiment = await requireExperimentRematch(uid, game.aiExperiment)
 
   // Get all players from the finished game
   const playersSnap = await gameRef.collection('players').get()
