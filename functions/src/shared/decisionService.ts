@@ -8,9 +8,14 @@ export interface AnswerPairInput { id: string; question: string; left: string; r
 export interface AnswerPairDecision { id: string; sameMeaning: boolean; metadata: DecisionMetadata }
 type Client = Pick<TypeSafeClient, 'systemOne'>
 
-function getClient(): Client {
-  const apiKey = process.env.TYPESAFE_API_KEY?.trim()
+export function requireTypesafeApiKey(environment: NodeJS.ProcessEnv = process.env): string {
+  const apiKey = environment.TYPESAFE_API_KEY?.trim()
   if (!apiKey) throw new Error('TYPESAFE_API_KEY is not configured on the server')
+  return apiKey
+}
+
+function getClient(): Client {
+  const apiKey = requireTypesafeApiKey()
   return new TypeSafeClient({ apiKey, defaultModel: process.env.JEV_DEFAULT_MODEL?.trim() || JEV_MODEL, timeout: 1500, retry: { maxRetries: 1, httpStatuses: new Set([429, 529]), apiTimeoutError: false }, logLevel: 'off' })
 }
 

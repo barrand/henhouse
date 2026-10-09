@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DecisionService } from '../decisionService'
+import { DecisionService, requireTypesafeApiKey } from '../decisionService'
 
 function serviceFor(answers: Record<string, unknown>) {
   return new DecisionService(() => ({
@@ -28,5 +28,9 @@ describe('DecisionService', () => {
       correct: { type: 'choice', choice: 'unknown', confidence: 0.9, probabilities: { correct: 0.9, incorrect: 0.1 } },
     })
     await expect(service.evaluateFowlWordsGuess({ secretWord: 'pumpkin', guess: 'squash' })).rejects.toThrow('Malformed Jev guess response')
+  })
+
+  it('fails before any request when the TypeSafe key is missing', () => {
+    expect(() => requireTypesafeApiKey({})).toThrow('TYPESAFE_API_KEY is not configured on the server')
   })
 })

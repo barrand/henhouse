@@ -51,6 +51,33 @@ if (args['self-test'] === 'fail') {
     if (result.code !== 0) throw new Error('S0 emulator scenario failed: ' + shortOutput(result))
     return 'admission, immutable room metadata, protected config, joining, and disabled rematch passed'
   })
+} else if (phase === 'S1') {
+  const npm = await resolveCommand('npm')
+  await check('s1-secret-binding', async () => {
+    const source = await readFile(path.join(rootDir, 'functions', 'src', 'index.ts'), 'utf8')
+    if (!source.includes("defineSecret('TYPESAFE_API_KEY')")) throw new Error('TYPESAFE_API_KEY secret parameter is missing')
+    if (!source.includes('onCall({ secrets: [typesafeApiKey] }')) throw new Error('Jev contract callable is not bound to TYPESAFE_API_KEY')
+    if (!source.includes('await requireJevOperation(uid, \'clue\')')) throw new Error('Jev contract callable is not admission-gated')
+    return 'secret parameter, callable binding, and admission gate are present'
+  })
+  await check('s1-offline-credential-handling', async () => {
+    if (!npm) return { status: 'incomplete', message: 'npm is unavailable' }
+    const build = await run(npm, ['--prefix', 'functions', 'run', 'build'], { cwd: rootDir, timeoutMs: 180000 })
+    if (build.code !== 0) throw new Error('functions build failed: ' + shortOutput(build))
+    const tests = await run(npm, ['--prefix', 'functions', 'test'], { cwd: rootDir, timeoutMs: 180000 })
+    if (tests.code !== 0) throw new Error('functions tests failed: ' + shortOutput(tests))
+    return 'functions build and missing-key/redaction unit tests passed'
+  })
+  if (profile !== 'offline') {
+    await check('live-typesafe-contract', async () => {
+      if (!process.env.TYPESAFE_API_KEY?.trim()) return { status: 'incomplete', message: 'TYPESAFE_API_KEY is not present in this validation process' }
+      const modulePath = path.join(rootDir, 'functions', 'lib', 'shared', 'jevLiveContract.js')
+      const { runJevLiveContractCheck } = await import(modulePath)
+      const result = await runJevLiveContractCheck()
+      if (result.model !== 'jev-1.13.0' || !Number.isFinite(result.latencyMs) || result.latencyMs < 0) throw new Error('live response did not satisfy the pinned-model metadata contract')
+      return 'authenticated Jev response validated: model=' + result.model + ', latencyMs=' + result.latencyMs
+    })
+  }
 } else if (phase !== 'foundation') {
   checks.push({ id: 'phase-scope', status: 'incomplete', message: phase + ' validation is not implemented; complete the foundation phase first' })
 } else {
@@ -135,7 +162,7 @@ if (args['self-test'] === 'fail') {
   })
 }
 
-if (profile !== 'offline') checks.push({ id: 'live-typesafe-contract', status: 'incomplete', message: 'live TypeSafe contract runner is not implemented in Phase 1 foundation' })
+if (phase === 'foundation' && profile !== 'offline') checks.push({ id: 'live-typesafe-contract', status: 'incomplete', message: 'live TypeSafe contract runner is not implemented in Phase 1 foundation' })
 const report = await createReport({ rootDir, phase, profile, fixtureVersion: fixtures.version, checks, events })
 process.stdout.write(report.summaryPath + '\n')
 process.exitCode = report.status === 'pass' ? 0 : report.status === 'incomplete' ? 2 : 1

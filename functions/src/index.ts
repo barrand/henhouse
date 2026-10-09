@@ -1,16 +1,33 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import { onValueWritten } from 'firebase-functions/v2/database'
+import { defineSecret } from 'firebase-functions/params'
 import * as admin from 'firebase-admin'
 import { FieldValue } from 'firebase-admin/firestore'
-import { sanitizedExperimentCapabilities } from './shared/aiExperiment'
+import { requireJevOperation, sanitizedExperimentCapabilities } from './shared/aiExperiment'
+import { runJevLiveContractCheck } from './shared/jevLiveContract'
 
 admin.initializeApp()
 
 const db = admin.firestore()
+const typesafeApiKey = defineSecret('TYPESAFE_API_KEY')
 
 export const jevExperimentCapabilities = onCall(async (request) => {
   if (!request.auth?.uid) throw new HttpsError('unauthenticated', 'Must be signed in')
   return sanitizedExperimentCapabilities(request.auth.uid)
+})
+
+// Not used by gameplay. This can only be invoked by an admitted host while the
+// clue operation is enabled, and its only response is redacted request metadata.
+export const jevLiveContractCheck = onCall({ secrets: [typesafeApiKey] }, async (request) => {
+  const uid = request.auth?.uid
+  if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
+  await requireJevOperation(uid, 'clue')
+  try {
+    return await runJevLiveContractCheck()
+  } catch (error) {
+    console.error('Jev live contract check failed', { message: error instanceof Error ? error.message : 'unknown error' })
+    throw new HttpsError('unavailable', 'Jev contract check could not complete')
+  }
 })
 // ── Shared: Join Game ─────────────────────────────────────────────────────────
 // joinGame is shared across all games — it looks up the room, adds the player,
