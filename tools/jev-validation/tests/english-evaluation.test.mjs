@@ -2,6 +2,59 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { aliasMatch, assertExperimentBudget, metrics, prediction, sweep, trace, validateCorpus } from '../lib/english-evaluation.mjs'
 import { diagnosticCases, openHoldout, aliasCards } from '../fixtures/english-experiment.mjs'
+import { developmentReview, supplementalCases } from '../fixtures/english-review.mjs'
+import { reviewPredictions } from '../lib/english-review.mjs'
+import { supplementalResults, supplementalThresholds } from '../lib/english-supplemental.mjs'
+
+test('supplemental comparison pins thresholds and never pools away original errors',()=>{
+  const original=[row('old',true,.1,{candidate:'grounded',split:'development'})]
+  const current=supplementalCases.map(c=>row(c.id,c.expected,c.expected?.99:.01,{...c,candidate:'grounded'}))
+  const result=supplementalResults(current,original).find(r=>r.candidate==='grounded')
+  assert.deepEqual(supplementalThresholds,{baseline:.51,grounded:.64})
+  assert.equal(result.original.fn,1)
+  assert.equal(result.supplemental.fn,0)
+  assert.equal(result.supplemental.cases,22)
+  assert.equal(result.disputed.length,2)
+  assert.equal(result.promotionEligible,false)
+})
+
+test('representativeness review preserves all development labels and disputed flags',()=>{
+  const cases=diagnosticCases()
+  assert.equal(developmentReview.length,240)
+  for(const source of cases) {
+    const review=developmentReview.find(row=>row.id===source.id)
+    assert.equal(review.expected,source.expected)
+    assert.equal(review.ambiguous,source.ambiguous)
+  }
+  for(const [secret,guess,bucket] of [['candy','sweets','ordinary-language'],['candy','confectionery','specialist-name'],['moon','natural satellite','specialist-name'],['refrigerator','refrigerating appliance','descriptive-phrase']]) {
+    const reviewed=developmentReview.find(row=>row.secret===secret&&row.guess===guess)
+    assert.equal(reviewed.expected,true);assert.equal(reviewed.ambiguous,false);assert.equal(reviewed.bucket,bucket)
+  }
+})
+
+test('review replay keeps original metrics, cannot promote, and rejects label drift',()=>{
+  const cases=diagnosticCases().map((c,i)=>row(c.id,c.expected,i%2?.1:.99,{...c}))
+  const before=structuredClone(cases)
+  const reviewed=reviewPredictions(cases,.64)
+  assert.deepEqual(reviewed.original,metrics(cases,.64))
+  assert.equal(reviewed.promotionEligible,false)
+  assert.deepEqual(cases,before)
+  assert.equal(Object.values(reviewed.byBucket).reduce((n,m)=>n+m.cases,0),236)
+  assert.throws(()=>reviewPredictions([{...cases[0],expected:false}],.64),/does not match/)
+})
+
+test('supplemental probes are unmeasured development data with no holdout family leakage',()=>{
+  assert.equal(supplementalCases.length,24)
+  assert.equal(supplementalCases.filter(row=>row.expected).length,12)
+  assert.equal(supplementalCases.filter(row=>row.ambiguous).length,2)
+  const heldTerms=new Set(openHoldout().map(row=>row.secret))
+  for(const probe of supplementalCases) {
+    assert.equal(probe.status,'not-measured')
+    assert.ok(probe.definition?.trim())
+    assert.equal(heldTerms.has(probe.secret),false)
+    assert.equal(heldTerms.has(probe.guess),false)
+  }
+})
 
 const row = (id,expected,p,extra={}) => ({id,secret:'bicycle',guess:'bike',expected,critical:true,ambiguous:false,category:'test',local:{decision:null,reason:'semantic-required'},providerCalled:true,choice:p>=.5?'correct':'incorrect',probability:p,latencyMs:100,...extra})
 test('corpus is balanced and concepts/reversed pairs remain isolated',()=>{

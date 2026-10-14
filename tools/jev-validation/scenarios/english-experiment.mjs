@@ -4,6 +4,8 @@ import path from 'node:path'
 import { aliasCards, developmentCards, diagnosticCases, openHoldout, labelHistory, disputedLocalRules } from '../fixtures/english-experiment.mjs'
 import { aliasMatch, assertExperimentBudget, comparisonMarkdown, hash, metrics, sweep, trace, validateCorpus } from '../lib/english-evaluation.mjs'
 import { evidenceFingerprint } from '../lib/report.mjs'
+import { supplementalCases } from '../fixtures/english-review.mjs'
+import { supplementalThresholds, supplementalResults, supplementalMarkdown } from '../lib/english-supplemental.mjs'
 const root = path.resolve(import.meta.dirname, '../../..')
 const require = createRequire(path.join(root, 'functions/package.json'))
 const { DecisionService, JEV_MODEL } = require('./lib/shared/decisionService.js')
@@ -16,12 +18,15 @@ const heldForSchemaOnly = openHoldout()
 const coverage = validateCorpus(development,heldForSchemaOnly,aliasCards)
 const sealedHash = hash(heldForSchemaOnly)
 const command = process.argv.includes('--offline') ? 'offline' : 'live'
+const supplemental = process.argv.includes('--supplemental')
 const directory = path.join(root,'validation-runs/jev',new Date().toISOString().replace(/[-:.TZ]/g,'')+'-english-experiment')
 await mkdir(directory,{recursive:true})
 const evidence = await evidenceFingerprint(root)
 const rubricHash = hash(await readFile(path.join(root,'functions/src/shared/decisionService.ts'),'utf8'))
 const report = { status: 'incomplete', model: JEV_MODEL, coverage, evidence, rubricHash, aliasHash: hash(aliasCards), sealedHash, labelHistory, localAudit: disputedLocalRules.map(row => ({ ...row, currentRejects: isObviouslySameAsSecretWord(row.clue,row.secret) })), stages: [], limits: { perStageRequests: 1000, perStageTokens: 10_000_000, experimentRequests: 4000 }, requests: 0, inputTokens: 0, selection: null, heldOut: [] }
 const priorIndex=process.argv.indexOf('--prior')
+if (supplemental && priorIndex < 0) throw new Error('Supplemental run requires --prior for cumulative budgeting and original evidence')
+let historical = []
 if(priorIndex>=0) {
   const priorPath=path.resolve(process.argv[priorIndex+1])
   const prior=JSON.parse(await readFile(path.join(priorPath,'report.json'),'utf8'))
@@ -32,7 +37,20 @@ if(priorIndex>=0) {
     if(heldForSchemaOnly.some(row=>exposedFamilies.has(row.family))) throw new Error('New holdout must use unexposed concept families, not reworded old cases')
   }
   report.priorRun=priorPath; report.priorRequests=prior.requests
+  if (!Number.isInteger(prior.requests) || prior.requests < 0 || !Number.isInteger(prior.inputTokens) || prior.inputTokens < 0) throw new Error('Invalid prior budget counters')
+  report.priorInputTokens=prior.inputTokens
   report.requests=prior.requests;report.inputTokens=prior.inputTokens
+  if (supplemental) {
+    if (prior.heldOut?.length) throw new Error('Supplemental development must not follow exposure of this holdout')
+    report.originalDevelopmentRun=prior.originalDevelopmentRun ?? (prior.fixedThresholds ? prior.priorRun : priorPath)
+    historical=JSON.parse(await readFile(path.join(report.originalDevelopmentRun,'predictions.json'),'utf8'))
+    for (const candidate of Object.keys(supplementalThresholds)) {
+      if (historical.filter(row=>row.candidate===candidate&&row.split==='development').length!==240) throw new Error('Supplemental run requires complete original baseline and grounded development evidence')
+    }
+    if (supplementalCases.some(row=>!row.definition?.trim())) throw new Error('Supplemental meanings must be frozen before inference')
+    report.supplementalHash=hash(supplementalCases)
+    report.fixedThresholds=supplementalThresholds
+  }
 }
 const captured = []
 const requestEvents = []
@@ -44,6 +62,10 @@ async function save() {
   await writeFile(path.join(directory,'requests.jsonl'),requestEvents.map(event=>JSON.stringify(event)).join('\n'))
   await writeFile(path.join(directory,'resources.json'),JSON.stringify({aliases:aliasCards,developmentMeanings:developmentCards,model:JEV_MODEL,rubricHash,sealedHash},null,2))
   await writeFile(path.join(directory,'comparison.md'),comparisonMarkdown(report))
+  if (supplemental) {
+    await writeFile(path.join(directory,'supplemental.md'),supplementalMarkdown(report))
+    await writeFile(path.join(directory,'supplemental-fixtures.json'),JSON.stringify(supplementalCases,null,2))
+  }
   await writeFile(path.join(directory,'summary.md'), `# English decision experiment\n\nStatus: ${report.status}\n\n${report.reason ?? 'Experiment in progress.'}\n\nRequests: ${report.requests}\nInput tokens (successful responses): ${report.inputTokens}\n\n${report.stages.map(s => `- ${s.name}: ${s.status ?? 'recorded'}`).join('\n')}\n\nSelection: ${JSON.stringify(report.selection)}\n\nFull details: report.json and predictions.json\n`)
 }
 function stage(name) {
@@ -109,6 +131,22 @@ try {
       rescued.latencyMs=row.latencyMs+Date.now()-start
       return rescued
     }
+    if (supplemental) {
+      stage('supplemental-24-baseline-and-grounded')
+      // Save inputs, hashes, and operating points before any provider request.
+      await save()
+      for (const candidate of Object.keys(supplementalThresholds)) {
+        for (const fixture of supplementalCases) {
+          const row=await evaluate(fixture,candidate)
+          row.status='measured'
+          row.trace=trace(row,supplementalThresholds[candidate],false,[])
+          await save()
+        }
+      }
+      report.supplementalCandidates=supplementalResults(captured,historical)
+      report.reason='Supplemental development comparison complete; original development gates and independent validation still block promotion.'
+      report.stages.at(-1).status='complete'
+    } else {
     stage('screen-120')
     const screening = development.slice(0,120)
     const screens = {}
@@ -200,8 +238,9 @@ try {
       report.status=passing?'incomplete':'fail'
       report.reason=passing?'English semantic gates pass three executions. Multilingual gates and HTTP game validation still block FW-5 promotion.':'Frozen candidate failed an English held-out gate; preserve all results and obtain a fresh holdout before retuning.'
     }
+    }
     for(const row of captured) if(!row.trace) row.trace=trace(row,.75,false,aliasCards)
-    report.recommendation=report.selection ? 'Validate the frozen selection; English success alone does not authorize promotion.' : 'Prefer the grounded rubric for further development; keep gameplay unchanged because no configuration passes. Do not expand aliases to patch observed failures without a separately versioned review.'
+    report.recommendation=supplemental ? 'Use the recorded supplemental comparison to choose one targeted development experiment. Original development gates remain authoritative; no holdout or promotion decision is made here.' : report.selection ? 'Validate the frozen selection; English success alone does not authorize promotion.' : 'Prefer the grounded rubric for further development; keep gameplay unchanged because no configuration passes. Do not expand aliases to patch observed failures without a separately versioned review.'
     await save()
     process.stdout.write(JSON.stringify({directory,status:report.status,requests:report.requests,selection:report.selection,reason:report.reason})+'\n')
     process.exitCode=report.status==='fail'?1:2

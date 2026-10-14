@@ -27,6 +27,7 @@ npm run test:jev:english
 npm run experiment:jev:english -- --offline
 npm run experiment:jev:english
 npm run replay:jev:english -- validation-runs/jev/<english-run-id>
+npm run experiment:jev:english -- --supplemental --prior validation-runs/jev/<latest-live-run-id>
 ```
 
 The English runner compares current, simple, and meaning-grounded Jev rubrics on 120 diagnostic cases. It expands only the baseline and strongest challenger to 240 development cases, sweeps thresholds offline, and evaluates a fixed 30-secret alias resource separately. A bounded alternate-rubric rescue is tested only when remaining valid development guesses fall in the specified probability band. No candidate is wired to gameplay.
@@ -38,3 +39,7 @@ Live mode reads TYPESAFE_API_KEY from the process or functions/.env; it never re
 A new 400-case English holdout spans 100 secret families. Only schema/seal validation occurs before selection; no held-out inputs are sent to Jev until a passing development configuration is written to selection.json. Then three independent executions run, preserving failures. Retuning through --prior rejects reuse of exposed holdout families. A passing English experiment remains incomplete for FW-5 until multilingual and HTTP/browser game gates pass.
 
 Artifacts include report.json, predictions.json with decision-stage traces, comparison.md, resources.json, requests.jsonl (request bodies and timing, never headers/credentials), and selection.json only if a development winner exists. Replay creates a new analysis directory, preserves source evidence, and makes zero API calls. Alias latency figures in development are offline projections from captured calls, not measured latency savings. Development rescue timing sums recorded first-call duration and a live rescue; held-out rescue executes sequentially under one shared deadline.
+
+Replay also writes representativeness.json and representativeness.md. This development-only review preserves original labels, exclusions, and diagnostic thresholds; it refuses saved cases that do not match the reviewed corpus. Buckets describe language style, not measured player frequency, and cannot authorize promotion. The review includes 24 additional, unmeasured development probes; these are not automatically sent to Jev or merged into the original balanced corpus. Policy-disputed probes remain explicitly marked. Technical/descriptive answers are retained, not dismissed as invalid tests.
+
+`--supplemental` explicitly measures those 24 probes using the existing baseline/grounded rubrics at fixed diagnostic thresholds 0.51/0.64. Reviewed meanings and fixture/source hashes are saved before inference. A `--prior` live run is mandatory for cumulative budgeting; use the latest live run so later calls remain counted. Original 240-case results are loaded separately, never pooled with the supplemental regression repeat. This mode uses no aliases, rescue, threshold sweep, selection, or held-out inference. Two disputed cases are recorded but unscored. Artifacts add supplemental-fixtures.json and supplemental.md; status remains incomplete for migration even if all supplemental cases pass.

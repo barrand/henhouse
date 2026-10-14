@@ -11,6 +11,7 @@ import GameHeader from '../components/GameHeader'
 import QuestionDisplay from '../components/QuestionDisplay'
 import RevealBoard from '../components/RevealBoard'
 import Scoreboard from '../components/Scoreboard'
+import { forceEndRound } from '../service'
 
 export default function Game() {
   const { code } = useParams<{ code: string }>()
@@ -25,6 +26,11 @@ export default function Game() {
   const isHost = useIsHost(game?.hostId, uid)
   const eligiblePlayers = getEligiblePlayers(round, players)
   const isWaitingForNextRound = isCurrentPlayerWaiting(round, uid)
+  useEffect(() => {
+    if (!gameId || !isHost || game?.aiExperiment?.mode !== 'jev' || round?.status !== 'revealing') return
+    const timer = setInterval(() => { void forceEndRound(gameId).catch(() => {}) }, 3000)
+    return () => clearInterval(timer)
+  }, [gameId, isHost, game?.aiExperiment?.mode, round?.status])
 
   useEffect(() => {
     if (!code) return

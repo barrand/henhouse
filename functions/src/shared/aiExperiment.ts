@@ -1,11 +1,12 @@
 import { HttpsError } from 'firebase-functions/v2/https'
 import * as admin from 'firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
+import { JEV_PLAYTEST_VERSION } from './jevPlaytest'
 
 export type AiExperimentMode = 'legacy' | 'shadow' | 'jev'
 export type JevOperation = 'clue' | 'guess' | 'grouping'
 export interface AiExperiment { mode: AiExperimentMode; model: string; configVersion: string; enabledAt: Timestamp }
-export const JEV_CONFIG_VERSION = 'jev-v1'
+export const JEV_CONFIG_VERSION = JEV_PLAYTEST_VERSION
 const JEV_MODEL = 'jev-1.13.0'
 
 function legacyExperiment(): AiExperiment {

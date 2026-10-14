@@ -8,6 +8,6 @@ export function acceptsJevClue(decision: ClueDecision): boolean {
   return !(!decision.singleWord && (p.joined_words ?? 0) >= JEV_CLUE_THRESHOLD)
     && !(decision.tooCloseToSecret && (p.too_close ?? 0) >= JEV_CLUE_THRESHOLD)
 }
-export function acceptsJevGuess(decision: GuessDecision): boolean {
-  return decision.correct && (decision.metadata.probabilities?.correct ?? 0) >= JEV_GUESS_THRESHOLD
+export function acceptsJevGuess(decision: GuessDecision, threshold = JEV_GUESS_THRESHOLD): boolean {
+  return decision.correct && (decision.metadata.probabilities?.correct ?? 0) >= threshold
 }

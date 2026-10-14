@@ -6,6 +6,7 @@ export interface GameSettings {
 }
 
 export interface BaseGameData {
+  aiExperiment?: { mode: 'legacy' | 'shadow' | 'jev'; model: string; configVersion: string }
   id: string
   code: string
   gameType: 'flock-together' | 'fowl-words' | 'truth-or-turd'

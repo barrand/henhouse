@@ -29,7 +29,9 @@ service cloud.firestore {
 
     match /games/{gameId}/players/{playerId} {
       allow read: if request.auth != null;
-      allow write: if request.auth.uid == playerId;
+      allow write: if request.auth.uid == playerId
+        && (!(get(/databases/$(database)/documents/games/$(gameId)).data.get('aiExperiment', {}).get('mode', 'legacy') == 'jev')
+          || (request.method == 'update' && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['score'])));
     }
 
     match /games/{gameId}/rounds/{roundNum} {

@@ -18,7 +18,7 @@ const call = (name, uid, data) => api[name].run({ auth: { uid }, data })
 const rounds = []
 const started = Date.now()
 try {
-  await db.doc('aiExperimentConfig/jev').set({ admissionEnabled: true, approvedConfigVersion: 'jev-v1', mode: 'jev', allowedHostUids: [players[0]], enabledOperations: { clue: true, guess: true } })
+  await db.doc('aiExperimentConfig/jev').set({ admissionEnabled: true, approvedConfigVersion: 'jev-playtest-v2', mode: 'jev', allowedHostUids: [players[0]], enabledOperations: { clue: true, guess: true } })
   const created = await call('fowlWordsCreateGame', players[0], { playerName: 'Synthetic host', experimental: true })
   for (const uid of players.slice(1)) await call('joinGame', uid, { code: created.code, playerName: uid })
   await call('fowlWordsStartGame', players[0], { gameId: created.gameId })

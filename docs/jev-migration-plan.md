@@ -17,6 +17,8 @@ Desired end state:
 
 ### Delivery contract: automation before promotion
 
+October 14 implementation note: the user authorized proceeding to an opt-in public `/jev` playtest despite remaining semantic uncertainty. See `docs/jev-live-playtest.md` for the v2 configuration, measured evidence, deployment/rollback, and incomplete formal gates. This authorizes experimental gameplay, not a declaration that this plan's full promotion criteria passed. Normal games remain legacy.
+
 Each phase delivers implementation, automated validation, and a saved evidence report together. The implementing agent runs the phase checks, fixes failures, and reports completion only when its required gates pass. Passing mocks alone never establishes live Jev accuracy or a working Firebase game.
 
 The user should review a brief phase summary and only policy cases that automation cannot resolve. No manual room creation, Start/Next clicking, score arithmetic, or routine screenshot checking is required for phase completion. Production publishing remains a separate release action; a passing report does not deploy or enable production experiments.

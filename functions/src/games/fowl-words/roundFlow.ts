@@ -14,7 +14,8 @@
 import * as admin from 'firebase-admin'
 import { Timestamp, FieldValue } from 'firebase-admin/firestore'
 import { createHash } from 'node:crypto'
-import { detectDuplicateClues, deterministicGuess, evaluateGuess } from '../../shared/gemini'
+import { detectDuplicateClues, deterministicGuess, experimentalGuessLocal, evaluateGuess } from '../../shared/gemini'
+import { evaluatePlaytestGuess, JEV_PLAYTEST_VERSION, JEV_PLAYTEST_GUESS_THRESHOLD } from '../../shared/jevPlaytest'
 import { DecisionService } from '../../shared/decisionService'
 import { jevOperationEnabled } from '../../shared/aiExperiment'
 import { enqueueFowlWordsShadow } from '../../shared/jevShadow'
@@ -443,7 +444,8 @@ export async function handleGuess(
   const currentAttempt: number = roundData.currentAttempt ?? 1
   const maxAttempts: number = roundData.maxAttempts ?? 1
 
-  const deterministic = deterministicGuess(secretWord, guess)
+  const playtest = game.aiExperiment?.mode === 'jev' && game.aiExperiment?.configVersion === JEV_PLAYTEST_VERSION
+  const deterministic = playtest ? experimentalGuessLocal(secretWord, guess).decision : deterministicGuess(secretWord, guess)
   let isCorrect: boolean
   if (deterministic !== null) {
     isCorrect = deterministic
@@ -452,8 +454,8 @@ export async function handleGuess(
       if (!await jevOperationEnabled(game.originalHostId ?? game.hostId, 'guess')) {
         isCorrect = false
       } else {
-        const decision = await new DecisionService().evaluateFowlWordsGuess({ secretWord, guess })
-        isCorrect = acceptsJevGuess(decision)
+        const decision = playtest ? await evaluatePlaytestGuess(secretWord, guess) : await new DecisionService().evaluateFowlWordsGuess({ secretWord, guess })
+        isCorrect = acceptsJevGuess(decision, playtest ? JEV_PLAYTEST_GUESS_THRESHOLD : undefined)
       }
     } catch {
       console.error('Jev guess evaluation unavailable; rejecting guess')

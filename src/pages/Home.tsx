@@ -123,7 +123,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
             HENHOUSE
           </h1>
           <p className="text-on-surface-variant font-body text-sm">Party games for the whole flock</p>
-          {experimental && <p className="mt-3 inline-flex rounded-full bg-primary-fixed px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.14em] text-on-primary-fixed-variant">Experimental Jev Mode · server admission required</p>}
+          {experimental && <p className="mt-3 inline-flex rounded-full bg-primary-fixed px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.14em] text-on-primary-fixed-variant">Jev playtest · decisions may differ · normal games unchanged</p>}
         </div>
 
         {/* Name */}

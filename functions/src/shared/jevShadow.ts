@@ -7,6 +7,8 @@ import { DecisionService } from './decisionService'
 import { JEV_CONFIG_VERSION, jevOperationEnabled } from './aiExperiment'
 import { typesafeApiKey } from './secrets'
 import { acceptsJevClue, acceptsJevGuess } from './jevPolicy'
+import { evaluatePlaytestGuess, JEV_PLAYTEST_GUESS_THRESHOLD } from './jevPlaytest'
+import { experimentalGuessLocal } from './gemini'
 
 export type ShadowOperation = 'clue' | 'guess'
 export type ShadowExpected = { accepted: boolean } | { correct: boolean }
@@ -115,10 +117,15 @@ export async function evaluateShadowJob(snapshot: FirebaseFirestore.DocumentSnap
         latencyMs = result.metadata.latencyMs
         fallbackUsed = result.metadata.fallbackUsed
       } else {
-        const result = await service.evaluateFowlWordsGuess({ secretWord: job.input.secretWord ?? '', guess: job.input.guess ?? '' })
-        candidate = acceptsJevGuess(result)
-        latencyMs = result.metadata.latencyMs
-        fallbackUsed = result.metadata.fallbackUsed
+        const secret=job.input.secretWord??'', guess=job.input.guess??''
+        const local=experimentalGuessLocal(secret,guess)
+        if(local.decision!==null) { candidate=local.decision;latencyMs=0 }
+        else {
+          const result = await evaluatePlaytestGuess(secret,guess,service)
+          candidate = acceptsJevGuess(result,JEV_PLAYTEST_GUESS_THRESHOLD)
+          latencyMs = result.metadata.latencyMs
+          fallbackUsed = result.metadata.fallbackUsed
+        }
       }
       const category = disagreementCategory(operation, job.expected, candidate)
       await db().runTransaction(async (tx) => {

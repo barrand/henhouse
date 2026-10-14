@@ -176,12 +176,12 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
 
         {/* Bonus Categories */}
         <section className="mb-8">
-          <CategoryInput
+          {game.aiExperiment && game.aiExperiment.mode !== 'legacy' ? <p className="text-sm text-on-surface-variant">Jev playtest uses preset or manually submitted questions. AI-generated categories require the normal game.</p> : <CategoryInput
             categories={game.categories}
             editable={isHost}
             onAdd={handleAddCategory}
             onRemove={handleRemoveCategory}
-          />
+          />}
         </section>
 
         {/* Submit Question */}

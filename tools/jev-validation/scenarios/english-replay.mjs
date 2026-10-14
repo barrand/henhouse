@@ -2,6 +2,7 @@ import path from 'node:path'
 import { readFile, mkdir, writeFile } from 'node:fs/promises'
 import { comparisonMarkdown, metrics } from '../lib/english-evaluation.mjs'
 import { evidenceFingerprint } from '../lib/report.mjs'
+import { reviewArtifact, reviewMarkdown } from '../lib/english-review.mjs'
 const root=path.resolve(import.meta.dirname,'../../..')
 const source=path.resolve(process.argv[2]??'')
 if(!process.argv[2]) throw new Error('Provide an English experiment run directory')
@@ -18,4 +19,7 @@ const rendered={...report,
 }
 await writeFile(path.join(output,'comparison.md'),comparisonMarkdown(rendered))
 await writeFile(path.join(output,'replay.json'),JSON.stringify(replay,null,2))
+const review=reviewArtifact(predictions,report)
+await writeFile(path.join(output,'representativeness.json'),JSON.stringify(review,null,2))
+await writeFile(path.join(output,'representativeness.md'),reviewMarkdown(review))
 process.stdout.write(output+'\n')

@@ -8,6 +8,8 @@ import { claimRoomCode, releaseRoomCode } from '../../shared/roomCodes'
 import { normalizeAnswer, fallbackGrouping, validateGeminiGroups } from '../../shared/normalizeAnswer'
 import { getRoundEligiblePlayerIds, isRoundEligible } from '../../shared/roundEligibility'
 import { experimentForCreation, requireExperimentRematch } from '../../shared/aiExperiment'
+import { typesafeApiKey } from '../../shared/secrets'
+import { scoreJevRound } from './jevScoring'
 
 const db = admin.firestore()
 const TOTAL_ROUNDS = 10
@@ -142,6 +144,7 @@ export const flockStartGame = onCall(async (request) => {
   const game = gameSnap.data()!
   if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can start')
   if (game.status !== 'lobby') throw new HttpsError('failed-precondition', 'Game already started')
+  if (game.aiExperiment?.mode !== undefined && game.aiExperiment.mode !== 'legacy' && game.categories?.length) throw new HttpsError('failed-precondition', 'AI categories are unavailable in Jev playtest rooms. Use preset or manually submitted questions.')
 
   // Seed the question pool with the current patriotic setting
   await seedQuestionPool(gameId, game.includePatrioticQuestions ?? false)
@@ -203,7 +206,7 @@ export const flockStartGame = onCall(async (request) => {
 })
 
 // -- SUBMIT ANSWER --
-export const submitAnswer = onCall(async (request) => {
+export const submitAnswer = onCall({ secrets: [typesafeApiKey] }, async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -226,6 +229,7 @@ export const submitAnswer = onCall(async (request) => {
   }
 
   const trimmed = answer.trim()
+  if (game.aiExperiment?.mode === 'jev' && trimmed.length > 500) throw new HttpsError('invalid-argument', 'Answer must be at most 500 characters')
 
   // Multiple-choice rounds only accept answers that exactly match one of the server-side options.
   if (roundData.type === 'multiple_choice') {
@@ -237,10 +241,19 @@ export const submitAnswer = onCall(async (request) => {
 
   const answerRef = roundRef.collection('answers').doc(uid)
   try {
-    await answerRef.create({
+    const answerData = {
       text: trimmed,
       submittedAt: FieldValue.serverTimestamp(),
-    })
+    }
+    if (game.aiExperiment?.mode === 'jev') {
+      await db.runTransaction(async tx => {
+        const [g,r,a]=await Promise.all([tx.get(gameRef),tx.get(roundRef),tx.get(answerRef)])
+        if(a.exists) return
+        const live=r.data()
+        if(g.data()?.status!=='playing' || g.data()?.currentRound!==roundNum || live?.status!=='answering' || live.question!==roundData.question || live.questionPoolId!==roundData.questionPoolId || live.deadline.toMillis()<Date.now() || !isRoundEligible(live,g.data()!,uid)) throw new HttpsError('failed-precondition','Round no longer accepts answers')
+        tx.create(answerRef,answerData)
+      })
+    } else await answerRef.create(answerData)
   } catch (err: unknown) {
     const code = typeof err === 'object' && err !== null && 'code' in err
       ? (err as { code?: unknown }).code
@@ -276,6 +289,13 @@ export const skipQuestion = onCall(async (request) => {
   if (roundSnap.data()!.status !== 'answering') {
     throw new HttpsError('failed-precondition', 'Can only skip during the answering phase')
   }
+  if (game.aiExperiment?.mode === 'jev') {
+    await db.runTransaction(async tx=>{
+      const current=await tx.get(roundRef)
+      if(current.data()?.status!=='answering' || current.data()?.questionPoolId!==roundSnap.data()!.questionPoolId) throw new HttpsError('failed-precondition','Round already changed')
+      tx.update(roundRef,{status:'skipped'})
+    })
+  }
 
   const recentTags: string[] = []
   for (let r = Math.max(1, roundNum - 4); r <= roundNum; r++) {
@@ -295,7 +315,10 @@ export const skipQuestion = onCall(async (request) => {
     recentTags,
     shouldDrawPatrioticQuestion(roundNum, game.includePatrioticQuestions ?? false),
   )
-  if (!newQuestion) throw new HttpsError('internal', 'No more questions available')
+  if (!newQuestion) {
+    if(game.aiExperiment?.mode==='jev') await roundRef.update({status:'answering'})
+    throw new HttpsError('internal', 'No more questions available')
+  }
 
   const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
 
@@ -334,6 +357,7 @@ export const updateCategories = onCall(async (request) => {
 
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   if (gameSnap.data()!.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can update categories')
+  if (gameSnap.data()!.aiExperiment?.mode && gameSnap.data()!.aiExperiment.mode !== 'legacy' && categories.length) throw new HttpsError('failed-precondition','AI categories are unavailable in Jev playtest rooms')
   if (gameSnap.data()!.status !== 'lobby') throw new HttpsError('failed-precondition', 'Game already started')
 
   await gameRef.update({ categories })
@@ -424,7 +448,7 @@ export const flockAdvanceRound = onCall(async (request) => {
 })
 
 // -- FORCE END ROUND (when timer expires) --
-export const forceEndRound = onCall(async (request) => {
+export const forceEndRound = onCall({ secrets: [typesafeApiKey] }, async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -437,7 +461,9 @@ export const forceEndRound = onCall(async (request) => {
   const roundRef = db.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
   const roundSnap = await roundRef.get()
 
-  if (!roundSnap.exists || roundSnap.data()!.status !== 'answering') return
+  if (!roundSnap.exists) return
+  if (gameSnap.data()!.aiExperiment?.mode === 'jev') { await scoreJevRound(gameId,roundNum); return }
+  if (roundSnap.data()!.status !== 'answering') return
 
   await triggerScoring(gameId, roundNum)
 })
@@ -458,6 +484,8 @@ async function syncRoundAnswerState(roundRef: FirebaseFirestore.DocumentReferenc
 }
 
 async function triggerScoring(gameId: string, roundNum: number) {
+  const experimentGame = await db.doc(`games/${gameId}`).get()
+  if (experimentGame.data()?.aiExperiment?.mode === 'jev') { await scoreJevRound(gameId,roundNum); return }
   const roundRef = db.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
 
   const claimed = await db.runTransaction(async (tx) => {

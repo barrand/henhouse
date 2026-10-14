@@ -15,19 +15,27 @@ let calls = 0
 let gate
 DecisionService.prototype.evaluateFowlWordsGuess = async () => { calls++; if (gate) await gate; return { correct: true, metadata: { probabilities: { correct: .99 }, latencyMs: 10, fallbackUsed: false } } }
 DecisionService.prototype.classifyFowlWordsClue = async () => { calls++; if (gate) await gate; return { singleWord: true, tooCloseToSecret: false, metadata: { probabilities: { joined_words: .1, too_close: .1 }, latencyMs: 10, fallbackUsed: false } } }
-await db.doc('aiExperimentConfig/jev').set({ admissionEnabled: true, approvedConfigVersion: 'jev-v1', mode: 'jev', allowedHostUids: ['host'], enabledOperations: { clue: true, guess: true } })
+await db.doc('aiExperimentConfig/jev').set({ admissionEnabled: true, approvedConfigVersion: 'jev-playtest-v2', mode: 'jev', allowedHostUids: ['host'], enabledOperations: { clue: true, guess: true } })
 let serial = 0
 async function room() {
   const gameId = `safety-${++serial}`
   const gameRef = db.doc(`games/${gameId}`)
   const roundRef = gameRef.collection('rounds').doc('1')
-  await gameRef.set({ hostId: 'host', originalHostId: 'host', status: 'playing', currentRound: 1, currentGuesser: 'host', playerIds: ['host', 'giver', 'other'], aiExperiment: { mode: 'jev' } })
+  await gameRef.set({ hostId: 'host', originalHostId: 'host', status: 'playing', currentRound: 1, currentGuesser: 'host', playerIds: ['host', 'giver', 'other'], aiExperiment: { mode: 'jev', configVersion: 'jev-playtest-v2' } })
   for (const uid of ['host', 'giver', 'other']) await gameRef.collection('players').doc(uid).set({ score: 0 })
   await roundRef.set({ status: 'reveal', currentAttempt: 1, maxAttempts: 3, secretWord: 'house', eligiblePlayerIds: ['host', 'giver', 'other'], clueGroups: [{ playerIds: ['giver'], clueTexts: ['shelter'], isDuplicate: false }], visibleGroupIndexes: [0], clueTimestamps: { giver: Timestamp.fromMillis(1) }, cluePeerLoveVotes: {}, attemptInProgress: false })
   return { gameId, gameRef, roundRef }
 }
 async function check(name, fn) { await fn(); checks.push(name); process.stdout.write(`PASS ${name}\n`) }
 try {
+  await check('playtest unequal-length synonyms reach the provider and use the 0.64 policy', async () => {
+    const {gameId,roundRef}=await room()
+    await roundRef.update({secretWord:'car'})
+    const before=calls
+    await handleGuess(gameId,1,'host','automobile',1)
+    assert.equal(calls,before+1)
+    assert.equal((await roundRef.get()).data().isCorrect,true)
+  })
   await check('concurrent correct guesses score once, and stale retry does not consume next attempt', async () => {
     const { gameId, roundRef, gameRef } = await room()
     await Promise.all(Array.from({ length: 8 }, () => handleGuess(gameId, 1, 'host', 'casa', 1)))
