@@ -192,6 +192,35 @@ if (args['self-test'] === 'fail') {
     if (dedupBoundary.includes('DecisionService')) throw new Error('Jev adapter is imported into the dedup round boundary')
     return 'Fowl Words deduplication remains isolated from Jev guess/clue decisions'
   })
+} else if (phase === 'FW-4') {
+  const npm = await resolveCommand('npm')
+  await check('fw4-shadow-build-and-tests', async () => {
+    if (!npm) return { status: 'incomplete', message: 'npm is unavailable' }
+    for (const item of [['functions build', ['--prefix', 'functions', 'run', 'build']], ['functions tests', ['--prefix', 'functions', 'test']]]) {
+      const result = await run(npm, item[1], { cwd: rootDir, timeoutMs: 180000 })
+      if (result.code !== 0) throw new Error(item[0] + ' failed: ' + shortOutput(result))
+    }
+    return 'shadow sampling, job identity, and Functions regression tests passed'
+  })
+  await check('fw4-durable-shadow-boundary', async () => {
+    const source = await readFile(path.join(rootDir, 'functions', 'src', 'shared', 'jevShadow.ts'), 'utf8')
+    for (const required of ['aiShadowJobs/{jobId}', 'inputExpiresAt', 'expireJevShadowInputs', 'configVersion', 'FieldValue.delete()', 'aiShadowAggregates', 'JEV_CONFIG_VERSION']) {
+      if (!source.includes(required)) throw new Error('missing durable shadow invariant: ' + required)
+    }
+    if (!source.includes("status: 'pending'") || !source.includes("status: 'complete'")) throw new Error('shadow job lifecycle is incomplete')
+    return 'immutable input snapshots, seven-day expiry metadata, config pinning, redacted completion, and aggregates are present'
+  })
+  await check('fw4-player-path-is-authoritative', async () => {
+    const clueSource = await readFile(path.join(rootDir, 'functions', 'src', 'games', 'fowl-words', 'index.ts'), 'utf8')
+    const guessSource = await readFile(path.join(rootDir, 'functions', 'src', 'games', 'fowl-words', 'roundFlow.ts'), 'utf8')
+    for (const source of [clueSource, guessSource]) {
+      if (!source.includes('enqueueFowlWordsShadow')) throw new Error('shadow enqueue is missing from an eligible player path')
+      if (!source.includes('.catch((error) => console.error')) throw new Error('shadow enqueue failure can block authoritative gameplay')
+    }
+    const worker = await readFile(path.join(rootDir, 'functions', 'src', 'shared', 'jevShadow.ts'), 'utf8')
+    if (!worker.includes('processJevShadowJob') || !worker.includes('snapshot.ref.update')) throw new Error('shadow worker does not write comparison state')
+    return 'legacy clue/guess decisions remain authoritative and shadow inference is durable, detached, and non-blocking'
+  })
 } else if (phase !== 'foundation') {
   checks.push({ id: 'phase-scope', status: 'incomplete', message: phase + ' validation is not implemented; complete the foundation phase first' })
 } else {

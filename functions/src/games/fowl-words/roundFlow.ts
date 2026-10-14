@@ -17,6 +17,7 @@ import { createHash } from 'node:crypto'
 import { detectDuplicateClues, deterministicGuess, evaluateGuess } from '../../shared/gemini'
 import { DecisionService, JEV_GUESS_ACCEPTANCE_THRESHOLD } from '../../shared/decisionService'
 import { jevOperationEnabled } from '../../shared/aiExperiment'
+import { enqueueFowlWordsShadow } from '../../shared/jevShadow'
 import { eligibleNonGuesserIds, getRoundEligiblePlayerIds } from '../../shared/roundEligibility'
 import {
   buildClueGroups,
@@ -446,6 +447,18 @@ export async function handleGuess(
     }
   } else {
     isCorrect = await evaluateGuess(secretWord, guess)
+  }
+  if (game.aiExperiment?.mode === 'shadow' && deterministic === null) {
+    await enqueueFowlWordsShadow({
+      gameId,
+      roundNum,
+      actorUid: guesserId,
+      operation: 'guess',
+      guess: guess.trim(),
+      secretWord,
+      attempt: currentAttempt,
+      expected: { correct: isCorrect },
+    }).catch((error) => console.error('Could not enqueue guess shadow evaluation', error instanceof Error ? error.message : 'unknown error'))
   }
   const clueTimestamps = normalizeTimestamps(roundData.clueTimestamps ?? {})
   const giverCount = await getGiverCount(gameId, roundNum)

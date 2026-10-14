@@ -29,6 +29,8 @@ export const jevLiveContractCheck = onCall({ secrets: [typesafeApiKey] }, async 
     throw new HttpsError('unavailable', 'Jev contract check could not complete')
   }
 })
+
+export * from './shared/jevShadow'
 // ── Shared: Join Game ─────────────────────────────────────────────────────────
 // joinGame is shared across all games — it looks up the room, adds the player,
 // and returns gameType so the frontend routes to the correct game module.

@@ -28,6 +28,7 @@ import {
   guesserBooFromRound,
 } from './voteHelpers'
 import { experimentForCreation, jevOperationEnabled, requireExperimentRematch } from '../../shared/aiExperiment'
+import { enqueueFowlWordsShadow } from '../../shared/jevShadow'
 
 const db = admin.firestore
 
@@ -311,6 +312,17 @@ export const submitClue = onCall(async (request) => {
     }
     : undefined
   const clueValidation = await validateClueForSubmission(cleanClue, secretWord, classify)
+  if (game.aiExperiment?.mode === 'shadow' && secretWord) {
+    await enqueueFowlWordsShadow({
+      gameId,
+      roundNum,
+      actorUid: uid,
+      operation: 'clue',
+      clue: cleanClue,
+      secretWord,
+      expected: { accepted: clueValidation.valid },
+    }).catch((error) => console.error('Could not enqueue clue shadow evaluation', error instanceof Error ? error.message : 'unknown error'))
+  }
   if (!clueValidation.valid) {
     const message = clueValidation.reason === 'too-close-to-secret'
       ? 'That clue is too close to the secret word. Try a different angle.'
