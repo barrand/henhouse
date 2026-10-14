@@ -13,7 +13,10 @@
 
 import * as admin from 'firebase-admin'
 import { Timestamp, FieldValue } from 'firebase-admin/firestore'
-import { detectDuplicateClues, evaluateGuess } from '../../shared/gemini'
+import { createHash } from 'node:crypto'
+import { detectDuplicateClues, deterministicGuess, evaluateGuess } from '../../shared/gemini'
+import { DecisionService, JEV_GUESS_ACCEPTANCE_THRESHOLD } from '../../shared/decisionService'
+import { jevOperationEnabled } from '../../shared/aiExperiment'
 import { eligibleNonGuesserIds, getRoundEligiblePlayerIds } from '../../shared/roundEligibility'
 import {
   buildClueGroups,
@@ -33,6 +36,7 @@ const SECONDS_PER_CLUE_SUBMISSION = 60
 export const WORD_SELECTION_SECONDS = 15
 export const WORD_SELECTION_PRIVACY_SECONDS = 4
 const WORD_SELECTED_SPOTLIGHT_MS = 2500
+const GUESS_CLAIM_LEASE_MS = 10_000
 
 function timestampMillis(timestamp: unknown): number | undefined {
   if (!timestamp || typeof timestamp !== 'object') return undefined
@@ -263,6 +267,109 @@ export async function runDeduplication(gameId: string, roundNum: number): Promis
   })
 }
 
+async function commitScoredGuess(
+  firestore: FirebaseFirestore.Firestore,
+  roundRef: FirebaseFirestore.DocumentReference,
+  gameId: string,
+  claimId: string,
+  guesserId: string,
+  guess: string,
+  isCorrect: boolean,
+  giverCount: number,
+): Promise<boolean> {
+  return firestore.runTransaction(async (tx) => {
+    const latestSnap = await tx.get(roundRef)
+    if (!latestSnap.exists) return false
+    const latest = latestSnap.data()!
+    if (latest.attemptInProgress !== true || latest.guessClaimId !== claimId || latest.status !== 'guess') return false
+    const claimExpiresAt = timestampMillis(latest.guessClaimExpiresAt)
+    if (claimExpiresAt && Date.now() > claimExpiresAt) return false
+    const clueGroups = (latest.clueGroups ?? []) as ClueGroup[]
+    const visibleGroupIndexes: number[] = latest.visibleGroupIndexes ?? []
+    const currentAttempt: number = latest.currentAttempt ?? 1
+    const clueTimestamps = normalizeTimestamps(latest.clueTimestamps ?? {})
+    const scores = computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, isCorrect, currentAttempt, clueTimestamps, giverCount)
+    if (isCorrect) {
+      const loveVotes = effectivePeerLoveVotesFromRound(latest)
+      applyPeerLoveVotes(loveVotes, clueGroups, visibleGroupIndexes, scores)
+    }
+    const playerRefs = Object.entries(scores)
+      .filter(([, points]) => points !== 0)
+      .map(([playerId]) => firestore.collection('games').doc(gameId).collection('players').doc(playerId))
+    await Promise.all(playerRefs.map((playerRef) => tx.get(playerRef)))
+    tx.update(roundRef, {
+      status: 'scored',
+      isCorrect,
+      guesserAnswer: guess.trim(),
+      pointsThisRound: scores,
+      tentativePoints: scores,
+      attemptInProgress: false,
+      guessClaimId: FieldValue.delete(),
+      guessClaimExpiresAt: FieldValue.delete(),
+    })
+    for (const [playerId, points] of Object.entries(scores)) {
+      if (points !== 0) {
+        const playerRef = firestore.collection('games').doc(gameId).collection('players').doc(playerId)
+        tx.update(playerRef, { score: FieldValue.increment(points) })
+      }
+    }
+    return true
+  })
+}
+
+async function commitWrongGuessProgress(
+  firestore: FirebaseFirestore.Firestore,
+  roundRef: FirebaseFirestore.DocumentReference,
+  gameId: string,
+  claimId: string,
+  guesserId: string,
+  giverCount: number,
+): Promise<boolean> {
+  const playerScores = await fetchPlayerScores(gameId)
+  return firestore.runTransaction(async (tx) => {
+    const latestSnap = await tx.get(roundRef)
+    if (!latestSnap.exists) return false
+    const latest = latestSnap.data()!
+    if (latest.attemptInProgress !== true || latest.guessClaimId !== claimId || latest.status !== 'guess') return false
+    const claimExpiresAt = timestampMillis(latest.guessClaimExpiresAt)
+    if (claimExpiresAt && Date.now() > claimExpiresAt) return false
+    const clueGroups = (latest.clueGroups ?? []) as ClueGroup[]
+    const visibleGroupIndexes: number[] = latest.visibleGroupIndexes ?? []
+    const currentAttempt: number = latest.currentAttempt ?? 1
+    const clueTimestamps = normalizeTimestamps(latest.clueTimestamps ?? {})
+    const nextUnlockIdx = selectNextUnlockGroup(clueGroups, visibleGroupIndexes, playerScores, clueTimestamps)
+    const newAttempt = currentAttempt + 1
+    if (nextUnlockIdx < 0) {
+      const newTentative = computeTentativePoints(clueGroups, visibleGroupIndexes, guesserId, newAttempt, clueTimestamps, giverCount)
+      tx.update(roundRef, {
+        status: 'reveal',
+        currentAttempt: newAttempt,
+        tentativePoints: newTentative,
+        attemptDeadline: Timestamp.fromMillis(Date.now() + getSecondsForAttempt(newAttempt) * 1000),
+        attemptInProgress: false,
+        guessClaimId: FieldValue.delete(),
+        guessClaimExpiresAt: FieldValue.delete(),
+        lastUnlockedGroupIndex: FieldValue.delete(),
+      })
+      return true
+    }
+    const newVisible = [...visibleGroupIndexes, nextUnlockIdx]
+    const newTentative = computeTentativePoints(clueGroups, newVisible, guesserId, newAttempt, clueTimestamps, giverCount)
+    tx.update(roundRef, {
+      status: 'reveal',
+      currentAttempt: newAttempt,
+      visibleGroupIndexes: newVisible,
+      tentativePoints: newTentative,
+      attemptDeadline: Timestamp.fromMillis(Date.now() + getSecondsForAttempt(newAttempt) * 1000),
+      attemptInProgress: false,
+      guessClaimId: FieldValue.delete(),
+      guessClaimExpiresAt: FieldValue.delete(),
+      lastUnlockedGroupIndex: nextUnlockIdx,
+    })
+    return true
+  })
+}
+
 /**
  * Called when the guesser submits a guess.
  *
@@ -278,6 +385,7 @@ export async function handleGuess(
   guess: string,
 ): Promise<void> {
   const firestore = db()
+  const gameRef = firestore.collection('games').doc(gameId)
   const roundRef = firestore
     .collection('games')
     .doc(gameId)
@@ -285,22 +393,34 @@ export async function handleGuess(
     .doc(String(roundNum))
 
   // Atomically claim "guess in progress" to prevent double-submit
+  let claimId = ''
+  let claimedAttempt = 1
   const claimed = await firestore.runTransaction(async (tx) => {
     const snap = await tx.get(roundRef)
     if (!snap.exists) return false
     const data = snap.data()!
     if (data.status !== 'guess' && data.status !== 'reveal') return false
     if (data.attemptInProgress === true) return false
+    claimedAttempt = data.currentAttempt ?? 1
+    claimId = createHash('sha256')
+      .update(`${gameId}/${roundNum}/guess/${claimedAttempt}/${guess.trim().normalize('NFC').toLocaleLowerCase('en-US')}`)
+      .digest('hex')
+      .slice(0, 32)
     tx.update(roundRef, {
       attemptInProgress: true,
       status: 'guess',
       guessAttempts: FieldValue.arrayUnion(guess.trim()),
+      guessClaimId: claimId,
+      guessClaimExpiresAt: Timestamp.fromMillis(Date.now() + GUESS_CLAIM_LEASE_MS),
     })
     return true
   })
   if (!claimed) return
 
+  const gameSnap = await gameRef.get()
   const roundSnap = await roundRef.get()
+  if (!gameSnap.exists || !roundSnap.exists) return
+  const game = gameSnap.data()!
   const roundData = roundSnap.data()!
   const secretWord: string = roundData.secretWord
   const clueGroups = (roundData.clueGroups ?? []) as ClueGroup[]
@@ -308,119 +428,96 @@ export async function handleGuess(
   const currentAttempt: number = roundData.currentAttempt ?? 1
   const maxAttempts: number = roundData.maxAttempts ?? 1
 
-  const isCorrect = await evaluateGuess(secretWord, guess)
+  const deterministic = deterministicGuess(secretWord, guess)
+  let isCorrect: boolean
+  if (deterministic !== null) {
+    isCorrect = deterministic
+  } else if (game.aiExperiment?.mode === 'jev') {
+    try {
+      if (!await jevOperationEnabled(guesserId, 'guess')) {
+        isCorrect = false
+      } else {
+        const decision = await new DecisionService().evaluateFowlWordsGuess({ secretWord, guess })
+        isCorrect = decision.correct && (decision.metadata.probabilities?.correct ?? 0) >= JEV_GUESS_ACCEPTANCE_THRESHOLD
+      }
+    } catch (error) {
+      console.error('Jev guess evaluation unavailable; rejecting guess', error instanceof Error ? error.message : 'unknown error')
+      isCorrect = false
+    }
+  } else {
+    isCorrect = await evaluateGuess(secretWord, guess)
+  }
   const clueTimestamps = normalizeTimestamps(roundData.clueTimestamps ?? {})
   const giverCount = await getGiverCount(gameId, roundNum)
 
   // ── Path 1: Correct ─────────────────────────────────────────────
   if (isCorrect) {
-    const scores = computeRoundScores(
-      clueGroups,
-      visibleGroupIndexes,
-      guesserId,
-      true,
-      currentAttempt,
-      clueTimestamps,
-      giverCount,
-    )
-
-    // Re-read star votes right before write to capture any cast during Gemini eval
-    const finalSnap1 = await roundRef.get()
-    const loveVotes = effectivePeerLoveVotesFromRound(finalSnap1.data() ?? {})
-    applyPeerLoveVotes(loveVotes, clueGroups, visibleGroupIndexes, scores)
-
-    const batch = firestore.batch()
-    batch.update(roundRef, {
-      status: 'scored',
-      isCorrect: true,
-      guesserAnswer: guess.trim(),
-      pointsThisRound: scores,
-      tentativePoints: scores,
-      attemptInProgress: false,
-    })
-    for (const [playerId, pts] of Object.entries(scores)) {
-      if (pts !== 0) {
-        const playerRef = firestore.collection('games').doc(gameId).collection('players').doc(playerId)
-        batch.update(playerRef, { score: FieldValue.increment(pts) })
-      }
-    }
-    await batch.commit()
+    await commitScoredGuess(firestore, roundRef, gameId, claimId, guesserId, guess, true, giverCount)
     return
   }
 
   // ── Path 2: Wrong, no attempts left → round over ────────────────
   if (currentAttempt >= maxAttempts) {
-    const scores = computeRoundScores(
-      clueGroups,
-      visibleGroupIndexes,
-      guesserId,
-      false,
-      currentAttempt,
-      clueTimestamps,
-      giverCount,
-    )
-
-    // Peer love pays out on win only — not applied on NO LUCK path
-    const batch = firestore.batch()
-    batch.update(roundRef, {
-      status: 'scored',
-      isCorrect: false,
-      guesserAnswer: guess.trim(),
-      pointsThisRound: scores,
-      tentativePoints: scores,
-      attemptInProgress: false,
-    })
-    // Apply penalties (e.g. duplicate -1) even on failure
-    for (const [playerId, pts] of Object.entries(scores)) {
-      if (pts !== 0) {
-        const playerRef = firestore.collection('games').doc(gameId).collection('players').doc(playerId)
-        batch.update(playerRef, { score: FieldValue.increment(pts) })
-      }
-    }
-    await batch.commit()
+    await commitScoredGuess(firestore, roundRef, gameId, claimId, guesserId, guess, false, giverCount)
     return
   }
 
   // ── Path 3: Wrong, attempts left → unlock next group, retry ─────
-  const playerScores = await fetchPlayerScores(gameId)
+  await commitWrongGuessProgress(firestore, roundRef, gameId, claimId, guesserId, giverCount)
+}
 
-  const nextUnlockIdx = selectNextUnlockGroup(
-    clueGroups,
-    visibleGroupIndexes,
-    playerScores,
-    clueTimestamps,
-  )
+/**
+ * Finishes a guess whose provider claim lease expired. Recovery is deliberately
+ * fail-closed: an unresolved guess is treated as wrong and never awards points.
+ */
+export async function recoverExpiredGuess(gameId: string, roundNum: number): Promise<void> {
+  const firestore = db()
+  const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
+  const giverCount = await getGiverCount(gameId, roundNum)
+  const gameSnap = await firestore.collection('games').doc(gameId).get()
+  const guesserId: string = gameSnap.data()?.currentGuesser ?? ''
+  await firestore.runTransaction(async (tx) => {
+    const snap = await tx.get(roundRef)
+    if (!snap.exists) return
+    const data = snap.data()!
+    const expiresAt = timestampMillis(data.guessClaimExpiresAt)
+    if (data.attemptInProgress !== true || data.status !== 'guess' || !expiresAt || Date.now() <= expiresAt) return
 
-  // All clues already visible — still advance to next attempt so the guesser
-  // gets the guaranteed minimum number of guesses.
-  if (nextUnlockIdx < 0) {
-    const newAttempt = currentAttempt + 1
-    const newTentative = computeTentativePoints(clueGroups, visibleGroupIndexes, guesserId, newAttempt, clueTimestamps, giverCount)
-    const newDeadline = Timestamp.fromMillis(Date.now() + getSecondsForAttempt(newAttempt) * 1000)
-    await roundRef.update({
+    const currentAttempt: number = data.currentAttempt ?? 1
+    const maxAttempts: number = data.maxAttempts ?? 1
+    const clueGroups = (data.clueGroups ?? []) as ClueGroup[]
+    const visibleGroupIndexes: number[] = data.visibleGroupIndexes ?? []
+    const clueTimestamps = normalizeTimestamps(data.clueTimestamps ?? {})
+    if (currentAttempt >= maxAttempts) {
+      const scores = computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, false, currentAttempt, clueTimestamps, giverCount)
+      const playerRefs = Object.entries(scores)
+        .filter(([, points]) => points !== 0)
+        .map(([playerId]) => firestore.collection('games').doc(gameId).collection('players').doc(playerId))
+      await Promise.all(playerRefs.map((playerRef) => tx.get(playerRef)))
+      tx.update(roundRef, {
+        status: 'scored',
+        isCorrect: false,
+        pointsThisRound: scores,
+        tentativePoints: scores,
+        attemptInProgress: false,
+        guessClaimId: FieldValue.delete(),
+        guessClaimExpiresAt: FieldValue.delete(),
+      })
+      for (const [playerId, points] of Object.entries(scores)) {
+        if (points !== 0) tx.update(firestore.collection('games').doc(gameId).collection('players').doc(playerId), { score: FieldValue.increment(points) })
+      }
+      return
+    }
+
+    const nextAttempt = currentAttempt + 1
+    tx.update(roundRef, {
       status: 'reveal',
-      currentAttempt: newAttempt,
-      tentativePoints: newTentative,
-      attemptDeadline: newDeadline,
+      currentAttempt: nextAttempt,
+      attemptDeadline: Timestamp.fromMillis(Date.now() + getSecondsForAttempt(nextAttempt) * 1000),
       attemptInProgress: false,
-      lastUnlockedGroupIndex: FieldValue.delete(),
+      guessClaimId: FieldValue.delete(),
+      guessClaimExpiresAt: FieldValue.delete(),
     })
-    return
-  }
-
-  const newVisible = [...visibleGroupIndexes, nextUnlockIdx]
-  const newAttempt = currentAttempt + 1
-  const newTentative = computeTentativePoints(clueGroups, newVisible, guesserId, newAttempt, clueTimestamps, giverCount)
-  const newDeadline = Timestamp.fromMillis(Date.now() + getSecondsForAttempt(newAttempt) * 1000)
-
-  await roundRef.update({
-    status: 'reveal',
-    currentAttempt: newAttempt,
-    visibleGroupIndexes: newVisible,
-    tentativePoints: newTentative,
-    attemptDeadline: newDeadline,
-    attemptInProgress: false,
-    lastUnlockedGroupIndex: nextUnlockIdx, // for UI to highlight what just changed
   })
 }
 

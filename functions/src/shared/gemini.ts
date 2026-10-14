@@ -472,7 +472,8 @@ export function fuzzyMatch(guess: string, secret: string): boolean {
   return false
 }
 
-export async function evaluateGuess(secretWord: string, guess: string): Promise<boolean> {
+/** Returns true/false for local certainty, or null when semantic evaluation is needed. */
+export function deterministicGuess(secretWord: string, guess: string): boolean | null {
   const trimmedGuess = guess.trim()
   const trimmedSecret = secretWord.trim()
 
@@ -491,6 +492,16 @@ export async function evaluateGuess(secretWord: string, guess: string): Promise<
 
   // Fuzzy fast path: accents, spacing/hyphens, simple plurals — no Gemini needed
   if (fuzzyMatch(trimmedGuess, trimmedSecret)) return true
+
+  return null
+}
+
+export async function evaluateGuess(secretWord: string, guess: string): Promise<boolean> {
+  const deterministic = deterministicGuess(secretWord, guess)
+  if (deterministic !== null) return deterministic
+
+  const trimmedGuess = guess.trim()
+  const trimmedSecret = secretWord.trim()
 
   try {
     const model = getModel()

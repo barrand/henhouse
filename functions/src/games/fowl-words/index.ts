@@ -6,6 +6,7 @@ import { eligibleNonGuesserIds, isRoundEligible } from '../../shared/roundEligib
 import {
   runDeduplication,
   handleGuess,
+  recoverExpiredGuess,
   advanceToNextRound,
   skipToNextAttempt,
   finalizeWordSelection,
@@ -378,6 +379,17 @@ export const submitGuess = onCall(async (request) => {
   }
 
   await handleGuess(gameId, roundNum, uid, guess)
+})
+
+export const fowlWordsRecoverGuess = onCall(async (request) => {
+  const uid = request.auth?.uid
+  if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
+  const { gameId, roundNum } = request.data as { gameId: string; roundNum: number }
+  const gameSnap = await db().collection('games').doc(gameId).get()
+  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+  const game = gameSnap.data()!
+  if (game.hostId !== uid && game.currentGuesser !== uid) throw new HttpsError('permission-denied', 'Only the host or guesser can recover a guess')
+  await recoverExpiredGuess(gameId, roundNum)
 })
 
 // -- ADVANCE ROUND --

@@ -3,6 +3,7 @@ import { choice, TypeSafeClient } from '@typesafe-ai/sdk'
 export const JEV_MODEL = 'jev-1.13.0'
 export const JEV_ATTEMPT_TIMEOUT_MS = 1500
 export const JEV_TOTAL_DEADLINE_MS = 2000
+export const JEV_GUESS_ACCEPTANCE_THRESHOLD = 0.75
 export interface DecisionMetadata { provider: 'legacy' | 'jev' | 'deterministic'; model?: string; requestId?: string; latencyMs: number; confidence?: number; probabilities?: Record<string, number>; fallbackUsed: boolean }
 export interface ClueDecision { singleWord: boolean; tooCloseToSecret: boolean; metadata: DecisionMetadata }
 export interface GuessDecision { correct: boolean; metadata: DecisionMetadata }
@@ -70,7 +71,7 @@ export class DecisionService {
     if (response.data.model !== JEV_MODEL || !Number.isInteger(response.data.usage?.input_tokens) || response.data.usage.input_tokens < 0 || !Number.isInteger(response.data.usage?.output_tokens) || response.data.usage.output_tokens < 0) throw new Error('Malformed Jev response metadata')
     const a = response.data.answers.correct
     if (!validate(a, ['correct', 'incorrect'])) throw new Error('Malformed Jev guess response')
-    return { correct: a.choice === 'correct', metadata: { provider: 'jev', model: response.data.model, requestId: response.requestId, latencyMs: Date.now() - started, confidence: a.confidence, fallbackUsed: false } }
+    return { correct: a.choice === 'correct', metadata: { provider: 'jev', model: response.data.model, requestId: response.requestId, latencyMs: Date.now() - started, confidence: a.confidence, probabilities: a.probabilities, fallbackUsed: false } }
   }
   async compareFlockAnswers(inputs: AnswerPairInput[]): Promise<AnswerPairDecision[]> {
     return Promise.all(inputs.map(async (input) => {

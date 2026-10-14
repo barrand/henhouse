@@ -138,6 +138,31 @@ if (args['self-test'] === 'fail') {
     }
     return 'duplicate, stale, late, and ineligible submissions are rejected before or during the guarded commit'
   })
+} else if (phase === 'FW-2') {
+  const npm = await resolveCommand('npm')
+  await check('fw2-guess-build-and-tests', async () => {
+    if (!npm) return { status: 'incomplete', message: 'npm is unavailable' }
+    for (const item of [['functions build', ['--prefix', 'functions', 'run', 'build']], ['functions tests', ['--prefix', 'functions', 'test']]]) {
+      const result = await run(npm, item[1], { cwd: rootDir, timeoutMs: 180000 })
+      if (result.code !== 0) throw new Error(item[0] + ' failed: ' + shortOutput(result))
+    }
+    return 'deterministic guess fast-path and Jev guess evaluation tests passed'
+  })
+  await check('fw2-provider-boundary', async () => {
+    const source = await readFile(path.join(rootDir, 'functions', 'src', 'games', 'fowl-words', 'roundFlow.ts'), 'utf8')
+    for (const required of ['deterministicGuess(secretWord, guess)', "game.aiExperiment?.mode === 'jev'", "jevOperationEnabled(guesserId, 'guess')", 'JEV_GUESS_ACCEPTANCE_THRESHOLD', 'isCorrect = false']) {
+      if (!source.includes(required)) throw new Error('missing FW-2 provider boundary: ' + required)
+    }
+    return 'exact/fuzzy/plural/inflection checks stay local; Jev is limited to unresolved guesses and failures reject'
+  })
+  await check('fw2-claim-and-recovery', async () => {
+    const source = await readFile(path.join(rootDir, 'functions', 'src', 'games', 'fowl-words', 'roundFlow.ts'), 'utf8')
+    for (const required of ['guessClaimId', 'GUESS_CLAIM_LEASE_MS', 'latest.guessClaimId !== claimId', 'commitScoredGuess', 'recoverExpiredGuess', 'guessClaimExpiresAt']) {
+      if (!source.includes(required)) throw new Error('missing FW-2 claim/recovery invariant: ' + required)
+    }
+    if (!source.includes('tx.update(playerRef, { score: FieldValue.increment(points) })')) throw new Error('score increments are not inside the guarded transaction')
+    return 'unique leased claims, expiry recovery, late-result rejection, and atomic score commits are present'
+  })
 } else if (phase !== 'foundation') {
   checks.push({ id: 'phase-scope', status: 'incomplete', message: phase + ' validation is not implemented; complete the foundation phase first' })
 } else {
