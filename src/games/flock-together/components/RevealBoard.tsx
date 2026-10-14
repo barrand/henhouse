@@ -118,6 +118,9 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
   const yourPoints = currentPlayerId ? (round.pointsThisRound?.[currentPlayerId] ?? 0) : 0
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
   const { clusters, noAnswerIds } = buildClusters(results, playerAnswers)
+  const flockClusters = clusters.filter((cluster) => cluster.type === 'flock')
+  const flockPlayerIds = flockClusters.flatMap((cluster) => cluster.playerIds)
+  const otherClusters = clusters.filter((cluster) => cluster.type !== 'flock')
 
   const handleAdvance = async () => {
     try {
@@ -159,7 +162,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
     return null
   }
 
-  const renderNameChips = (playerIds: string[]) => (
+  const renderNameChips = (playerIds: string[], tone: 'default' | 'flock' = 'default') => (
     <div className="flex flex-wrap gap-1.5">
       {playerIds.map((id) => {
         const isYou = id === currentPlayerId
@@ -168,8 +171,10 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
             key={id}
             className={`px-2.5 py-0.5 rounded-full text-xs font-medium font-body ${
               isYou
-                ? 'bg-primary/20 text-primary font-bold'
-                : 'bg-surface-container-high text-on-surface'
+                ? 'bg-primary text-on-primary font-bold'
+                : tone === 'flock'
+                  ? 'bg-on-primary-fixed/10 text-on-primary-fixed-variant'
+                  : 'bg-surface-container-high text-on-surface'
             }`}
           >
             {playerNameById(id)}{isYou && ' ← you'}
@@ -177,6 +182,17 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
         )
       })}
     </div>
+  )
+
+  const renderAnswerIterations = (playerIds: string[]) => (
+    <p className="text-sm text-on-primary-fixed-variant font-body leading-relaxed">
+      {playerIds.map((id, index) => (
+        <span key={id}>
+          <span className="font-semibold">{playerAnswers[id]?.trim() || '—'}</span>
+          {index < playerIds.length - 1 && <span className="mx-1.5 text-on-primary-fixed-variant/60">·</span>}
+        </span>
+      ))}
+    </p>
   )
 
   return (
@@ -203,11 +219,42 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
         </div>
       )}
 
-      {/* Unified answer board */}
+      {/* Grouped answer board */}
       <section className="space-y-2">
-        <h3 className="font-headline text-lg font-semibold text-primary px-1">Everyone's answers</h3>
+        <h3 className="font-headline text-lg font-semibold text-primary px-1">How the flock landed</h3>
 
-        {clusters.map((cluster) => {
+        {flockPlayerIds.length > 0 && (
+          <div className={`rounded-2xl p-5 shadow-sm bg-primary-fixed border-2 border-primary ${currentPlayerId && flockPlayerIds.includes(currentPlayerId) ? 'ring-2 ring-primary/30' : ''}`}>
+            <div className="flex items-start gap-3">
+              <img src="/images/generated-comic/hen-excited.png" alt="" className="w-10 h-10 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-label text-[10px] uppercase tracking-[0.18em] font-bold text-on-primary-fixed-variant">The flock</p>
+                  <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-on-primary shrink-0">
+                    {flockPlayerIds.length} {flockPlayerIds.length === 1 ? 'player' : 'players'}
+                  </span>
+                </div>
+                <p className="font-headline text-xl font-bold text-on-primary-fixed mt-1">They matched!</p>
+                <p className="text-sm text-on-primary-fixed-variant font-body mt-1">One answer, shared by the whole group</p>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              {renderNameChips(flockPlayerIds, 'flock')}
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-on-primary-fixed-variant/20">
+              <p className="font-label text-[10px] uppercase tracking-[0.16em] font-bold text-on-primary-fixed-variant mb-1">Answer iterations</p>
+              {renderAnswerIterations(flockPlayerIds)}
+            </div>
+          </div>
+        )}
+
+        {otherClusters.length > 0 && (
+          <p className="font-label text-[10px] uppercase tracking-[0.18em] text-secondary font-bold pt-3 px-1">Other answers</p>
+        )}
+
+        {otherClusters.map((cluster) => {
           const style = CLUSTER_STYLES[cluster.type]
           const isYourCluster = currentPlayerId ? cluster.playerIds.includes(currentPlayerId) : false
           return (
