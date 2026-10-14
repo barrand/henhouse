@@ -32,6 +32,24 @@ function Clear-LocalDevPorts {
   }
 }
 
+function Enable-LocalJevAdmission {
+  $uri = "http://127.0.0.1:8080/v1/projects/$projectId/databases/(default)/documents/aiExperimentConfig/jev"
+  $body = @{
+    fields = @{
+      admissionEnabled = @{ booleanValue = $true }
+      mode = @{ stringValue = 'jev' }
+      approvedConfigVersion = @{ stringValue = 'jev-playtest-v2' }
+      enabledOperations = @{ mapValue = @{ fields = @{
+        clue = @{ booleanValue = $true }
+        guess = @{ booleanValue = $true }
+        grouping = @{ booleanValue = $true }
+      } } }
+    }
+  } | ConvertTo-Json -Depth 8
+  Invoke-RestMethod -Uri $uri -Method Patch -ContentType 'application/json' -Body $body | Out-Null
+  Write-Host 'Local Jev admission enabled for the emulator.'
+}
+
 function Import-EnvFile([string]$path) {
   if (-not (Test-Path $path)) { return }
   foreach ($line in Get-Content $path) {
@@ -90,6 +108,7 @@ try {
   Wait-ForPort 5001 'Functions emulator' $emulator
   Wait-ForPort 9000 'Realtime Database emulator' $emulator
   Wait-ForPort 4000 'Firebase Emulator UI' $emulator
+  Enable-LocalJevAdmission
   Start-Sleep -Seconds 3
 
   Write-Host 'Starting Vite dev server...'
