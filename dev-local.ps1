@@ -48,7 +48,7 @@ try {
 
   Write-Host 'Starting Vite dev server...'
   $vite = Start-Process -FilePath $viteCli `
-    -ArgumentList @('--host', 'localhost', '--port', '5173', '--strictPort') `
+    -ArgumentList @('--host', '0.0.0.0', '--port', '5173', '--strictPort') `
     -WorkingDirectory $root -RedirectStandardOutput $viteOut `
     -RedirectStandardError $viteErr -WindowStyle Hidden -PassThru
   $children += $vite
