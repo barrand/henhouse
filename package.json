@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:local": "./dev.sh",
+    "dev:local": "powershell -ExecutionPolicy Bypass -File ./dev-local.ps1",
     "bots": "node tools/bots/index.mjs",
     "validate:jev": "node tools/jev-validation/index.mjs",
     "experiment:jev:english": "npm --prefix functions run build && node tools/jev-validation/scenarios/english-experiment.mjs",
