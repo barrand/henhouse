@@ -33,20 +33,23 @@ function Clear-LocalDevPorts {
 }
 
 function Enable-LocalJevAdmission {
-  $uri = "http://127.0.0.1:8080/v1/projects/$projectId/databases/(default)/documents/aiExperimentConfig/jev"
-  $body = @{
-    fields = @{
-      admissionEnabled = @{ booleanValue = $true }
-      mode = @{ stringValue = 'jev' }
-      approvedConfigVersion = @{ stringValue = 'jev-playtest-v2' }
-      enabledOperations = @{ mapValue = @{ fields = @{
-        clue = @{ booleanValue = $true }
-        guess = @{ booleanValue = $true }
-        grouping = @{ booleanValue = $true }
-      } } }
-    }
-  } | ConvertTo-Json -Depth 8
-  Invoke-RestMethod -Uri $uri -Method Patch -ContentType 'application/json' -Body $body | Out-Null
+  $adminPackage = Join-Path $root 'functions\node_modules\firebase-admin'
+  $seed = @'
+const admin = require(process.argv[1])
+admin.initializeApp({ projectId: process.argv[2] })
+admin.firestore().doc('aiExperimentConfig/jev').set({
+  admissionEnabled: true,
+  mode: 'jev',
+  approvedConfigVersion: 'jev-playtest-v2',
+  enabledOperations: { clue: true, guess: true, grouping: true },
+}).then(() => process.exit(0)).catch((error) => { console.error(error); process.exit(1) })
+'@
+  $previousFirestoreHost = $env:FIRESTORE_EMULATOR_HOST
+  $env:FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080'
+  & $nodeExe -e $seed $adminPackage $projectId
+  $exitCode = $LASTEXITCODE
+  if ($previousFirestoreHost) { $env:FIRESTORE_EMULATOR_HOST = $previousFirestoreHost } else { Remove-Item Env:FIRESTORE_EMULATOR_HOST -ErrorAction SilentlyContinue }
+  if ($exitCode -ne 0) { throw 'Could not seed local Jev admission config.' }
   Write-Host 'Local Jev admission enabled for the emulator.'
 }
 
