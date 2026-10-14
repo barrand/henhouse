@@ -172,7 +172,7 @@ export async function beginClueSubmission(gameId: string, roundNum: number): Pro
 }
 
 /**
- * Called after all clues are submitted. Runs Gemini dedup and transitions
+ * Called after all clues are submitted. Runs deterministic deduplication and transitions
  * the round to 'reveal' status with grouped clues + initial visible groups.
  */
 export async function runDeduplication(gameId: string, roundNum: number): Promise<void> {

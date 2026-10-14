@@ -68,7 +68,7 @@ describe('fuzzyMatch', () => {
     expect(fuzzyMatch('dog', 'cat')).toBe(false)
   })
 
-  it('does not match verb inflections (left to Gemini)', () => {
+  it('leaves unsupported verb inflections unresolved for semantic evaluation', () => {
     expect(fuzzyMatch('running', 'run')).toBe(false)
     expect(fuzzyMatch('run', 'running')).toBe(false)
     expect(fuzzyMatch('baking', 'bake')).toBe(false)
@@ -100,7 +100,24 @@ describe('detectDuplicateClues', () => {
         expect.arrayContaining(['alice', 'bob', 'carol']),
         ['dave'],
       ]),
-      reason: 'Exact match + common variations detected (no Gemini)',
+      reason: 'Exact match + common variations detected (deterministic)',
     })
+  })
+
+  it('returns every clue exactly once without a provider call', async () => {
+    const result = await detectDuplicateClues('omelet', {
+      alice: 'rainbow',
+      bob: 'sunshine',
+      carol: 'RAINBOW',
+      dave: 'sunshine',
+    })
+    const members = result.groups.flat()
+    expect(new Set(members)).toEqual(new Set(['alice', 'bob', 'carol', 'dave']))
+    expect(members).toHaveLength(4)
+    expect(result.groups).toEqual(expect.arrayContaining([
+      expect.arrayContaining(['alice', 'carol']),
+      expect.arrayContaining(['bob', 'dave']),
+    ]))
+    expect(result.reason).toContain('deterministic')
   })
 })

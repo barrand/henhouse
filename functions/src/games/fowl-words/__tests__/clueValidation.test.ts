@@ -67,7 +67,7 @@ describe('validateClueForSubmission', () => {
   })
 
   it('keeps shape-valid clues playable if classification is unavailable', async () => {
-    const classify = vi.fn().mockRejectedValue(new Error('Gemini unavailable'))
+    const classify = vi.fn().mockRejectedValue(new Error('classifier unavailable'))
 
     await expect(validateClueForSubmission('butterfly', classify)).resolves.toEqual({
       valid: true,

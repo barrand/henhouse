@@ -163,6 +163,35 @@ if (args['self-test'] === 'fail') {
     if (!source.includes('tx.update(playerRef, { score: FieldValue.increment(points) })')) throw new Error('score increments are not inside the guarded transaction')
     return 'unique leased claims, expiry recovery, late-result rejection, and atomic score commits are present'
   })
+} else if (phase === 'FW-3') {
+  const npm = await resolveCommand('npm')
+  await check('fw3-deterministic-dedup-build-and-tests', async () => {
+    if (!npm) return { status: 'incomplete', message: 'npm is unavailable' }
+    for (const item of [['functions build', ['--prefix', 'functions', 'run', 'build']], ['functions tests', ['--prefix', 'functions', 'test']]]) {
+      const result = await run(npm, item[1], { cwd: rootDir, timeoutMs: 180000 })
+      if (result.code !== 0) throw new Error(item[0] + ' failed: ' + shortOutput(result))
+    }
+    return 'deterministic grouping, complete partition, visibility, and scoring tests passed'
+  })
+  await check('fw3-no-provider-dedup', async () => {
+    const source = await readFile(path.join(rootDir, 'functions', 'src', 'shared', 'gemini.ts'), 'utf8')
+    const start = source.indexOf('export async function detectDuplicateClues')
+    const end = source.indexOf('function fallbackExactMatchGrouping', start)
+    if (start < 0 || end < 0) throw new Error('deterministic dedup function boundary is missing')
+    const dedupSource = source.slice(start, end)
+    if (dedupSource.includes('generateContent') || dedupSource.includes('DecisionService') || dedupSource.includes('TypeSafeClient')) throw new Error('deduplication contains a provider call')
+    if (!dedupSource.includes('fastExactMatchGrouping')) throw new Error('deduplication does not use deterministic grouping')
+    return 'deduplication has no Jev/Gemini/provider call and uses normalized deterministic grouping only'
+  })
+  await check('fw3-round-boundary', async () => {
+    const source = await readFile(path.join(rootDir, 'functions', 'src', 'games', 'fowl-words', 'roundFlow.ts'), 'utf8')
+    if (!source.includes('detectDuplicateClues(secretWord, cluesByPlayer)')) throw new Error('round flow is not using the deterministic dedup function')
+    const start = source.indexOf('export async function runDeduplication')
+    const end = source.indexOf('async function commitScoredGuess', start)
+    const dedupBoundary = source.slice(start, end)
+    if (dedupBoundary.includes('DecisionService')) throw new Error('Jev adapter is imported into the dedup round boundary')
+    return 'Fowl Words deduplication remains isolated from Jev guess/clue decisions'
+  })
 } else if (phase !== 'foundation') {
   checks.push({ id: 'phase-scope', status: 'incomplete', message: phase + ' validation is not implemented; complete the foundation phase first' })
 } else {

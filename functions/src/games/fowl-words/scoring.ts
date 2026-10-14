@@ -171,7 +171,7 @@ export function selectNextUnlockGroup(
 }
 
 /**
- * Build ClueGroup objects from Gemini's grouped output + clue texts.
+ * Build ClueGroup objects from the deterministic grouped output + clue texts.
  * Returns groups sorted with unique groups first.
  */
 export function buildClueGroups(

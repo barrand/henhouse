@@ -290,10 +290,10 @@ export interface DuplicateClueResult {
 }
 
 /**
- * TIER 1 — Fast exact-match + common variation grouping (NO Gemini call).
+ * Deterministic exact-match + common variation grouping (no provider call).
  * Catches ~95% of duplicates without any API cost.
  * Returns hasGrouped=true only if we found actual duplicates to group.
- * If all clues are unique, returns hasGrouped=false so we skip Gemini entirely.
+ * If all clues are unique, returns hasGrouped=false so the result stays unique.
  */
 function fastExactMatchGrouping(
   clues: Record<string, string>,
@@ -364,8 +364,7 @@ function fastExactMatchGrouping(
   console.log('[Tier1] Groups found:', JSON.stringify(groups), 'hasGrouped:', hasGrouped)
 
   if (!hasGrouped) {
-    // All clues are unique — skip Gemini entirely
-    console.log('[Tier1] No duplicates found, skipping Gemini')
+    // All clues are unique — return the deterministic partition.
     return {
       hasGrouped: false,
       groups: groups, // still return groups (all size-1), but signal to skip Gemini
@@ -373,12 +372,12 @@ function fastExactMatchGrouping(
     }
   }
 
-  // Found duplicates — return them without calling Gemini
-  console.log('[Tier1] Duplicates found! Skipping Gemini entirely')
+  // Found duplicates — return them without a provider call.
+  console.log('[Tier1] Duplicates found; returning deterministic groups')
   return {
     hasGrouped: true,
     groups: groups.sort((a, b) => b.length - a.length), // largest groups first
-    reason: 'Exact match + common variations detected (no Gemini)',
+      reason: 'Exact match + common variations detected (deterministic)',
   }
 }
 
@@ -410,13 +409,10 @@ export async function detectDuplicateClues(
     }
   }
 
-  // If tier 1 found no duplicates, we could call Gemini for semantic matching.
-  // However: the Gemini prompt is CONSERVATIVE (only exact/spelling/plural variations),
-  // so if tier 1 didn't find them, Gemini won't either. Skip Gemini to save cost.
-  console.log('[detectDuplicateClues] Tier 1 found no duplicates. Skipping Gemini. Returning:', JSON.stringify(tier1Result))
+  console.log('[detectDuplicateClues] Tier 1 found no duplicates. Returning deterministic partition:', JSON.stringify(tier1Result))
   return {
     groups: tier1Result.groups, // all unique (size-1 groups)
-    reason: 'All clues unique (tier 1 pass)',
+    reason: 'All clues unique (deterministic tier 1 pass)',
   }
 }
 
@@ -433,8 +429,8 @@ function fallbackExactMatchGrouping(clues: Record<string, string>): DuplicateClu
   return {
     groups,
     reason: hasDuplicates
-      ? 'Exact duplicates detected (Gemini unavailable)'
-      : 'All clues unique (Gemini unavailable)',
+      ? 'Exact duplicates detected (deterministic fallback)'
+      : 'All clues unique (deterministic fallback)',
   }
 }
 
