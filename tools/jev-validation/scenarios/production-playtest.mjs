@@ -129,11 +129,15 @@ if(mode==='stage') {
         const guesser=participants.find(p=>p.user.uid===fg.currentGuesser),givers=participants.filter(p=>p!==guesser)
         for(const giver of givers) await giver.call('fowlWordsSubmitWordVote',{...fowlData,wordIndex:0})
         let fr=(await db.doc(`games/${fowl.gameId}/rounds/1`).get()).data()
-        const wait=Math.max(0,new Date(fr.wordSelectedDeadline).getTime()-Date.now()+200)
-        assert.ok(wait<30_000,'Unexpected word-selection handoff deadline')
-        if(wait) await new Promise(resolve=>setTimeout(resolve,wait))
-        await call('fowlWordsBeginClueSubmission',fowlData)
-        fr=(await db.doc(`games/${fowl.gameId}/rounds/1`).get()).data()
+        // Follow server state instead of assuming the workstation clock agrees
+        // with Cloud Functions' spotlight deadline. Early begin calls are no-ops.
+        for(let attempt=0;attempt<12;attempt++) {
+          await call('fowlWordsBeginClueSubmission',fowlData)
+          fr=(await db.doc(`games/${fowl.gameId}/rounds/1`).get()).data()
+          if(fr.status==='clue-submission') break
+          await new Promise(resolve=>setTimeout(resolve,1000))
+        }
+        assert.equal(fr.status,'clue-submission','Server spotlight did not finish within smoke deadline')
         const secret=fr.secretWord
         const clues=['penguin','volcano','cactus','rainbow','butterfly'].filter(c=>!c.includes(secret.toLowerCase())&&!secret.toLowerCase().includes(c)).slice(0,2)
         for(let i=0;i<2;i++) await givers[i].call('submitClue',{...fowlData,clue:clues[i]})
@@ -152,6 +156,13 @@ if(mode==='stage') {
         await assert.rejects(()=>call('updateCategories',{gameId:flock.gameId,categories:['birds']}))
         await call('flockStartGame',{gameId:flock.gameId})
         let lr=(await db.doc(`games/${flock.gameId}/rounds/1`).get()).data()
+        if(process.argv.includes('--open-flock')) {
+          for(let attempt=0;lr.type==='multiple_choice'&&attempt<8;attempt++) {
+            await call('skipQuestion',{gameId:flock.gameId})
+            lr=(await db.doc(`games/${flock.gameId}/rounds/1`).get()).data()
+          }
+          assert.notEqual(lr.type,'multiple_choice','No open question drawn for deployed grouping smoke')
+        }
         const answers=lr.type==='multiple_choice'?[lr.options[0],lr.options[0],lr.options[1]]:['bicycle','bike','car']
         for(let i=0;i<3;i++) await participants[i].call('submitAnswer',{gameId:flock.gameId,roundNum:1,answer:answers[i]})
         lr=(await db.doc(`games/${flock.gameId}/rounds/1`).get()).data()
