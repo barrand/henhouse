@@ -78,6 +78,41 @@ if (args['self-test'] === 'fail') {
       return 'authenticated Jev response validated: model=' + result.model + ', latencyMs=' + result.latencyMs
     })
   }
+} else if (phase === 'S2') {
+  const npm = await resolveCommand('npm')
+  await check('s2-adapter-build-and-tests', async () => {
+    if (!npm) return { status: 'incomplete', message: 'npm is unavailable' }
+    for (const item of [['functions build', ['--prefix', 'functions', 'run', 'build']], ['functions tests', ['--prefix', 'functions', 'test']]]) {
+      const result = await run(npm, item[1], { cwd: rootDir, timeoutMs: 180000 })
+      if (result.code !== 0) throw new Error(item[0] + ' failed: ' + shortOutput(result))
+    }
+    return 'adapter build and S2 transport/error-path tests passed'
+  })
+  await check('s2-transport-policy', async () => {
+    const source = await readFile(path.join(rootDir, 'functions', 'src', 'shared', 'decisionService.ts'), 'utf8')
+    for (const required of ['JEV_ATTEMPT_TIMEOUT_MS = 1500', 'JEV_TOTAL_DEADLINE_MS = 2000', 'maxRetries: 1', 'httpStatuses: new Set([429, 529])', 'Malformed Jev response metadata', 'Jev total deadline exceeded']) {
+      if (!source.includes(required)) throw new Error('missing transport policy: ' + required)
+    }
+    if (source.includes('console.log') || source.includes('console.error')) throw new Error('adapter must not log provider payloads or credentials')
+    return 'one SDK retry layer, bounded per-attempt/total deadlines, status policy, metadata validation, and quiet logging are present'
+  })
+  await check('s2-duplicate-commit-guard', async () => {
+    const source = await readFile(path.join(rootDir, 'functions', 'src', 'games', 'fowl-words', 'roundFlow.ts'), 'utf8')
+    for (const required of ['attemptInProgress === true', 'attemptInProgress: true', "status: 'scored'", 'batch.commit()']) {
+      if (!source.includes(required)) throw new Error('missing guarded commit invariant: ' + required)
+    }
+    return 'duplicate guess claims are rejected and scoring state plus score increments commit atomically'
+  })
+  if (profile !== 'offline') {
+    await check('live-typesafe-contract', async () => {
+      if (!process.env.TYPESAFE_API_KEY?.trim()) return { status: 'incomplete', message: 'TYPESAFE_API_KEY is not present in this validation process' }
+      const modulePath = path.join(rootDir, 'functions', 'lib', 'shared', 'jevLiveContract.js')
+      const { runJevLiveContractCheck } = await import(modulePath)
+      const result = await runJevLiveContractCheck()
+      if (result.model !== 'jev-1.13.0' || !Number.isFinite(result.latencyMs) || result.latencyMs < 0) throw new Error('live response did not satisfy the pinned-model metadata contract')
+      return 'authenticated Jev response validated: model=' + result.model + ', latencyMs=' + result.latencyMs
+    })
+  }
 } else if (phase !== 'foundation') {
   checks.push({ id: 'phase-scope', status: 'incomplete', message: phase + ' validation is not implemented; complete the foundation phase first' })
 } else {
