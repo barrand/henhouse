@@ -3,8 +3,9 @@ $ProgressPreference = 'SilentlyContinue'
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $projectId = if ($env:FIREBASE_PROJECT_ID) { $env:FIREBASE_PROJECT_ID } else { 'flock-together-game' }
-$firebaseCli = Join-Path $root 'node_modules\.bin\firebase.cmd'
-$viteCli = Join-Path $root 'node_modules\.bin\vite.cmd'
+$nodeExe = (Get-Command node -ErrorAction Stop).Source
+$firebaseJs = Join-Path $root 'node_modules\firebase-tools\lib\bin\firebase.js'
+$viteJs = Join-Path $root 'node_modules\vite\bin\vite.js'
 $logRoot = Join-Path $env:TEMP 'henhouse-dev-local'
 $emulatorOut = Join-Path $logRoot 'emulators.out.log'
 $emulatorErr = Join-Path $logRoot 'emulators.err.log'
@@ -50,8 +51,8 @@ function Wait-ForPort([int]$port, [string]$name, [System.Diagnostics.Process]$pr
 }
 
 try {
-  if (-not (Test-Path $firebaseCli)) { throw "Firebase CLI not found at $firebaseCli. Run npm install first." }
-  if (-not (Test-Path $viteCli)) { throw "Vite not found at $viteCli. Run npm install first." }
+  if (-not (Test-Path $firebaseJs)) { throw "Firebase CLI not found at $firebaseJs. Run npm install first." }
+  if (-not (Test-Path $viteJs)) { throw "Vite not found at $viteJs. Run npm install first." }
 
   New-Item -ItemType Directory -Path $logRoot -Force | Out-Null
   Write-Host 'Building functions...'
@@ -59,8 +60,8 @@ try {
   if ($LASTEXITCODE -ne 0) { throw 'Functions build failed.' }
 
   Write-Host "Starting Firebase emulators for project $projectId..."
-  $emulator = Start-Process -FilePath $firebaseCli `
-    -ArgumentList @('emulators:start', '--project', $projectId) `
+  $emulator = Start-Process -FilePath $nodeExe `
+    -ArgumentList @($firebaseJs, 'emulators:start', '--project', $projectId) `
     -WorkingDirectory $root -RedirectStandardOutput $emulatorOut `
     -RedirectStandardError $emulatorErr -WindowStyle Hidden -PassThru
   $children += $emulator
@@ -73,8 +74,8 @@ try {
   Start-Sleep -Seconds 3
 
   Write-Host 'Starting Vite dev server...'
-  $vite = Start-Process -FilePath $viteCli `
-    -ArgumentList @('--host', '0.0.0.0', '--port', '5173', '--strictPort') `
+  $vite = Start-Process -FilePath $nodeExe `
+    -ArgumentList @($viteJs, '--host', '0.0.0.0', '--port', '5173', '--strictPort') `
     -WorkingDirectory $root -RedirectStandardOutput $viteOut `
     -RedirectStandardError $viteErr -WindowStyle Hidden -PassThru
   $children += $vite
