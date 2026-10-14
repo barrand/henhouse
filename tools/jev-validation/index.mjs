@@ -221,6 +221,32 @@ if (args['self-test'] === 'fail') {
     if (!worker.includes('processJevShadowJob') || !worker.includes('snapshot.ref.update')) throw new Error('shadow worker does not write comparison state')
     return 'legacy clue/guess decisions remain authoritative and shadow inference is durable, detached, and non-blocking'
   })
+} else if (phase === 'FW-5') {
+  const npm = await resolveCommand('npm')
+  await check('fw5-offline-regression', async () => {
+    if (!npm) return { status: 'incomplete', message: 'npm is unavailable' }
+    for (const item of [['root build', ['run', 'build']], ['functions build', ['--prefix', 'functions', 'run', 'build']], ['functions tests', ['--prefix', 'functions', 'test']]]) {
+      const result = await run(npm, item[1], { cwd: rootDir, timeoutMs: 180000 })
+      if (result.code !== 0) throw new Error(item[0] + ' failed: ' + shortOutput(result))
+    }
+    return 'full offline regression passed'
+  })
+  await check('fw5-semantic-corpus', () => {
+    const clueCount = fixtures.clueValidation.length
+    const guessCount = fixtures.guessEvaluation.length
+    const clueHeldOut = fixtures.clueValidation.filter((item) => item.split === 'held-out').length
+    const guessHeldOut = fixtures.guessEvaluation.filter((item) => item.split === 'held-out').length
+    if (clueCount < 400 || guessCount < 400 || clueHeldOut < 300 || guessHeldOut < 300) {
+      return { status: 'incomplete', message: `FW-5 requires 400 clue and 400 guess fixtures with 300 held-out each; found clues=${clueCount} (held-out=${clueHeldOut}), guesses=${guessCount} (held-out=${guessHeldOut})` }
+    }
+    return 'minimum held-out clue and guess corpus is present'
+  })
+  await check('fw5-three-live-semantic-runs', () => {
+    if (!process.env.TYPESAFE_API_KEY?.trim()) return { status: 'incomplete', message: 'three frozen live Jev semantic runs require TYPESAFE_API_KEY in the validation process' }
+    return { status: 'incomplete', message: 'live semantic runner is not implemented for FW-5' }
+  })
+  await check('fw5-live-performance', () => ({ status: 'incomplete', message: 'FW-5 requires at least 200 live clue and 200 live guess operations with p95 under 1s; performance runner is not implemented' }))
+  await check('fw5-bot-swarm-evidence', () => ({ status: 'incomplete', message: 'FW-5 requires completed real-Jev ten-round scripted Fowl Words games with Gemini blocked; no qualifying evidence artifact exists' }))
 } else if (phase !== 'foundation') {
   checks.push({ id: 'phase-scope', status: 'incomplete', message: phase + ' validation is not implemented; complete the foundation phase first' })
 } else {
