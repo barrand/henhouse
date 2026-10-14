@@ -13,7 +13,7 @@ const db = admin.firestore()
 const checks = []
 let calls = 0
 let gate
-DecisionService.prototype.evaluateFowlWordsGuess = async () => { calls++; if (gate) await gate; return { correct: true, metadata: { probabilities: { correct: .99 }, latencyMs: 10, fallbackUsed: false } } }
+DecisionService.prototype.evaluateFowlWordsGuess = async ({guess}) => { calls++; if (gate) await gate; const correct=guess!=='extremelylongwronganswer'; return { correct, metadata: { probabilities: { correct: correct?.99:.01 }, latencyMs: 10, fallbackUsed: false } } }
 DecisionService.prototype.classifyFowlWordsClue = async () => { calls++; if (gate) await gate; return { singleWord: true, tooCloseToSecret: false, metadata: { probabilities: { joined_words: .1, too_close: .1 }, latencyMs: 10, fallbackUsed: false } } }
 await db.doc('aiExperimentConfig/jev').set({ admissionEnabled: true, approvedConfigVersion: 'jev-playtest-v2', mode: 'jev', allowedHostUids: ['host'], enabledOperations: { clue: true, guess: true } })
 let serial = 0
