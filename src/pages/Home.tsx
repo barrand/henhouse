@@ -20,19 +20,10 @@ export default function Home({ experimental = false }: { experimental?: boolean 
   const [creatingFowlWords, setCreatingFowlWords] = useState(false)
   const [creatingTruthOrTurd, setCreatingTruthOrTurd] = useState(false)
   const [joining, setJoining] = useState(false)
-  const [includePatrioticQuestions, setIncludePatrioticQuestions] = useState(() => localStorage.getItem('includePatrioticQuestions') === 'true')
 
   const saveName = (n: string) => {
     setName(n)
     localStorage.setItem('playerName', n)
-  }
-
-  const togglePatrioticEdition = () => {
-    setIncludePatrioticQuestions((current) => {
-      const next = !current
-      localStorage.setItem('includePatrioticQuestions', String(next))
-      return next
-    })
   }
 
   const handleCreateFlock = async () => {
@@ -40,7 +31,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
     setError('')
     setCreatingFlock(true)
     try {
-      const { code } = await flockCreateGame(name.trim(), includePatrioticQuestions, experimental)
+      const { code } = await flockCreateGame(name.trim(), false, experimental)
       navigate(`/flock/${code}`)
     } catch (err: unknown) {
       setError(errorMessage(err, 'Failed to create game'))
@@ -54,7 +45,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
     setError('')
     setCreatingFowlWords(true)
     try {
-      const { code } = await fowlWordsCreateGame(name.trim(), includePatrioticQuestions, experimental)
+      const { code } = await fowlWordsCreateGame(name.trim(), false, experimental)
       navigate(`/fowl-words/${code}`)
     } catch (err: unknown) {
       setError(errorMessage(err, 'Failed to create game'))
@@ -68,7 +59,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
     setError('')
     setCreatingTruthOrTurd(true)
     try {
-      const { code } = await truthOrTurdCreateGame(name.trim(), includePatrioticQuestions)
+      const { code } = await truthOrTurdCreateGame(name.trim(), false)
       navigate(`/truth-or-turd/${code}`)
     } catch (err: unknown) {
       setError(errorMessage(err, 'Failed to create game'))
@@ -123,7 +114,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
             HENHOUSE
           </h1>
           <p className="text-on-surface-variant font-body text-sm">Party games for the whole flock</p>
-          {experimental && <p className="mt-3 inline-flex rounded-full bg-primary-fixed px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.14em] text-on-primary-fixed-variant">Jev playtest · decisions may differ · normal games unchanged</p>}
+          {experimental && <p className="mt-3 inline-flex rounded-full bg-primary-fixed px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.14em] text-on-primary-fixed-variant">Jev mode · decisions may differ · Gemini mode at /gemini</p>}
         </div>
 
         {/* Name */}
@@ -185,32 +176,6 @@ export default function Home({ experimental = false }: { experimental?: boolean 
           <span className="font-body text-xs italic text-on-surface-variant">or start a new game</span>
           <div className="h-px flex-1 bg-outline-variant/40" />
         </div>
-
-        {/* Shared Settings */}
-        <button
-          type="button"
-          onClick={togglePatrioticEdition}
-          className="w-full rounded-xl border border-outline-variant/60 bg-surface-container-low px-4 py-3 flex items-center justify-between gap-4 text-left hover:bg-surface-container transition-all"
-          aria-pressed={includePatrioticQuestions}
-        >
-          <span className="min-w-0">
-            <span className="block font-headline text-base font-bold text-on-surface">Patriotic Edition</span>
-            <span className="block text-xs text-on-surface-variant font-body leading-snug mt-0.5">
-              Adds America-themed questions, trivia, and Fowl Words cards.
-            </span>
-          </span>
-          <span
-            className={`shrink-0 w-12 h-6 rounded-full transition-colors flex items-center ${
-              includePatrioticQuestions ? 'bg-primary' : 'bg-outline-variant'
-            }`}
-          >
-            <span
-              className={`w-5 h-5 rounded-full bg-surface-container transition-transform ${
-                includePatrioticQuestions ? 'translate-x-6' : 'translate-x-0.5'
-              }`}
-            />
-          </span>
-        </button>
 
         {/* Create Section: Game Tiles */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

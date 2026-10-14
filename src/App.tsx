@@ -21,7 +21,8 @@ const Loading = () => (
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<Home experimental />} />
+      <Route path="/gemini" element={<Home />} />
       <Route path="/jev" element={<Home experimental />} />
       {FlockPreview && (
         <>
