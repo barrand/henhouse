@@ -14,6 +14,24 @@ $viteErr = Join-Path $logRoot 'vite.err.log'
 $children = @()
 $stopRequested = $false
 
+function Stop-ProcessTree([int]$processId) {
+  $descendants = Get-CimInstance Win32_Process -Filter "ParentProcessId = $processId" -ErrorAction SilentlyContinue
+  foreach ($descendant in $descendants) {
+    Stop-ProcessTree ([int]$descendant.ProcessId)
+  }
+  Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue
+}
+
+function Clear-LocalDevPorts {
+  foreach ($port in @(4000, 5001, 5173, 8080, 9000, 9099)) {
+    $owners = Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue |
+      Select-Object -ExpandProperty OwningProcess -Unique
+    foreach ($owner in $owners) {
+      Stop-ProcessTree ([int]$owner)
+    }
+  }
+}
+
 function Import-EnvFile([string]$path) {
   if (-not (Test-Path $path)) { return }
   foreach ($line in Get-Content $path) {
@@ -30,6 +48,7 @@ function Import-EnvFile([string]$path) {
 Import-EnvFile (Join-Path $root '.env')
 Import-EnvFile (Join-Path $root '.env.production')
 $env:VITE_USE_EMULATORS = 'true'
+Clear-LocalDevPorts
 
 $cancelHandler = [ConsoleCancelEventHandler]{
   param($sender, $eventArgs)
@@ -97,8 +116,9 @@ try {
 finally {
   [Console]::remove_CancelKeyPress($cancelHandler)
   foreach ($child in $children) {
-    if ($child -and -not $child.HasExited) {
-      Stop-Process -Id $child.Id -Force -ErrorAction SilentlyContinue
+    if ($child) {
+      Stop-ProcessTree $child.Id
     }
   }
+  Clear-LocalDevPorts
 }
