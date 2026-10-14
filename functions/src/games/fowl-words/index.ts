@@ -29,6 +29,9 @@ import {
 } from './voteHelpers'
 import { experimentForCreation, jevOperationEnabled, requireExperimentRematch } from '../../shared/aiExperiment'
 import { enqueueFowlWordsShadow } from '../../shared/jevShadow'
+import { typesafeApiKey } from '../../shared/secrets'
+import { acceptsJevClue } from '../../shared/jevPolicy'
+import { classifyFowlWordsClue as legacyClueClassifier } from '../../shared/gemini'
 
 const db = admin.firestore
 
@@ -240,7 +243,7 @@ export const fowlWordsStartGame = onCall(async (request) => {
 })
 
 // -- SUBMIT CLUE --
-export const submitClue = onCall(async (request) => {
+export const submitClue = onCall({ secrets: [typesafeApiKey] }, async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -296,27 +299,29 @@ export const submitClue = onCall(async (request) => {
   // Run the semantic check only for a valid, eligible, in-progress submission.
   // Legacy rooms retain Gemini; Jev rooms use the server-selected Jev adapter.
   const jevService = game.aiExperiment?.mode === 'jev' ? new DecisionService() : null
+  let semanticClue = false
   const classify = jevService
     ? async (candidateClue: string, candidateSecret?: string) => {
-      if (!await jevOperationEnabled(uid, 'clue')) return null
+      if (!await jevOperationEnabled(game.originalHostId ?? game.hostId, 'clue')) return null
       if (!candidateSecret) return null
       const decision = await jevService.classifyFowlWordsClue({ clue: candidateClue, secretWord: candidateSecret })
-      const probabilities = decision.metadata.probabilities ?? {}
-      const joinedWordsRejected = !decision.singleWord && (probabilities.joined_words ?? 0) >= JEV_CLUE_REJECTION_THRESHOLD
-      const tooCloseRejected = decision.tooCloseToSecret && (probabilities.too_close ?? 0) >= JEV_CLUE_REJECTION_THRESHOLD
       return {
-        allowed: !joinedWordsRejected,
-        reason: joinedWordsRejected ? 'joined_words' as const : 'single_word' as const,
-        tooCloseToSecret: tooCloseRejected,
+        allowed: acceptsJevClue(decision),
+        reason: 'single_word' as const,
+        tooCloseToSecret: decision.tooCloseToSecret && (decision.metadata.probabilities?.too_close ?? 0) >= JEV_CLUE_REJECTION_THRESHOLD,
       }
     }
-    : undefined
+    : game.aiExperiment?.mode === 'shadow' ? async (candidateClue: string, candidateSecret?: string) => {
+      semanticClue = true
+      return legacyClueClassifier(candidateClue, candidateSecret)
+    } : undefined
   const clueValidation = await validateClueForSubmission(cleanClue, secretWord, classify)
-  if (game.aiExperiment?.mode === 'shadow' && secretWord) {
+  if (game.aiExperiment?.mode === 'shadow' && semanticClue && secretWord) {
     await enqueueFowlWordsShadow({
       gameId,
       roundNum,
       actorUid: uid,
+      hostUid: game.originalHostId ?? game.hostId,
       operation: 'clue',
       clue: cleanClue,
       secretWord,
@@ -366,7 +371,7 @@ export const submitClue = onCall(async (request) => {
 })
 
 // -- SUBMIT GUESS --
-export const submitGuess = onCall(async (request) => {
+export const submitGuess = onCall({ secrets: [typesafeApiKey] }, async (request) => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Must be signed in')
 
@@ -390,7 +395,13 @@ export const submitGuess = onCall(async (request) => {
     throw new HttpsError('permission-denied', 'You will join next round')
   }
 
-  await handleGuess(gameId, roundNum, uid, guess)
+  const expectedAttempt = request.data.expectedAttempt as number | undefined
+  if (expectedAttempt !== undefined && (!Number.isInteger(expectedAttempt) || expectedAttempt < 1 || expectedAttempt > 4)) throw new HttpsError('invalid-argument', 'Invalid attempt')
+  if (round.attemptInProgress && round.guessClaimExpiresAt?.toMillis?.() <= Date.now()) {
+    await recoverExpiredGuess(gameId, roundNum)
+    return
+  }
+  await handleGuess(gameId, roundNum, uid, guess, expectedAttempt)
 })
 
 export const fowlWordsRecoverGuess = onCall(async (request) => {

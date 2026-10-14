@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type KeyboardEvent, type PointerEvent } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
-import { submitGuess, unlockFirst, advanceRound, submitCluePeerLoveVote, submitCluePeerBooVote } from '../service'
+import { submitGuess, recoverGuess, unlockFirst, advanceRound, submitCluePeerLoveVote, submitCluePeerBooVote } from '../service'
 import PointCounter from './PointCounter'
 import { animateThumbBtn } from './thumbVoteFx'
 import { spawnHeartFloat, spawnBooFloat, pulseCardLove, shakeCardBoo, pulseCardUnlock } from './reactionFx'
@@ -50,6 +50,20 @@ export default function RevealView({
 
   useEffect(() => { guessRef.current = guess }, [guess])
 
+  useEffect(() => {
+    if (!round.attemptInProgress || !round.guessClaimExpiresAt || (!isGuesser && !isHost)) return
+    const expiresAt = round.guessClaimExpiresAt.seconds * 1000 + round.guessClaimExpiresAt.nanoseconds / 1e6
+    let pending = false
+    const recover = async () => {
+      if (pending || Date.now() <= expiresAt) return
+      pending = true
+      try { await recoverGuess(game.id, game.currentRound) } catch { /* Retry on the next tick. */ }
+      finally { pending = false }
+    }
+    const interval = setInterval(recover, 1000)
+    return () => clearInterval(interval)
+  }, [round.attemptInProgress, round.guessClaimExpiresAt, isGuesser, isHost, game.id, game.currentRound])
+
   // One-time unlock pulse on the newly visible clue (attempt 2+)
   useEffect(() => {
     const idx = round.lastUnlockedGroupIndex
@@ -76,7 +90,7 @@ export default function RevealView({
       if (remaining === 0 && !autoSubmittedRef.current && !submitting) {
         autoSubmittedRef.current = true
         const currentGuess = guessRef.current.trim() || '---'
-        try { await submitGuess(game.id, game.currentRound, currentGuess) } catch { /* ignore */ }
+        try { await submitGuess(game.id, game.currentRound, currentGuess, round.currentAttempt) } catch { /* ignore */ }
       }
     }
     tick()
@@ -98,9 +112,9 @@ export default function RevealView({
     setError('')
     setSubmitting(true)
     try {
-      await submitGuess(game.id, game.currentRound, guess)
-    } catch (err: any) {
-      setError(err.message ?? "Couldn't submit your guess")
+      await submitGuess(game.id, game.currentRound, guess, round.currentAttempt)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't submit your guess")
       setSubmitting(false)
     }
   }
@@ -109,8 +123,8 @@ export default function RevealView({
     setUnlocking(true)
     try {
       await unlockFirst(game.id, game.currentRound)
-    } catch (err: any) {
-      setError(err.message ?? "Couldn't unlock clue")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't unlock clue")
       setUnlocking(false)
     }
   }

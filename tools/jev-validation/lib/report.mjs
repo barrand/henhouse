@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, writeFile, readdir, readFile } from 'node:fs/promises'
+import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 
 export function sha256(value) {
@@ -8,6 +9,24 @@ export function sha256(value) {
 
 export function nowId() {
   return new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14)
+}
+
+export async function evidenceFingerprint(rootDir) {
+  const files = []
+  async function collect(directory) {
+    for (const item of await readdir(path.join(rootDir, directory), { withFileTypes: true })) {
+      const name = path.join(directory, item.name)
+      if (item.isDirectory()) await collect(name)
+      else files.push(name)
+    }
+  }
+  for (const directory of ['src', 'functions/src', 'tools/jev-validation']) await collect(directory)
+  files.push('package-lock.json', 'functions/package-lock.json', 'firebase.json', 'firestore.rules')
+  const hashes = {}
+  for (const file of files.sort()) hashes[file.replaceAll('\\', '/')] = sha256(await readFile(path.join(rootDir, file)))
+  let commit = 'unavailable'
+  try { commit = execFileSync('git', ['-c', `safe.directory=${rootDir.replaceAll('\\', '/')}`, 'rev-parse', 'HEAD'], { cwd: rootDir, encoding: 'utf8', windowsHide: true }).trim() } catch { /* Fingerprint still covers uncommitted content. */ }
+  return { commit, implementationHash: sha256(JSON.stringify(hashes)), files: hashes }
 }
 
 export function reportStatus(checks) {
@@ -28,7 +47,9 @@ export async function createReport({ rootDir, phase, profile, fixtureVersion, ch
     phase,
     profile,
     status: reportStatus(checks),
-    startedAt: new Date().toISOString(),
+    startedAt: events[0]?.startedAt ?? new Date().toISOString(),
+    finishedAt: new Date().toISOString(),
+    evidence: await evidenceFingerprint(rootDir),
     runtime: { node: process.version, platform: process.platform, cwd: process.cwd() },
     fixtureVersion,
     checks,

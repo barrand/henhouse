@@ -3,7 +3,7 @@ import { DecisionService, JEV_ATTEMPT_TIMEOUT_MS, JEV_TOTAL_DEADLINE_MS, require
 
 function serviceFor(answers: Record<string, unknown>) {
   return new DecisionService(() => ({
-    systemOne: (_request: unknown, _options: unknown) => ({
+    systemOne: () => ({
       withResponse: async () => ({
         data: { model: 'jev-1.13.0', usage: { input_tokens: 1, output_tokens: 1 }, answers },
         requestId: 'req-test',

@@ -43,7 +43,8 @@ export interface RoundData {
   clueSubmissionDeadline?: { seconds: number; nanoseconds: number }
   currentAttempt: number                // 1–4
   maxAttempts: number                   // min(4, max(1, totalClueGroups))
-  attemptInProgress: boolean            // true during Gemini guess evaluation
+  attemptInProgress: boolean            // true during provider guess evaluation
+  guessClaimExpiresAt?: { seconds: number; nanoseconds: number }
   attemptDeadline?: { seconds: number; nanoseconds: number }
   cluesByPlayer: Record<string, string>
   clueTimestamps?: Record<string, number> // unix seconds, for fast-bonus ordering

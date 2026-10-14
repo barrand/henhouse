@@ -3,6 +3,7 @@ import path from 'node:path'
 import { createReport, reportStatus, sha256 } from './lib/report.mjs'
 import { assertPartition, scoreFlockRound } from './lib/oracle.mjs'
 import { assertLoopback, probeVite, resolveCommand, run, shortOutput } from './lib/runtime.mjs'
+import { fowlCorpus, validateFowlCorpus } from './fixtures/fowl-corpus.mjs'
 
 const rootDir = path.resolve(import.meta.dirname, '../..')
 const args = Object.fromEntries(process.argv.slice(2).reduce((pairs, arg, index, all) => {
@@ -125,7 +126,7 @@ if (args['self-test'] === 'fail') {
   })
   await check('fw1-provider-boundary', async () => {
     const source = await readFile(path.join(rootDir, 'functions', 'src', 'games', 'fowl-words', 'index.ts'), 'utf8')
-    for (const required of ['game.aiExperiment?.mode === \'jev\'', 'new DecisionService()', "jevOperationEnabled(uid, 'clue')", 'JEV_CLUE_REJECTION_THRESHOLD', 'runTransaction']) {
+    for (const required of ['game.aiExperiment?.mode === \'jev\'', 'new DecisionService()', "jevOperationEnabled(game.originalHostId ?? game.hostId, 'clue')", 'JEV_CLUE_REJECTION_THRESHOLD', 'runTransaction']) {
       if (!source.includes(required)) throw new Error('missing FW-1 provider boundary: ' + required)
     }
     if (!source.includes(': undefined')) throw new Error('legacy classifier fallback is not explicit')
@@ -150,7 +151,7 @@ if (args['self-test'] === 'fail') {
   })
   await check('fw2-provider-boundary', async () => {
     const source = await readFile(path.join(rootDir, 'functions', 'src', 'games', 'fowl-words', 'roundFlow.ts'), 'utf8')
-    for (const required of ['deterministicGuess(secretWord, guess)', "game.aiExperiment?.mode === 'jev'", "jevOperationEnabled(guesserId, 'guess')", 'JEV_GUESS_ACCEPTANCE_THRESHOLD', 'isCorrect = false']) {
+    for (const required of ['deterministicGuess(secretWord, guess)', "game.aiExperiment?.mode === 'jev'", "jevOperationEnabled(game.originalHostId ?? game.hostId, 'guess')", 'acceptsJevGuess', 'isCorrect = false']) {
       if (!source.includes(required)) throw new Error('missing FW-2 provider boundary: ' + required)
     }
     return 'exact/fuzzy/plural/inflection checks stay local; Jev is limited to unresolved guesses and failures reject'
@@ -218,7 +219,7 @@ if (args['self-test'] === 'fail') {
       if (!source.includes('.catch((error) => console.error')) throw new Error('shadow enqueue failure can block authoritative gameplay')
     }
     const worker = await readFile(path.join(rootDir, 'functions', 'src', 'shared', 'jevShadow.ts'), 'utf8')
-    if (!worker.includes('processJevShadowJob') || !worker.includes('snapshot.ref.update')) throw new Error('shadow worker does not write comparison state')
+    if (!worker.includes('processJevShadowJob') || !worker.includes('tx.update(snapshot.ref')) throw new Error('shadow worker does not write comparison state')
     return 'legacy clue/guess decisions remain authoritative and shadow inference is durable, detached, and non-blocking'
   })
 } else if (phase === 'FW-5') {
@@ -232,21 +233,14 @@ if (args['self-test'] === 'fail') {
     return 'full offline regression passed'
   })
   await check('fw5-semantic-corpus', () => {
-    const clueCount = fixtures.clueValidation.length
-    const guessCount = fixtures.guessEvaluation.length
-    const clueHeldOut = fixtures.clueValidation.filter((item) => item.split === 'held-out').length
-    const guessHeldOut = fixtures.guessEvaluation.filter((item) => item.split === 'held-out').length
-    if (clueCount < 400 || guessCount < 400 || clueHeldOut < 300 || guessHeldOut < 300) {
-      return { status: 'incomplete', message: `FW-5 requires 400 clue and 400 guess fixtures with 300 held-out each; found clues=${clueCount} (held-out=${clueHeldOut}), guesses=${guessCount} (held-out=${guessHeldOut})` }
-    }
-    return 'minimum held-out clue and guess corpus is present'
+    const coverage = validateFowlCorpus(fowlCorpus())
+    return `${coverage.clues} clue and ${coverage.guesses} guess fixtures; 100 development and 300 held-out each plus English challenges; concept families isolated by split`
   })
   await check('fw5-three-live-semantic-runs', () => {
-    if (!process.env.TYPESAFE_API_KEY?.trim()) return { status: 'incomplete', message: 'three frozen live Jev semantic runs require TYPESAFE_API_KEY in the validation process' }
-    return { status: 'incomplete', message: 'live semantic runner is not implemented for FW-5' }
+    return { status: 'incomplete', message: 'Live runner implemented (scenarios/fowl-semantics.mjs); observed translation/English-equivalence failures block threshold freeze. New independent holdout is required after rubric tuning.' }
   })
-  await check('fw5-live-performance', () => ({ status: 'incomplete', message: 'FW-5 requires at least 200 live clue and 200 live guess operations with p95 under 1s; performance runner is not implemented' }))
-  await check('fw5-bot-swarm-evidence', () => ({ status: 'incomplete', message: 'FW-5 requires completed real-Jev ten-round scripted Fowl Words games with Gemini blocked; no qualifying evidence artifact exists' }))
+  await check('fw5-live-performance', () => ({ status: 'incomplete', message: 'Live latency measurements are saved with semantic runs; promotion requires passing measurements for the final frozen rubric/configuration.' }))
+  await check('fw5-bot-swarm-evidence', () => ({ status: 'incomplete', message: 'Three-player ten-round handler integration with real Jev passed; full HTTP/browser and supported player-count matrix remain required.' }))
 } else if (phase !== 'foundation') {
   checks.push({ id: 'phase-scope', status: 'incomplete', message: phase + ' validation is not implemented; complete the foundation phase first' })
 } else {
@@ -331,6 +325,16 @@ if (args['self-test'] === 'fail') {
   })
 }
 
+if (['S2', 'FW-1', 'FW-2', 'FW-3', 'FW-4', 'FW-5'].includes(phase) && !args['self-test']) {
+  await check('fowl-firestore-behavior', async () => {
+    const firebase = await resolveCommand('firebase')
+    const scenario = path.join(rootDir, 'tools/jev-validation/scenarios/fowl-safety.mjs')
+    const result = await run(firebase, ['emulators:exec', '--only', 'firestore', '--project', 'demo-jev-safety', `"${process.execPath}" "${scenario}"`], { cwd: rootDir, timeoutMs: 180000 })
+    if (result.code !== 0) throw new Error('Firestore safety scenarios failed: ' + shortOutput(result))
+    return 'Real transactions: concurrent scoring, late replies, expiry recovery, kill switch, parallel/stale clues, shadow replay, and cleanup pagination passed (mocked provider, no external model calls)'
+  })
+}
+if (['FW-1', 'FW-2', 'FW-4'].includes(phase)) checks.push({ id: 'phase-exit-evidence', status: 'incomplete', message: 'Behavioral safety suite passed if listed above; full semantic corpus gates, shadow latency comparison, and end-to-end prerequisites are not yet all satisfied. Source checks alone do not complete this phase.' })
 if (phase === 'foundation' && profile !== 'offline') checks.push({ id: 'live-typesafe-contract', status: 'incomplete', message: 'live TypeSafe contract runner is not implemented in Phase 1 foundation' })
 const report = await createReport({ rootDir, phase, profile, fixtureVersion: fixtures.version, checks, events })
 process.stdout.write(report.summaryPath + '\n')

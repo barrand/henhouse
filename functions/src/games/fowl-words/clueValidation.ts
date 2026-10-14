@@ -136,8 +136,8 @@ export async function validateClueForSubmission(
     }
     if (classification.tooCloseToSecret) return { valid: false, reason: 'too-close-to-secret' }
     if (!classification.allowed) return { valid: false, reason: 'joined-words' }
-  } catch (err) {
-    console.error('Fowl Words clue classifier failed; accepting shape-valid clue:', err)
+  } catch {
+    console.error('Fowl Words clue classifier failed; accepting shape-valid clue')
   }
 
   return shape

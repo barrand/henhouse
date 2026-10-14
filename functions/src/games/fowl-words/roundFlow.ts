@@ -15,9 +15,10 @@ import * as admin from 'firebase-admin'
 import { Timestamp, FieldValue } from 'firebase-admin/firestore'
 import { createHash } from 'node:crypto'
 import { detectDuplicateClues, deterministicGuess, evaluateGuess } from '../../shared/gemini'
-import { DecisionService, JEV_GUESS_ACCEPTANCE_THRESHOLD } from '../../shared/decisionService'
+import { DecisionService } from '../../shared/decisionService'
 import { jevOperationEnabled } from '../../shared/aiExperiment'
 import { enqueueFowlWordsShadow } from '../../shared/jevShadow'
+import { acceptsJevGuess } from '../../shared/jevPolicy'
 import { eligibleNonGuesserIds, getRoundEligiblePlayerIds } from '../../shared/roundEligibility'
 import {
   buildClueGroups,
@@ -279,9 +280,13 @@ async function commitScoredGuess(
   giverCount: number,
 ): Promise<boolean> {
   return firestore.runTransaction(async (tx) => {
+    const gameSnapshot = await tx.get(firestore.collection('games').doc(gameId))
     const latestSnap = await tx.get(roundRef)
     if (!latestSnap.exists) return false
     const latest = latestSnap.data()!
+    const game = gameSnapshot.data()
+    if (!game || game.status !== 'playing' || game.currentRound !== Number(roundRef.id) || game.currentGuesser !== guesserId) return false
+    if (latest.guessClaimAttempt !== latest.currentAttempt) return false
     if (latest.attemptInProgress !== true || latest.guessClaimId !== claimId || latest.status !== 'guess') return false
     const claimExpiresAt = timestampMillis(latest.guessClaimExpiresAt)
     if (claimExpiresAt && Date.now() > claimExpiresAt) return false
@@ -328,9 +333,13 @@ async function commitWrongGuessProgress(
 ): Promise<boolean> {
   const playerScores = await fetchPlayerScores(gameId)
   return firestore.runTransaction(async (tx) => {
+    const gameSnapshot = await tx.get(firestore.collection('games').doc(gameId))
     const latestSnap = await tx.get(roundRef)
     if (!latestSnap.exists) return false
     const latest = latestSnap.data()!
+    const game = gameSnapshot.data()
+    if (!game || game.status !== 'playing' || game.currentRound !== Number(roundRef.id) || game.currentGuesser !== guesserId) return false
+    if (latest.guessClaimAttempt !== latest.currentAttempt) return false
     if (latest.attemptInProgress !== true || latest.guessClaimId !== claimId || latest.status !== 'guess') return false
     const claimExpiresAt = timestampMillis(latest.guessClaimExpiresAt)
     if (claimExpiresAt && Date.now() > claimExpiresAt) return false
@@ -384,6 +393,7 @@ export async function handleGuess(
   roundNum: number,
   guesserId: string,
   guess: string,
+  expectedAttempt?: number,
 ): Promise<void> {
   const firestore = db()
   const gameRef = firestore.collection('games').doc(gameId)
@@ -397,9 +407,14 @@ export async function handleGuess(
   let claimId = ''
   let claimedAttempt = 1
   const claimed = await firestore.runTransaction(async (tx) => {
+    const gameSnapshot = await tx.get(gameRef)
     const snap = await tx.get(roundRef)
-    if (!snap.exists) return false
+    if (!snap.exists || !gameSnapshot.exists) return false
+    const currentGame = gameSnapshot.data()!
     const data = snap.data()!
+    if (currentGame.status !== 'playing' || currentGame.currentRound !== roundNum || currentGame.currentGuesser !== guesserId) return false
+    if (!getRoundEligiblePlayerIds(data, currentGame).includes(guesserId)) return false
+    if (expectedAttempt !== undefined && expectedAttempt !== (data.currentAttempt ?? 1)) return false
     if (data.status !== 'guess' && data.status !== 'reveal') return false
     if (data.attemptInProgress === true) return false
     claimedAttempt = data.currentAttempt ?? 1
@@ -412,6 +427,7 @@ export async function handleGuess(
       status: 'guess',
       guessAttempts: FieldValue.arrayUnion(guess.trim()),
       guessClaimId: claimId,
+      guessClaimAttempt: claimedAttempt,
       guessClaimExpiresAt: Timestamp.fromMillis(Date.now() + GUESS_CLAIM_LEASE_MS),
     })
     return true
@@ -424,8 +440,6 @@ export async function handleGuess(
   const game = gameSnap.data()!
   const roundData = roundSnap.data()!
   const secretWord: string = roundData.secretWord
-  const clueGroups = (roundData.clueGroups ?? []) as ClueGroup[]
-  const visibleGroupIndexes: number[] = roundData.visibleGroupIndexes ?? []
   const currentAttempt: number = roundData.currentAttempt ?? 1
   const maxAttempts: number = roundData.maxAttempts ?? 1
 
@@ -435,14 +449,14 @@ export async function handleGuess(
     isCorrect = deterministic
   } else if (game.aiExperiment?.mode === 'jev') {
     try {
-      if (!await jevOperationEnabled(guesserId, 'guess')) {
+      if (!await jevOperationEnabled(game.originalHostId ?? game.hostId, 'guess')) {
         isCorrect = false
       } else {
         const decision = await new DecisionService().evaluateFowlWordsGuess({ secretWord, guess })
-        isCorrect = decision.correct && (decision.metadata.probabilities?.correct ?? 0) >= JEV_GUESS_ACCEPTANCE_THRESHOLD
+        isCorrect = acceptsJevGuess(decision)
       }
-    } catch (error) {
-      console.error('Jev guess evaluation unavailable; rejecting guess', error instanceof Error ? error.message : 'unknown error')
+    } catch {
+      console.error('Jev guess evaluation unavailable; rejecting guess')
       isCorrect = false
     }
   } else {
@@ -453,6 +467,7 @@ export async function handleGuess(
       gameId,
       roundNum,
       actorUid: guesserId,
+      hostUid: game.originalHostId ?? game.hostId,
       operation: 'guess',
       guess: guess.trim(),
       secretWord,
@@ -460,7 +475,6 @@ export async function handleGuess(
       expected: { correct: isCorrect },
     }).catch((error) => console.error('Could not enqueue guess shadow evaluation', error instanceof Error ? error.message : 'unknown error'))
   }
-  const clueTimestamps = normalizeTimestamps(roundData.clueTimestamps ?? {})
   const giverCount = await getGiverCount(gameId, roundNum)
 
   // ── Path 1: Correct ─────────────────────────────────────────────
@@ -485,13 +499,16 @@ export async function handleGuess(
  */
 export async function recoverExpiredGuess(gameId: string, roundNum: number): Promise<void> {
   const firestore = db()
+  const playerScores = await fetchPlayerScores(gameId)
   const roundRef = firestore.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
   const giverCount = await getGiverCount(gameId, roundNum)
   const gameSnap = await firestore.collection('games').doc(gameId).get()
   const guesserId: string = gameSnap.data()?.currentGuesser ?? ''
   await firestore.runTransaction(async (tx) => {
+    const freshGame = (await tx.get(firestore.collection('games').doc(gameId))).data()
     const snap = await tx.get(roundRef)
     if (!snap.exists) return
+    if (!freshGame || freshGame.status !== 'playing' || freshGame.currentRound !== roundNum || freshGame.currentGuesser !== guesserId) return
     const data = snap.data()!
     const expiresAt = timestampMillis(data.guessClaimExpiresAt)
     if (data.attemptInProgress !== true || data.status !== 'guess' || !expiresAt || Date.now() <= expiresAt) return
@@ -523,9 +540,14 @@ export async function recoverExpiredGuess(gameId: string, roundNum: number): Pro
     }
 
     const nextAttempt = currentAttempt + 1
+    const nextUnlockIdx = selectNextUnlockGroup(clueGroups, visibleGroupIndexes, playerScores, clueTimestamps)
+    const newVisible = nextUnlockIdx < 0 ? visibleGroupIndexes : [...visibleGroupIndexes, nextUnlockIdx]
     tx.update(roundRef, {
       status: 'reveal',
       currentAttempt: nextAttempt,
+      visibleGroupIndexes: newVisible,
+      tentativePoints: computeTentativePoints(clueGroups, newVisible, guesserId, nextAttempt, clueTimestamps, giverCount),
+      lastUnlockedGroupIndex: nextUnlockIdx < 0 ? FieldValue.delete() : nextUnlockIdx,
       attemptDeadline: Timestamp.fromMillis(Date.now() + getSecondsForAttempt(nextAttempt) * 1000),
       attemptInProgress: false,
       guessClaimId: FieldValue.delete(),

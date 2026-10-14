@@ -11,7 +11,7 @@ const fowlWordsCreateGameFn = httpsCallable<{ playerName: string; includePatriot
 const fowlWordsRematchFn = httpsCallable<{ gameId: string }, { code: string }>(functions, 'fowlWordsRematch')
 const fowlWordsStartGameFn = httpsCallable<{ gameId: string }, void>(functions, 'fowlWordsStartGame')
 const submitClueFn = httpsCallable<{ gameId: string; roundNum: number; clue: string }, void>(functions, 'submitClue')
-const submitGuessFn = httpsCallable<{ gameId: string; roundNum: number; guess: string }, void>(functions, 'submitGuess')
+const submitGuessFn = httpsCallable<{ gameId: string; roundNum: number; guess: string; expectedAttempt?: number }, void>(functions, 'submitGuess')
 const fowlWordsAdvanceRoundFn = httpsCallable<{ gameId: string }, void>(functions, 'fowlWordsAdvanceRound')
 const fowlWordsForceDedupFn = httpsCallable<{ gameId: string; roundNum: number }, void>(functions, 'fowlWordsForceDedup')
 const fowlWordsUnlockFirstFn = httpsCallable<{ gameId: string; roundNum: number }, void>(functions, 'fowlWordsUnlockFirst')
@@ -51,8 +51,12 @@ export async function submitClue(gameId: string, roundNum: number, clue: string)
   await submitClueFn({ gameId, roundNum, clue })
 }
 
-export async function submitGuess(gameId: string, roundNum: number, guess: string) {
-  await submitGuessFn({ gameId, roundNum, guess })
+export async function submitGuess(gameId: string, roundNum: number, guess: string, expectedAttempt?: number) {
+  await submitGuessFn({ gameId, roundNum, guess, ...(expectedAttempt === undefined ? {} : { expectedAttempt }) })
+}
+
+export async function recoverGuess(gameId: string, roundNum: number) {
+  await httpsCallable<{ gameId: string; roundNum: number }, void>(functions, 'fowlWordsRecoverGuess')({ gameId, roundNum })
 }
 
 export async function advanceRound(gameId: string) {

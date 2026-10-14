@@ -34,6 +34,10 @@ try {
   await mustReject(() => updateDoc(experimentalRef, { aiExperiment: { mode: 'legacy' } }), 'client experiment mutation')
   await mustReject(() => setDoc(doc(gameHost.db, 'aiExperimentConfig', 'jev'), { admissionEnabled: true }), 'client config mutation')
   await mustReject(() => getDoc(doc(gameHost.db, 'aiExperimentConfig', 'jev')), 'client config read')
+  for (const collection of ['aiShadowJobs', 'aiShadowAggregates']) {
+    await mustReject(() => getDoc(doc(gameHost.db, collection, 'synthetic')), 'client shadow read')
+    await mustReject(() => setDoc(doc(gameHost.db, collection, 'synthetic'), { status: 'pending' }), 'client shadow write')
+  }
   await admin.firestore().doc('games/' + experimental.gameId).update({ status: 'finished' })
   await admin.firestore().doc('aiExperimentConfig/jev').update({ admissionEnabled: false })
   await mustReject(() => gameHost.call('flockRematch', { gameId: experimental.gameId }), 'disabled experimental rematch')
