@@ -31,7 +31,7 @@ if(mode==='stage') {
   const decode=v=>'mapValue' in v?Object.fromEntries(Object.entries(v.mapValue.fields??{}).map(([k,x])=>[k,decode(x)])):'arrayValue' in v?(v.arrayValue.values??[]).map(decode):'integerValue' in v?Number(v.integerValue):Object.values(v)[0]
   const encode=v=>v===null?{nullValue:null}:typeof v==='boolean'?{booleanValue:v}:typeof v==='string'?{stringValue:v}:typeof v==='number'?{integerValue:String(v)}:Array.isArray(v)?{arrayValue:{values:v.map(encode)}}:{mapValue:{fields:Object.fromEntries(Object.entries(v).map(([k,x])=>[k,encode(x)]))}}
   const db={doc:document=>{
-    assert.ok(document==='aiExperimentConfig/jev'||/^games\/[\w-]+$/.test(document),'Out-of-scope document')
+    assert.ok(document==='aiExperimentConfig/jev'||/^games\/[\w-]+(?:\/(?:rounds\/\d+|players\/[\w-]+))?$/.test(document),'Out-of-scope document')
     const url=`https://firestore.googleapis.com/v1/projects/${project}/databases/(default)/documents/${document}`
     const request=async(method='GET',data)=>{
       const token=await credential.getAccessToken()
@@ -100,30 +100,82 @@ if(mode==='stage') {
       const actor=await signInAnonymously(getAuth(app))
       const functions=getFunctions(app,'us-central1')
       const call=async(name,data={})=>(await httpsCallable(functions,name)(data)).data
+      const guests=[],gameplay=[],created=[]
+      let legacy
       try {
         const capabilities=await call('jevExperimentCapabilities')
         assert.equal(capabilities.experimentalAvailable,true)
         assert.equal(capabilities.configVersion,'jev-playtest-v2')
         const contract=await call('jevLiveContractCheck')
         assert.equal(contract.model,'jev-1.13.0')
-        const created=[]
         for(const name of ['fowlWordsCreateGame','flockCreateGame']) {
           const room=await call(name,{playerName:'Jev release smoke',experimental:true})
           created.push(room)
           const game=(await db.doc(`games/${room.gameId}`).get()).data()
           assert.equal(game.aiExperiment.mode,'jev');assert.equal(game.aiExperiment.configVersion,'jev-playtest-v2')
-          await call(name==='flockCreateGame'?'flockAbandonGame':'fowlWordsAbandonGame',{gameId:room.gameId})
         }
-        const legacy=await call('flockCreateGame',{playerName:'Legacy release smoke'})
+        for(let i=0;i<2;i++) {
+          const guestApp=initializeApp({projectId:project,apiKey:key},`jev-smoke-guest-${i}`)
+          const guest=await signInAnonymously(getAuth(guestApp)), guestFunctions=getFunctions(guestApp,'us-central1')
+          guests.push({app:guestApp,user:guest.user,call:async(name,data)=>(await httpsCallable(guestFunctions,name)(data)).data})
+        }
+        const participants=[{user:actor.user,call},...guests]
+        for(const room of created) for(const guest of guests) await guest.call('joinGame',{code:room.code,playerName:'Synthetic release guest'})
+        const fowl=created[0],fowlData={gameId:fowl.gameId,roundNum:1}
+        await call('fowlWordsStartGame',{gameId:fowl.gameId})
+        await call('fowlWordsSkipWordSelectionPrivacyHandoff',fowlData)
+        const fg=(await db.doc(`games/${fowl.gameId}`).get()).data()
+        const guesser=participants.find(p=>p.user.uid===fg.currentGuesser),givers=participants.filter(p=>p!==guesser)
+        for(const giver of givers) await giver.call('fowlWordsSubmitWordVote',{...fowlData,wordIndex:0})
+        let fr=(await db.doc(`games/${fowl.gameId}/rounds/1`).get()).data()
+        const wait=Math.max(0,new Date(fr.wordSelectedDeadline).getTime()-Date.now()+200)
+        assert.ok(wait<30_000,'Unexpected word-selection handoff deadline')
+        if(wait) await new Promise(resolve=>setTimeout(resolve,wait))
+        await call('fowlWordsBeginClueSubmission',fowlData)
+        fr=(await db.doc(`games/${fowl.gameId}/rounds/1`).get()).data()
+        const secret=fr.secretWord
+        const clues=['penguin','volcano','cactus','rainbow','butterfly'].filter(c=>!c.includes(secret.toLowerCase())&&!secret.toLowerCase().includes(c)).slice(0,2)
+        for(let i=0;i<2;i++) await givers[i].call('submitClue',{...fowlData,clue:clues[i]})
+        assert.equal((await db.doc(`games/${fowl.gameId}/rounds/1`).get()).data().status,'reveal')
+        await guesser.call('submitGuess',{...fowlData,guess:'zzzxxyyqq',expectedAttempt:1})
+        assert.equal((await db.doc(`games/${fowl.gameId}/rounds/1`).get()).data().currentAttempt,2)
+        await guesser.call('submitGuess',{...fowlData,guess:'zzzxxyyqq',expectedAttempt:1})
+        assert.equal((await db.doc(`games/${fowl.gameId}/rounds/1`).get()).data().currentAttempt,2)
+        await guesser.call('submitGuess',{...fowlData,guess:secret,expectedAttempt:2})
+        fr=(await db.doc(`games/${fowl.gameId}/rounds/1`).get()).data()
+        assert.equal(fr.status,'scored');assert.equal(fr.isCorrect,true)
+        assert.equal(fr.pointsThisRound[guesser.user.uid],5)
+        for(const participant of participants) assert.equal((await db.doc(`games/${fowl.gameId}/players/${participant.user.uid}`).get()).data().score,fr.pointsThisRound[participant.user.uid])
+        gameplay.push({game:'fowl-words',status:fr.status,attempts:2,staleRetryIgnored:true,scoresMatch:true})
+        const flock=created[1]
+        await assert.rejects(()=>call('updateCategories',{gameId:flock.gameId,categories:['birds']}))
+        await call('flockStartGame',{gameId:flock.gameId})
+        let lr=(await db.doc(`games/${flock.gameId}/rounds/1`).get()).data()
+        const answers=lr.type==='multiple_choice'?[lr.options[0],lr.options[0],lr.options[1]]:['bicycle','bike','car']
+        for(let i=0;i<3;i++) await participants[i].call('submitAnswer',{gameId:flock.gameId,roundNum:1,answer:answers[i]})
+        lr=(await db.doc(`games/${flock.gameId}/rounds/1`).get()).data()
+        assert.equal(lr.status,'scored');assert.equal(lr.commentary,'')
+        assert.equal(lr.groupSource,lr.type==='multiple_choice'?'multiple-choice':'jev')
+        const points=lr.pointsThisRound
+        await Promise.all([call('forceEndRound',{gameId:flock.gameId}),call('forceEndRound',{gameId:flock.gameId})])
+        for(const participant of participants) assert.equal((await db.doc(`games/${flock.gameId}/players/${participant.user.uid}`).get()).data().score,points[participant.user.uid])
+        gameplay.push({game:'flock-together',status:lr.status,type:lr.type,groupSource:lr.groupSource,duplicateRevealIgnored:true,scoresMatch:true})
+        for(let i=0;i<created.length;i++) await call(i===0?'fowlWordsAbandonGame':'flockAbandonGame',{gameId:created[i].gameId})
+        legacy=await call('flockCreateGame',{playerName:'Legacy release smoke'})
         assert.equal((await db.doc(`games/${legacy.gameId}`).get()).data().aiExperiment.mode,'legacy')
         await call('flockAbandonGame',{gameId:legacy.gameId})
         const page=await fetch('https://chickenparty.web.app/jev',{cache:'no-store'})
         assert.equal(page.status,200)
         const html=await page.text();assert.ok(html.includes('/assets/'))
-        const result={status:'pass',scope:'Deployed HTTP admission, room provider stamps, normal-room isolation, secret-bound live contract, /jev SPA availability. Gameplay validated separately in emulators.',capabilities,contract,temporaryRooms:created.map(r=>r.gameId)}
+        const result={status:'pass',scope:'Deployed HTTP admission, provider stamps, normal isolation, Secret Manager contract, one real three-player round per game, stale guess/duplicate reveal and cumulative scores, /jev SPA availability. Not the full multi-seed browser matrix.',capabilities,contract,gameplay,temporaryRooms:created.map(r=>r.gameId)}
         await writeFile(path.join(directory,'report.json'),JSON.stringify(result,null,2))
         process.stdout.write(JSON.stringify({directory,...result})+'\n')
-      } finally {await deleteUser(actor.user);await deleteApp(app)}
+      } finally {
+        for(let i=0;i<created.length;i++) await call(i===0?'fowlWordsAbandonGame':'flockAbandonGame',{gameId:created[i].gameId}).catch(()=>{})
+        if(legacy) await call('flockAbandonGame',{gameId:legacy.gameId}).catch(()=>{})
+        for(const guest of guests) {await deleteUser(guest.user);await deleteApp(guest.app)}
+        await deleteUser(actor.user);await deleteApp(app)
+      }
     }
   } finally { /* HTTP-only release operations hold no database connections. */ }
 }
