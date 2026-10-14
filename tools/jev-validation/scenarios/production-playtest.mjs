@@ -15,9 +15,11 @@ if(mode==='stage') {
   await mkdir(dest)
   for(const name of ['lib','package.json','package-lock.json']) await cp(path.join(root,'functions',name),path.join(dest,name),{recursive:true})
   await symlink(path.join(root,'functions/node_modules'),path.join(dest,'node_modules'),'junction')
-  const config={functions:[{source:'functions',codebase:'default',ignore:['node_modules','.git','.env*']}],hosting:[{site:'chickenparty',public:'../../../dist',ignore:['firebase.json','**/.*','**/node_modules/**'],rewrites:[{source:'**',destination:'/index.html'}]}],firestore:{rules:'../../../firestore.rules'}}
+  const config={functions:[{source:path.relative(root,dest).replaceAll('\\','/'),codebase:'default',ignore:['node_modules','.git','.env*']}],hosting:[{site:'chickenparty',public:'dist',ignore:['firebase.json','**/.*','**/node_modules/**'],rewrites:[{source:'**',destination:'/index.html'}]}],firestore:{rules:'firestore.rules'}}
   await writeFile(path.join(directory,'firebase.json'),JSON.stringify(config,null,2))
-  process.stdout.write(JSON.stringify({directory,config:path.join(directory,'firebase.json'),project,localEnvPreserved:true})+'\n')
+  const releaseConfig=path.join(root,'firebase.jev-release.json')
+  await writeFile(releaseConfig,JSON.stringify(config,null,2))
+  process.stdout.write(JSON.stringify({directory,config:releaseConfig,project,localEnvPreserved:true})+'\n')
 } else {
   const auth=require('../../../node_modules/firebase-tools/lib/auth.js')
   const account=auth.getProjectDefaultAccount(root)??auth.getGlobalDefaultAccount()

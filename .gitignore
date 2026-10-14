@@ -21,6 +21,7 @@ functions/lib
 
 # Firebase
 .firebase/
+firebase.jev-release.json
 .agents/
 .claude/
 skills-lock.json
