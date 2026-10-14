@@ -18,13 +18,15 @@ import { mostHelpfulSplitPts } from './peerLove'
 import { buildFowlWordsDeck } from './deck'
 import { addFowlWordCooldownWrites, fetchActiveFowlWordCooldowns } from './cooldowns'
 import { validateClueForSubmission, validateClueShape } from './clueValidation'
+import { JEV_CLUE_REJECTION_THRESHOLD } from './clueValidation'
+import { DecisionService } from '../../shared/decisionService'
 import {
   giverLovesForPlayer,
   giverBooForPlayer,
   guesserMostHelpfulFromRound,
   guesserBooFromRound,
 } from './voteHelpers'
-import { experimentForCreation, requireExperimentRematch } from '../../shared/aiExperiment'
+import { experimentForCreation, jevOperationEnabled, requireExperimentRematch } from '../../shared/aiExperiment'
 
 const db = admin.firestore
 
@@ -272,6 +274,10 @@ export const submitClue = onCall(async (request) => {
   }
 
   const roundData = roundSnap.data()!
+  const existing = roundData.cluesByPlayer ?? {}
+  if (existing[uid]) {
+    throw new HttpsError('already-exists', 'Already submitted a clue')
+  }
   if (!isRoundEligible(roundData, game, uid)) {
     throw new HttpsError('permission-denied', 'You will join next round')
   }
@@ -286,8 +292,24 @@ export const submitClue = onCall(async (request) => {
   }
 
   // Run the semantic check only for a valid, eligible, in-progress submission.
-  // This keeps malformed or stale calls from spending a Gemini request.
-  const clueValidation = await validateClueForSubmission(cleanClue, secretWord)
+  // Legacy rooms retain Gemini; Jev rooms use the server-selected Jev adapter.
+  const jevService = game.aiExperiment?.mode === 'jev' ? new DecisionService() : null
+  const classify = jevService
+    ? async (candidateClue: string, candidateSecret?: string) => {
+      if (!await jevOperationEnabled(uid, 'clue')) return null
+      if (!candidateSecret) return null
+      const decision = await jevService.classifyFowlWordsClue({ clue: candidateClue, secretWord: candidateSecret })
+      const probabilities = decision.metadata.probabilities ?? {}
+      const joinedWordsRejected = !decision.singleWord && (probabilities.joined_words ?? 0) >= JEV_CLUE_REJECTION_THRESHOLD
+      const tooCloseRejected = decision.tooCloseToSecret && (probabilities.too_close ?? 0) >= JEV_CLUE_REJECTION_THRESHOLD
+      return {
+        allowed: !joinedWordsRejected,
+        reason: joinedWordsRejected ? 'joined_words' as const : 'single_word' as const,
+        tooCloseToSecret: tooCloseRejected,
+      }
+    }
+    : undefined
+  const clueValidation = await validateClueForSubmission(cleanClue, secretWord, classify)
   if (!clueValidation.valid) {
     const message = clueValidation.reason === 'too-close-to-secret'
       ? 'That clue is too close to the secret word. Try a different angle.'
@@ -295,15 +317,24 @@ export const submitClue = onCall(async (request) => {
     throw new HttpsError('invalid-argument', message)
   }
 
-  const existing = roundData.cluesByPlayer ?? {}
-  if (existing[uid]) {
-    throw new HttpsError('already-exists', 'Already submitted a clue')
-  }
-
-  await roundRef.update({
-    [`cluesByPlayer.${uid}`]: cleanClue,
-    [`clueTimestamps.${uid}`]: FieldValue.serverTimestamp(),
+  const committed = await firestore.runTransaction(async (tx) => {
+    const freshGameSnap = await tx.get(gameRef)
+    const freshRoundSnap = await tx.get(roundRef)
+    if (!freshGameSnap.exists || !freshRoundSnap.exists) return false
+    const freshGame = freshGameSnap.data()!
+    const freshRound = freshRoundSnap.data()!
+    if (freshGame.status === 'abandoned' || freshRound.status !== 'clue-submission') return false
+    const freshDeadline = freshRound.clueSubmissionDeadline?.toDate?.()
+    if (freshDeadline && Date.now() > freshDeadline.getTime()) return false
+    if (!isRoundEligible(freshRound, freshGame, uid) || freshGame.currentGuesser === uid) return false
+    if ((freshRound.cluesByPlayer ?? {})[uid]) return false
+    tx.update(roundRef, {
+      [`cluesByPlayer.${uid}`]: cleanClue,
+      [`clueTimestamps.${uid}`]: FieldValue.serverTimestamp(),
+    })
+    return true
   })
+  if (!committed) throw new HttpsError('failed-precondition', 'Clue submission is no longer available')
 
   // Check if all eligible non-guesser players have submitted
   // Use eligiblePlayerCount snapshotted at round creation so late joiners don't block dedup

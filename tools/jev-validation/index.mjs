@@ -113,6 +113,31 @@ if (args['self-test'] === 'fail') {
       return 'authenticated Jev response validated: model=' + result.model + ', latencyMs=' + result.latencyMs
     })
   }
+} else if (phase === 'FW-1') {
+  const npm = await resolveCommand('npm')
+  await check('fw1-clue-validation-build-and-tests', async () => {
+    if (!npm) return { status: 'incomplete', message: 'npm is unavailable' }
+    for (const item of [['functions build', ['--prefix', 'functions', 'run', 'build']], ['functions tests', ['--prefix', 'functions', 'test']]]) {
+      const result = await run(npm, item[1], { cwd: rootDir, timeoutMs: 180000 })
+      if (result.code !== 0) throw new Error(item[0] + ' failed: ' + shortOutput(result))
+    }
+    return 'deterministic clue corpus and Jev adapter integration tests passed'
+  })
+  await check('fw1-provider-boundary', async () => {
+    const source = await readFile(path.join(rootDir, 'functions', 'src', 'games', 'fowl-words', 'index.ts'), 'utf8')
+    for (const required of ['game.aiExperiment?.mode === \'jev\'', 'new DecisionService()', "jevOperationEnabled(uid, 'clue')", 'JEV_CLUE_REJECTION_THRESHOLD', 'runTransaction']) {
+      if (!source.includes(required)) throw new Error('missing FW-1 provider boundary: ' + required)
+    }
+    if (!source.includes(': undefined')) throw new Error('legacy classifier fallback is not explicit')
+    return 'server-selected Jev mode, operation kill switch, thresholded decisions, and legacy fallback are present'
+  })
+  await check('fw1-guarded-clue-commit', async () => {
+    const source = await readFile(path.join(rootDir, 'functions', 'src', 'games', 'fowl-words', 'index.ts'), 'utf8')
+    for (const required of ['if (existing[uid])', 'freshRound.status !== \'clue-submission\'', 'freshDeadline', 'isRoundEligible(freshRound, freshGame, uid)', 'if ((freshRound.cluesByPlayer ?? {})[uid])', 'Clue submission is no longer available']) {
+      if (!source.includes(required)) throw new Error('missing stale/parallel clue guard: ' + required)
+    }
+    return 'duplicate, stale, late, and ineligible submissions are rejected before or during the guarded commit'
+  })
 } else if (phase !== 'foundation') {
   checks.push({ id: 'phase-scope', status: 'incomplete', message: phase + ' validation is not implemented; complete the foundation phase first' })
 } else {

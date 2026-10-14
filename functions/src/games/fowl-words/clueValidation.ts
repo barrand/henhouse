@@ -13,6 +13,8 @@ export type ClueValidationResult =
 
 export type ClueClassifier = (clue: string, secretWord?: string) => Promise<FowlWordsClueClassification | null>
 
+export const JEV_CLUE_REJECTION_THRESHOLD = 0.75
+
 const MAX_CLUE_LENGTH = 50
 const SINGLE_WORD = /^[\p{L}\p{M}]+$/u
 const INVISIBLE_OR_VARIATION_SELECTOR = /[\p{Cf}\uFE0E\uFE0F\u{E0100}-\u{E01EF}]/u
