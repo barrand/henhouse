@@ -12,6 +12,24 @@ $viteOut = Join-Path $logRoot 'vite.out.log'
 $viteErr = Join-Path $logRoot 'vite.err.log'
 $children = @()
 $stopRequested = $false
+
+function Import-EnvFile([string]$path) {
+  if (-not (Test-Path $path)) { return }
+  foreach ($line in Get-Content $path) {
+    if ($line -match '^\s*(VITE_[A-Za-z0-9_]+)\s*=\s*(.*)\s*$') {
+      $name = $matches[1]
+      $value = $matches[2].Trim().Trim('"').Trim("'")
+      if (-not [Environment]::GetEnvironmentVariable($name)) {
+        [Environment]::SetEnvironmentVariable($name, $value, 'Process')
+      }
+    }
+  }
+}
+
+Import-EnvFile (Join-Path $root '.env')
+Import-EnvFile (Join-Path $root '.env.production')
+$env:VITE_USE_EMULATORS = 'true'
+
 $cancelHandler = [ConsoleCancelEventHandler]{
   param($sender, $eventArgs)
   $eventArgs.Cancel = $true

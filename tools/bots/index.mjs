@@ -710,6 +710,7 @@ class Swarm {
 
 async function main() {
   loadEnvFile(path.join(rootDir, '.env'))
+  loadEnvFile(path.join(rootDir, '.env.production'))
   loadEnvFile(path.join(rootDir, 'functions/.env'))
   const args = parseArgs(process.argv.slice(2))
   const apiKey = process.env.GEMINI_API_KEY
