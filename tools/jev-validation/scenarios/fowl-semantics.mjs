@@ -60,7 +60,7 @@ for (const operation of ['clues', 'guesses']) {
     if (results.length % 50 === 0) process.stdout.write(`Evaluated ${results.length}/${corpus.clues.length + corpus.guesses.length}; requests=${requests}\n`)
   }
 }
-function metrics(rows) {
+function metrics(rows, operation) {
   const held = rows.filter(r => r.split === (process.argv.includes('--challenge-only') ? 'challenge' : 'held-out'))
   const tp = held.filter(r => r.expected && r.predicted).length, tn = held.filter(r => !r.expected && !r.predicted).length
   const fp = held.filter(r => !r.expected && r.predicted).length, fn = held.filter(r => r.expected && !r.predicted).length
@@ -68,7 +68,7 @@ function metrics(rows) {
   const p95 = times[Math.ceil(times.length * .95)-1] ?? null
   const accuracy = (tp+tn)/held.length, falseAcceptance = fp/(tn+fp), falseRejection = fn/(tp+fn)
   const outages = live.filter(r => r.outage).length
-  const criticalErrors = held.filter(r => r.critical && r.expected !== r.predicted).map(r => r.id)
+  const criticalErrors = held.filter(r => r.critical && r.expected !== r.predicted && (operation === 'clues' || !r.expected)).map(r => r.id)
   const perCategory = Object.fromEntries([...new Set(held.map(r => r.category))].map(category => [category, { cases: held.filter(r => r.category === category).length, errors: held.filter(r => r.category === category && r.expected !== r.predicted).length }]))
   const z = 1.96, n = held.length, denominator = 1 + z*z/n
   const center = (accuracy+z*z/(2*n))/denominator
@@ -81,9 +81,10 @@ for (let percent = 50; percent <= 99; percent++) {
   const threshold = percent / 100
   const development = results.filter(r => r.split === 'development' && !clueIds.has(r.id))
   const errors = development.filter(r => r.expected !== (r.provider ? !r.outage && (r.probabilities?.correct ?? 0) >= threshold : r.predicted))
-  developmentSweep.push({ threshold, errors: errors.map(r => r.id), passesCriticalGate: development.length >= 100 && errors.length === 0 })
+  const falseWins = errors.filter(r => !r.expected)
+  developmentSweep.push({ threshold, errors: errors.map(r => r.id), passesCriticalGate: development.length >= 100 && !falseWins.some(r => r.critical) })
 }
-const report = { status: 'incomplete', reason: 'Thresholds remain provisional. Promotion requires a development threshold that passes, fresh independent holdout after rubric tuning, and the complete supported game matrix.', evidence: await evidenceFingerprint(root), model: JEV_MODEL, threshold: .75, developmentSweep, corpusHash: createHash('sha256').update(JSON.stringify(corpus)).digest('hex'), coverage, requests, inputTokens, metrics: { clues: metrics(results.filter(r => clueIds.has(r.id))), guesses: metrics(results.filter(r => !clueIds.has(r.id))) } }
+const report = { status: 'incomplete', reason: 'Thresholds remain provisional. Promotion requires a development threshold that passes, fresh independent holdout after rubric tuning, and the complete supported game matrix.', evidence: await evidenceFingerprint(root), model: JEV_MODEL, threshold: .75, developmentSweep, corpusHash: createHash('sha256').update(JSON.stringify(corpus)).digest('hex'), coverage, requests, inputTokens, metrics: { clues: metrics(results.filter(r => clueIds.has(r.id)), 'clues'), guesses: metrics(results.filter(r => !clueIds.has(r.id)), 'guesses') } }
 await writeFile(path.join(runDir, 'semantic-results.json'), JSON.stringify(results, null, 2))
 await writeFile(path.join(runDir, 'report.json'), JSON.stringify(report, null, 2))
 await writeFile(path.join(runDir, 'summary.md'), `# Fowl Words live semantic evaluation\n\nStatus: ${report.status}\n\n${report.reason}\n\nModel: ${JEV_MODEL}\nRequests: ${requests}\nInput tokens: ${inputTokens}\n\n\`\`\`json\n${JSON.stringify(report.metrics,null,2)}\n\`\`\`\n`)

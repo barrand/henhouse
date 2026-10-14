@@ -534,3 +534,12 @@ Return ONLY valid JSON: {"correct": true} or {"correct": false}`
     return false
   }
 }
+
+/** Harness-only candidate: length differences do not establish non-equivalence. */
+export function experimentalGuessLocal(secretWord: string, guess: string): { decision: boolean | null; reason: string } {
+  if (!guess.trim()) return { decision: false, reason: 'empty' }
+  if (guess.trim().length > 100) return { decision: false, reason: 'maximum-length' }
+  if (secretWord.trim().toUpperCase() === guess.trim().toUpperCase()) return { decision: true, reason: 'exact' }
+  if (normalizeGuess(secretWord) && normalizeGuess(guess) && fuzzyMatch(secretWord, guess)) return { decision: true, reason: 'normalized-or-inflected' }
+  return { decision: null, reason: 'semantic-required' }
+}

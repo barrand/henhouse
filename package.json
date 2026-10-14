@@ -8,6 +8,9 @@
     "dev:local": "./dev.sh",
     "bots": "node tools/bots/index.mjs",
     "validate:jev": "node tools/jev-validation/index.mjs",
+    "experiment:jev:english": "npm --prefix functions run build && node tools/jev-validation/scenarios/english-experiment.mjs",
+    "test:jev:english": "node --test tools/jev-validation/tests/english-evaluation.test.mjs",
+    "replay:jev:english": "node tools/jev-validation/scenarios/english-replay.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
