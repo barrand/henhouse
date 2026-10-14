@@ -111,6 +111,7 @@ if(mode==='stage') {
         for(const name of ['fowlWordsCreateGame','flockCreateGame']) {
           const room=await call(name,{playerName:'Jev release smoke',experimental:true})
           created.push(room)
+          await writeFile(path.join(directory,'temporary-rooms.json'),JSON.stringify(created,null,2))
           const game=(await db.doc(`games/${room.gameId}`).get()).data()
           assert.equal(game.aiExperiment.mode,'jev');assert.equal(game.aiExperiment.configVersion,'jev-playtest-v2')
         }
@@ -177,5 +178,12 @@ if(mode==='stage') {
         await deleteUser(actor.user);await deleteApp(app)
       }
     }
+  } catch(error) {
+    if(mode==='smoke') {
+      await ref.update({admissionEnabled:false}).catch(()=>{})
+      await writeFile(path.join(directory,'report.json'),JSON.stringify({status:'fail',admissionDisabled:true,errorCategory:error.code??error.name??'validation-error'},null,2))
+      throw new Error(`Production smoke failed (${error.code??error.name??'validation-error'}); admission disabled. Evidence: ${directory}`)
+    }
+    throw error
   } finally { /* HTTP-only release operations hold no database connections. */ }
 }
