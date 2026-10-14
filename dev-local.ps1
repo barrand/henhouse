@@ -1,4 +1,5 @@
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $projectId = if ($env:FIREBASE_PROJECT_ID) { $env:FIREBASE_PROJECT_ID } else { 'flock-together-game' }
@@ -10,6 +11,13 @@ $emulatorErr = Join-Path $logRoot 'emulators.err.log'
 $viteOut = Join-Path $logRoot 'vite.out.log'
 $viteErr = Join-Path $logRoot 'vite.err.log'
 $children = @()
+$stopRequested = $false
+$cancelHandler = [ConsoleCancelEventHandler]{
+  param($sender, $eventArgs)
+  $eventArgs.Cancel = $true
+  $script:stopRequested = $true
+}
+[Console]::add_CancelKeyPress($cancelHandler)
 
 function Wait-ForPort([int]$port, [string]$name, [System.Diagnostics.Process]$process) {
   for ($attempt = 0; $attempt -lt 90; $attempt++) {
@@ -61,13 +69,14 @@ try {
   Write-Host "Logs: $logRoot"
   Write-Host 'Press Ctrl+C to stop everything.'
 
-  while ($true) {
+  while (-not $stopRequested) {
     if ($emulator.HasExited) { throw "Firebase emulators exited. See $emulatorErr" }
     if ($vite.HasExited) { throw "Vite exited. See $viteErr" }
     Start-Sleep -Seconds 1
   }
 }
 finally {
+  [Console]::remove_CancelKeyPress($cancelHandler)
   foreach ($child in $children) {
     if ($child -and -not $child.HasExited) {
       Stop-Process -Id $child.Id -Force -ErrorAction SilentlyContinue
