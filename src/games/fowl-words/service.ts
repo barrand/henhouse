@@ -1,7 +1,8 @@
 // Fowl Words-specific game service functions
 
 import { httpsCallable } from 'firebase/functions'
-import { functions, db } from '../../lib/firebase'
+import { functions, db, auth } from '../../lib/firebase'
+import type { ScoringRules, ScoringView } from './scoring'
 import type { RoundData, GameData, PlayerData } from './types'
 import { doc, onSnapshot } from 'firebase/firestore'
 
@@ -143,7 +144,31 @@ export async function fowlWordsAbandonGame(gameId: string) {
 }
 
 export function onRoundUpdate(gameId: string, roundNum: number, callback: (data: RoundData | null) => void) {
-  return onSnapshot(doc(db, 'games', gameId, 'rounds', String(roundNum)), (snap) => {
-    callback(snap.exists() ? ({ id: snap.id, ...snap.data() } as RoundData) : null)
+  let stopView: (() => void) | undefined
+  let publicRound: RoundData | null = null
+  let view: ScoringView | undefined
+  const emit = () => callback(publicRound ? { ...publicRound, ...(view ? { engine: view } : {}) } : null)
+  const stop = onSnapshot(doc(db, 'games', gameId, 'rounds', String(roundNum)), snap => {
+    publicRound = snap.exists() ? { id: snap.id, ...snap.data() } as RoundData : null
+    if (publicRound?.scoringVersion === 1 && !stopView && auth.currentUser) {
+      stopView = onSnapshot(doc(db, 'games', gameId, 'rounds', String(roundNum), 'views', auth.currentUser.uid), own => {
+        view = own.data()?.engine as ScoringView | undefined
+        emit()
+      })
+    }
+    emit()
   })
+  return () => { stop(); stopView?.() }
+}
+
+export async function scoringCapabilities() {
+  return (await httpsCallable<void, { bestCluesFirstEnabled: boolean }>(functions, 'fowlWordsScoringCapabilities')()).data
+}
+
+export async function updateScoring(gameId: string, expectedRound: number, expectedRevision: number, rules?: ScoringRules, cancel = false) {
+  await httpsCallable(functions, 'fowlWordsUpdateScoring')({ gameId, expectedRound, expectedRevision, ...(rules ? { rules } : {}), cancel })
+}
+
+export async function scoringAction(gameId: string, roundNum: number, action: string, payload: { expectedAttempt?: number; text?: string; clueId?: string; index?: number } = {}) {
+  await httpsCallable(functions, 'fowlWordsScoringAction')({ gameId, roundNum, action, ...payload })
 }

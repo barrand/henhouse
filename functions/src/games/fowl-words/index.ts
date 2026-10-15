@@ -1,4 +1,5 @@
-import { onCall, HttpsError } from 'firebase-functions/v2/https'
+import { onCall as firebaseOnCall, HttpsError } from 'firebase-functions/v2/https'
+import type { CallableOptions, CallableRequest } from 'firebase-functions/v2/https'
 import * as admin from 'firebase-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import { claimRoomCode, releaseRoomCode } from '../../shared/roomCodes'
@@ -32,8 +33,27 @@ import { enqueueFowlWordsShadow } from '../../shared/jevShadow'
 import { typesafeApiKey } from '../../shared/secrets'
 import { acceptsJevClue } from '../../shared/jevPolicy'
 import { classifyFowlWordsClue as legacyClueClassifier } from '../../shared/gemini'
+import { startScoringRound } from './scoringEngine'
+import { recommendedRules } from './rules'
+export { fowlWordsScoringCapabilities, fowlWordsUpdateScoring, fowlWordsScoringAction } from './scoringEngine'
 
 const db = admin.firestore
+
+// Old callables must never repopulate a protected round's public document.
+// They remain supported for already-active legacy rounds only.
+const onCall: typeof firebaseOnCall = ((options: unknown, maybeHandler?: unknown) => {
+  const handler = (maybeHandler ?? options) as (request: CallableRequest) => Promise<unknown>
+  const guarded = async (request: CallableRequest) => {
+    if (!request.auth) throw new HttpsError('unauthenticated', 'Must be signed in')
+    const data = request.data as { gameId?: unknown; roundNum?: unknown } | undefined
+    if (typeof data?.gameId === 'string' && Number.isInteger(data.roundNum)) {
+      const round = await db().collection('games').doc(data.gameId).collection('rounds').doc(String(data.roundNum)).get()
+      if (round.data()?.scoringVersion === 1) throw new HttpsError('failed-precondition', 'Use the updated Fowl Words controls for this round')
+    }
+    return handler(request)
+  }
+  return maybeHandler ? firebaseOnCall(options as CallableOptions, guarded) : firebaseOnCall(guarded)
+}) as typeof firebaseOnCall
 
 const TOTAL_ROUNDS = 10 // Reduced from 13 after playtest feedback
 
@@ -93,6 +113,9 @@ export const fowlWordsCreateGame = onCall(async (request) => {
     cardsRemaining: [],
     playerIds: [uid],
     settings: { totalRounds: TOTAL_ROUNDS, secondsPerRound: 60, autoAdvanceSeconds: 10 },
+    scoringEngineVersion: 1,
+    scoringRules: recommendedRules(),
+    scoringRevision: 0,
     includePatrioticQuestions,
     aiExperiment,
   })
@@ -149,6 +172,9 @@ export const fowlWordsRematch = onCall(async (request) => {
     cardsRemaining: [],
     playerIds: game.playerIds,
     settings: game.settings,
+    scoringEngineVersion: 1,
+    scoringRules: game.pendingScoringRules ?? game.scoringRules ?? recommendedRules(),
+    scoringRevision: 0,
     includePatrioticQuestions,
     aiExperiment,
   })
@@ -189,6 +215,10 @@ export const fowlWordsStartGame = onCall(async (request) => {
   const originalHostId: string = game.originalHostId ?? game.hostId
   const includePatrioticQuestions = game.includePatrioticQuestions ?? false
   const cardsRemaining = await buildCardsRemaining(totalRounds, includePatrioticQuestions, originalHostId)
+  if (game.scoringEngineVersion === 1) {
+    await startScoringRound(gameId, uid, cardsRemaining)
+    return
+  }
 
   // Draw 3 words for the first word-selection vote
   const wordOptions: string[] = []
@@ -426,7 +456,10 @@ export const fowlWordsAdvanceRound = onCall(async (request) => {
   if (gameSnap.data()!.hostId !== uid) {
     throw new HttpsError('permission-denied', 'Only host can advance')
   }
-
+  if (gameSnap.data()?.scoringEngineVersion === 1) {
+    await startScoringRound(gameId, uid)
+    return
+  }
   await advanceToNextRound(gameId)
 })
 

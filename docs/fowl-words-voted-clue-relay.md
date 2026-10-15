@@ -54,3 +54,12 @@ Best Clues First pays the current tier to the guesser and shown clue authors; un
 ## Validation
 
 Unit-test presets, configuration validation, configurable ladders, relative reveals/rounding, ties and duplicates. Emulator-test host authorization, flag behavior, next-round changes, privacy, deadlines, concurrent guess/skip/timeout, give up and exactly-once scores. Browser-test both modes, small/large rooms, grid, settings, reconnects and full early-win results. Run frontend/functions builds and relevant existing tests. Report actual checks and limitations; do not deploy.
+
+## Implementation notes
+
+- New games use the versioned engine in both modes. Active legacy rounds finish on their existing path; saving host settings opts subsequent rounds into the new engine.
+- Availability is controlled by the server-only Firestore document `fowlWordsConfig/scoring`, field `bestCluesFirstEnabled` (boolean). Without that document, availability defaults on in emulators and off in production. Classic remains selectable. This configuration is independent of Jev/Gemini settings.
+- Private state lives in `games/{id}/rounds/{round}/private/state`; own role projections live in `views/{uid}`. Future words live in `games/{id}/private/deck`. Legacy callables reject versioned rounds, preventing accidental public secret writes.
+- Two-player rounds skip the final ranking window: there is no other giver to back. Guesser controls appear above the clue grid so large rooms do not require scrolling through every clue to act.
+- Emulator safety checks: build functions, then run `firebase emulators:exec --only auth,firestore --project demo-fowl-scoring "npm run test:fowl:emulator"`. Tests use stubbed providers and never require paid AI calls.
+- A future release must include frontend, functions and Firestore rules together. This implementation task does not deploy them or enable the production experiment.

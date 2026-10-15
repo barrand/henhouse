@@ -25,7 +25,7 @@ export async function fetchActiveFowlWordCooldowns(originalHostId: string): Prom
 }
 
 export function addFowlWordCooldownWrites(
-  batch: FirebaseFirestore.WriteBatch,
+  batch: { set(ref: FirebaseFirestore.DocumentReference, data: FirebaseFirestore.DocumentData): unknown },
   originalHostId: string,
   words: string[],
   nowMillis: number = Date.now(),

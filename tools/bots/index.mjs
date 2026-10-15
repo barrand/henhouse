@@ -383,6 +383,9 @@ class Bot {
   }
 
   listen(onUpdate) {
+    this.scoringInterval = setInterval(() => {
+      if (this.latestRound?.scoringVersion === 1) this.handleUpdate().catch(err => this.reporter.event('error', { botName: this.name, message: err.message }))
+    }, 1000)
     this.unsubscribes.push(onSnapshot(doc(this.db, 'games', this.gameId), (snap) => {
       this.latestGame = snap.exists() ? { id: snap.id, ...snap.data() } : null
       this.attachRoundListener()
@@ -398,10 +401,20 @@ class Bot {
     const roundNum = this.latestGame?.currentRound
     if (!roundNum || this.roundListenerNum === roundNum) return
     if (this.roundUnsubscribe) this.roundUnsubscribe()
+    if (this.roundViewUnsubscribe) this.roundViewUnsubscribe()
+    this.roundViewUnsubscribe = null
     this.roundListenerNum = roundNum
     this.latestRound = null
     this.roundUnsubscribe = onSnapshot(doc(this.db, 'games', this.gameId, 'rounds', String(roundNum)), (snap) => {
-      this.latestRound = snap.exists() ? { id: snap.id, ...snap.data() } : null
+      const engine = this.latestRound?.engine
+      this.latestRound = snap.exists() ? { id: snap.id, ...snap.data(), ...(engine ? { engine } : {}) } : null
+      if (this.latestRound?.scoringVersion === 1 && !this.roundViewUnsubscribe) {
+        this.roundViewUnsubscribe = onSnapshot(doc(this.db, 'games', this.gameId, 'rounds', String(roundNum), 'views', this.uid), view => {
+          if (this.roundListenerNum !== roundNum) return
+          if (this.latestRound) this.latestRound.engine = view.data()?.engine
+          this.handleUpdate().catch(err => this.reporter.event('error', { botName: this.name, message: err.message }))
+        })
+      }
       this.handleUpdate().catch((err) => this.reporter.event('error', { botName: this.name, message: err.message }))
     }, (err) => this.reporter.event('error', { botName: this.name, message: err.message }))
   }
@@ -417,6 +430,10 @@ class Bot {
   }
 
   async handleFowlWords(game, round) {
+    if (round.scoringVersion === 1) {
+      if (round.engine) await this.handleScoringRound(round.engine)
+      return
+    }
     const roundNum = game.currentRound
     const isGuesser = game.currentGuesser === this.uid
     if (round.status === 'word-selection' && !isGuesser && !round.wordVotes?.[this.uid]) {
@@ -459,6 +476,42 @@ class Bot {
 
     if (round.status === 'scored' && isGuesser) {
       await this.castGuesserAwards(roundNum, round)
+    }
+  }
+
+  async handleScoringRound(v) {
+    if (!v.participating) return
+    const call = (action, extra = {}) => this.call('fowlWordsScoringAction', { gameId: this.gameId, roundNum: v.roundNum, action, expectedAttempt: v.attempt, ...extra })
+    const now = Date.now()
+    const expired = v.processing ? now >= v.claimExpiresAt : v.phase === 'deduplication' ? now >= v.phaseClaimExpiresAt : v.deadline && now >= v.deadline
+    if (v.phase !== 'scored' && expired) {
+      await this.once(`scoring:tick:${v.roundNum}:${v.phase}:${v.attempt}:${v.deadline}:${v.claimExpiresAt}:${v.phaseClaimExpiresAt}`, () => call('tick'))
+      return
+    }
+    if (v.phase === 'word-selection' && !v.guesser && now >= v.selectionOpensAt && v.myWordVote === null) {
+      await this.once(`scoring:word:${v.roundNum}`, () => call('word-vote', { index: Math.floor(Math.random() * v.wordOptions.length) }))
+    }
+    if (v.phase === 'clue-submission' && !v.guesser && !v.ownClue) {
+      await this.once(`scoring:clue:${v.roundNum}`, async () => call('clue', { text: await this.makeClue(v.secretWord) }))
+    }
+    if (['clue-submission', 'clue-voting'].includes(v.phase) && v.ownClue && v.rules.mode === 'best-clues-first') {
+      const remaining = Math.max(0, v.rules.hearts - v.ownRankingVotes.length)
+      const options = v.board.filter(c => !c.backed).slice(0, remaining)
+      for (const clue of options) await this.once(`scoring:rank:${v.roundNum}:${clue.id}`, () => call('rank', { clueId: clue.id }))
+    }
+    if (['reveal','guess'].includes(v.phase) && v.guesser && !v.processing) {
+      await this.once(`scoring:guess:${v.roundNum}:${v.attempt}`, async () => {
+        if (!v.groups.length && v.hiddenCount && v.attempt < v.maxAttempts) return call('skip')
+        const visible = v.groups.filter(g => g.shown)
+        const legacy = { clueGroups: visible.map(g => ({ clueTexts: [g.text] })), visibleGroupIndexes: visible.map((_, i) => i), guessAttempts: v.history.filter(h => h.text).map(h => h.text) }
+        return call('guess', { text: await this.makeGuess(legacy) })
+      })
+    }
+    if (v.phase === 'scored' && v.guesser && v.correct) {
+      await this.once(`scoring:helpful:${v.roundNum}`, async () => {
+        const clue = randomChoice(v.groups.filter(g => g.shown))
+        if (clue && Math.random() < 0.6) await call('helpful', { clueId: clue.id })
+      })
     }
   }
 
@@ -622,6 +675,8 @@ class Bot {
   }
 
   async stop() {
+    clearInterval(this.scoringInterval)
+    if (this.roundViewUnsubscribe) this.roundViewUnsubscribe()
     for (const unsubscribe of this.unsubscribes) unsubscribe()
     if (this.roundUnsubscribe) this.roundUnsubscribe()
     if (this.gameId && this.uid) {

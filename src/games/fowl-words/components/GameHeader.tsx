@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
 import LeaderboardModal from './LeaderboardModal'
 import { fowlWordsAbandonGame } from '../service'
+import ScoringSettings from './ScoringSettings'
 
 interface Props {
   game: GameData
@@ -15,6 +16,7 @@ export default function GameHeader({ game, players, currentPlayer, round: _round
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [abandoning, setAbandoning] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
 
   const guesserPlayer = players.find((p) => p.id === game.currentGuesser)
   const guesserName = guesserPlayer?.name ?? '…'
@@ -72,6 +74,9 @@ export default function GameHeader({ game, players, currentPlayer, round: _round
             </div>
             <div className="flex items-center gap-3">
               {isHost && (
+                <button onClick={() => setShowSettings(true)} className="min-h-11 text-sm underline">Settings</button>
+              )}
+              {isHost && (
                 <button
                   onClick={() => setConfirming(true)}
                   className="text-xs opacity-50 hover:opacity-80 font-body transition-opacity"
@@ -89,6 +94,10 @@ export default function GameHeader({ game, players, currentPlayer, round: _round
           </div>
         )}
       </div>
+
+      {game.pendingScoringRules && <p className="bg-tertiary-container text-on-tertiary-container px-4 py-2 text-sm" role="status">Next round: {game.pendingScoringRules.mode === 'classic' ? 'Classic' : 'Best Clues First'} · updated rules</p>}
+      {game.scoringChangedRound === game.currentRound && <p className="bg-primary-fixed text-on-primary-fixed px-4 py-2 text-sm" role="status">Round {game.currentRound}: {game.scoringRules?.mode === 'best-clues-first' ? 'Best Clues First' : 'Classic'} settings are active.</p>}
+      {showSettings && <ScoringSettings game={game} onClose={() => setShowSettings(false)} />}
 
       {showLeaderboard && (
         <LeaderboardModal

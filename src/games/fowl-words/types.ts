@@ -1,8 +1,14 @@
 // Fowl Words-specific types, extending shared base types
 
 import type { BaseGameData, PlayerData as SharedPlayerData } from '@shared/types'
+import type { ScoringRules, ScoringView } from './scoring'
 
 export interface GameData extends BaseGameData {
+  scoringEngineVersion?: number
+  scoringRules?: ScoringRules
+  pendingScoringRules?: ScoringRules
+  scoringRevision?: number
+  scoringChangedRound?: number
   currentGuesser: string | null    // playerId of current guesser (null in lobby)
   cardsRemaining: string[]         // word stack for remaining rounds
   includePatrioticQuestions?: boolean
@@ -16,6 +22,7 @@ export type RoundStatus =
   | 'word-selection'
   | 'word-selected'
   | 'clue-submission'
+  | 'clue-voting'
   | 'deduplication'
   | 'reveal'
   | 'guess'
@@ -28,6 +35,8 @@ export interface ClueGroup {
 }
 
 export interface RoundData {
+  scoringVersion?: number
+  engine?: ScoringView
   id: string
   secretWord: string       // empty string during word-selection, set when finalized
   status: RoundStatus

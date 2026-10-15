@@ -16,6 +16,7 @@ import RevealView from '../components/RevealView'
 import GuessView from '../components/GuessView'
 import RoundResultView from '../components/RoundResultView'
 import Scoreboard from '../components/Scoreboard'
+import ScoringRound from '../components/ScoringRound'
 
 export default function Game() {
   const { code } = useParams<{ code: string }>()
@@ -148,6 +149,13 @@ export default function Game() {
         </main>
       </div>
     )
+  }
+
+  if (round?.scoringVersion === 1) {
+    return <div className="min-h-screen flex flex-col bg-surface linen-texture text-on-surface">
+      <GameHeader game={game} players={players} round={round} currentPlayer={currentPlayer} isHost={isHost} />
+      {round.engine ? <ScoringRound game={game} view={round.engine} players={players} uid={uid ?? ''} isHost={isHost} /> : <p className="p-6 text-center text-on-surface-variant">Loading this round…</p>}
+    </div>
   }
 
   if (round && isPrivacyHandoff) {

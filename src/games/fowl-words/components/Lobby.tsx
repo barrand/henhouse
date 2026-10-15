@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
 import { startGame } from '../service'
+import ScoringSettings from './ScoringSettings'
 
 interface Props {
   game: GameData
@@ -14,6 +15,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
   const navigate = useNavigate()
   const [starting, setStarting] = useState(false)
   const [error, setError] = useState('')
+  const [showSettings, setShowSettings] = useState(false)
 
   const handleStart = async () => {
     if (players.length < 2) return setError('Need at least 2 players')
@@ -104,14 +106,20 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
         </section>
 
         {/* How to Play */}
+        <section className="mb-6 rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4">
+          <p className="font-headline font-bold">{game.scoringRules?.mode === 'best-clues-first' ? 'Best Clues First · experimental' : 'Classic scoring'}</p>
+          <p className="text-sm text-on-surface-variant mt-1">{game.scoringRules?.mode === 'best-clues-first' ? 'Back great clues. Solve with fewer reveals for more points.' : 'Unique clues, speed bonuses and peer awards.'}</p>
+          {isHost && <button onClick={() => setShowSettings(true)} className="min-h-12 px-4 mt-3 rounded-xl border border-outline-variant/60 bg-surface-container-high">Game settings</button>}
+        </section>
+        {showSettings && <ScoringSettings game={game} onClose={() => setShowSettings(false)} />}
         <section className="mb-6 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-5 shadow-sm">
           <h3 className="font-headline text-base font-bold text-on-surface mb-3">How it works</h3>
           <ol className="text-sm text-on-surface-variant space-y-2 list-decimal list-inside font-body">
             <li>One player is the <strong className="text-on-surface">guesser</strong>. No peeking.</li>
             <li>The rest see a <strong className="text-on-surface">secret word</strong> and each write a <strong className="text-on-surface">one-word clue</strong>.</li>
             <li>Duplicate clues get <strong className="text-on-surface">eliminated</strong>.</li>
-            <li>Guesser reads the survivors and takes a shot.</li>
-            <li>Nail it → <strong className="text-primary">+10 pts</strong> for everyone who helped. Miss → try again for fewer points.</li>
+            <li>{game.scoringRules?.mode === 'best-clues-first' ? 'Back other clues. The most-backed unique clues appear first.' : 'Guesser reads the survivors and takes a shot.'}</li>
+            <li>Nail it → points for the guesser and shown clue authors. Miss or skip → more clues for fewer points.</li>
           </ol>
         </section>
 
