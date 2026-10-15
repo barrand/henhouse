@@ -18,6 +18,7 @@ Reward useful, unique clues. Givers submit early to gain voting exposure, then p
 
 - Trial payout: `max(1, 10 - 2 × (clue groups shown - 1) - 2 × wrong guesses)`. No win means no relay payout; duplicate penalties still apply.
 - Remove FAST: early submission earns exposure, not guaranteed points. Votes grant no direct points. Keep Most Helpful and Boo; use pre-guess hearts for ordering instead of a separate Peer love point payout in this mode.
+- Old scoring to remove or replace in relay mode: FAST is deleted; USED becomes the shown-clue relay payout; pre-guess Peer love no longer pays +1 and is used only for ordering; DUPLICATE remains -1; the guesser attempt bonus is replaced by the reveal/guess payout ladder. Keep Most Helpful and Boo only if playtests show they add fun rather than duplicate the relay reward.
 - Giver screen: secret word, own locked clue, arriving clue cards, heart toggles, remaining hearts and voting deadline.
 - Guesser screen: revealed clue cards, current potential points, guess field and **Guess**; **Next clue · 8 pts** makes the cost explicit.
 - Results: reveal the word and full queue, distinguish shown/unshown clues, and display server-authoritative point breakdowns.
@@ -37,6 +38,8 @@ Back up to 2 other clues      │ LAVA                    │
 
 ## Implementation and validation
 
-Add an opt-in relay mode for new games. Store frozen reveal order, revealed count, voting deadline and relay scoring version on the round; compute ranking, deadlines and all points on the server. Keep unrevealed clue text inaccessible to the guesser, including Firestore documents and responses. Preserve existing games and scoring.
+Add the relay behind a server-authoritative feature flag. Give the host a lobby toggle, **Classic scoring / Voted clue relay**, defaulting to Classic; show a short explanation under the toggle. Lock the choice when the first round starts, store the selected mode on the game and each round, and make all clients render from that value. This lets hosts run complete A/B playtests without mixing scoring rules inside one game. Store frozen reveal order, revealed count, voting deadline and relay scoring version on relay rounds; compute ranking, deadlines and all points on the server. Keep unrevealed clue text inaccessible to the guesser, including Firestore documents and responses. Preserve Classic games and scoring unchanged.
+
+Before enabling relay by default, decide whether Most Helpful is retained as a post-round recognition action or removed from relay scoring, and whether the old Peer love data needs a migration or can remain read-only legacy data. Do not delete old fields until existing Classic rounds no longer need to render their breakdowns.
 
 Test self-votes, vote limits, late submissions, ties, duplicates/all-duplicates, reveal/guess races, wrong guesses, exhaustion, timeout and exactly-once payouts. Playtest whether strong clues rise, voting stays quick, and early exposure outweighs quality. Specifically watch the tension that helping another clue can solve the word before your own is shown.
