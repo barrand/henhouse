@@ -1,46 +1,56 @@
-# Fowl Words: voted clue relay
+# Fowl Words: configurable scoring and Best Clues First
 
-Proposal for playtesting; no gameplay changes yet.
+Implementation draft. Update and push this document first, then implement and validate locally. No deployment. Preserve unrelated `.env.production` changes.
 
-## Goal
+## Modes and live settings
 
-Reward useful, unique clues. Givers submit early to gain voting exposure, then promote strong complementary clues so the guesser solves with fewer reveals and shown clues earn more points. Voting changes reveal order rather than awarding points directly; no separate voter bonus.
+| Setting | Classic | Best Clues First |
+|---|---|---|
+| Opening clues | All unique groups | Top 20% of unique groups, minimum 3 |
+| Attempts | Existing default behavior | 4 |
+| Payout ladder | 10 / 5 / 2 / 1 | 10 / 7 / 4 / 1 |
+| Reveal all groups by | Attempt 3 | Attempt 3 |
+| FAST / Peer love points | Existing awards | Disabled |
+| Most Helpful / Boo | Existing awards; Boo is display-only | Recognition only |
+| Duplicate penalty | -1 per author | -1 per author |
+| Ranking votes | None | Two hearts per giver |
+| Final voting window | None | 10 seconds |
 
-## Round flow
+Classic is the default. Missing rules preserve legacy rounds. A server-controlled availability flag enables new selections of Best Clues First independently of the AI experiment. Disabling it does not interrupt selected rounds. Enable it locally for playtesting; production requires an explicit server configuration.
 
-1. **Write:** Givers submit one word before seeing other clues. Submission locks their clue and opens the voting board; new clues appear as others submit. The guesser stays blind.
-2. **Vote:** Reuse the heart interaction to back other clues. Proposed limit: two hearts per giver, one per clue, freely changeable until voting closes. Hide authors and live totals; prohibit self-votes. Allow a final 10-second voting window after submission closes.
-3. **Order:** Deduplicate, then rank unique clues by final votes. Freeze the queue; randomize ties once. Duplicate groups remain locked initially and retain their -1 penalty. Votes on duplicates do not move them into the unique queue.
-4. **Reveal:** Show the highest-ranked clue first. The guesser can request another clue without spending a guess, or submit an answer. Earlier clues stay visible; each additional reveal lowers the potential payout.
-5. **Finish:** On a correct answer, award the same relay points to the guesser and each shown clue author. Unshown clues earn no relay points. Preserve four guess attempts; a wrong answer lowers the payout and reveals the next queued unique clue, or uses the existing duplicate-unlock fallback once uniques run out. Exhaustion or timeout ends the round.
+Host settings are accessible in the lobby and game header: preset, attempts and payouts, reveal-all attempt, and mode-specific advanced controls. Require positive, non-increasing payouts, one per attempt. Show example reveal counts, current versus pending settings, Save for next round, Cancel pending changes and Reset to recommended. Lobby saves affect round one; in-game saves affect the next round. Reject stale saves if the round changes while editing. Each round freezes a versioned rules snapshot. Announce activated changes, retain cumulative scores, and inherit saved settings on rematch.
 
-## Starting scoring and UI
+## Voting and reveals
 
-- Trial payout: `max(1, 10 - 2 × (clue groups shown - 1) - 2 × wrong guesses)`. No win means no relay payout; duplicate penalties still apply.
-- Remove FAST: early submission earns exposure, not guaranteed points. Votes grant no direct points. Keep Most Helpful and Boo; use pre-guess hearts for ordering instead of a separate Peer love point payout in this mode.
-- Old scoring to remove or replace in relay mode: FAST is deleted; USED becomes the shown-clue relay payout; pre-guess Peer love no longer pays +1 and is used only for ordering; DUPLICATE remains -1; the guesser attempt bonus is replaced by the reveal/guess payout ladder. Keep Most Helpful and Boo only if playtests show they add fun rather than duplicate the relay reward.
-- Giver screen: secret word, own locked clue, a dense responsive grid of arriving clue cards (up to roughly 40), heart toggles, remaining hearts and voting deadline. Use compact cards with short clue text; on narrow phones the grid collapses to two columns rather than becoming a long single-column feed.
-- Guesser screen: revealed clue cards, current potential points, guess field and **Guess**; **Next clue · 8 pts** makes the cost explicit.
-- Results: reveal the word and full queue, distinguish shown/unshown clues, and display server-authoritative point breakdowns.
+Givers lock a one-word clue before seeing others. Best Clues First uses optional, changeable hearts to rank clues. Hide authors and totals, prohibit self-votes, and allow a final voting window after submissions close. Freeze the order when voting closes: unique groups by votes, ties randomized once, then duplicate groups in existing unlock priority. Votes on duplicate clues do not promote them into the unique queue.
 
-```text
-GIVER                                  GUESSER
-Secret word: VOLCANO                   1 clue shown · Win: +10 each
-Your clue: ASH                         ┌──────────────────────┐
-Back up to 2 other clues               │ LAVA                 │
-┌────────────┬────────────┬──────────┐ └──────────────────────┘
-│ LAVA  [♥]  │ ASH [own]  │ HEAT [♡] │ Your guess [__________]
-├────────────┼────────────┼──────────┤ [Guess]
-│ MOUNTAIN[♡]│ FIRE [♡]   │ ROCK [♡] │ [Next clue · 8 pts]
-├────────────┼────────────┼──────────┤
-│ ... up to ~40 compact clue cards ... │ 1 heart left · Voting: 10s
-└────────────┴────────────┴──────────┘
-```
+Opening count is `min(uniqueCount, max(minimumOpening, ceil(openingShare × uniqueCount)))`. Spread remaining groups evenly across transitions before the configured reveal-all attempt, rounding cumulative counts upward. Reveal at least one additional group while any remain. Classic opens all uniques and retains duplicate unlock priority, revealing every remaining group by the same deadline.
 
-## Implementation and validation
+| Attempt | Example: 10 unique + 4 duplicate groups | Best Clues First payout |
+|---|---|---|
+| 1 | Top 3 uniques | 10 |
+| 2 | First 9 groups | 7 |
+| 3 | All 14 groups | 4 |
+| 4 | All 14 remain visible | 1 |
 
-Add the relay behind a server-authoritative feature flag. Give the host a lobby toggle, **Classic scoring / Voted clue relay**, defaulting to Classic; show a short explanation under the toggle. Lock the choice when the first round starts, store the selected mode on the game and each round, and make all clients render from that value. This lets hosts run complete A/B playtests without mixing scoring rules inside one game. Store frozen reveal order, revealed count, voting deadline and relay scoring version on relay rounds; compute ranking, deadlines and all points on the server. Keep unrevealed clue text inaccessible to the guesser, including Firestore documents and responses. Preserve Classic games and scoring unchanged.
+All-duplicate rounds retain the locked opening; advancing reveals the first scheduled batch. No submitted clues ends the round immediately. Results reveal every clue, even after an early win.
 
-Before enabling relay by default, decide whether Most Helpful is retained as a post-round recognition action or removed from relay scoring, and whether the old Peer love data needs a migration or can remain read-only legacy data. Do not delete old fields until existing Classic rounds no longer need to render their breakdowns.
+## Guess, skip and give up
 
-Test self-votes, vote limits, late submissions, ties, duplicates/all-duplicates, reveal/guess races, wrong guesses, exhaustion, timeout and exactly-once payouts. Playtest whether strong clues rise, voting stays quick, and early exposure outweighs quality. Specifically watch the tension that helping another clue can solve the word before your own is shown.
+Both modes offer Guess and **Skip · reveal N more · next win +P**. A wrong guess, skip or attempt timeout consumes an attempt, advances the ladder and reveals the next batch. Skip makes no AI call and is recorded as Skipped. No additional penalty. Restart the next timer using 60s, 40s, then 20s for subsequent attempts.
+
+Replace skip with Give up when no hidden groups remain or on the final attempt. Confirm before ending unsuccessfully. Disable actions during answer evaluation. Attempt exhaustion ends the round.
+
+Best Clues First pays the current tier to the guesser and shown clue authors; unshown authors get no relay payout. Apply duplicate penalties separately, even on failure. Remove FAST and Peer love points only in this mode; Most Helpful and Boo remain recognition. Classic retains its scoring and awards.
+
+## UI and backend
+
+- Givers: stable responsive grid for roughly 40 clues, two columns on phones, wrapping words, accessible heart targets, own clue separated, visible vote allowance/deadline. Append arrivals without rearranging cards.
+- Guesser: attempt, payout, revealed cards, highlighted new clues, answer field and explicit skip consequence. Results show mode, authors, shown/unshown status, history and server point breakdowns.
+- Add capability lookup, host settings updates, ranking votes/finalization and guesser skip/give-up actions. Share transactional progression across wrong answers, skips and timeout recovery. Validate expected round/attempt and commit scores exactly once.
+- Keep secret words, future word decks, unrevealed clues, author mappings and private ballots in restricted storage. Project role-appropriate views; board access requires a locked clue. Protect rules/configuration against direct client writes.
+- Preserve active legacy rounds, Classic scoring and historical fields. New rounds use immutable rules snapshots. Record rules, reveals, skips, wrong guesses and duration. Defer saved presets and dashboards.
+
+## Validation
+
+Unit-test presets, configuration validation, configurable ladders, relative reveals/rounding, ties and duplicates. Emulator-test host authorization, flag behavior, next-round changes, privacy, deadlines, concurrent guess/skip/timeout, give up and exactly-once scores. Browser-test both modes, small/large rooms, grid, settings, reconnects and full early-win results. Run frontend/functions builds and relevant existing tests. Report actual checks and limitations; do not deploy.
