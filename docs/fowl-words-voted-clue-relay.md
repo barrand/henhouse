@@ -19,21 +19,22 @@ Reward useful, unique clues. Givers submit early to gain voting exposure, then p
 - Trial payout: `max(1, 10 - 2 × (clue groups shown - 1) - 2 × wrong guesses)`. No win means no relay payout; duplicate penalties still apply.
 - Remove FAST: early submission earns exposure, not guaranteed points. Votes grant no direct points. Keep Most Helpful and Boo; use pre-guess hearts for ordering instead of a separate Peer love point payout in this mode.
 - Old scoring to remove or replace in relay mode: FAST is deleted; USED becomes the shown-clue relay payout; pre-guess Peer love no longer pays +1 and is used only for ordering; DUPLICATE remains -1; the guesser attempt bonus is replaced by the reveal/guess payout ladder. Keep Most Helpful and Boo only if playtests show they add fun rather than duplicate the relay reward.
-- Giver screen: secret word, own locked clue, arriving clue cards, heart toggles, remaining hearts and voting deadline.
+- Giver screen: secret word, own locked clue, a dense responsive grid of arriving clue cards (up to roughly 40), heart toggles, remaining hearts and voting deadline. Use compact cards with short clue text; on narrow phones the grid collapses to two columns rather than becoming a long single-column feed.
 - Guesser screen: revealed clue cards, current potential points, guess field and **Guess**; **Next clue · 8 pts** makes the cost explicit.
 - Results: reveal the word and full queue, distinguish shown/unshown clues, and display server-authoritative point breakdowns.
 
 ```text
-GIVER                         GUESSER
-Secret word: VOLCANO          1 clue shown · Win: +10 each
-Your clue: ASH                ┌─────────────────────────┐
-Back up to 2 other clues      │ LAVA                    │
-┌────────────────────────┐   └─────────────────────────┘
-│ LAVA         [♥ Backed]│   Your guess [____________]
-│ ERUPTION     [♡ Back]  │   [Guess]
-│ MOUNTAIN     [♡ Back]  │   [Next clue · 8 pts]
-└────────────────────────┘
-1 heart left · Voting: 10s
+GIVER                                  GUESSER
+Secret word: VOLCANO                   1 clue shown · Win: +10 each
+Your clue: ASH                         ┌──────────────────────┐
+Back up to 2 other clues               │ LAVA                 │
+┌────────────┬────────────┬──────────┐ └──────────────────────┘
+│ LAVA  [♥]  │ ASH [own]  │ HEAT [♡] │ Your guess [__________]
+├────────────┼────────────┼──────────┤ [Guess]
+│ MOUNTAIN[♡]│ FIRE [♡]   │ ROCK [♡] │ [Next clue · 8 pts]
+├────────────┼────────────┼──────────┤
+│ ... up to ~40 compact clue cards ... │ 1 heart left · Voting: 10s
+└────────────┴────────────┴──────────┘
 ```
 
 ## Implementation and validation
