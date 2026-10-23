@@ -11,9 +11,9 @@ export default function LeaderboardModal({ players, currentPlayerId, onClose }: 
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-on-surface/40" />
+      <div className="absolute inset-0 bg-deep/90" />
       <div
-        className="relative w-full max-w-sm bg-surface-container-lowest rounded-t-2xl p-6 pb-8 max-h-[80vh] overflow-y-auto"
+        className="relative w-full max-w-sm bg-surface-container-lowest sticker-card rounded-t-2xl p-6 pb-8 max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
@@ -21,11 +21,11 @@ export default function LeaderboardModal({ players, currentPlayerId, onClose }: 
             <img src="/images/generated-comic/hen-magnifying.png" alt="" className="w-10 h-10 animate-hen-bob" />
             <h2 className="font-headline text-xl font-bold text-on-surface">STANDINGS</h2>
           </div>
-          <button onClick={onClose} className="text-outline hover:text-on-surface-variant text-2xl">&times;</button>
+          <button aria-label="Close standings" onClick={onClose} className="text-on-surface-variant hover:text-on-surface-variant text-2xl">&times;</button>
         </div>
 
         {sorted.length === 0 ? (
-          <p className="text-outline text-center py-4 font-body">No players yet</p>
+          <p className="text-on-surface-variant text-center py-4 font-body">No players yet</p>
         ) : (
           <ul className="space-y-3">
             {sorted.map((player, i) => (

@@ -1,4 +1,4 @@
-/** Peer award animations: heart float, boo float, star float, card pulse, MVP stamp. */
+/** Peer award animations: heart float, boo float, star float, card pulse, Most Helpful stamp. */
 
 import { animateThumbBtn } from './thumbVoteFx'
 
@@ -19,10 +19,11 @@ function cleanupFloatNode(pool: HTMLElement[], el: HTMLElement) {
 }
 
 function burstGoldParticles(btn: HTMLElement) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const r = btn.getBoundingClientRect()
   const cx = r.left + r.width / 2
   const cy = r.top + r.height / 2
-  const colors = ['#f0c078', '#ffd699', '#e8a840', '#fff0c0', '#c4923a']
+  const colors = ['var(--color-sun)', 'var(--color-cream)', 'var(--color-tang)']
   const count = 10
   for (let i = 0; i < count; i++) {
     const p = document.createElement('div')
@@ -44,6 +45,7 @@ function burstGoldParticles(btn: HTMLElement) {
 }
 
 export function spawnHeartFloat(sourceEl: HTMLElement) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const r = sourceEl.getBoundingClientRect()
   const el = document.createElement('span')
   el.textContent = '❤️'
@@ -60,13 +62,14 @@ export function spawnHeartFloat(sourceEl: HTMLElement) {
 }
 
 export function spawnBooFloat(sourceEl: HTMLElement) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const r = sourceEl.getBoundingClientRect()
   const el = document.createElement('span')
   el.textContent = 'boo!'
   el.style.cssText = [
     'position:fixed', 'font-size:13px', 'font-weight:800', 'letter-spacing:0.04em',
-    'text-transform:lowercase', 'color:#ffb4ab',
-    'text-shadow:0 1px 0 rgba(42,31,14,0.35)', 'pointer-events:none', 'z-index:9999',
+    'text-transform:lowercase', 'color:var(--color-lilac)',
+    'pointer-events:none', 'z-index:9999',
     `left:${r.left + r.width / 2}px`, `top:${r.top}px`, 'transform:translate(-50%,0)',
   ].join(';')
   el.classList.add('animate-boo-float')
@@ -78,13 +81,13 @@ export function spawnBooFloat(sourceEl: HTMLElement) {
 }
 
 export function spawnStarFloat(sourceEl: HTMLElement) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const r = sourceEl.getBoundingClientRect()
   const el = document.createElement('span')
   el.textContent = '⭐'
   el.style.cssText = [
     'position:fixed', 'font-size:20px', 'pointer-events:none', 'z-index:9999',
     `left:${r.left + r.width / 2}px`, `top:${r.top}px`, 'transform:translate(-50%,0)',
-    'filter:drop-shadow(0 1px 2px rgba(42,31,14,0.35))',
   ].join(';')
   el.classList.add('animate-star-float')
   document.body.appendChild(el)
@@ -95,6 +98,7 @@ export function spawnStarFloat(sourceEl: HTMLElement) {
 }
 
 export function pulseCardLove(cardEl: HTMLElement) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   cardEl.classList.remove('animate-card-pulse-love')
   void cardEl.offsetWidth
   cardEl.classList.add('animate-card-pulse-love')
@@ -102,6 +106,7 @@ export function pulseCardLove(cardEl: HTMLElement) {
 }
 
 export function pulseCardMostHelpful(cardEl: HTMLElement) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   cardEl.classList.remove('animate-card-pulse-mvp')
   void cardEl.offsetWidth
   cardEl.classList.add('animate-card-pulse-mvp')
@@ -109,6 +114,7 @@ export function pulseCardMostHelpful(cardEl: HTMLElement) {
 }
 
 export function shakeCardBoo(cardEl: HTMLElement) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   cardEl.classList.remove('animate-card-shake')
   void cardEl.offsetWidth
   cardEl.classList.add('animate-card-shake')
@@ -116,6 +122,7 @@ export function shakeCardBoo(cardEl: HTMLElement) {
 }
 
 export function pulseCardUnlock(cardEl: HTMLElement) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   cardEl.classList.remove('animate-card-unlock-pulse')
   void cardEl.offsetWidth
   cardEl.classList.add('animate-card-unlock-pulse')
@@ -123,6 +130,7 @@ export function pulseCardUnlock(cardEl: HTMLElement) {
 }
 
 export function playMostHelpfulAwardFx(btn: HTMLButtonElement, cardEl?: HTMLElement | null) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   animateThumbBtn(btn, 'up')
   spawnStarFloat(btn)
   burstGoldParticles(btn)
@@ -130,12 +138,14 @@ export function playMostHelpfulAwardFx(btn: HTMLButtonElement, cardEl?: HTMLElem
 }
 
 export function playBooAwardFx(btn: HTMLButtonElement, cardEl?: HTMLElement | null) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   animateThumbBtn(btn, 'down')
   spawnBooFloat(btn)
   if (cardEl) shakeCardBoo(cardEl)
 }
 
 export function stampMostHelpful(badgeEl: HTMLElement) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   badgeEl.classList.remove('animate-star-stamp')
   void badgeEl.offsetWidth
   badgeEl.classList.add('animate-star-stamp')

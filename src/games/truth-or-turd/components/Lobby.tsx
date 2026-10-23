@@ -50,10 +50,10 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
           <h2 className="font-headline text-4xl font-bold text-on-surface mb-2 tracking-tight">TRUTH OR TURD</h2>
           <p className="text-on-surface-variant text-sm">A fast fact-or-flop showdown</p>
 
-          <div className="mt-6 inline-flex items-center gap-4 bg-surface-container-lowest px-8 py-4 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.3)] border border-outline-variant/60">
+          <div className="room-sticker mt-6 inline-flex items-center gap-4 bg-surface-container-lowest px-8 py-4 rounded-xl shadow-sticker border border-outline-variant">
             <div className="flex flex-col items-center">
-              <span className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary mb-1">Room Code</span>
-              <span className="font-headline text-3xl font-bold text-on-surface tracking-[0.3em]">{game.code}</span>
+              <span className="font-label text-[11px] uppercase tracking-[0.2em] text-info mb-1">Room Code</span>
+              <span className="room-code text-3xl">{game.code}</span>
             </div>
             <button
               type="button"
@@ -67,7 +67,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
         </div>
 
         {game.includePatrioticQuestions && (
-          <div className="mb-6 bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-4 text-center">
+          <div className="mb-6 bg-surface-container-lowest border border-outline-variant rounded-xl p-4 text-center">
             <p className="font-headline text-lg font-bold text-on-surface">Patriotic Edition is ON</p>
             <p className="text-on-surface-variant text-sm font-body mt-1">Every question is America-themed.</p>
           </div>
@@ -79,12 +79,12 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
               The Henhouse <span className="text-on-surface-variant font-normal text-sm ml-1">({players.length})</span>
             </h3>
           </div>
-          <div className="bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.3)] border border-outline-variant/60 relative overflow-hidden">
+          <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sticker border border-outline-variant relative overflow-hidden">
             <ul className="grid grid-cols-2 gap-x-4 gap-y-3 relative z-10">
               {players.map((player) => (
-                <li key={player.id} className="flex items-center min-w-0">
+                <li key={player.id} className="animate-hen-pop flex items-center min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className={`shrink-0 w-2 h-2 rounded-full ${player.connected ? 'bg-primary shadow-[0_0_8px_rgba(168,201,169,0.5)]' : 'bg-outline-variant'}`} />
+                    <span className={`shrink-0 w-2 h-2 rounded-full ${player.connected ? 'bg-success' : 'bg-outline-variant'}`} />
                     <span className="font-medium truncate">
                       {player.name}
                       {(player.id === game.hostId || player.id === currentPlayer?.id) && (
@@ -97,21 +97,21 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
                   </div>
                 </li>
               ))}
-              <li className="col-span-2 pt-2 border-t border-outline-variant/50 text-center">
+              <li className="col-span-2 pt-2 border-t border-outline-variant text-center">
                 <p className="italic text-on-surface-variant text-sm">Waiting for the flock...</p>
               </li>
             </ul>
           </div>
         </section>
 
-        <section className="mb-8 bg-surface-container-lowest rounded-xl border border-outline-variant/60 p-4">
+        <section className="mb-8 bg-surface-container-lowest rounded-xl border border-outline-variant p-4">
           <div className="grid grid-cols-2 gap-3 text-center">
             <div>
-              <p className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold">Rounds</p>
+              <p className="font-label text-[11px] uppercase tracking-[0.2em] text-secondary font-bold">Rounds</p>
               <p className="font-headline text-2xl font-bold text-on-surface">{game.settings.totalRounds}</p>
             </div>
             <div>
-              <p className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold">Timer</p>
+              <p className="font-label text-[11px] uppercase tracking-[0.2em] text-secondary font-bold">Timer</p>
               <p className="font-headline text-2xl font-bold text-on-surface">{game.settings.secondsPerRound}s</p>
             </div>
           </div>
@@ -121,13 +121,13 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
       </main>
 
       {isHost ? (
-        <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background/95 to-transparent z-40">
+        <div className="fixed bottom-0 left-0 right-0 p-6 action-dock z-40">
           <div className="max-w-md mx-auto">
             <button
               type="button"
               onClick={handleStart}
               disabled={starting || players.length < 1}
-              className="w-full bg-primary text-on-primary h-16 rounded-xl font-headline font-bold text-lg shadow-[0_12px_32px_rgba(0,0,0,0.4)] flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 transition-transform duration-200"
+              className="w-full bg-action text-on-action h-16 rounded-xl font-headline font-bold text-lg shadow-sticker flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 transition-transform duration-200"
             >
               <span>{starting ? 'Starting...' : 'Start Game'}</span>
               {!starting && <span className="material-symbols-outlined">play_arrow</span>}
@@ -135,7 +135,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
           </div>
         </div>
       ) : (
-        <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background/95 to-transparent z-40">
+        <div className="fixed bottom-0 left-0 right-0 p-6 action-dock z-40">
           <div className="max-w-md mx-auto text-center">
             <p className="text-on-surface-variant animate-pulse">Waiting for host to start...</p>
           </div>

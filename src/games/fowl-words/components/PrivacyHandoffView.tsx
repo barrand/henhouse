@@ -61,7 +61,7 @@ export default function PrivacyHandoffView({ game, round, guesserName, isHost, o
           {guesserName}, close your eyes.
         </h1>
         <p className="font-headline text-2xl font-bold text-primary">No peeking.</p>
-        <p className="font-headline text-5xl font-bold text-on-surface tabular-nums">{timeLeft}</p>
+        <p className="font-mono text-5xl font-bold text-timer tabular-nums">{timeLeft}</p>
         {isHost && (
           <button
             type="button"

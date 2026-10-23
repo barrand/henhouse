@@ -104,7 +104,7 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
         className={`rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.98] disabled:opacity-55 ${
           active
             ? 'bg-primary-fixed border-primary text-on-primary-fixed animate-answer-card-lock'
-            : 'bg-surface-container-low border-outline-variant/60 hover:border-primary hover:bg-primary/10 text-on-surface'
+            : 'bg-surface-container-low border-outline-variant hover:border-primary hover:bg-primary/10 text-on-surface'
         }`}
       >
         <span className="flex items-center gap-3">
@@ -123,18 +123,18 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
     <main className="flex-1 flex flex-col px-4 py-6">
       <div className="text-center mb-4">
         <p className="text-xs font-label uppercase tracking-widest text-secondary mb-1">Round timer</p>
-        <p className={`font-headline text-3xl font-bold tabular-nums ${expired ? 'text-error' : 'text-on-surface'}`}>
+        <p className={`font-headline text-3xl font-bold tabular-nums ${expired ? 'text-timer' : 'text-timer'}`}>
           {expired ? "TIME'S UP!" : `0:${String(timeLeft).padStart(2, '0')}`}
         </p>
         <div className="mt-2 h-2 bg-surface-container-high rounded-full overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-250 ${expired ? 'bg-error' : 'bg-primary'}`}
+            className={`h-full rounded-full transition-all duration-250 ${expired ? 'bg-timer' : 'bg-timer'}`}
             style={{ width: `${timerPercent}%` }}
           />
         </div>
       </div>
 
-      <section className="rounded-2xl border-2 p-6 text-center shadow-sm relative bg-surface-container-lowest border-outline-variant/60">
+      <section className="rounded-2xl border-2 p-6 text-center shadow-sm relative bg-surface-container-lowest border-outline-variant">
         {isPatrioticRound && (
           <div className="absolute top-3 right-3 text-2xl" aria-hidden>🇺🇸</div>
         )}
@@ -159,14 +159,14 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
                   className={`rounded-2xl border-2 p-5 text-left transition-all active:scale-[0.98] disabled:opacity-55 ${
                     active
                       ? 'bg-primary-fixed border-primary text-on-primary-fixed animate-answer-card-lock'
-                      : 'bg-surface-container-low border-outline-variant/60 hover:border-primary hover:bg-primary/10 text-on-surface'
+                      : 'bg-surface-container-low border-outline-variant hover:border-primary hover:bg-primary/10 text-on-surface'
                   }`}
                 >
                   <span className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-3xl">{copy.icon}</span>
                     <span>
                       <span className="block font-headline text-2xl font-bold">{copy.label}</span>
-                      <span className="block text-sm font-body text-on-surface-variant">{copy.helper}</span>
+                      <span className={`block text-sm font-body ${active ? 'text-on-primary-fixed' : 'text-on-surface-variant'}`}>{copy.helper}</span>
                     </span>
                   </span>
                 </button>
@@ -175,7 +175,7 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
       </div>
 
       {alreadyAnswered || selected ? (
-        <div className="mt-5 text-center py-4 rounded-xl border border-outline-variant/60 bg-surface-container-low px-4">
+        <div className="mt-5 text-center py-4 rounded-xl border border-outline-variant bg-surface-container-low px-4">
           <p className="font-headline text-lg font-semibold text-on-surface">You&apos;re clucked in</p>
           {selected && (
             <p className="mt-2 inline-block rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-sm font-body font-semibold text-primary">
@@ -189,12 +189,12 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
       ) : expired ? (
         <div className="mt-5 text-center py-4">
           <img src="/images/generated-comic/hen-sleeping.png" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
-          <p className="text-error font-bold text-lg font-body">Too slow!</p>
+          <p className="text-waiting font-bold text-lg font-body">Too slow!</p>
           <p className="text-on-surface-variant mt-1 font-body">No answer this round.</p>
         </div>
       ) : null}
 
-      <section className="mt-6 bg-surface-container-lowest rounded-xl border border-outline-variant/60 p-4">
+      <section className="mt-6 bg-surface-container-lowest rounded-xl border border-outline-variant p-4">
         <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 font-label">
           {answeredIds.size} of {players.length} answered
         </p>
@@ -204,12 +204,12 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
             return (
               <li key={player.id} className="flex items-center gap-1.5 min-w-0">
                 <span
-                  className={`material-symbols-outlined text-base shrink-0 ${hasAnswered ? 'text-primary' : 'text-outline-variant'}`}
+                  className={`material-symbols-outlined text-base shrink-0 ${hasAnswered ? 'text-success' : 'text-on-surface-variant'}`}
                   style={hasAnswered ? { fontVariationSettings: "'FILL' 1" } : undefined}
                 >
                   {hasAnswered ? 'check_circle' : 'radio_button_unchecked'}
                 </span>
-                <span className={`text-sm font-body truncate ${hasAnswered ? 'text-on-surface' : 'text-outline'}`}>
+                <span className={`text-sm font-body truncate ${hasAnswered ? 'text-on-surface' : 'text-on-surface-variant'}`}>
                   {player.name}
                 </span>
               </li>
@@ -227,12 +227,12 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
           >
             <span>{confirmReveal ? 'Tap again to reveal' : 'Stop Waiting'}</span>
             {!confirmReveal && (
-              <span className="font-label text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
+              <span className="font-label text-[11px] font-bold uppercase tracking-[0.2em] opacity-70">
                 Host only
               </span>
             )}
           </button>
-          <p className="text-center text-xs text-outline font-body">
+          <p className="text-center text-xs text-on-surface-variant font-body">
             Reveal now and score anyone who has not answered as no answer.
           </p>
         </div>

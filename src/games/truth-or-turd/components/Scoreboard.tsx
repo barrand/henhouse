@@ -75,7 +75,7 @@ export default function Scoreboard({ game, players, isHost, isFinal, currentPlay
           </div>
         )}
 
-        <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 divide-y divide-outline-variant/50 overflow-hidden">
+        <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant divide-y divide-outline-variant overflow-hidden">
           {sorted.map((player, index) => {
             const isYou = player.id === currentPlayerId
             return (
@@ -106,7 +106,7 @@ export default function Scoreboard({ game, players, isHost, isFinal, currentPlay
                   type="button"
                   onClick={handleRematch}
                   disabled={rematching}
-                  className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-semibold tracking-wide shadow-[0_12px_32px_rgba(0,0,0,0.4)] hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full bg-action text-on-action h-14 rounded-xl font-body font-semibold tracking-wide shadow-sticker hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
                 >
                   {rematching ? 'Starting...' : 'PLAY AGAIN'}
                 </button>

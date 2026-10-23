@@ -19,18 +19,18 @@ export default function GuessView({ game, round, players, isGuesser }: Props) {
         <h2 className="font-headline text-2xl font-bold text-on-surface">
           Checking that guess…
         </h2>
-        <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-5 shadow-sm">
-          <p className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary mb-2 font-bold">
+        <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant p-5 shadow-sm">
+          <p className="font-label text-[11px] uppercase tracking-[0.2em] text-secondary mb-2 font-bold">
             {isGuesser ? 'Your guess' : `${guesserPlayer?.name}’s guess`}
           </p>
-          <p className="font-headline text-3xl font-bold text-on-surface">
+          <p className="font-mono text-3xl font-bold text-on-surface">
             {guess}
           </p>
         </div>
         <div className="flex justify-center gap-2">
-          <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-          <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-          <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+          <span className="w-2 h-2 bg-waiting rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+          <span className="w-2 h-2 bg-waiting rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+          <span className="w-2 h-2 bg-waiting rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
         </div>
       </div>
     </main>

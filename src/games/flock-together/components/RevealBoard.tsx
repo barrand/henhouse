@@ -25,28 +25,28 @@ const CLUSTER_STYLES: Record<ClusterType, {
   badgeClass: string
 }> = {
   flock: {
-    cardClass: 'bg-primary-fixed/10 border-2 border-primary',
-    textClass: 'text-primary',
+    cardClass: 'bg-success-fixed/10 border-2 border-success',
+    textClass: 'text-success',
     henImg: '/images/generated-comic/hen-excited.png',
     badge: 'THE FLOCK',
-    badgeClass: 'bg-primary text-on-primary',
+    badgeClass: 'bg-success text-on-success',
   },
   outlier: {
-    cardClass: 'bg-surface-container border border-outline-variant/60',
+    cardClass: 'bg-surface-container border border-outline-variant',
     textClass: 'text-on-surface',
     henImg: '/images/generated-comic/hen-embarrassed.png',
     badge: 'MINORITY',
     badgeClass: 'bg-secondary-fixed text-on-secondary-fixed',
   },
   rotten: {
-    cardClass: 'bg-error-container/10 border border-error/40',
-    textClass: 'text-error',
+    cardClass: 'bg-secondary-container border border-secondary',
+    textClass: 'text-secondary',
     henImg: '/images/generated-comic/hen-embarrassed.png',
     badge: 'LONE −1',
-    badgeClass: 'bg-error-container text-on-error-container',
+    badgeClass: 'bg-secondary-container text-on-secondary-container',
   },
   'no-answer': {
-    cardClass: 'bg-surface-container border border-outline-variant/60',
+    cardClass: 'bg-surface-container border border-outline-variant',
     textClass: 'text-on-surface-variant',
     henImg: null,
     badge: 'NO ANSWER',
@@ -104,7 +104,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
         <div className="text-center space-y-3">
           <img src="/images/generated-comic/hen-pecking.png" alt="" className="w-20 h-20 mx-auto animate-hen-peck" />
           <p className="font-headline text-xl font-bold text-on-surface">Checking all answers...</p>
-          <p className="text-outline text-sm font-body">The flock is being counted</p>
+          <p className="text-on-surface-variant text-sm font-body">The flock is being counted</p>
         </div>
       </div>
     )
@@ -152,13 +152,13 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
 
   const roundChip = (result: RoundResult | undefined, earned: number) => {
     if (result === 'flock' && earned > 0)
-      return <span className="rounded-full bg-primary-fixed px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-primary-fixed">Flock +1</span>
+      return <span className="rounded-full bg-success-fixed px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-on-success-fixed">Flock +1</span>
     if (result === 'rotten' && earned < 0)
-      return <span className="rounded-full bg-error-container px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-error-container">Lone −1</span>
+      return <span className="rounded-full bg-error-container px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-on-error-container">Lone −1</span>
     if (result === 'no-answer')
-      return <span className="rounded-full bg-surface-container-high px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">No answer</span>
+      return <span className="rounded-full bg-surface-container-high px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">No answer</span>
     if (result === 'outlier')
-      return <span className="rounded-full bg-secondary-fixed px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-secondary-fixed">Minority</span>
+      return <span className="rounded-full bg-secondary-fixed px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-on-secondary-fixed">Minority</span>
     return null
   }
 
@@ -173,7 +173,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
               isYou
                 ? 'bg-primary text-on-primary font-bold'
                 : tone === 'flock'
-                  ? 'bg-on-primary-fixed/10 text-on-primary-fixed-variant'
+                  ? 'bg-on-success-fixed/10 text-on-success-fixed-variant'
                   : 'bg-surface-container-high text-on-surface'
             }`}
           >
@@ -185,11 +185,11 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
   )
 
   const renderAnswerIterations = (playerIds: string[]) => (
-    <p className="text-sm text-on-primary-fixed-variant font-body leading-relaxed">
+    <p className="text-sm text-on-success-fixed-variant font-mono leading-relaxed">
       {playerIds.map((id, index) => (
         <span key={id}>
           <span className="font-semibold">{playerAnswers[id]?.trim() || '—'}</span>
-          {index < playerIds.length - 1 && <span className="mx-1.5 text-on-primary-fixed-variant/60">·</span>}
+          {index < playerIds.length - 1 && <span className="mx-1.5 text-on-success-fixed-variant">·</span>}
         </span>
       ))}
     </p>
@@ -198,7 +198,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
   return (
     <div className="flex-1 px-4 py-6 space-y-5">
       {/* Question */}
-      <div className="rounded-2xl border-2 p-5 text-center shadow-sm bg-surface-container-lowest border-outline-variant/60">
+      <div className="rounded-2xl border-2 p-5 text-center shadow-sm bg-surface-container-lowest border-outline-variant">
         <p className="font-headline text-xl font-bold text-on-surface leading-relaxed">{round.question}</p>
       </div>
 
@@ -210,7 +210,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
             <p className="font-headline text-2xl font-bold text-on-surface">{heroConfig.label}</p>
             {heroConfig.points && (
               <span className={`inline-block px-4 py-1 rounded-full text-sm font-bold font-body ${
-                yourPoints > 0 ? 'bg-primary text-on-primary' : 'bg-error-container text-on-error-container'
+                yourPoints > 0 ? 'bg-success text-on-success' : 'bg-secondary-container text-on-secondary-container'
               }`}>
                 {heroConfig.points}
               </span>
@@ -221,21 +221,21 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
 
       {/* Grouped answer board */}
       <section className="space-y-2">
-        <h3 className="font-headline text-lg font-semibold text-primary px-1">How the flock landed</h3>
+        <h3 className="font-headline text-lg font-semibold text-success px-1">How the flock landed</h3>
 
         {flockPlayerIds.length > 0 && (
-          <div className={`rounded-2xl p-5 shadow-sm bg-primary-fixed border-2 border-primary ${currentPlayerId && flockPlayerIds.includes(currentPlayerId) ? 'ring-2 ring-primary/30' : ''}`}>
+          <div className={`rounded-2xl p-5 shadow-sm bg-success-fixed border-2 border-success ${currentPlayerId && flockPlayerIds.includes(currentPlayerId) ? 'ring-2 ring-success/30' : ''}`}>
             <div className="flex items-start gap-3">
               <img src="/images/generated-comic/hen-excited.png" alt="" className="w-10 h-10 shrink-0" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="font-label text-[10px] uppercase tracking-[0.18em] font-bold text-on-primary-fixed-variant">The flock</p>
-                  <span className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-on-primary shrink-0">
+                  <p className="font-label text-[11px] uppercase tracking-[0.18em] font-bold text-on-success-fixed-variant">The flock</p>
+                  <span className="rounded-full bg-success px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-on-success shrink-0">
                     {flockPlayerIds.length} {flockPlayerIds.length === 1 ? 'player' : 'players'}
                   </span>
                 </div>
-                <p className="font-headline text-xl font-bold text-on-primary-fixed mt-1">They matched!</p>
-                <p className="text-sm text-on-primary-fixed-variant font-body mt-1">One answer, shared by the whole group</p>
+                <p className="font-headline text-xl font-bold text-on-success-fixed mt-1">They matched!</p>
+                <p className="text-sm text-on-success-fixed-variant font-body mt-1">One answer, shared by the whole group</p>
               </div>
             </div>
 
@@ -243,15 +243,15 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
               {renderNameChips(flockPlayerIds, 'flock')}
             </div>
 
-            <div className="mt-4 pt-3 border-t border-on-primary-fixed-variant/20">
-              <p className="font-label text-[10px] uppercase tracking-[0.16em] font-bold text-on-primary-fixed-variant mb-1">Answer iterations</p>
+            <div className="mt-4 pt-3 border-t border-on-success-fixed-variant/20">
+              <p className="font-label text-[11px] uppercase tracking-[0.16em] font-bold text-on-success-fixed-variant mb-1">Answer iterations</p>
               {renderAnswerIterations(flockPlayerIds)}
             </div>
           </div>
         )}
 
         {otherClusters.length > 0 && (
-          <p className="font-label text-[10px] uppercase tracking-[0.18em] text-secondary font-bold pt-3 px-1">Other answers</p>
+          <p className="font-label text-[11px] uppercase tracking-[0.18em] text-secondary font-bold pt-3 px-1">Other answers</p>
         )}
 
         {otherClusters.map((cluster) => {
@@ -260,18 +260,18 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
           return (
             <div
               key={cluster.answer}
-              className={`rounded-2xl p-4 shadow-sm ${style.cardClass} ${isYourCluster ? 'ring-1 ring-primary/30' : ''}`}
+              className={`rounded-2xl p-4 shadow-sm ${style.cardClass} ${isYourCluster ? 'ring-1 ring-success/30' : ''}`}
             >
-              <div className="flex items-center gap-3 mb-2.5">
+              <div className="flex flex-wrap items-center gap-3 mb-2.5">
                 {style.henImg ? (
                   <img src={style.henImg} alt="" className="w-8 h-8 shrink-0" />
                 ) : (
                   <div className="w-8 h-8 shrink-0" />
                 )}
-                <p className={`font-headline text-base font-bold flex-1 ${style.textClass}`}>{cluster.answer}</p>
+                <p className={`font-mono text-base font-bold flex-1 min-w-0 break-words ${style.textClass}`}>{cluster.answer}</p>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <span className="text-xs text-on-surface-variant font-body">{cluster.playerIds.length} {cluster.playerIds.length === 1 ? 'player' : 'players'}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${style.badgeClass}`}>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${style.badgeClass}`}>
                     {style.badge}
                   </span>
                 </div>
@@ -283,10 +283,10 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
 
         {noAnswerIds.length > 0 && (
           <div className={`rounded-2xl p-4 shadow-sm ${CLUSTER_STYLES['no-answer'].cardClass}`}>
-            <div className="flex items-center gap-3 mb-2.5">
+            <div className="flex flex-wrap items-center gap-3 mb-2.5">
               <div className="w-8 h-8 shrink-0" />
-              <p className="font-headline text-base font-bold flex-1 text-on-surface-variant">No answer</p>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${CLUSTER_STYLES['no-answer'].badgeClass}`}>
+              <p className="font-mono text-base font-bold flex-1 min-w-0 break-words text-on-surface-variant">No answer</p>
+              <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${CLUSTER_STYLES['no-answer'].badgeClass}`}>
                 TOO SLOW
               </span>
             </div>
@@ -297,10 +297,10 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
 
       {/* Standings */}
       <section>
-        <h3 className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
+        <h3 className="font-label text-[11px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
           Standings
         </h3>
-        <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 divide-y divide-outline-variant/50 overflow-hidden">
+        <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant divide-y divide-outline-variant overflow-hidden">
           {sortedPlayers.map((player, i) => {
             const earned = round.pointsThisRound?.[player.id] ?? 0
             const isYou = player.id === currentPlayerId
@@ -309,7 +309,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
                 key={player.id}
                 className={`px-3 py-2 font-body flex items-center gap-2 ${isYou ? 'bg-secondary-fixed/20' : ''}`}
               >
-                <span className="text-outline w-5 tabular-nums shrink-0 text-sm">{i + 1}.</span>
+                <span className="text-on-surface-variant w-5 tabular-nums shrink-0 text-sm">{i + 1}.</span>
                 <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-1.5 gap-y-1">
                   <span className="font-medium text-on-surface truncate">{player.name}</span>
                   {isYou && <span className="text-xs text-on-surface-variant shrink-0">← you</span>}
@@ -317,7 +317,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {earned !== 0 && (
-                    <span className={`text-xs font-bold tabular-nums ${earned > 0 ? 'text-primary' : 'text-error'}`}>
+                    <span className={`text-xs font-bold tabular-nums ${earned > 0 ? 'text-success' : 'text-secondary'}`}>
                       {earned > 0 ? '+' : ''}{earned}
                     </span>
                   )}
@@ -333,7 +333,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
         {isHost ? (
           <button
             onClick={handleAdvance}
-            className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-semibold tracking-wide shadow-[0_12px_32px_rgba(0,0,0,0.4)] hover:opacity-90 active:scale-95 transition-all"
+            className="w-full bg-action text-on-action h-14 rounded-xl font-body font-semibold tracking-wide shadow-sticker hover:opacity-90 active:scale-95 transition-all"
           >
             {isLastRound ? 'SEE FINAL STANDINGS' : 'NEXT ROUND'}
           </button>

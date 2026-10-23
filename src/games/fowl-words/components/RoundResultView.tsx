@@ -173,10 +173,10 @@ export default function RoundResultView({
                 alt=""
                 className={`w-28 h-28 mx-auto ${round.currentAttempt === 1 ? 'animate-hen-celebrate' : 'animate-hen-pop'}`}
               />
-              <h2 className="font-headline text-4xl font-bold text-primary tracking-tight">NAILED IT!</h2>
+              <h2 className="font-headline text-4xl font-bold text-success tracking-tight">NAILED IT!</h2>
               <p className="text-on-surface-variant font-body text-sm">
                 {guesserName} got{' '}
-                <span className="font-headline font-bold text-2xl text-primary tracking-tight">{round.secretWord}</span>
+                <span className="font-headline font-bold text-2xl text-success tracking-tight">{round.secretWord}</span>
                 {round.currentAttempt > 1 && (
                   <span className="block text-xs mt-1 opacity-75">
                     on attempt {round.currentAttempt} of {round.maxAttempts}
@@ -187,13 +187,13 @@ export default function RoundResultView({
           ) : round.clueGroups.length === 0 ? (
             <>
               <img src="/images/generated-comic/hen-embarrassed.png" alt="" className="w-28 h-28 mx-auto animate-hen-pop" />
-              <h2 className="font-headline text-4xl font-bold text-error tracking-tight">NO CLUES</h2>
+              <h2 className="font-headline text-4xl font-bold text-waiting tracking-tight">NO CLUES</h2>
               <p className="text-on-surface-variant font-body text-sm">Nobody submitted a clue in time.</p>
             </>
           ) : (
             <>
               <img src="/images/generated-comic/hen-confused.png" alt="" className="w-28 h-28 mx-auto animate-hen-pop" />
-              <h2 className="font-headline text-4xl font-bold text-error tracking-tight">NO LUCK</h2>
+              <h2 className="font-headline text-4xl font-bold text-waiting tracking-tight">NO LUCK</h2>
               <p className="text-on-surface-variant font-body text-sm">
                 {guesserName} ran out of guesses.
               </p>
@@ -204,7 +204,7 @@ export default function RoundResultView({
                     : [round.guesserAnswer!]
                   ).map((g, i) => (
                     <span key={i} className="text-sm text-on-surface-variant font-body">
-                      <span className="font-label text-[10px] text-outline tabular-nums">{i + 1}.</span>{' '}
+                      <span className="font-label text-[11px] text-on-surface-variant tabular-nums">{i + 1}.</span>{' '}
                       <span className="font-bold text-on-surface">{g}</span>
                     </span>
                   ))}
@@ -216,7 +216,7 @@ export default function RoundResultView({
 
         {!round.isCorrect && (
           <div className="bg-primary-fixed border-2 border-primary-fixed-dim rounded-2xl px-4 py-3 text-center shadow-sm">
-            <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-primary-fixed-variant font-bold mb-0.5">
+            <p className="font-label text-[11px] uppercase tracking-[0.2em] text-on-primary-fixed-variant font-bold mb-0.5">
               The word was
             </p>
             <p className="font-headline text-3xl font-bold text-on-primary-fixed tracking-tight">
@@ -227,7 +227,7 @@ export default function RoundResultView({
 
         {round.clueGroups.length > 0 && (
           <div>
-            <h3 className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
+            <h3 className="font-label text-[11px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
               What everyone wrote
             </h3>
 
@@ -278,7 +278,7 @@ export default function RoundResultView({
                     })}`}
                   >
                     <p
-                      className={`font-headline font-bold text-xl leading-tight text-center line-clamp-2 h-11 flex items-center justify-center mb-0.5 shrink-0 ${
+                      className={`font-mono font-bold text-lg leading-tight text-center line-clamp-2 h-11 flex items-center justify-center mb-0.5 shrink-0 ${
                         group.isDuplicate && !isVisible
                           ? 'text-error line-through'
                           : 'text-on-surface'
@@ -294,7 +294,7 @@ export default function RoundResultView({
                           <span className="text-error font-bold"> · -1</span>
                         )}
                         {group.isDuplicate && !isYours && (
-                          <span className="text-error font-bold uppercase text-[9px] tracking-wide"> · dup</span>
+                          <span className="text-error font-bold uppercase text-[11px] tracking-wide"> · dup</span>
                         )}
                       </span>
                       <PeerLoveChip count={loveCount} />
@@ -371,7 +371,7 @@ export default function RoundResultView({
         )}
 
         {isCurrentGuesser && (
-          <div className={`rounded-xl px-4 py-3 text-center font-body border ${round.isCorrect ? 'bg-primary-fixed/20 border-primary-fixed-dim' : 'bg-surface-container-low border-outline-variant/20'}`}>
+          <div className={`rounded-xl px-4 py-3 text-center font-body border ${round.isCorrect ? 'bg-primary-fixed/20 border-primary-fixed-dim' : 'bg-surface-container-low border-outline-variant'}`}>
             <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider font-label mb-1">Your result as guesser</p>
             <p className="font-headline font-bold text-lg text-on-surface">
               {round.isCorrect
@@ -392,10 +392,10 @@ export default function RoundResultView({
         )}
 
         <div>
-          <h3 className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
+          <h3 className="font-label text-[11px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">
             Standings
           </h3>
-          <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 divide-y divide-outline-variant/20 overflow-hidden">
+          <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant divide-y divide-outline-variant overflow-hidden">
             {sortedPlayers.map((p, i) => {
               const earned = round.pointsThisRound[p.id] ?? 0
               const isYou = p.id === currentPlayerId
@@ -405,7 +405,7 @@ export default function RoundResultView({
                   key={p.id}
                   className={`px-3 py-2 font-body flex items-center gap-2 ${isYou ? 'bg-secondary-fixed/20' : ''}`}
                 >
-                  <span className="text-outline w-5 tabular-nums shrink-0 text-sm">{i + 1}.</span>
+                  <span className="text-on-surface-variant w-5 tabular-nums shrink-0 text-sm">{i + 1}.</span>
                   <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-1.5 gap-y-1">
                     <span className="font-medium text-on-surface truncate">{p.name}</span>
                     {isYou && <span className="text-xs text-on-surface-variant shrink-0">← you</span>}
@@ -431,12 +431,12 @@ export default function RoundResultView({
           <button
             onClick={handleAdvance}
             disabled={advancing}
-            className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
+            className="w-full bg-action text-on-action h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
           >
             {advancing ? 'Loading…' : isLastRound ? 'See final scores →' : 'Next round →'}
           </button>
         ) : (
-          <p className="text-center text-outline text-sm animate-pulse font-body">
+          <p className="text-center text-on-surface-variant text-sm animate-pulse font-body">
             Waiting on the host to deal the next round…
           </p>
         )}

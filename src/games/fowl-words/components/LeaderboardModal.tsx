@@ -13,16 +13,16 @@ export default function LeaderboardModal({ game, players, currentPlayerId, onClo
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-on-surface/40" />
+      <div className="absolute inset-0 bg-deep/90" />
       <div
-        className="relative w-full max-w-sm bg-surface-container-lowest rounded-t-2xl p-6 pb-8 max-h-[80vh] overflow-y-auto"
+        className="relative w-full max-w-sm bg-surface-container-lowest sticker-card rounded-t-2xl p-6 pb-8 max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-headline text-xl font-bold text-on-surface">STANDINGS</h2>
           <button
             onClick={onClose}
-            className="text-outline hover:text-on-surface-variant text-2xl"
+            className="text-on-surface-variant hover:text-on-surface-variant text-2xl"
             aria-label="Close"
           >
             &times;
@@ -30,7 +30,7 @@ export default function LeaderboardModal({ game, players, currentPlayerId, onClo
         </div>
 
         {sorted.length === 0 ? (
-          <p className="text-outline text-center py-4 font-body">No players yet</p>
+          <p className="text-on-surface-variant text-center py-4 font-body">No players yet</p>
         ) : (
           <ul className="space-y-2">
             {sorted.map((player, i) => {
@@ -44,10 +44,10 @@ export default function LeaderboardModal({ game, players, currentPlayerId, onClo
                   }`}
                 >
                   <span className="flex items-center gap-1.5 font-medium text-on-surface">
-                    <span className="text-outline w-5 tabular-nums">{i + 1}.</span>
+                    <span className="text-on-surface-variant w-5 tabular-nums">{i + 1}.</span>
                     {player.name}
                     {isGuesser && (
-                      <span className="text-[10px] font-bold bg-tertiary-container text-on-tertiary-container px-1.5 py-0.5 rounded-full font-label">
+                      <span className="text-[11px] font-bold bg-tertiary-container text-on-tertiary-container px-1.5 py-0.5 rounded-full font-label">
                         👀 GUESSER
                       </span>
                     )}

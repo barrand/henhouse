@@ -219,13 +219,13 @@ export default function RevealView({
             onKeyDown={handlePeekKeyDown}
             onKeyUp={handlePeekKeyUp}
             aria-pressed={isPeeking}
-            className="w-full rounded-2xl border-2 border-outline-variant/60 bg-surface-container-low px-4 py-3 text-center touch-none select-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            className="w-full rounded-2xl border-2 border-outline-variant bg-surface-container-low px-4 py-3 text-center touch-none select-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           >
             <span className="flex items-center justify-center gap-2 text-secondary">
               <span className="material-symbols-outlined text-lg" aria-hidden="true">
                 {isPeeking ? 'visibility' : 'visibility_off'}
               </span>
-              <span className="font-label text-[10px] uppercase tracking-[0.2em] font-bold">Secret word</span>
+              <span className="font-label text-[11px] uppercase tracking-[0.2em] font-bold">Secret word</span>
             </span>
             {isPeeking && round.secretWord ? (
               <span className="block mt-2 font-headline text-3xl font-bold text-on-surface tracking-tight animate-hen-pop">
@@ -262,7 +262,7 @@ export default function RevealView({
               </p>
             )}
             {!allDuplicates && lockedDuplicateCount > 0 && (
-              <p className="text-outline text-xs mt-1 font-body">
+              <p className="text-on-surface-variant text-xs mt-1 font-body">
                 {lockedDuplicateCount} locked duplicate clue{lockedDuplicateCount !== 1 ? 's' : ''}{' '}
                 {round.currentAttempt < round.maxAttempts
                   ? `could unlock if this guess is wrong.`
@@ -277,7 +277,7 @@ export default function RevealView({
                 ? <span className="text-error">All duplicates!</span>
                 : <><span className="text-primary">{guesserPlayer?.name}</span> is thinking…</>}
             </h2>
-            <p className="text-xs text-outline mt-0.5 italic font-body">
+            <p className="text-xs text-on-surface-variant mt-0.5 italic font-body">
               {allDuplicates
                 ? `Every clue matched — ${guesserPlayer?.name} is unlocking the first one`
                 : GIVER_REVEAL_HINT}
@@ -286,7 +286,7 @@ export default function RevealView({
         )}
 
         {allDuplicates && (
-          <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-6 text-center space-y-4 shadow-sm">
+          <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant p-6 text-center space-y-4 shadow-sm">
             <img src="/images/generated-comic/hen-embarrassed.png" alt="" className="w-16 h-16 mx-auto" />
             <div>
               <p className="font-headline text-lg font-bold text-on-surface">Every clue matched</p>
@@ -297,7 +297,7 @@ export default function RevealView({
               </p>
             </div>
             {!isGuesser && (
-              <p className="text-xs text-outline font-body">
+              <p className="text-xs text-on-surface-variant font-body">
                 {round.clueGroups.length} duplicate group{round.clueGroups.length !== 1 ? 's' : ''} locked
               </p>
             )}
@@ -312,13 +312,13 @@ export default function RevealView({
             )}
             {!isGuesser && (
               <div className="space-y-2">
-                <p className="text-xs text-outline animate-pulse font-body">
+                <p className="text-xs text-on-surface-variant animate-pulse font-body">
                   Waiting for {guesserPlayer?.name} to unlock…
                 </p>
                 {isHost && (
                   <button
                     onClick={() => advanceRound(game.id).catch(() => {})}
-                    className="text-xs text-outline underline hover:text-on-surface-variant font-body"
+                    className="text-xs text-on-surface-variant underline hover:text-on-surface-variant font-body"
                   >
                     Skip this round
                   </button>
@@ -349,21 +349,21 @@ export default function RevealView({
                       key={idx}
                       className={`relative bg-surface-container-lowest rounded-xl border px-2 py-1.5 transition-all ${
                         justUnlocked
-                          ? 'border-tertiary shadow-[0_4px_16px_rgba(255,200,100,0.25)]'
+                          ? 'border-tertiary shadow-sticker'
                           : group.isDuplicate
                           ? 'border-tertiary/50'
                           : 'border-primary/35'
                       }`}
                     >
                       {justUnlocked && (
-                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-tertiary-container text-on-tertiary-container text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full font-label whitespace-nowrap">
+                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-tertiary-container text-on-tertiary-container text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full font-label whitespace-nowrap">
                           🔓 new
                         </span>
                       )}
-                      <p className="font-headline font-bold text-on-surface text-center text-lg leading-tight line-clamp-2 h-11 flex items-center justify-center">
+                      <p className="font-mono font-bold text-on-surface text-center text-lg leading-tight line-clamp-2 h-11 flex items-center justify-center">
                         {displayText}
                       </p>
-                      <p className="text-on-surface-variant text-center font-body text-[10px] font-medium leading-snug h-4 truncate">
+                      <p className="text-on-surface-variant text-center font-body text-[11px] font-medium leading-snug h-4 truncate">
                         {author}
                       </p>
                       <div className="mt-1 flex min-h-[18px] items-center justify-center gap-1">
@@ -390,11 +390,11 @@ export default function RevealView({
                     })}`}
                   >
                     {justUnlocked && (
-                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-tertiary-container text-on-tertiary-container text-[9px] font-bold uppercase px-2 py-0.5 rounded-full font-label whitespace-nowrap">
+                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-tertiary-container text-on-tertiary-container text-[11px] font-bold uppercase px-2 py-0.5 rounded-full font-label whitespace-nowrap">
                         🔓 new
                       </span>
                     )}
-                    <p className="font-headline font-bold text-on-surface text-xl leading-tight text-center line-clamp-2 h-11 flex items-center justify-center mb-0.5">
+                    <p className="font-mono font-bold text-on-surface text-xl leading-tight text-center line-clamp-2 h-11 flex items-center justify-center mb-0.5">
                       {displayText}
                     </p>
                     <p className="text-xs text-on-surface-variant font-medium mb-1.5 font-body text-center leading-snug h-4 truncate">
@@ -409,7 +409,7 @@ export default function RevealView({
                         ))
                       )}
                       {group.isDuplicate && !isOwnClue && (
-                        <span className="text-error font-bold uppercase text-[9px] tracking-wide"> · dup</span>
+                        <span className="text-error font-bold uppercase text-[11px] tracking-wide"> · dup</span>
                       )}
                       {isOwnClue && group.isDuplicate && (
                         <span className="text-error font-bold"> · -1</span>
@@ -419,11 +419,11 @@ export default function RevealView({
                       {isOwnClue ? (
                         <>
                           <div className="flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg bg-surface-container-low font-label">
-                            <span className={`text-lg leading-none ${loveCount > 0 ? '' : 'grayscale opacity-30'}`}>❤️</span>
+                            <span className={`text-lg leading-none ${loveCount > 0 ? '' : 'grayscale'}`}>❤️</span>
                             {loveCount > 0 && <span className={VOTE_COUNT_CLASS}>{loveCount}</span>}
                           </div>
                           <div className="flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg bg-surface-container-low font-label">
-                            <span className={`text-lg leading-none ${booCount > 0 ? '' : 'grayscale opacity-30'}`}>👎</span>
+                            <span className={`text-lg leading-none ${booCount > 0 ? '' : 'grayscale'}`}>👎</span>
                             {booCount > 0 && <span className={VOTE_COUNT_CLASS}>{booCount}</span>}
                           </div>
                         </>
@@ -435,7 +435,7 @@ export default function RevealView({
                             title="Love this clue (+1 pt if we win)"
                             className={loveVoteBtnClass(isMyLoved)}
                           >
-                            <span className={`text-lg leading-none ${isMyLoved ? '' : 'grayscale opacity-40'}`}>❤️</span>
+                            <span className={`text-lg leading-none ${isMyLoved ? '' : 'grayscale'}`}>❤️</span>
                             {loveCount > 0 && (
                               <span className={VOTE_COUNT_CLASS}>
                                 {loveCount}
@@ -448,7 +448,7 @@ export default function RevealView({
                             title="Boo this clue (fun only — no point penalty)"
                             className={booVoteBtnClass(isMyBoo)}
                           >
-                            <span className={`text-lg leading-none ${isMyBoo ? '' : 'grayscale opacity-40'}`}>👎</span>
+                            <span className={`text-lg leading-none ${isMyBoo ? '' : 'grayscale'}`}>👎</span>
                             {booCount > 0 && (
                               <span className={VOTE_COUNT_CLASS}>
                                 {booCount}
@@ -466,24 +466,24 @@ export default function RevealView({
               return (
                 <div
                   key={idx}
-                  className={`relative rounded-xl border border-dashed px-2.5 py-1.5 opacity-50 transition-all ${
-                    isPlayerInDupGroup ? 'bg-error/8 border-error/40' : 'bg-surface-container border-outline-variant/40'
+                  className={`relative rounded-xl border border-dashed px-2.5 py-1.5  transition-all ${
+                    isPlayerInDupGroup ? 'bg-error/8 border-error/40' : 'bg-surface-container border-outline-variant'
                   }`}
                 >
-                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-surface-container-highest text-outline text-[9px] font-bold uppercase px-2 py-0.5 rounded-full font-label whitespace-nowrap border border-outline-variant/50">
+                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-surface-container-highest text-on-surface-variant text-[11px] font-bold uppercase px-2 py-0.5 rounded-full font-label whitespace-nowrap border border-outline-variant">
                     🔒 hidden from {guesserPlayer?.name ?? 'guesser'}
                   </span>
-                  <p className={`font-headline text-lg font-bold line-through leading-tight text-center line-clamp-2 h-11 flex items-center justify-center ${
-                    isPlayerInDupGroup ? 'text-error/70' : 'text-on-surface-variant/70'
+                  <p className={`font-mono text-lg font-bold line-through leading-tight text-center line-clamp-2 h-11 flex items-center justify-center ${
+                    isPlayerInDupGroup ? 'text-error' : 'text-on-surface-variant'
                   }`}>
                     {displayText}
                   </p>
-                  <p className="text-xs text-outline font-medium font-body truncate text-center">
+                  <p className="text-xs text-on-surface-variant font-medium font-body truncate text-center">
                     {group.playerIds.map(playerName).join(', ')}
                     {!isPlayerInDupGroup && (
-                      <span className="text-error/70 font-bold uppercase text-[9px] tracking-wide"> · dup</span>
+                      <span className="text-error font-bold uppercase text-[11px] tracking-wide"> · dup</span>
                     )}
-                    {isPlayerInDupGroup && <span className="text-error/70 font-bold"> · -1</span>}
+                    {isPlayerInDupGroup && <span className="text-error font-bold"> · -1</span>}
                   </p>
                 </div>
               )
@@ -493,23 +493,21 @@ export default function RevealView({
 
         {isGuesser && !allDuplicates && (
           <div className="sticky bottom-0 bg-background pt-2 pb-1 -mx-4 px-4">
-            <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 px-3 py-2.5 space-y-2 shadow-[0_-4px_16px_rgba(0,0,0,0.3)]">
+            <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant px-3 py-2.5 space-y-2 shadow-sticker">
               {round.guessAttempts?.length > 0 && (
                 <p className="text-xs text-on-surface-variant font-body truncate">
-                  <span className="font-label text-[10px] uppercase tracking-wider text-error font-bold mr-1.5">Wrong</span>
+                  <span className="font-label text-[11px] uppercase tracking-wider text-waiting font-bold mr-1.5">Wrong</span>
                   {round.guessAttempts.join(', ')}
                 </p>
               )}
-              <div className="flex items-stretch rounded-xl border-2 border-outline overflow-hidden bg-surface-container-low focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2">
                 {round.attemptDeadline && (
-                  <span className={`shrink-0 flex items-center px-2.5 font-headline text-sm font-bold tabular-nums border-r border-outline-variant/40 ${
-                    timeLeft <= 10 ? 'text-error' : timeLeft <= 20 ? 'text-tertiary' : 'text-primary'
-                  }`} aria-label={`${timeLeft} seconds left`}>
+                  <span className="col-start-2 row-start-1 text-right font-mono text-sm font-bold text-timer" aria-label={`${timeLeft} seconds left`}>
                     {timeLeft}s
                   </span>
                 )}
                 <label className="sr-only" htmlFor="guesser-guess-input">Your guess</label>
-                <span className="shrink-0 self-center pl-2 pr-0.5 font-label text-[9px] uppercase tracking-wide text-secondary font-bold whitespace-nowrap" aria-hidden>
+                <span className="col-start-1 row-start-1 font-label text-[11px] uppercase tracking-wide text-secondary font-bold" aria-hidden>
                   Your guess
                 </span>
                 <input
@@ -522,13 +520,13 @@ export default function RevealView({
                   maxLength={100}
                   autoFocus
                   disabled={submitting}
-                  className="flex-1 min-w-0 bg-transparent border-0 px-2 py-2.5 text-base text-on-surface placeholder:text-outline/50 font-body outline-none"
+                  className="col-start-1 row-start-2 w-full min-w-0 rounded-xl px-3 py-3 text-base text-on-surface placeholder:text-mute font-mono"
                 />
                 <button
                   type="button"
                   onClick={handleGuess}
                   disabled={submitting || !guess.trim()}
-                className="shrink-0 bg-primary text-on-primary px-4 py-2.5 font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all border-l border-primary-fixed-dim"
+                  className="col-start-2 row-start-2 rounded-xl bg-action text-on-action px-4 py-3 font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
                 >
                   {submitting ? '…' : 'Submit'}
                 </button>
@@ -542,13 +540,13 @@ export default function RevealView({
           <div className="text-center space-y-2 mt-2">
             {round.guessAttempts?.length > 0 && (
               <div className="space-y-1">
-                <p className="font-label text-[10px] uppercase tracking-wider text-error font-bold">Wrong so far</p>
+                <p className="font-label text-[11px] uppercase tracking-wider text-waiting font-bold">Wrong so far</p>
                 <p className="text-sm text-on-surface-variant font-body">{round.guessAttempts.join(', ')}</p>
               </div>
             )}
-            <p className="text-outline text-sm animate-pulse font-body">Watching {guesserPlayer?.name} think…</p>
+            <p className="text-on-surface-variant text-sm animate-pulse font-body">Watching {guesserPlayer?.name} think…</p>
             {isHost && (
-              <button onClick={() => advanceRound(game.id).catch(() => {})} className="text-xs text-outline underline hover:text-on-surface-variant font-body">
+              <button onClick={() => advanceRound(game.id).catch(() => {})} className="text-xs text-on-surface-variant underline hover:text-on-surface-variant font-body">
                 Skip this round
               </button>
             )}

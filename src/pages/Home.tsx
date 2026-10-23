@@ -99,7 +99,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-8 py-12 bg-surface linen-texture font-body text-on-surface relative overflow-hidden">
+    <div className="home-shell min-h-screen flex flex-col items-center justify-center bg-surface linen-texture font-body text-on-surface relative overflow-hidden">
       {/* Decorative botanical backgrounds */}
       <div className="absolute -top-10 -left-10 opacity-20 pointer-events-none -rotate-12">
         <img src="/images/generated-comic/botanical-fern.png" alt="" className="w-48 h-48 object-contain" />
@@ -108,19 +108,19 @@ export default function Home({ experimental = false }: { experimental?: boolean 
         <img src="/images/generated-comic/botanical-wheat.png" alt="" className="w-64 h-64 object-contain" />
       </div>
 
-      <div className="w-full max-w-2xl space-y-6 relative px-0">
-        <div className="text-center mb-6">
-          <h1 className="font-headline text-5xl font-bold tracking-tight text-on-surface leading-none mb-2">
-            HENHOUSE
+      <div className="w-full max-w-4xl space-y-6 relative px-0">
+        <div className="home-masthead text-center mb-6">
+          <p className="sticker-label">GOOD FRIENDS. QUESTIONABLE ANSWERS.</p>
+          <h1 className="font-headline text-on-surface">
+            HEN<span>HOUSE</span>
           </h1>
           <p className="text-on-surface-variant font-body text-sm">Party games for the whole flock</p>
-          {experimental && <p className="mt-3 inline-flex rounded-full bg-primary-fixed px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.14em] text-on-primary-fixed-variant">Jev mode · decisions may differ · Gemini mode at /gemini</p>}
         </div>
 
         {/* Name */}
-        <div className="space-y-2 rounded-2xl border border-outline-variant/25 bg-surface-container-lowest/40 p-4 sm:p-5">
-          <label className="block font-label text-[10px] font-bold uppercase tracking-[0.2em] text-secondary ml-1" htmlFor="player-name">
-            Your name
+        <div className="space-y-2 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 sm:p-5">
+          <label className="block font-label text-[11px] font-bold uppercase tracking-[0.2em] text-info ml-1" htmlFor="player-name">
+            01 / Your name
           </label>
           <input
             id="player-name"
@@ -128,8 +128,8 @@ export default function Home({ experimental = false }: { experimental?: boolean 
             placeholder="Enter name..."
             value={name}
             onChange={(e) => { saveName(e.target.value); if (error) setError('') }}
-            className={`w-full bg-surface-container-lowest border-2 rounded-xl px-4 py-3.5 text-on-surface placeholder:text-outline/50 font-body focus:ring-2 outline-none transition-all ${
-              error ? 'border-error focus:ring-error/20 focus:border-error' : 'border-outline-variant/30 focus:ring-primary/20 focus:border-primary'
+            className={`w-full bg-surface-container-lowest border-2 rounded-xl px-4 py-3.5 text-on-surface placeholder:text-mute font-body focus:ring-2 outline-none transition-all ${
+              error ? 'border-error focus:ring-error/20 focus:border-error' : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
             }`}
             maxLength={20}
           />
@@ -141,10 +141,10 @@ export default function Home({ experimental = false }: { experimental?: boolean 
         {/* Join Section */}
         <section
           aria-labelledby="join-heading"
-          className="flex flex-col rounded-2xl border border-outline-variant/25 bg-surface-container-lowest/40 p-4 sm:p-5 shadow-[0_4px_16px_rgba(0,0,0,0.2)]"
+          className="flex flex-col rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 sm:p-5 shadow-sticker"
         >
-          <h2 id="join-heading" className="font-label text-[10px] font-bold uppercase tracking-[0.2em] text-secondary ml-1">
-            Join a game
+          <h2 id="join-heading" className="font-label text-[11px] font-bold uppercase tracking-[0.2em] text-info ml-1">
+            02 / Join a game
           </h2>
           <p className="text-on-surface-variant text-xs font-body leading-snug mt-2 mb-4 pl-1">
             Have a room code from the host? Enter it here.
@@ -152,18 +152,19 @@ export default function Home({ experimental = false }: { experimental?: boolean 
           <div className="flex gap-3">
             <input
               id="room-code"
+              aria-label="Room code"
               type="text"
               placeholder="Room code"
               value={roomCode}
               onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-              className="flex-1 min-w-0 bg-surface-container-lowest border-2 border-outline-variant/30 rounded-xl px-4 py-3.5 text-on-surface placeholder:text-outline/50 font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              className="flex-1 min-w-0 bg-surface-container-lowest border-2 border-outline-variant rounded-xl px-4 py-3.5 text-on-surface placeholder:text-mute font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               maxLength={10}
             />
             <button
               type="button"
               onClick={handleJoin}
               disabled={joining}
-              className="shrink-0 bg-primary text-on-primary h-[58px] px-6 rounded-xl font-headline font-bold text-base tracking-wide shadow-[0_8px_24px_rgba(0,0,0,0.3)] hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
+              className="shrink-0 bg-action text-on-action h-[58px] px-6 rounded-xl font-headline font-bold text-base tracking-wide shadow-sticker hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
             >
               {joining ? 'Joining…' : 'JOIN'}
             </button>
@@ -184,18 +185,19 @@ export default function Home({ experimental = false }: { experimental?: boolean 
             type="button"
             onClick={handleCreateFlock}
             disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd}
-            className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
+            className="game-tile group rounded-2xl border-2 border-outline-variant bg-surface-container-lowest p-5 text-left shadow-sticker hover:border-primary hover:bg-surface-container-high active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center">
-                <img src="/images/generated-comic/flock-icon.png" alt="" className="w-14 h-14 object-contain" />
+              <div className="tile-art w-16 h-16 rounded-2xl bg-deep flex items-center justify-center">
+                <img src="/images/generated-comic/flock-icon-midnight.png" alt="" className="w-14 h-14 object-contain" />
               </div>
+              <span className="tile-number">01</span>
             </div>
             <h3 className="font-headline text-xl font-bold text-on-surface mb-1">Flock Together</h3>
-            <p className="text-on-surface-variant text-xs font-body leading-snug mb-4">
+            <p className="text-on-surface-variant text-sm font-body leading-snug mb-4">
               Match the majority's answer. Based on <em>Herd Mentality</em>.
             </p>
-            <div className="bg-primary text-on-primary h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
+            <div className="tile-action bg-action text-on-action h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
               {creatingFlock ? 'CREATING…' : 'CREATE'}
             </div>
           </button>
@@ -205,18 +207,19 @@ export default function Home({ experimental = false }: { experimental?: boolean 
             type="button"
             onClick={handleCreateFowlWords}
             disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd}
-            className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
+            className="game-tile group rounded-2xl border-2 border-outline-variant bg-surface-container-lowest p-5 text-left shadow-sticker hover:border-primary hover:bg-surface-container-high active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center">
+              <div className="tile-art w-16 h-16 rounded-2xl bg-deep flex items-center justify-center">
                 <img src="/images/generated-comic/fowl-icon.png" alt="" className="w-14 h-14 object-contain" />
               </div>
+              <span className="tile-number">02</span>
             </div>
             <h3 className="font-headline text-xl font-bold text-on-surface mb-1">Fowl Words</h3>
-            <p className="text-on-surface-variant text-xs font-body leading-snug mb-4">
+            <p className="text-on-surface-variant text-sm font-body leading-snug mb-4">
               Give a clever one-word clue. Based on <em>Just One</em>.
             </p>
-            <div className="bg-primary text-on-primary h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
+            <div className="tile-action bg-action text-on-action h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
               {creatingFowlWords ? 'CREATING…' : 'CREATE'}
             </div>
           </button>
@@ -226,18 +229,19 @@ export default function Home({ experimental = false }: { experimental?: boolean 
             type="button"
             onClick={handleCreateTruthOrTurd}
             disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd}
-            className="group rounded-2xl border-2 border-outline-variant/25 bg-surface-container-lowest/40 p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-primary hover:bg-surface-container-lowest/70 active:scale-[0.98] transition-all disabled:opacity-50"
+            className="game-tile group rounded-2xl border-2 border-outline-variant bg-surface-container-lowest p-5 text-left shadow-sticker hover:border-primary hover:bg-surface-container-high active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center">
+              <div className="tile-art w-16 h-16 rounded-2xl bg-deep flex items-center justify-center">
                 <img src="/images/generated-comic/truth-or-turd-icon.png" alt="" className="w-14 h-14 object-contain" />
               </div>
+              <span className="tile-number">03</span>
             </div>
             <h3 className="font-headline text-xl font-bold text-on-surface mb-1">Truth or Turd</h3>
-            <p className="text-on-surface-variant text-xs font-body leading-snug mb-4">
+            <p className="text-on-surface-variant text-sm font-body leading-snug mb-4">
               Decide if oddball trivia is true or total nonsense.
             </p>
-            <div className="bg-primary text-on-primary h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
+            <div className="tile-action bg-action text-on-action h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
               {creatingTruthOrTurd ? 'CREATING…' : 'CREATE'}
             </div>
           </button>

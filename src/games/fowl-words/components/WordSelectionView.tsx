@@ -114,11 +114,11 @@ export default function WordSelectionView({ game, round, players, currentPlayerI
               : 'The others are voting on which word to give you. Sit tight.'}
           </p>
           <div className="flex justify-center gap-2 mt-4">
-            <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <span className="w-2 h-2 bg-waiting rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-2 h-2 bg-waiting rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-2 h-2 bg-waiting rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
-          <p className="text-xs text-outline font-body">{timeLeft}s remaining</p>
+          <p className="text-xs text-on-surface-variant font-body">{timeLeft}s remaining</p>
         </div>
       </main>
     )
@@ -154,7 +154,7 @@ export default function WordSelectionView({ game, round, players, currentPlayerI
         <div className={`flex items-center justify-center gap-3 ${isWordSelected ? 'animate-hen-pop' : ''}`}>
           <div
             className={`font-headline text-4xl font-bold tabular-nums transition-colors ${
-              isWordSelected ? 'text-primary' : timeLeft <= 5 ? 'text-error' : timeLeft <= 10 ? 'text-tertiary' : 'text-primary'
+              isWordSelected ? 'text-primary' : 'text-timer'
             }`}
           >
             {timeLeft}
@@ -179,35 +179,35 @@ export default function WordSelectionView({ game, round, players, currentPlayerI
                 disabled={voting || isWordSelected}
                 className={`relative flex min-h-32 flex-col items-center justify-center overflow-visible rounded-2xl border-2 px-3 py-5 font-body transition-all ${
                   isSelected
-                    ? 'bg-primary-fixed border-primary text-on-primary-fixed scale-[1.08] animate-word-selected-card shadow-xl'
+                    ? 'bg-primary-fixed border-primary text-on-primary-fixed scale-[1.02] animate-word-selected-card shadow-xl'
                     : isDimmed
-                      ? 'bg-surface-container-lowest border-outline-variant/50 text-outline opacity-45 scale-95'
+                      ? 'bg-surface-container-lowest border-outline-variant text-on-surface-variant scale-95'
                       : isMyPick
-                        ? 'bg-primary border-primary text-on-primary shadow-[0_8px_24px_rgba(0,0,0,0.3)] scale-[1.04] active:scale-[0.97]'
-                        : 'bg-surface-container-lowest border-outline-variant/30 text-on-surface hover:border-primary/50 hover:bg-primary-fixed/20 active:scale-[0.97]'
+                        ? 'bg-primary border-primary text-on-primary shadow-sticker scale-[1.02] active:scale-[0.97]'
+                        : 'bg-surface-container-lowest border-outline-variant text-on-surface hover:border-primary/50 hover:bg-primary-fixed/20 active:scale-[0.97]'
                 }`}
               >
                 {isSelected && (
-                  <span className="pointer-events-none absolute inset-0 z-0">
-                    <span className="absolute left-2 top-2 text-primary animate-word-spark">✦</span>
-                    <span className="absolute right-3 top-4 text-tertiary animate-word-spark-delayed">✶</span>
-                    <span className="absolute bottom-3 left-1/2 text-secondary animate-word-spark-late">✦</span>
+                  <span aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
+                    <span className="absolute left-2 top-2 text-on-primary animate-word-spark">✦</span>
+                    <span className="absolute right-3 top-4 text-on-primary animate-word-spark-delayed">✶</span>
+                    <span className="absolute bottom-3 left-1/2 text-on-primary animate-word-spark-late">✦</span>
                   </span>
                 )}
-                <span className="font-headline text-base font-bold text-center leading-tight">
+                <span className="font-mono text-sm font-bold text-center leading-tight break-words [overflow-wrap:anywhere]">
                   {word}
                 </span>
                 {voteCount > 0 && (
                   <span
                     className={`mt-2 text-xs font-bold tabular-nums ${
-                      isSelected ? 'text-on-primary-fixed-variant' : isMyPick ? 'text-on-primary/80' : 'text-primary'
+                      isSelected ? 'text-on-primary-fixed-variant' : isMyPick && !isWordSelected ? 'text-on-primary' : 'text-primary'
                     }`}
                   >
                     {voteCount} vote{voteCount !== 1 ? 's' : ''}
                   </span>
                 )}
                 {isMyPick && !isWordSelected && (
-                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-tertiary-container text-on-tertiary-container text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full font-label">
+                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-tertiary-container text-on-tertiary-container text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full font-label whitespace-nowrap">
                     Yours
                   </span>
                 )}
@@ -221,11 +221,11 @@ export default function WordSelectionView({ game, round, players, currentPlayerI
             Spotlight word locked
           </p>
         ) : effectiveMyVote === null ? (
-          <p className="text-center text-outline text-xs font-body">
+          <p className="text-center text-on-surface-variant text-xs font-body">
             Tap to vote — {guesserPlayer?.name} can't see this screen
           </p>
         ) : (
-          <p className="text-center text-outline text-xs font-body">
+          <p className="text-center text-on-surface-variant text-xs font-body">
             {totalVotes < nonGuesserCount
               ? `Waiting for ${nonGuesserCount - totalVotes} more vote${nonGuesserCount - totalVotes !== 1 ? 's' : ''}… Tap to change your pick.`
               : 'All voted! Finalizing…'}
@@ -236,7 +236,7 @@ export default function WordSelectionView({ game, round, players, currentPlayerI
         {isHost && !isWordSelected && (
           <button
             onClick={() => finalizeWordSelection(game.id, roundNum).catch(() => {})}
-            className="w-full bg-surface-container-low border border-outline-variant/30 text-on-surface-variant h-10 rounded-xl font-body text-sm hover:opacity-80 active:scale-[0.98] transition-all"
+            className="w-full bg-surface-container-low border border-outline-variant text-on-surface-variant h-10 rounded-xl font-body text-sm hover:opacity-80 active:scale-[0.98] transition-all"
           >
             Skip stragglers · Pick now
           </button>

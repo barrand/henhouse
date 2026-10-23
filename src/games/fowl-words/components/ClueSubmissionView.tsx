@@ -156,7 +156,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
   }
 
   const giverStatusList = (
-    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 p-4">
+    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-4">
       <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 font-label">
         {cluesCount} of {nonGuesserCount} ready
       </p>
@@ -167,18 +167,18 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
             <li key={p.id} className="flex items-center gap-1.5 min-w-0">
               <span
                 className={`material-symbols-outlined text-base shrink-0 ${
-                  hasClue ? 'text-primary' : 'text-outline-variant'
+                  hasClue ? 'text-success' : 'text-on-surface-variant'
                 }`}
                 style={hasClue ? { fontVariationSettings: "'FILL' 1" } : undefined}
               >
                 {hasClue ? 'check_circle' : 'radio_button_unchecked'}
               </span>
               <span className="text-sm font-body min-w-0 flex items-baseline gap-0.5">
-                <span className={`truncate ${hasClue ? 'text-on-surface' : 'text-outline'}`}>
+                <span className={`truncate ${hasClue ? 'text-on-surface' : 'text-on-surface-variant'}`}>
                   {p.name}
                 </span>
                 {!hasClue && (
-                  <span className="text-outline text-xs shrink-0"> (waiting)</span>
+                  <span className="text-on-surface-variant text-xs shrink-0"> (waiting)</span>
                 )}
               </span>
             </li>
@@ -202,7 +202,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
           {isHost && cluesCount < nonGuesserCount && (
             <button
               onClick={handleHostSkip}
-              className="text-xs text-outline underline hover:text-on-surface-variant font-body"
+              className="text-xs text-on-surface-variant underline hover:text-on-surface-variant font-body"
             >
               {cluesCount === 0 ? 'Skip this round' : 'Not waiting for stragglers · Skip ahead'}
             </button>
@@ -226,13 +226,13 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
           onKeyDown={handlePeekKeyDown}
           onKeyUp={handlePeekKeyUp}
           aria-pressed={isPeeking}
-          className="w-full h-28 flex flex-col justify-center rounded-2xl border-2 border-outline-variant/60 bg-surface-container-low px-5 py-4 text-center touch-none select-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          className="w-full h-28 flex flex-col justify-center rounded-2xl border-2 border-outline-variant bg-surface-container-low px-5 py-4 text-center touch-none select-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
         >
           <span className="flex items-center justify-center gap-2 text-secondary">
             <span className="material-symbols-outlined text-lg" aria-hidden="true">
               {isPeeking ? 'visibility' : 'visibility_off'}
             </span>
-            <span className="font-label text-[10px] uppercase tracking-[0.2em] font-bold">Secret word</span>
+            <span className="font-label text-[11px] uppercase tracking-[0.2em] font-bold">Secret word</span>
           </span>
           {isPeeking && round.secretWord ? (
             <span className="block mt-2 font-headline text-4xl font-bold text-on-surface tracking-tight animate-hen-pop">
@@ -249,7 +249,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
         {round.clueSubmissionDeadline && !myClueSubmitted && (
           <div className="flex items-center justify-center gap-2">
             <span className={`font-headline text-3xl font-bold tabular-nums transition-colors ${
-              timeLeft <= 10 ? 'text-error' : timeLeft <= 20 ? 'text-tertiary' : 'text-primary'
+              'text-timer'
             }`}>
               {timeLeft}s
             </span>
@@ -259,19 +259,19 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
 
         {/* Clue Input or Submitted State */}
         {!myClueSubmitted ? (
-          <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant/30 p-5 space-y-3 shadow-sm">
+          <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant p-5 space-y-3 shadow-sm">
             <label className="block">
               <div className="flex justify-between items-center mb-1">
-                <span className="font-label text-[10px] uppercase tracking-wider text-secondary font-bold">
+                <span className="font-label text-[11px] uppercase tracking-wider text-secondary font-bold">
                   Your clue · ONE word only
                 </span>
                 {formatError && (
-                  <span className="font-label text-[10px] uppercase tracking-wider text-error font-bold">
+                  <span className="font-label text-[11px] uppercase tracking-wider text-error font-bold">
                     Fix your clue
                   </span>
                 )}
                 {clueIsPartOfWord && (
-                  <span className="font-label text-[10px] uppercase tracking-wider text-error font-bold">
+                  <span className="font-label text-[11px] uppercase tracking-wider text-error font-bold">
                     Cannot use the secret!
                   </span>
                 )}
@@ -287,10 +287,10 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
                 placeholder="One word…"
                 maxLength={30}
                 autoFocus
-                className={`mt-1 w-full bg-surface-container-lowest border-2 rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-outline/50 font-body focus:ring-2 outline-none transition-all ${
+                className={`mt-1 w-full bg-surface-container-lowest border-2 rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-mute font-body focus:ring-2 outline-none transition-all ${
                   !!formatError || clueIsPartOfWord
                     ? 'border-error focus:ring-error/20 focus:border-error'
-                  : 'border-outline-variant/30 focus:ring-primary/20 focus:border-primary'
+                  : 'border-outline-variant focus:ring-primary/20 focus:border-primary'
                 }`}
               />
               {formatError && (
@@ -300,17 +300,17 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
             <button
               onClick={handleSubmit}
               disabled={submitting || !normalizedClue || !!formatError || clueIsPartOfWord}
-              className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
+              className="w-full bg-action text-on-action h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
             >
               {submitting ? 'Checking clue…' : 'Lock it in'}
             </button>
             {error && <p className="text-center text-error text-sm font-body">{error}</p>}
-            <p className="text-xs text-outline text-center font-body">
+            <p className="text-xs text-on-surface-variant text-center font-body">
               One real word. No emoji or words mashed together.
             </p>
           </div>
         ) : (
-          <div className="text-center py-4 rounded-xl border border-outline-variant/50 bg-surface-container-low px-4">
+          <div className="text-center py-4 rounded-xl border border-outline-variant bg-surface-container-low px-4">
             <img src="/images/generated-comic/hen-thinking.png" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
             <p className="font-headline text-lg font-semibold text-on-surface">Clue locked in</p>
             <p className="text-on-surface-variant text-sm font-body mt-2">
@@ -325,7 +325,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
           <div className="text-center">
             <button
               onClick={handleHostSkip}
-              className="text-xs text-outline underline hover:text-on-surface-variant font-body"
+              className="text-xs text-on-surface-variant underline hover:text-on-surface-variant font-body"
             >
               {cluesCount === 0 ? 'Skip this round' : 'Skip stragglers · Move on'}
             </button>

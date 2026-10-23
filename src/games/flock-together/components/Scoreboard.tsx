@@ -66,7 +66,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
           <div className="text-center space-y-2">
             <p className="font-headline text-3xl font-bold text-on-surface">GAME OVER!</p>
             <img src="/images/generated-comic/hen-winner.png" alt="" className="w-36 h-36 mx-auto animate-hen-celebrate" />
-            <p className="font-headline text-2xl font-bold text-on-surface">
+            <p className="font-headline text-2xl font-bold text-primary">
               {winner.name} RULES THE ROOST!
             </p>
             <p className="text-on-surface-variant font-body">with {winner.score} points</p>
@@ -80,10 +80,10 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
           </div>
         )}
 
-        <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 divide-y divide-outline-variant/20">
+        <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant divide-y divide-outline-variant">
           {sorted.map((player, i) => (
-            <li key={player.id} className="px-4 py-3 flex items-center justify-between">
-              <span className="flex items-center gap-1.5 font-medium text-on-surface font-body">
+            <li key={player.id} className="px-4 py-3 flex items-center justify-between gap-3">
+              <span className="flex flex-wrap min-w-0 items-center gap-1.5 font-medium text-on-surface font-body break-words">
                 {i + 1}. {player.name}
               </span>
               <span className="font-headline text-lg font-bold tabular-nums text-on-surface">{player.score}</span>
@@ -98,7 +98,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
                 <button
                   onClick={handleRematch}
                   disabled={rematching}
-                  className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-semibold tracking-wide shadow-[0_12px_32px_rgba(0,0,0,0.4)] hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full bg-action text-on-action h-14 rounded-xl font-body font-semibold tracking-wide shadow-sticker hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
                 >
                   {rematching ? 'Starting...' : 'PLAY AGAIN'}
                 </button>

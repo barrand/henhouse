@@ -125,18 +125,18 @@ export default function QuestionDisplay({
     <div className="flex-1 flex flex-col px-4 py-6">
       <div className="text-center mb-4">
         <p className="text-xs font-label uppercase tracking-widest text-secondary mb-1">Round timer</p>
-        <p className={`font-headline text-3xl font-bold tabular-nums ${expired ? 'text-error' : 'text-on-surface'}`}>
+        <p className={`font-headline text-3xl font-bold tabular-nums ${expired ? 'text-timer' : 'text-timer'}`}>
           {expired ? "TIME'S UP!" : `0:${String(timeLeft).padStart(2, '0')}`}
         </p>
         <div className="mt-2 h-2 bg-surface-container-high rounded-full overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-250 ${expired ? 'bg-error' : 'bg-primary'}`}
+            className={`h-full rounded-full transition-all duration-250 ${expired ? 'bg-timer' : 'bg-timer'}`}
             style={{ width: `${timerPercent}%` }}
           />
         </div>
       </div>
 
-      <div className="rounded-2xl border-2 p-6 text-center shadow-sm relative bg-surface-container-lowest border-outline-variant/60">
+      <div className="rounded-2xl border-2 p-6 text-center shadow-sm relative bg-surface-container-lowest border-outline-variant">
         {round.source === 'patriotic' && (
           <div className="absolute top-3 right-3 text-2xl" aria-hidden>🇺🇸</div>
         )}
@@ -144,7 +144,7 @@ export default function QuestionDisplay({
           {round.question}
         </p>
         {round.source === 'custom' && round.submittedBy && (
-          <p className="mt-2 text-xs text-outline font-body">
+          <p className="mt-2 text-xs text-on-surface-variant font-body">
             submitted by {players.find((p) => p.id === round.submittedBy)?.name ?? 'a player'}
           </p>
         )}
@@ -153,7 +153,7 @@ export default function QuestionDisplay({
       {isHost && !expired && (
         <button
           onClick={handleSkip}
-          className="mt-2 text-sm text-outline underline hover:text-on-surface-variant self-center font-body"
+          className="mt-2 text-sm text-on-surface-variant underline hover:text-on-surface-variant self-center font-body"
         >
           Skip question
         </button>
@@ -163,8 +163,8 @@ export default function QuestionDisplay({
         {expired && !submitted ? (
           <div className="text-center py-4">
             <img src="/images/generated-comic/hen-sleeping.png" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
-            <p className="text-error font-bold text-lg font-body">Too slow!</p>
-            <p className="text-outline mt-1 font-body">You didn't answer in time.</p>
+            <p className="text-waiting font-bold text-lg font-body">Too slow!</p>
+            <p className="text-on-surface-variant mt-1 font-body">You didn't answer in time.</p>
           </div>
         ) : !submitted ? (
           round.type === 'multiple_choice' && round.options && round.options.length >= 2 ? (
@@ -182,7 +182,7 @@ export default function QuestionDisplay({
                   key={opt}
                   onClick={() => handleSubmit(opt)}
                   disabled={submitting}
-                  className="bg-surface-container-low border-2 border-outline-variant/60 hover:border-primary hover:bg-primary/10 active:scale-95 disabled:opacity-50 rounded-xl px-4 py-4 text-lg font-body font-semibold text-on-surface transition-all text-center leading-snug"
+                  className="bg-surface-container-low border-2 border-outline-variant hover:border-primary hover:bg-primary/10 active:scale-95 disabled:opacity-50 rounded-xl px-4 py-4 text-lg font-body font-semibold text-on-surface transition-all text-center leading-snug"
                 >
                   {opt}
                 </button>
@@ -196,21 +196,21 @@ export default function QuestionDisplay({
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-              className="w-full bg-surface-container-low border-2 border-outline rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-outline/50 font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              className="w-full bg-surface-container-low border-2 border-outline rounded-xl px-4 py-3 text-lg text-on-surface placeholder:text-mute font-body focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               maxLength={100}
               autoFocus
             />
             <button
               onClick={() => handleSubmit()}
               disabled={!answer.trim() || submitting}
-              className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-semibold tracking-wide shadow-[0_12px_32px_rgba(0,0,0,0.4)] hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all"
+              className="w-full bg-action text-on-action h-14 rounded-xl font-body font-semibold tracking-wide shadow-sticker hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all"
             >
               {submitting ? 'Clucking in...' : 'CLUCK IN'}
             </button>
           </>
           )
         ) : (
-          <div className="text-center py-4 rounded-xl border border-outline-variant/50 bg-surface-container-low px-4">
+          <div className="text-center py-4 rounded-xl border border-outline-variant bg-surface-container-low px-4">
             <img src="/images/generated-comic/hen-thinking.png" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
             <p className="font-headline text-lg font-semibold text-on-surface">You&apos;re clucked in</p>
             {round.type === 'multiple_choice' && answer && (
@@ -222,7 +222,7 @@ export default function QuestionDisplay({
               Waiting for the rest of the flock. Your answer only appears at the reveal.
             </p>
             <p
-              className={`mt-3 font-headline text-2xl font-bold tabular-nums ${expired ? 'text-error' : 'text-primary'}`}
+              className={`mt-3 font-headline text-2xl font-bold tabular-nums ${expired ? 'text-timer' : 'text-timer'}`}
               aria-live="polite"
             >
               {expired ? "TIME'S UP" : `0:${String(timeLeft).padStart(2, '0')} left`}
@@ -232,7 +232,7 @@ export default function QuestionDisplay({
       </div>
 
       {/* Player answer status list */}
-      <div className="mt-6 bg-surface-container-lowest rounded-xl border border-outline-variant/60 p-4">
+      <div className="mt-6 bg-surface-container-lowest rounded-xl border border-outline-variant p-4">
         <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3 font-label">
           {answeredIds.size} of {players.length} answered
         </p>
@@ -243,18 +243,18 @@ export default function QuestionDisplay({
               <li key={p.id} className="flex items-center gap-1.5 min-w-0">
                 <span
                   className={`material-symbols-outlined text-base shrink-0 ${
-                    hasAnswered ? 'text-primary' : 'text-outline-variant'
+                    hasAnswered ? 'text-success' : 'text-on-surface-variant'
                   }`}
                   style={hasAnswered ? { fontVariationSettings: "'FILL' 1" } : undefined}
                 >
                   {hasAnswered ? 'check_circle' : 'radio_button_unchecked'}
                 </span>
                 <span className="text-sm font-body min-w-0 flex items-baseline gap-0.5">
-                  <span className={`truncate ${hasAnswered ? 'text-on-surface' : 'text-outline'}`}>
+                  <span className={`truncate ${hasAnswered ? 'text-on-surface' : 'text-on-surface-variant'}`}>
                     {p.name}
                   </span>
                   {!hasAnswered && (
-                    <span className="text-outline text-xs shrink-0"> (waiting)</span>
+                    <span className="text-on-surface-variant text-xs shrink-0"> (waiting)</span>
                   )}
                 </span>
               </li>
@@ -271,12 +271,12 @@ export default function QuestionDisplay({
           >
             <span>{confirmEndRound ? 'Tap again to stop waiting' : 'Stop Waiting'}</span>
             {!confirmEndRound && (
-              <span className="font-label text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
+              <span className="font-label text-[11px] font-bold uppercase tracking-[0.2em] opacity-70">
                 · Host only
               </span>
             )}
           </button>
-          <p className="mt-2 text-center text-xs text-outline font-body">
+          <p className="mt-2 text-center text-xs text-on-surface-variant font-body">
             Stop waiting and score answers — anyone who hasn&apos;t answered yet gets none.
           </p>
         </div>

@@ -1,5 +1,6 @@
 /** Imperative thumb vote animations — shared by RevealView and RoundResultView. */
 export function animateThumbBtn(btn: HTMLButtonElement, type: 'up' | 'down') {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const cls = type === 'up' ? 'animate-thumb-punch' : 'animate-thumb-shake'
   btn.classList.remove(cls)
   void btn.offsetWidth
@@ -8,12 +9,13 @@ export function animateThumbBtn(btn: HTMLButtonElement, type: 'up' | 'down') {
 }
 
 export function burstThumbParticles(btn: HTMLButtonElement, type: 'up' | 'down') {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const r = btn.getBoundingClientRect()
   const cx = r.left + r.width / 2
   const cy = r.top + r.height / 2
   const colors = type === 'up'
-    ? ['#91c595', '#c4e5c5', '#4caf66', '#b8e4bc']
-    : ['#f08080', '#e05050', '#c44444', '#f4a0a0']
+    ? ['var(--color-mint)', 'var(--color-cyan)', 'var(--color-cream)']
+    : ['var(--color-lilac)', 'var(--color-cream)']
   const count = type === 'up' ? 8 : 5
   for (let i = 0; i < count; i++) {
     const p = document.createElement('div')
@@ -35,6 +37,7 @@ export function burstThumbParticles(btn: HTMLButtonElement, type: 'up' | 'down')
 }
 
 export function playThumbVoteFx(btn: HTMLButtonElement, type: 'up' | 'down') {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   animateThumbBtn(btn, type)
   burstThumbParticles(btn, type)
 }

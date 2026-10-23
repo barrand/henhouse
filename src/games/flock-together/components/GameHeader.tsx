@@ -28,10 +28,10 @@ export default function GameHeader({ game, players, currentPlayer, round: _round
 
   return (
     <>
-      <div className="sticky top-0 z-10 bg-primary-container text-on-primary-container px-4 py-2">
+      <div className="game-header sticky top-0 z-10 px-4 py-2">
         <div className="flex justify-between items-center text-sm font-body">
           <span>Round {game.currentRound} of {game.settings.totalRounds}</span>
-          <span className="font-bold">{game.code}</span>
+          <span className="room-code">{game.code}</span>
         </div>
 
         {confirming ? (
@@ -40,7 +40,7 @@ export default function GameHeader({ game, players, currentPlayer, round: _round
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setConfirming(false)}
-                className="text-sm font-body opacity-70 hover:opacity-100"
+                className="text-sm font-body hover:text-cream"
               >
                 Cancel
               </button>
@@ -64,14 +64,14 @@ export default function GameHeader({ game, players, currentPlayer, round: _round
               {isHost && (
                 <button
                   onClick={() => setConfirming(true)}
-                  className="text-xs opacity-50 hover:opacity-80 font-body transition-opacity"
+                  className="text-xs text-error font-body transition-opacity"
                 >
                   End game
                 </button>
               )}
               <button
                 onClick={() => setShowLeaderboard(true)}
-                className="text-sm underline opacity-80 hover:opacity-100 font-body"
+                className="text-sm underline hover:text-cream font-body"
               >
                 Standings
               </button>

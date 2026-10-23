@@ -3,7 +3,7 @@
 import type { MouseEvent, ReactNode } from 'react'
 
 export const SCORE_CHIP_SHELL =
-  'inline-flex shrink-0 items-center gap-0.5 rounded-full bg-surface-container-high border border-outline-variant/50 px-1.5 py-px text-[9px] font-bold font-label text-on-surface-variant whitespace-nowrap'
+  'inline-flex shrink-0 items-center gap-0.5 rounded-full bg-surface-container-high border border-outline-variant px-1.5 py-px text-[11px] font-bold font-label text-on-surface-variant whitespace-nowrap'
 
 export function ScoreChip({
   icon,
@@ -141,7 +141,7 @@ export function PeerBooChipPlaceholder() {
 }
 
 /** Shared vote-button + card-border styling (Reveal + Result) */
-export const VOTE_COUNT_CLASS = 'text-[9px] font-bold leading-none text-on-surface-variant'
+export const VOTE_COUNT_CLASS = 'text-[11px] font-bold leading-none text-on-surface-variant'
 
 export const CARD_VOTE_TRANSITION = 'transition-[border-color,background-color,box-shadow]'
 
@@ -174,13 +174,13 @@ export function clueCardBorderClass(opts: {
   justUnlocked?: boolean
   visibleCorrect?: boolean
 }): string {
-  if (opts.hiddenDuplicate) return 'bg-surface-container-low border-outline-variant/50'
+  if (opts.hiddenDuplicate) return 'bg-surface-container-low border-outline-variant'
   if (opts.isMostHelpful) return 'border-primary/50 bg-primary/5'
   if (opts.isMyLoved) return 'border-love/50 bg-love/5'
-  if (opts.isMyBoo || opts.isGuesserBoo) return 'border-outline-variant/60'
+  if (opts.isMyBoo || opts.isGuesserBoo) return 'border-outline-variant'
   if (opts.justUnlocked) return 'border-tertiary'
-  if (opts.visibleCorrect) return 'border-primary/40'
-  return 'border-outline-variant/60'
+  if (opts.visibleCorrect) return 'border-success'
+  return 'border-outline-variant'
 }
 
 export function StarIcon({ filled = false, className = '' }: { filled?: boolean; className?: string }) {
@@ -209,7 +209,7 @@ export function MostHelpfulCell({
   const className = `${starVoteBtnClass(active, !!interactive)}${!interactive && !active ? ' opacity-60' : ''}`
   const content = (
     <>
-      <StarIcon filled={active} className={active ? 'text-primary' : 'text-outline opacity-40'} />
+      <StarIcon filled={active} className={active ? 'text-primary' : 'text-on-surface-variant opacity-40'} />
       {active && (
         <span className={VOTE_COUNT_CLASS}>
           {authorCount > 1 ? `+${perAuthor} each` : `+${perAuthor}`}
@@ -244,7 +244,7 @@ export function BooCell({
 
   const content = (
     <>
-      <span className={`text-base leading-none ${hasBoo || isActive ? '' : 'grayscale opacity-40'}`}>👎</span>
+      <span className={`text-base leading-none ${hasBoo || isActive ? '' : 'grayscale'}`}>👎</span>
       {!interactive && giverBooCount > 0 && (
         <span className={VOTE_COUNT_CLASS}>{giverBooCount}</span>
       )}

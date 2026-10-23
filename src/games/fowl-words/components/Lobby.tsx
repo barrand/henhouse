@@ -50,10 +50,10 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
           <h2 className="font-headline text-4xl font-bold text-on-surface mb-1 tracking-tight">FOWL WORDS</h2>
           <p className="text-on-surface-variant text-sm font-body">One clue. One word. Stay unique.</p>
 
-          <div className="mt-5 inline-flex items-center gap-3 bg-surface-container-lowest px-6 py-3 rounded-2xl border border-outline-variant/30 shadow-sm">
+          <div className="room-sticker mt-5 inline-flex items-center gap-3 bg-surface-container-lowest px-6 py-3 rounded-2xl border border-outline-variant shadow-sm">
             <div className="flex flex-col items-center">
-              <span className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-1">Room code</span>
-              <span className="font-headline text-3xl font-bold text-on-surface tracking-[0.3em]">{game.code}</span>
+              <span className="font-label text-[11px] uppercase tracking-[0.2em] text-info font-bold mb-1">Room code</span>
+              <span className="room-code text-3xl">{game.code}</span>
             </div>
             <button
               onClick={() => navigator.clipboard.writeText(game.code)}
@@ -66,7 +66,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
         </div>
 
         {game.includePatrioticQuestions && (
-          <div className="mb-6 bg-surface-container-lowest border border-outline-variant/60 rounded-xl p-4 text-center">
+          <div className="mb-6 bg-surface-container-lowest border border-outline-variant rounded-xl p-4 text-center">
             <p className="font-headline text-lg font-bold text-on-surface">Patriotic Edition is ON</p>
             <p className="text-on-surface-variant text-sm font-body mt-1">America-themed cards every other round</p>
           </div>
@@ -76,15 +76,15 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
         <section className="mb-6">
           <div className="flex justify-between items-end mb-2 px-1">
             <h3 className="font-headline text-lg font-bold text-primary">
-              In the henhouse <span className="text-outline font-normal text-sm ml-1">({players.length})</span>
+              In the henhouse <span className="text-on-surface-variant font-normal text-sm ml-1">({players.length})</span>
             </h3>
           </div>
-          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 px-5 py-4 shadow-sm">
+          <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant px-5 py-4 shadow-sm">
             <ul className="space-y-3">
               {players.map((p) => (
-                <li key={p.id} className="flex items-center justify-between">
+                <li key={p.id} className="animate-hen-pop flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className={`w-2 h-2 rounded-full ${p.connected ? 'bg-primary' : 'bg-outline-variant'}`} />
+                    <span className={`w-2 h-2 rounded-full ${p.connected ? 'bg-success' : 'bg-outline-variant'}`} />
                     <span className="font-medium text-on-surface">
                       {p.name}
                       {(p.id === game.hostId || p.id === currentPlayer?.id) && (
@@ -97,22 +97,22 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
                   </div>
                 </li>
               ))}
-              <li className="pt-2 border-t border-outline-variant/20 text-center">
+              <li className="pt-2 border-t border-outline-variant text-center">
                 <img src="/images/generated-comic/hen-neutral.png" alt="" className="w-12 h-12 mx-auto mb-1 opacity-70 animate-hen-bob" />
-                <p className="italic text-outline text-sm font-body">More friends? Send them the code.</p>
+                <p className="italic text-on-surface-variant text-sm font-body">More friends? Send them the code.</p>
               </li>
             </ul>
           </div>
         </section>
 
         {/* How to Play */}
-        {game.scoringEngineVersion === 1 && <section className="mb-6 rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4">
+        {game.scoringEngineVersion === 1 && <section className="mb-6 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4">
           <p className="font-headline font-bold">{game.scoringRules?.mode === 'best-clues-first' ? 'Best Clues First · experimental' : 'Classic scoring'}</p>
           <p className="text-sm text-on-surface-variant mt-1">{game.scoringRules?.mode === 'best-clues-first' ? 'Back great clues. Solve with fewer reveals for more points.' : 'Unique clues, speed bonuses and peer awards.'}</p>
-          {isHost && <button onClick={() => setShowSettings(true)} className="min-h-12 px-4 mt-3 rounded-xl border border-outline-variant/60 bg-surface-container-high">Game settings</button>}
+          {isHost && <button onClick={() => setShowSettings(true)} className="min-h-12 px-4 mt-3 rounded-xl border border-outline-variant bg-surface-container-high">Game settings</button>}
         </section>}
         {showSettings && <ScoringSettings game={game} onClose={() => setShowSettings(false)} />}
-        <section className="mb-6 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-5 shadow-sm">
+        <section className="mb-6 bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-sm">
           <h3 className="font-headline text-base font-bold text-on-surface mb-3">How it works</h3>
           <ol className="text-sm text-on-surface-variant space-y-2 list-decimal list-inside font-body">
             <li>One player is the <strong className="text-on-surface">guesser</strong>. No peeking.</li>
@@ -128,12 +128,12 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
           <button
             onClick={handleStart}
             disabled={starting || players.length < 2}
-            className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
+            className="w-full bg-action text-on-action h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
           >
             {buttonLabel}
           </button>
         ) : (
-          <p className="text-center text-outline text-sm animate-pulse font-body">
+          <p className="text-center text-on-surface-variant text-sm animate-pulse font-body">
             Hang tight — the host is rounding everyone up…
           </p>
         )}

@@ -39,7 +39,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
             <img src="/images/generated-comic/hen-embarrassed.png" alt="" className="w-20 h-20 mx-auto" />
             <p className="font-headline text-4xl font-bold text-on-surface tracking-tight">GAME OVER</p>
             <p className="font-headline text-xl font-bold text-on-surface">Nobody scored!</p>
-            <p className="text-outline">Tough crowd. Try again?</p>
+            <p className="text-on-surface-variant">Tough crowd. Try again?</p>
           </div>
         )}
 
@@ -53,7 +53,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
             <p className="font-headline text-xl font-bold text-on-surface">
               Tied at {topScore} points!
             </p>
-            <p className="text-outline">The flock can’t agree.</p>
+            <p className="text-on-surface-variant">The flock can’t agree.</p>
           </div>
         )}
 
@@ -64,18 +64,18 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
             <p className="font-headline text-2xl font-bold text-primary">
               {winner.name} wins!
             </p>
-            <p className="text-outline">with {winner.score} points</p>
+            <p className="text-on-surface-variant">with {winner.score} points</p>
           </div>
         )}
 
         {!isFinal && (
           <div className="text-center">
             <h2 className="font-headline text-2xl font-bold text-on-surface tracking-tight">THE STANDINGS</h2>
-            <p className="text-outline mt-1">Round {game.currentRound} of {game.settings.totalRounds}</p>
+            <p className="text-on-surface-variant mt-1">Round {game.currentRound} of {game.settings.totalRounds}</p>
           </div>
         )}
 
-        <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 divide-y divide-outline-variant/20 overflow-hidden shadow-sm">
+        <ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant divide-y divide-outline-variant overflow-hidden shadow-sm">
           {sorted.map((player, i) => {
             const isWinner = isFinal && winner && player.id === winner.id && !isTie
             return (
@@ -85,8 +85,8 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
                   isWinner ? 'bg-primary-fixed/30' : ''
                 }`}
               >
-                <span className="flex items-center gap-2 font-medium text-on-surface">
-                  <span className="text-outline w-5 tabular-nums">{i + 1}.</span>
+                <span className="flex flex-wrap min-w-0 items-center gap-2 font-medium text-on-surface break-words">
+                  <span className="text-on-surface-variant w-5 tabular-nums">{i + 1}.</span>
                   {player.name}
                   {isWinner && <span className="text-xs text-primary font-bold">CHAMPION</span>}
                 </span>
@@ -105,7 +105,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
                 <button
                   onClick={handleRematch}
                   disabled={rematching}
-                  className="w-full bg-primary text-on-primary h-14 rounded-xl font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
+                  className="w-full bg-action text-on-action h-14 rounded-xl font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
                 >
                   {rematching ? 'Starting…' : 'Play again'}
                 </button>
@@ -119,7 +119,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
               </>
             ) : (
               <>
-                <p className="text-center text-outline text-sm animate-pulse">
+                <p className="text-center text-on-surface-variant text-sm animate-pulse">
                   Waiting for the host to start a rematch…
                 </p>
                 <button

@@ -53,13 +53,13 @@ export default function CategoryInput({ categories, editable, onAdd, onRemove }:
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-            className="w-full bg-surface-container-low border-2 border-outline rounded-xl py-4 pl-5 pr-14 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none placeholder:text-outline/50 text-sm transition-all"
+            className="w-full bg-surface-container-low border-2 border-outline rounded-xl py-4 pl-5 pr-14 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none placeholder:text-mute text-sm transition-all"
             maxLength={30}
           />
           <button
             onClick={handleAdd}
             disabled={!text.trim()}
-            className="absolute right-2 top-2 bottom-2 w-10 bg-primary text-on-primary rounded-lg flex items-center justify-center hover:bg-primary-container disabled:opacity-50 transition-colors"
+            className="absolute right-2 top-2 bottom-2 w-10 bg-action text-on-action rounded-lg flex items-center justify-center hover:bg-action/90 disabled:opacity-50 transition-colors"
           >
             <span className="material-symbols-outlined">add</span>
           </button>

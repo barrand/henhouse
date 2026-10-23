@@ -25,13 +25,13 @@ export default function QuestionSubmission({ onSubmit, submittedQuestions }: Pro
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-          className="w-full bg-surface-container-low border-2 border-outline rounded-xl py-4 pl-5 pr-14 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none placeholder:text-outline/50 text-sm italic font-headline transition-all"
+          className="w-full bg-surface-container-low border-2 border-outline rounded-xl py-4 pl-5 pr-14 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none placeholder:text-mute text-sm italic font-headline transition-all"
           maxLength={200}
         />
         <button
           onClick={handleSubmit}
           disabled={!text.trim()}
-          className="absolute right-2 top-2 bottom-2 w-10 bg-primary text-on-primary rounded-lg flex items-center justify-center hover:bg-primary-container disabled:opacity-50 transition-colors"
+          className="absolute right-2 top-2 bottom-2 w-10 bg-action text-on-action rounded-lg flex items-center justify-center hover:bg-action/90 disabled:opacity-50 transition-colors"
         >
           <span className="material-symbols-outlined">send</span>
         </button>
@@ -40,7 +40,7 @@ export default function QuestionSubmission({ onSubmit, submittedQuestions }: Pro
       {submittedQuestions.length > 0 && (
         <div className="space-y-2">
           {submittedQuestions.map((q, i) => (
-            <div key={i} className="px-4 py-3 bg-surface-container/50 rounded-lg border border-dashed border-outline-variant/30">
+            <div key={i} className="px-4 py-3 bg-surface-container/50 rounded-lg border border-dashed border-outline-variant">
               <p className="font-headline italic text-on-surface-variant text-sm">"{q}"</p>
             </div>
           ))}
