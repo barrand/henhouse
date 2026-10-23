@@ -27,21 +27,21 @@ const CLUSTER_STYLES: Record<ClusterType, {
   flock: {
     cardClass: 'bg-success-fixed/10 border-2 border-success',
     textClass: 'text-success',
-    henImg: '/images/generated-comic/hen-excited.png',
+    henImg: '/images/generated-comic/midnight/hen-excited.png',
     badge: 'THE FLOCK',
     badgeClass: 'bg-success text-on-success',
   },
   outlier: {
     cardClass: 'bg-surface-container border border-outline-variant',
     textClass: 'text-on-surface',
-    henImg: '/images/generated-comic/hen-embarrassed.png',
+    henImg: '/images/generated-comic/midnight/hen-embarrassed.png',
     badge: 'MINORITY',
     badgeClass: 'bg-secondary-fixed text-on-secondary-fixed',
   },
   rotten: {
     cardClass: 'bg-secondary-container border border-secondary',
     textClass: 'text-secondary',
-    henImg: '/images/generated-comic/hen-embarrassed.png',
+    henImg: '/images/generated-comic/midnight/hen-embarrassed.png',
     badge: 'LONE −1',
     badgeClass: 'bg-secondary-container text-on-secondary-container',
   },
@@ -102,7 +102,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
         <div className="text-center space-y-3">
-          <img src="/images/generated-comic/hen-pecking.png" alt="" className="w-20 h-20 mx-auto animate-hen-peck" />
+          <img src="/images/generated-comic/midnight/hen-pecking.png" alt="" className="w-20 h-20 mx-auto animate-hen-peck" />
           <p className="font-headline text-xl font-bold text-on-surface">Checking all answers...</p>
           <p className="text-on-surface-variant text-sm font-body">The flock is being counted</p>
         </div>
@@ -135,16 +135,16 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
     switch (yourResult) {
       case 'flock':
         return hasFlock
-          ? { img: '/images/generated-comic/hen-excited.png', label: "You're in the flock!", points: '+1 pt' }
-          : { img: '/images/generated-comic/hen-confused.png', label: 'No flock formed this round', points: null }
+          ? { img: '/images/generated-comic/midnight/hen-excited.png', label: "You're in the flock!", points: '+1 pt' }
+          : { img: '/images/generated-comic/midnight/hen-confused.png', label: 'No flock formed this round', points: null }
       case 'outlier':
         return hasFlock
-          ? { img: '/images/generated-comic/hen-embarrassed.png', label: 'You were in the minority', points: null }
-          : { img: '/images/generated-comic/hen-confused.png', label: 'No flock formed this round', points: null }
+          ? { img: '/images/generated-comic/midnight/hen-embarrassed.png', label: 'You were in the minority', points: null }
+          : { img: '/images/generated-comic/midnight/hen-confused.png', label: 'No flock formed this round', points: null }
       case 'rotten':
-        return { img: '/images/generated-comic/hen-embarrassed.png', label: 'Lone odd one out', points: '−1 pt' }
+        return { img: '/images/generated-comic/midnight/hen-embarrassed.png', label: 'Lone odd one out', points: '−1 pt' }
       case 'no-answer':
-        return { img: '/images/generated-comic/hen-sleeping.png', label: "You didn't answer in time", points: null }
+        return { img: '/images/generated-comic/midnight/hen-sleeping.png', label: "You didn't answer in time", points: null }
       default:
         return null
     }
@@ -226,7 +226,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
         {flockPlayerIds.length > 0 && (
           <div className={`rounded-2xl p-5 shadow-sm bg-success-fixed border-2 border-success ${currentPlayerId && flockPlayerIds.includes(currentPlayerId) ? 'ring-2 ring-success/30' : ''}`}>
             <div className="flex items-start gap-3">
-              <img src="/images/generated-comic/hen-excited.png" alt="" className="w-10 h-10 shrink-0" />
+              <img src="/images/generated-comic/midnight/hen-excited.png" alt="" className="w-10 h-10 shrink-0" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-label text-[11px] uppercase tracking-[0.18em] font-bold text-on-success-fixed-variant">The flock</p>

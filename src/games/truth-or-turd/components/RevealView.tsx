@@ -19,7 +19,7 @@ export default function RevealView({ game, round, players, isHost, currentPlayer
     return (
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
         <div className="text-center space-y-3">
-          <img src="/images/generated-comic/hen-pecking.png" alt="" className="w-20 h-20 mx-auto animate-hen-peck" />
+          <img src="/images/generated-comic/midnight/hen-pecking.png" alt="" className="w-20 h-20 mx-auto animate-hen-peck" />
           <p className="font-headline text-xl font-bold text-on-surface">Checking the droppings...</p>
           <p className="text-on-surface-variant text-sm font-body">The facts are being sorted</p>
         </div>
@@ -82,7 +82,7 @@ export default function RevealView({ game, round, players, isHost, currentPlayer
   const hero = (() => {
     if (yourResult === 'correct') {
       return {
-        img: '/images/generated-comic/truth-or-turd-correct.png',
+        img: '/images/generated-comic/midnight/truth-or-turd-correct.png',
         title: 'You nailed it!',
         detail: `You picked ${yourAnswer ? answerText(yourAnswer) : 'correctly'}.`,
         points: '+1 pt',
@@ -94,7 +94,7 @@ export default function RevealView({ game, round, players, isHost, currentPlayer
     }
     if (yourResult === 'incorrect') {
       return {
-        img: '/images/generated-comic/truth-or-turd-wrong.png',
+        img: '/images/generated-comic/midnight/truth-or-turd-wrong.png',
         title: 'You stepped in it',
         detail: `You picked ${yourAnswer ? answerText(yourAnswer) : 'the wrong side'}. Correct was ${correctAnswerText}.`,
         points: null,
@@ -106,7 +106,7 @@ export default function RevealView({ game, round, players, isHost, currentPlayer
     }
     if (yourResult === 'no-answer') {
       return {
-        img: '/images/generated-comic/hen-sleeping.png',
+        img: '/images/generated-comic/midnight/hen-sleeping.png',
         title: "You didn't answer",
         detail: `Correct was ${correctAnswerText}.`,
         points: null,

@@ -77,19 +77,6 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
 
   return (
     <div className="min-h-screen bg-surface linen-texture font-body text-on-surface relative overflow-hidden">
-      {/* Background botanical decorations */}
-      <div className="absolute -top-8 -left-8 opacity-[0.07] pointer-events-none -rotate-12">
-        <img src="/images/generated-comic/botanical-fern.png" alt="" className="w-52 h-52 object-contain" />
-      </div>
-      <div className="absolute top-1/3 -right-12 opacity-[0.06] pointer-events-none rotate-[25deg]">
-        <img src="/images/generated-comic/botanical-wheat.png" alt="" className="w-56 h-56 object-contain" />
-      </div>
-      <div className="absolute bottom-24 -left-16 opacity-[0.05] pointer-events-none rotate-[200deg]">
-        <img src="/images/generated-comic/botanical-wheat.png" alt="" className="w-48 h-48 object-contain" />
-      </div>
-      <div className="absolute -bottom-6 -right-6 opacity-[0.07] pointer-events-none rotate-[140deg]">
-        <img src="/images/generated-comic/botanical-fern.png" alt="" className="w-44 h-44 object-contain" />
-      </div>
 
       <main className="max-w-md mx-auto px-6 pt-4 pb-32 relative z-10">
         {/* Header + Room Code */}
@@ -101,7 +88,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
             <span className="material-symbols-outlined">arrow_back</span>
             <span className="text-sm font-medium">Back</span>
           </button>
-          <img src="/images/generated-comic/hen-neutral.png" alt="" className="w-24 h-24 mx-auto mb-3 animate-hen-bob" />
+          <img src="/images/generated-comic/midnight/hen-neutral.png" alt="" className="w-24 h-24 mx-auto mb-3 animate-hen-bob" />
           <h2 className="font-headline text-4xl font-bold text-on-surface mb-2 tracking-tight">FLOCK TOGETHER</h2>
           <p className="text-on-surface-variant text-sm">Waiting in the lobby</p>
 
@@ -136,7 +123,6 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
             </h3>
           </div>
           <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sticker border border-outline-variant relative overflow-hidden">
-            <span className="material-symbols-outlined absolute -top-2.5 -left-2.5 opacity-15 -rotate-[15deg] text-primary text-6xl pointer-events-none">eco</span>
             <ul className="grid grid-cols-2 gap-x-4 gap-y-3 relative z-10">
               {players.map((p) => (
                 <li key={p.id} className="animate-hen-pop flex items-center min-w-0">
@@ -158,7 +144,6 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
                 <p className="italic text-on-surface-variant text-sm">Waiting for others...</p>
               </li>
             </ul>
-            <span className="material-symbols-outlined absolute -bottom-4 -right-4 opacity-15 rotate-[165deg] text-primary text-6xl pointer-events-none">account_tree</span>
           </div>
         </section>
 

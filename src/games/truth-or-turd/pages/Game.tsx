@@ -116,7 +116,7 @@ export default function Game() {
         <GameHeader game={game} players={players} currentPlayer={currentPlayer} round={round} isHost={isHost} />
         <main className="flex-1 flex items-center justify-center px-6 py-10">
           <div className="max-w-md text-center space-y-4">
-            <img src="/images/generated-comic/hen-thinking.png" alt="" className="w-24 h-24 mx-auto animate-hen-bob" />
+            <img src="/images/generated-comic/midnight/hen-thinking.png" alt="" className="w-24 h-24 mx-auto animate-hen-bob" />
             <h2 className="font-headline text-3xl font-bold text-on-surface">You&apos;re in!</h2>
             <p className="text-on-surface-variant font-body">
               This question already started, so you&apos;ll join on the next one.

@@ -138,7 +138,7 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
         {isPatrioticRound && (
           <div className="absolute top-3 right-3 text-2xl" aria-hidden>🇺🇸</div>
         )}
-        <img src="/images/generated-comic/truth-or-turd-thinking.png" alt="" className="w-20 h-20 mx-auto mb-3 animate-hen-bob" />
+        <img src="/images/generated-comic/midnight/truth-or-turd-thinking.png" alt="" className="w-20 h-20 mx-auto mb-3 animate-hen-bob" />
         <p className="font-headline text-xl font-bold text-on-surface leading-relaxed">
           {prompt}
         </p>
@@ -188,7 +188,7 @@ export default function AnsweringView({ game, round, players, isHost, currentPla
         </div>
       ) : expired ? (
         <div className="mt-5 text-center py-4">
-          <img src="/images/generated-comic/hen-sleeping.png" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
+          <img src="/images/generated-comic/midnight/hen-sleeping.png" alt="" className="w-20 h-20 mx-auto mb-2 animate-hen-bob" />
           <p className="text-waiting font-bold text-lg font-body">Too slow!</p>
           <p className="text-on-surface-variant mt-1 font-body">No answer this round.</p>
         </div>

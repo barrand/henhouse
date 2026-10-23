@@ -47,7 +47,7 @@ export default function ScoringRound({ game, view: v, players, uid, isHost }: {
     finally { setBusy(false) }
   }
   const status = <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-on-surface-variant mb-4"><span>{mode} · {v.phase === 'scored' ? 'Round complete' : 'Rules fixed for this round'}</span>{v.deadline > 0 && <span role="timer" className="text-timer font-mono font-bold" aria-label={`${countdown} seconds remaining`}>{countdown}s</span>}</div>
-  const art = (file: string) => <img src={`/images/generated-comic/${file}.png`} alt="" className="w-24 h-24 mx-auto animate-hen-bob" />
+  const art = (file: string) => <img src={`/images/generated-comic/midnight/${file}.png`} alt="" className="w-24 h-24 mx-auto animate-hen-bob" />
   const secret = v.secretWord && <button type="button" className="w-full rounded-2xl bg-primary-fixed text-on-primary-fixed p-4 mb-4 touch-none select-none" onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); setPeek(true) }} onPointerUp={() => setPeek(false)} onPointerCancel={() => setPeek(false)} onLostPointerCapture={() => setPeek(false)} onBlur={() => setPeek(false)} onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setPeek(true) } }} onKeyUp={() => setPeek(false)} aria-pressed={peek}>{peek ? <span className="font-headline text-3xl font-bold break-words">{v.secretWord}</span> : 'Hold to see the secret word'}</button>
   const groupCards = (results = false) => <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">{v.groups.map(g => <div key={g.id} className={`min-w-0 rounded-2xl border p-3 space-y-2 ${g.newlyShown && !results ? 'border-primary bg-primary-container text-on-primary-container animate-hen-pop' : 'border-outline-variant bg-surface-container-lowest'}`}>
     <p className="font-mono font-bold text-lg break-words [overflow-wrap:anywhere]">{g.text}</p>
@@ -77,7 +77,7 @@ export default function ScoringRound({ game, view: v, players, uid, isHost }: {
     {tickError && <p role="status" className="text-on-surface-variant">{tickError}</p>}
     {(v.phase === 'word-selection' || v.phase === 'word-selected') && <div className="max-w-md mx-auto space-y-5 text-center">
       <div className="space-y-2">
-        <img src={`/images/generated-comic/${v.phase === 'word-selected' ? 'hen-excited' : 'hen-thinking'}.png`} alt="" className={`w-24 h-24 mx-auto ${v.phase === 'word-selected' ? 'animate-hen-pop' : 'animate-hen-bob'}`} />
+        <img src={`/images/generated-comic/midnight/${v.phase === 'word-selected' ? 'hen-excited' : 'hen-thinking'}.png`} alt="" className={`w-24 h-24 mx-auto ${v.phase === 'word-selected' ? 'animate-hen-pop' : 'animate-hen-bob'}`} />
         <h2 className="font-headline text-3xl font-bold">{v.phase === 'word-selected'
           ? v.guesser ? 'Your word is ready!' : <>The flock picked <span className="text-primary">this one!</span></>
           : v.guesser ? 'No peeking!' : now < v.selectionOpensAt ? 'Guesser, look away!' : <>Pick a word for <span className="text-primary">the guesser</span>!</>}</h2>

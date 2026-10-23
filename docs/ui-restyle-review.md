@@ -70,3 +70,11 @@ Captures include home/join, the Flock Together lobby/question/grouped results, F
 - `src/index.css`
 - `src/pages/Home.tsx`
 - `docs/ui-restyle-review.md`
+
+## Complete artwork follow-up
+
+Added 18 separately generated transparent comic-sticker PNGs under `public/images/generated-comic/midnight/`, matching the previously approved three-hen Flock Together icon. All character states, the two remaining homepage game icons, and Truth or Turd states now use the new set. The egg and flying pose are included for the full character vocabulary. Earlier assets remain available for rollback.
+
+Removed botanical PNG overlays from home and both decorated lobbies, removed the plant-shaped lobby accents and the old footprint divider, and added two restrained CSS comic bursts near the homepage masthead plus a three-diamond footer accent. These decorations consume the shared palette and have no animation.
+
+Validation: production build passed; all static image references resolve; all 18 PNGs have real alpha channels; all 19 current illustrations loaded in a dark/cream review gallery; 18 home/gameplay checks at 390px and 1440px showed no missing images or document overflow. The home text contrast check still passes. Prompts and individual subject specifications are recorded in `docs/art-prompts/midnight-sticker-set.md`. Temporary review HTML was removed before commit. Game logic, routes, services, and data were unchanged.

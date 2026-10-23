@@ -100,16 +100,11 @@ export default function Home({ experimental = false }: { experimental?: boolean 
 
   return (
     <div className="home-shell min-h-screen flex flex-col items-center justify-center bg-surface linen-texture font-body text-on-surface relative overflow-hidden">
-      {/* Decorative botanical backgrounds */}
-      <div className="absolute -top-10 -left-10 opacity-20 pointer-events-none -rotate-12">
-        <img src="/images/generated-comic/botanical-fern.png" alt="" className="w-48 h-48 object-contain" />
-      </div>
-      <div className="absolute -bottom-10 -right-10 opacity-20 pointer-events-none rotate-45">
-        <img src="/images/generated-comic/botanical-wheat.png" alt="" className="w-64 h-64 object-contain" />
-      </div>
 
       <div className="w-full max-w-4xl space-y-6 relative px-0">
-        <div className="home-masthead text-center mb-6">
+        <div className="home-masthead text-center mb-6 relative">
+          <span className="comic-splash comic-splash-cyan" aria-hidden="true" />
+          <span className="comic-splash comic-splash-lilac" aria-hidden="true" />
           <p className="sticker-label">GOOD FRIENDS. QUESTIONABLE ANSWERS.</p>
           <h1 className="font-headline text-on-surface">
             HEN<span>HOUSE</span>
@@ -211,7 +206,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
           >
             <div className="flex items-start justify-between mb-3">
               <div className="tile-art w-16 h-16 rounded-2xl bg-deep flex items-center justify-center">
-                <img src="/images/generated-comic/fowl-icon.png" alt="" className="w-14 h-14 object-contain" />
+                <img src="/images/generated-comic/midnight/fowl-icon.png" alt="" className="w-14 h-14 object-contain" />
               </div>
               <span className="tile-number">02</span>
             </div>
@@ -233,7 +228,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
           >
             <div className="flex items-start justify-between mb-3">
               <div className="tile-art w-16 h-16 rounded-2xl bg-deep flex items-center justify-center">
-                <img src="/images/generated-comic/truth-or-turd-icon.png" alt="" className="w-14 h-14 object-contain" />
+                <img src="/images/generated-comic/midnight/truth-or-turd-icon.png" alt="" className="w-14 h-14 object-contain" />
               </div>
               <span className="tile-number">03</span>
             </div>
@@ -247,7 +242,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
           </button>
         </div>
 
-        <img src="/images/generated-comic/footprint-divider.png" alt="" className="w-full max-w-xs h-14 object-contain opacity-60 mx-auto mt-8" />
+        <div className="comic-divider" aria-hidden="true"><span /><span /><span /></div>
       </div>
     </div>
   )

@@ -169,7 +169,7 @@ export default function RoundResultView({
           {round.isCorrect ? (
             <>
               <img
-                src={round.currentAttempt === 1 ? '/images/generated-comic/hen-excited.png' : '/images/generated-comic/hen-winner.png'}
+                src={round.currentAttempt === 1 ? '/images/generated-comic/midnight/hen-excited.png' : '/images/generated-comic/midnight/hen-winner.png'}
                 alt=""
                 className={`w-28 h-28 mx-auto ${round.currentAttempt === 1 ? 'animate-hen-celebrate' : 'animate-hen-pop'}`}
               />
@@ -186,13 +186,13 @@ export default function RoundResultView({
             </>
           ) : round.clueGroups.length === 0 ? (
             <>
-              <img src="/images/generated-comic/hen-embarrassed.png" alt="" className="w-28 h-28 mx-auto animate-hen-pop" />
+              <img src="/images/generated-comic/midnight/hen-embarrassed.png" alt="" className="w-28 h-28 mx-auto animate-hen-pop" />
               <h2 className="font-headline text-4xl font-bold text-waiting tracking-tight">NO CLUES</h2>
               <p className="text-on-surface-variant font-body text-sm">Nobody submitted a clue in time.</p>
             </>
           ) : (
             <>
-              <img src="/images/generated-comic/hen-confused.png" alt="" className="w-28 h-28 mx-auto animate-hen-pop" />
+              <img src="/images/generated-comic/midnight/hen-confused.png" alt="" className="w-28 h-28 mx-auto animate-hen-pop" />
               <h2 className="font-headline text-4xl font-bold text-waiting tracking-tight">NO LUCK</h2>
               <p className="text-on-surface-variant font-body text-sm">
                 {guesserName} ran out of guesses.

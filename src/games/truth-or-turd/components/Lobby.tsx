@@ -29,12 +29,6 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
 
   return (
     <div className="min-h-screen bg-surface linen-texture font-body text-on-surface relative overflow-hidden">
-      <div className="absolute -top-8 -left-8 opacity-[0.07] pointer-events-none -rotate-12">
-        <img src="/images/generated-comic/botanical-fern.png" alt="" className="w-52 h-52 object-contain" />
-      </div>
-      <div className="absolute -bottom-6 -right-6 opacity-[0.07] pointer-events-none rotate-[140deg]">
-        <img src="/images/generated-comic/botanical-wheat.png" alt="" className="w-48 h-48 object-contain" />
-      </div>
 
       <main className="max-w-md mx-auto px-6 pt-4 pb-32 relative z-10">
         <div className="text-center mb-8">
@@ -46,7 +40,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
             <span className="material-symbols-outlined">arrow_back</span>
             <span className="text-sm font-medium">Back</span>
           </button>
-          <img src="/images/generated-comic/hen-neutral.png" alt="" className="w-24 h-24 mx-auto mb-3 animate-hen-bob" />
+          <img src="/images/generated-comic/midnight/hen-neutral.png" alt="" className="w-24 h-24 mx-auto mb-3 animate-hen-bob" />
           <h2 className="font-headline text-4xl font-bold text-on-surface mb-2 tracking-tight">TRUTH OR TURD</h2>
           <p className="text-on-surface-variant text-sm">A fast fact-or-flop showdown</p>
 

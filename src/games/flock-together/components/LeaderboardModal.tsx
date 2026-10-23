@@ -18,7 +18,7 @@ export default function LeaderboardModal({ players, currentPlayerId, onClose }: 
       >
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-2">
-            <img src="/images/generated-comic/hen-magnifying.png" alt="" className="w-10 h-10 animate-hen-bob" />
+            <img src="/images/generated-comic/midnight/hen-magnifying.png" alt="" className="w-10 h-10 animate-hen-bob" />
             <h2 className="font-headline text-xl font-bold text-on-surface">STANDINGS</h2>
           </div>
           <button aria-label="Close standings" onClick={onClose} className="text-on-surface-variant hover:text-on-surface-variant text-2xl">&times;</button>

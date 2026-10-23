@@ -101,7 +101,7 @@ export default function WordSelectionView({ game, round, players, currentPlayerI
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-10">
         <div className="max-w-md w-full text-center space-y-5">
           <img
-            src="/images/generated-comic/hen-thinking.png"
+            src="/images/generated-comic/midnight/hen-thinking.png"
             alt=""
             className={`w-24 h-24 mx-auto ${isWordSelected ? 'animate-hen-pop' : 'animate-hen-bob'}`}
           />
