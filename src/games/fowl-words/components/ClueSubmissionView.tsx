@@ -300,7 +300,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
             <button
               onClick={handleSubmit}
               disabled={submitting || !normalizedClue || !!formatError || clueIsPartOfWord}
-              className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
+              className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
             >
               {submitting ? 'Checking clue…' : 'Lock it in'}
             </button>

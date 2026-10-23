@@ -106,11 +106,11 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
         </section>
 
         {/* How to Play */}
-        <section className="mb-6 rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4">
+        {game.scoringEngineVersion === 1 && <section className="mb-6 rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4">
           <p className="font-headline font-bold">{game.scoringRules?.mode === 'best-clues-first' ? 'Best Clues First · experimental' : 'Classic scoring'}</p>
           <p className="text-sm text-on-surface-variant mt-1">{game.scoringRules?.mode === 'best-clues-first' ? 'Back great clues. Solve with fewer reveals for more points.' : 'Unique clues, speed bonuses and peer awards.'}</p>
           {isHost && <button onClick={() => setShowSettings(true)} className="min-h-12 px-4 mt-3 rounded-xl border border-outline-variant/60 bg-surface-container-high">Game settings</button>}
-        </section>
+        </section>}
         {showSettings && <ScoringSettings game={game} onClose={() => setShowSettings(false)} />}
         <section className="mb-6 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-5 shadow-sm">
           <h3 className="font-headline text-base font-bold text-on-surface mb-3">How it works</h3>
@@ -128,7 +128,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
           <button
             onClick={handleStart}
             disabled={starting || players.length < 2}
-            className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
+            className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
           >
             {buttonLabel}
           </button>

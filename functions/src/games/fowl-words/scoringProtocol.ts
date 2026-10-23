@@ -41,6 +41,9 @@ export function projectScoringView(s: ScoringState, uid: string, tentative: Reco
   return {
     phase: s.phase, rules: s.rules, roundNum: s.roundNum, guesser, participating,
     startedAt: s.startedAt, deadline: s.deadline, selectionOpensAt: s.selectionOpensAt,
+    // Candidate words are only ever projected during the vote. This keeps
+    // the handoff screen free of choices and preserves the guesser's blind
+    // state even if a client has a stale role or phase transition.
     wordOptions: giver && s.phase === 'word-selection' ? s.wordOptions : [],
     myWordVote: s.wordVotes[uid] ?? null, wordsVoted: Object.keys(s.wordVotes).length,
     secretWord: scored || (giver && s.phase !== 'word-selection') ? s.secretWord : '',

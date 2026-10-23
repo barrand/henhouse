@@ -90,6 +90,12 @@ describe('role projections', () => {
     expect(JSON.stringify(view)).not.toContain('volcano')
     expect(JSON.stringify(view)).not.toContain('rocks')
   })
+  it('does not project candidate words after the vote closes', () => {
+    const selected = projectScoringView({ ...state, phase: 'word-selected' }, 'a', {})
+    const guesser = projectScoringView({ ...state, phase: 'word-selected' }, 'g', {})
+    expect(selected.wordOptions).toEqual([])
+    expect(guesser.wordOptions).toEqual([])
+  })
   it('requires a locked clue before accessing the board or all groups', () => {
     expect(projectScoringView(state, 'c', {}).board).toEqual([])
     const board = projectScoringView(state, 'a', {}).board

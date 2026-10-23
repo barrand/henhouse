@@ -431,7 +431,7 @@ export default function RoundResultView({
           <button
             onClick={handleAdvance}
             disabled={advancing}
-            className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
+            className="w-full bg-primary text-on-primary h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
           >
             {advancing ? 'Loading…' : isLastRound ? 'See final scores →' : 'Next round →'}
           </button>

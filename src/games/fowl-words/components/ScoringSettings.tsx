@@ -64,7 +64,7 @@ export default function ScoringSettings({ game, onClose }: { game: GameData; onC
       </div>}
       <p className="rounded-xl bg-primary-fixed text-on-primary-fixed p-3" aria-live="polite">{game.status === 'lobby' ? 'Applies to round 1' : `Applies to round ${game.currentRound + 1}`}. This round’s points stay fixed.</p>
       {error && <p className="text-error" role="alert">{error}</p>}
-      <div className="flex flex-wrap gap-3"><button onClick={() => save()} disabled={busy} className="min-h-12 rounded-xl bg-primary text-on-primary px-5 font-bold disabled:opacity-50">{busy ? 'Saving…' : game.status === 'lobby' ? 'Save settings' : 'Save for next round'}</button><button className={secondary} disabled={busy} onClick={() => setRules(recommendedRules(rules.mode))}>Reset to recommended</button>{game.pendingScoringRules && <button className={secondary} disabled={busy} onClick={() => save(true)}>Cancel pending changes</button>}</div>
+      <div className="flex flex-wrap gap-3"><button onClick={() => save()} disabled={busy} className="min-h-12 rounded-xl bg-primary text-on-primary px-5 font-bold disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100">{busy ? 'Saving…' : game.status === 'lobby' ? 'Save settings' : 'Save for next round'}</button><button className={secondary} disabled={busy} onClick={() => setRules(recommendedRules(rules.mode))}>Reset to recommended</button>{game.pendingScoringRules && <button className={secondary} disabled={busy} onClick={() => save(true)}>Cancel pending changes</button>}</div>
     </div>
   </div>
 }

@@ -3,7 +3,7 @@ import type { GameData, PlayerData } from '../types'
 import type { ScoringView } from '../scoring'
 import { advanceRound, scoringAction } from '../service'
 
-const primary = 'min-h-12 rounded-xl px-5 py-3 bg-primary text-on-primary font-headline font-bold disabled:opacity-50 active:scale-[0.98] transition-all'
+const primary = 'min-h-12 rounded-xl px-5 py-3 bg-primary text-on-primary font-headline font-bold disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 active:scale-[0.98] transition-all'
 const secondary = 'min-h-12 rounded-xl px-4 py-3 bg-surface-container-high border border-outline-variant/60 text-on-surface disabled:opacity-50'
 const field = 'w-full rounded-xl px-4 py-3 border-2 border-outline bg-surface-container-low text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none'
 
@@ -22,10 +22,13 @@ export default function ScoringRound({ game, view: v, players, uid, isHost }: {
   const name = (id: string) => players.find(p => p.id === id)?.name ?? 'Player'
   const mode = v.rules.mode === 'classic' ? 'Classic' : 'Best Clues First'
   const enteringClues = v.phase === 'clue-submission'
+  const selectedWordIndex = v.phase === 'word-selected' && v.secretWord
+    ? v.wordOptions.findIndex(word => word.toLowerCase() === v.secretWord.toLowerCase())
+    : -1
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 500); return () => clearInterval(timer) }, [])
   useEffect(() => { setText(''); setConfirmGiveUp(false); setPeek(false); setError(''); window.scrollTo(0, 0) }, [v.attempt, v.roundNum, enteringClues])
   useEffect(() => {
-    if (!v.participating || v.phase === 'scored') return
+    if (!v.participating || !isHost || v.phase === 'scored') return
     const expired = v.processing ? now >= v.claimExpiresAt
       : v.phase === 'deduplication' ? now >= v.phaseClaimExpiresAt : now >= v.deadline
     if (!expired || now - lastTick.current < 2500) return
@@ -57,20 +60,54 @@ export default function ScoringRound({ game, view: v, players, uid, isHost }: {
     </div>}
     {results && v.guesser && g.shown && <div className="flex flex-wrap gap-2">{v.correct && <button type="button" className={`${secondary} text-sm`} disabled={busy} aria-pressed={g.helpful} onClick={() => act('helpful', { clueId: g.id })}>⭐ Most Helpful{v.rules.mostHelpfulPoints ? ` +${Math.max(1, Math.floor(v.rules.mostHelpfulPoints / g.authors.length))}` : ''}</button>}<button type="button" className={`${secondary} text-sm`} disabled={busy} aria-pressed={v.ownBoo === g.id} onClick={() => act('boo', { clueId: g.id })}>👎 Boo</button></div>}
   </div>)}</div>
+  const resultCards = <div className="grid grid-cols-2 gap-2">{v.groups.map(g => <div key={g.id} className={`relative flex flex-col min-w-0 rounded-xl border-2 shadow-sm px-2.5 py-2 ${g.duplicate ? 'border-error/40 bg-surface-container' : g.shown && v.correct ? 'border-primary/60 bg-surface-container-lowest' : 'border-outline-variant/60 bg-surface-container-lowest'}`}>
+    <p className={`font-headline font-bold text-xl leading-tight text-center line-clamp-2 min-h-11 flex items-center justify-center ${g.duplicate ? 'text-error line-through' : 'text-on-surface'}`}>{g.text}</p>
+    <p className="text-xs text-on-surface-variant font-medium text-center leading-snug min-h-4 truncate">{g.authors.map(name).join(', ') || '—'}{g.duplicate && <span className="text-error font-bold uppercase text-[9px] tracking-wide"> · dup</span>}</p>
+    <div className="flex items-center justify-center gap-2 min-h-8 mt-1 text-sm"><span>❤️ {g.loves}</span><span>👎 {g.boos}</span>{g.helpful && <span>⭐</span>}</div>
+    <div className="flex gap-1.5 mt-1">
+      {v.guesser && v.correct && g.shown && <button type="button" className={`${secondary} flex-1 text-xs px-2`} disabled={busy} aria-pressed={g.helpful} onClick={() => act('helpful', { clueId: g.id })}>⭐ {g.helpful ? 'Helpful' : 'Most helpful'}</button>}
+      {((v.guesser && g.shown) || (!v.guesser && g.shown && !g.mine)) && <button type="button" className={`${secondary} flex-1 text-xs px-2`} disabled={busy} aria-pressed={v.ownBoo === g.id} onClick={() => act('boo', { clueId: g.id })}>👎 Boo</button>}
+    </div>
+  </div>)}</div>
 
   if (!v.participating) return <main className="p-6 text-center">You’ll join the next round.</main>
   return <main className="w-full max-w-5xl mx-auto px-4 py-6 space-y-4">
     {status}
     {error && <p role="alert" className="text-error">{error}</p>}
     {tickError && <p role="status" className="text-on-surface-variant">{tickError}</p>}
-    {v.phase === 'word-selection' && <div className="max-w-md mx-auto space-y-4 text-center">
-      {art('hen-thinking')}
-      <h2 className="font-headline text-3xl font-bold">{v.guesser ? 'No peeking!' : now < v.selectionOpensAt ? 'Guesser, look away!' : 'Pick the secret word'}</h2>
-      <p className="text-on-surface-variant">{v.guesser ? 'The flock is choosing your word.' : now < v.selectionOpensAt ? 'Keep the guesser’s screen private. Voting starts in a moment.' : 'Vote for one word. The other two are burned.'}</p>
-      {!v.guesser && now >= v.selectionOpensAt && v.wordOptions.map((word, index) => <button key={index} disabled={busy || countdown === 0} onClick={() => act('word-vote', { index })} aria-pressed={v.myWordVote === index} className={`block w-full ${v.myWordVote === index ? primary : secondary}`}>{word}{v.myWordVote === index ? ' · Your vote' : ''}</button>)}
-      <p>{v.wordsVoted} of {v.giverCount} voted</p>
+    {(v.phase === 'word-selection' || v.phase === 'word-selected') && <div className="max-w-md mx-auto space-y-5 text-center">
+      <div className="space-y-2">
+        <img src={`/images/generated-comic/${v.phase === 'word-selected' ? 'hen-excited' : 'hen-thinking'}.png`} alt="" className={`w-24 h-24 mx-auto ${v.phase === 'word-selected' ? 'animate-hen-pop' : 'animate-hen-bob'}`} />
+        <h2 className="font-headline text-3xl font-bold">{v.phase === 'word-selected'
+          ? v.guesser ? 'Your word is ready!' : <>The flock picked <span className="text-primary">this one!</span></>
+          : v.guesser ? 'No peeking!' : now < v.selectionOpensAt ? 'Guesser, look away!' : <>Pick a word for <span className="text-primary">the guesser</span>!</>}</h2>
+        <p className="text-on-surface-variant">{v.phase === 'word-selected'
+          ? v.guesser ? 'The others are getting ready to write clues. Still no peeking.' : 'Get ready to write a clue for the spotlight word.'
+          : v.guesser ? 'The flock is choosing your word.' : now < v.selectionOpensAt ? 'Keep the guesser’s screen private. Voting starts in a moment.' : 'Choose the one that will make for the most fun round.'}</p>
+      </div>
+
+      <div className={`flex items-center justify-center gap-3 ${v.phase === 'word-selected' ? 'animate-hen-pop' : ''}`}>
+        <div className={`font-headline text-4xl font-bold tabular-nums ${v.phase === 'word-selected' ? 'text-primary' : countdown <= 5 ? 'text-error' : countdown <= 10 ? 'text-tertiary' : 'text-primary'}`}>{countdown}</div>
+        <div className="text-on-surface-variant text-sm">{v.phase === 'word-selected' ? 'starting clues' : `${v.wordsVoted}/${v.giverCount} voted`}</div>
+      </div>
+
+      {!v.guesser && v.wordOptions.length > 0 && <div className="grid grid-cols-3 gap-3">
+        {v.wordOptions.map((word, index) => {
+          const isMyPick = v.myWordVote === index
+          const isSelected = v.phase === 'word-selected' && selectedWordIndex === index
+          const isDimmed = v.phase === 'word-selected' && !isSelected
+          return <button key={index} disabled={busy || countdown === 0 || v.phase === 'word-selected'} onClick={() => act('word-vote', { index })} aria-pressed={isMyPick} className={`relative flex min-h-32 flex-col items-center justify-center overflow-visible rounded-2xl border-2 px-3 py-5 font-body transition-all ${isSelected ? 'bg-primary-fixed border-primary text-on-primary-fixed scale-[1.08] animate-word-selected-card shadow-xl' : isDimmed ? 'bg-surface-container-lowest border-outline-variant/50 text-outline opacity-45 scale-95' : isMyPick ? 'bg-primary border-primary text-on-primary shadow-[0_8px_24px_rgba(0,0,0,0.3)] scale-[1.04] active:scale-[0.97]' : 'bg-surface-container-lowest border-outline-variant/30 text-on-surface hover:border-primary/50 hover:bg-primary-fixed/20 active:scale-[0.97]'}`}>
+            {isSelected && <span className="pointer-events-none absolute inset-0 z-0"><span className="absolute left-2 top-2 text-primary animate-word-spark">✦</span><span className="absolute right-3 top-4 text-tertiary animate-word-spark-delayed">✶</span><span className="absolute bottom-3 left-1/2 text-secondary animate-word-spark-late">✦</span></span>}
+            <span className="relative z-10 font-headline text-base font-bold text-center leading-tight">{word}</span>
+            {isMyPick && v.phase === 'word-selection' && <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-tertiary-container text-on-tertiary-container text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full font-label">Yours</span>}
+          </button>
+        })}
+      </div>}
+
+      {v.phase === 'word-selected' && !v.guesser && secret}
+      {v.guesser && <div className="flex justify-center gap-2"><span className="w-2 h-2 bg-primary rounded-full animate-bounce" /><span className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:150ms]" /><span className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:300ms]" /></div>}
+      {v.phase === 'word-selection' && !v.guesser && <p className="text-center text-outline text-xs">{v.wordsVoted < v.giverCount ? `Waiting for ${v.giverCount - v.wordsVoted} more vote${v.giverCount - v.wordsVoted !== 1 ? 's' : ''}…` : 'All voted! Finalizing…'}</p>}
     </div>}
-    {v.phase === 'word-selected' && <div className="max-w-md mx-auto text-center space-y-4">{art('hen-thinking')}<h2 className="font-headline text-2xl font-bold">{v.guesser ? 'Your word is ready' : 'The flock has chosen'}</h2>{!v.guesser && secret}</div>}
     {(v.phase === 'clue-submission' || v.phase === 'clue-voting') && <>
       {v.guesser ? <div className="max-w-md mx-auto space-y-4 text-center">{art('hen-blindfold')}<h2 className="font-headline text-3xl font-bold">{v.phase === 'clue-voting' ? 'Best clues coming up' : 'No peeking!'}</h2><p className="text-on-surface-variant">{v.phase === 'clue-voting' ? 'The flock is backing the clues that will help you.' : 'The flock is writing one-word clues.'}</p><p>{v.submittedCount} of {v.giverCount} clues submitted</p></div> : <>
         <div className="max-w-md mx-auto">{secret}{v.ownClue ? <p className="rounded-xl border border-outline-variant/60 bg-surface-container-lowest p-4 mb-4">Your locked clue: <strong className="break-words">{v.ownClue}</strong></p> : v.phase === 'clue-submission' ? <form className="space-y-3" onSubmit={e => { e.preventDefault(); act('clue', { text: text.trim() }) }}><label htmlFor="scoring-clue" className="block">Your one-word clue</label><input id="scoring-clue" className={field} value={text} maxLength={50} autoComplete="off" onChange={e => setText(e.target.value)} /><button type="submit" className={`${primary} w-full`} disabled={busy || countdown === 0 || !/^[\p{L}\p{M}]+$/u.test(text.trim())}>{busy ? 'Submitting…' : v.rules.mode === 'classic' ? 'Lock clue' : 'Lock clue & back others'}</button></form> : <p className="text-on-surface-variant">Clue submission closed. You can watch this round and join the next.</p>}</div>
@@ -98,10 +135,10 @@ export default function ScoringRound({ game, view: v, players, uid, isHost }: {
       {!v.guesser && <p className="text-sm text-on-surface-variant">Your points if solved now: {v.tentative[uid] ?? 0}{v.rules.mode === 'classic' && v.rules.mostHelpfulPoints > 0 ? ' · Most Helpful can add a bonus after a win.' : ''}</p>}
     </>}
     {v.phase === 'scored' && <>
-      <div className="text-center space-y-3">{art(v.correct ? 'hen-winner' : 'hen-confused')}<h2 className="font-headline text-3xl font-bold">{v.correct ? 'NAILED IT!' : 'NO LUCK'}</h2><p className="font-headline text-3xl text-primary">{v.secretWord || 'No clues submitted'}</p><p>Your round: {v.scores[uid] > 0 ? '+' : ''}{v.scores[uid] ?? 0} points</p><p className="text-sm text-on-surface-variant">{(v.breakdown[uid] ?? []).map(p => `${({ guess: 'Guess', used: 'Shown clue', fast: 'FAST', dup: 'Duplicate', love: 'Peer love', helpful: 'Most Helpful' })[p.kind]} ${p.points > 0 ? '+' : ''}${p.points}`).join(' · ')}</p></div>
-      <h3 className="font-headline text-xl font-bold">Every clue</h3>{groupCards(true)}
-      {isHost ? <button type="button" onClick={advance} className={primary} disabled={busy}>{game.currentRound >= game.settings.totalRounds ? 'Final standings' : 'Next round'}</button> : <p className="text-center text-on-surface-variant">Waiting for the host to continue.</p>}
+      <div className="text-center space-y-2">{art(v.correct ? (v.attempt === 1 ? 'hen-excited' : 'hen-winner') : v.groups.length === 0 ? 'hen-embarrassed' : 'hen-confused')}<h2 className={`font-headline text-4xl font-bold tracking-tight ${v.correct ? 'text-primary' : 'text-error'}`}>{v.correct ? 'NAILED IT!' : v.groups.length === 0 ? 'NO CLUES' : 'NO LUCK'}</h2><p className="text-on-surface-variant text-sm">{v.correct ? `${name(game.currentGuesser ?? '')} got` : v.groups.length === 0 ? 'Nobody submitted a clue in time.' : `${name(game.currentGuesser ?? '')} ran out of guesses.`} {v.correct && <span className="font-headline text-2xl font-bold text-primary">{v.secretWord}</span>}</p>{!v.correct && v.secretWord && <p className="font-label text-[10px] uppercase tracking-[0.2em] text-on-primary-fixed-variant font-bold bg-primary-fixed rounded-2xl px-4 py-3 mt-2"><span className="block">The word was</span><span className="block font-headline text-3xl text-on-primary-fixed tracking-tight mt-1">{v.secretWord}</span></p>}{v.history.length > 0 && <div className="flex flex-wrap justify-center gap-x-3 gap-y-1">{v.history.filter(h => h.text).map((h, i) => <span key={i} className="text-sm text-on-surface-variant"><span className="text-outline text-[10px]">{i + 1}.</span> <span className="font-bold text-on-surface">{h.text}</span></span>)}</div>}</div>
+      {v.groups.length > 0 && <><h3 className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">What everyone wrote</h3>{resultCards}</>}
+      <section><h3 className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">Standings</h3><ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 divide-y divide-outline-variant/50 overflow-hidden">{[...players].sort((a, b) => b.score - a.score).map((p, i) => <li key={p.id} className={`px-3 py-2 flex items-center gap-2 ${p.id === uid ? 'bg-secondary-fixed/20' : ''}`}><span className="text-outline w-5 text-sm">{i + 1}.</span><span className="flex-1 font-medium truncate">{p.name}{p.id === uid && ' ← you'}</span><span className={`text-xs font-bold ${v.scores[p.id] > 0 ? 'text-primary' : v.scores[p.id] < 0 ? 'text-error' : 'text-outline'}`}>{v.scores[p.id] ? `${v.scores[p.id] > 0 ? '+' : ''}${v.scores[p.id]}` : ''}</span><span className="font-headline text-lg font-bold tabular-nums w-8 text-right">{p.score}</span></li>)}</ul></section>
+      {isHost ? <button type="button" onClick={advance} className={`${primary} w-full`} disabled={busy}>{game.currentRound >= game.settings.totalRounds ? 'See final scores →' : 'Next round →'}</button> : <p className="text-center text-on-surface-variant">Waiting for the host to continue.</p>}
     </>}
-    {v.history.length > 0 && <div className="border-t border-outline-variant/60 pt-4"><h3 className="font-headline font-bold mb-2">Attempts</h3><ol className="space-y-1 text-sm text-on-surface-variant">{v.history.map((h, i) => <li key={i}>Attempt {h.attempt}: {h.kind === 'skip' ? 'Skipped' : h.kind === 'timeout' ? 'Time ran out' : h.kind === 'give-up' ? 'Gave up' : `${h.text} · ${h.correct ? 'Correct' : 'Wrong'}`}</li>)}</ol></div>}
   </main>
 }

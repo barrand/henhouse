@@ -113,9 +113,9 @@ export const fowlWordsCreateGame = onCall(async (request) => {
     cardsRemaining: [],
     playerIds: [uid],
     settings: { totalRounds: TOTAL_ROUNDS, secondsPerRound: 60, autoAdvanceSeconds: 10 },
-    scoringEngineVersion: 1,
-    scoringRules: recommendedRules(),
-    scoringRevision: 0,
+    // The scoring-engine renderer is an experimental alternate flow.  The
+    // established Fowl Words screens are the default game experience.
+    scoringEngineVersion: 0,
     includePatrioticQuestions,
     aiExperiment,
   })
@@ -172,9 +172,9 @@ export const fowlWordsRematch = onCall(async (request) => {
     cardsRemaining: [],
     playerIds: game.playerIds,
     settings: game.settings,
-    scoringEngineVersion: 1,
-    scoringRules: game.pendingScoringRules ?? game.scoringRules ?? recommendedRules(),
-    scoringRevision: 0,
+    // Rematches should preserve the polished, established game flow too.
+    // An experimental scoring-engine round is never carried into a rematch.
+    scoringEngineVersion: 0,
     includePatrioticQuestions,
     aiExperiment,
   })

@@ -66,6 +66,20 @@
   --color-on-love-container: #ffd4da;
 }
 
+/* Action controls use the dark primary container. Pale primary is reserved
+   for selected states, scores, and information surfaces. */
+button.bg-primary.text-on-primary,
+.group .bg-primary.text-on-primary {
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+}
+
+button.bg-primary.text-on-primary:disabled {
+  background-color: var(--color-surface-container-high);
+  color: var(--color-on-surface-variant);
+  opacity: 1;
+}
+
 .linen-texture {
   background-image: radial-gradient(#ffffff0b 1px, transparent 0);
   background-size: 24px 24px;

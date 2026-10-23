@@ -528,7 +528,7 @@ export default function RevealView({
                   type="button"
                   onClick={handleGuess}
                   disabled={submitting || !guess.trim()}
-                  className="shrink-0 bg-primary text-on-primary px-4 py-2.5 font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all border-l border-primary-fixed-dim"
+                className="shrink-0 bg-primary text-on-primary px-4 py-2.5 font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all border-l border-primary-fixed-dim"
                 >
                   {submitting ? '…' : 'Submit'}
                 </button>

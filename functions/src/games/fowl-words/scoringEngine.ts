@@ -52,25 +52,42 @@ function writeState(tx: admin.firestore.Transaction, id: string, s: ScoringState
 }
 
 async function mutate(id: string, round: number, uid: string, change: (s: ScoringState, game: Game, tx: admin.firestore.Transaction) => void) {
-  return firestore().runTransaction(async tx => {
-    const [gs, ss] = await Promise.all([tx.get(gameRef(id)), tx.get(stateRef(id, round))])
-    if (!gs.exists || !ss.exists) throw new HttpsError('not-found', 'Round not found')
-    const game = gs.data()!
-    const s = ss.data() as ScoringState
-    if (game.gameType !== 'fowl-words' || game.scoringEngineVersion !== 1 || game.status !== 'playing' || game.currentRound !== round) fail('This round is no longer active')
-    if (!s.eligible.includes(uid)) throw new HttpsError('permission-denied', 'You will join next round')
-    const previous = { ...s.scores }
-    change(s, game, tx)
-    if (s.phase === 'scored') {
-      const result = scores(s)
-      s.scores = result.scores; s.breakdown = result.breakdown
-      for (const [player, points] of Object.entries(s.scores)) {
-        const delta = points - (previous[player] ?? 0)
-        if (delta) tx.update(gameRef(id).collection('players').doc(player), { score: FieldValue.increment(delta) })
-      }
+  // The emulator can return ABORTED for a transaction lock timeout without
+  // retrying it itself. A swarm commonly has every client tick the same
+  // round at once, so give that transient contention a jittered retry.
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await firestore().runTransaction(async tx => {
+        const [gs, ss] = await Promise.all([tx.get(gameRef(id)), tx.get(stateRef(id, round))])
+        if (!gs.exists || !ss.exists) throw new HttpsError('not-found', 'Round not found')
+        const game = gs.data()!
+        const s = ss.data() as ScoringState
+        if (game.gameType !== 'fowl-words' || game.scoringEngineVersion !== 1 || game.status !== 'playing' || game.currentRound !== round) fail('This round is no longer active')
+        if (!s.eligible.includes(uid)) throw new HttpsError('permission-denied', 'You will join next round')
+        const previous = { ...s.scores }
+        change(s, game, tx)
+        if (s.phase === 'scored') {
+          const result = scores(s)
+          s.scores = result.scores; s.breakdown = result.breakdown
+          for (const [player, points] of Object.entries(s.scores)) {
+            const delta = points - (previous[player] ?? 0)
+            if (delta) tx.update(gameRef(id).collection('players').doc(player), { score: FieldValue.increment(delta) })
+          }
+        }
+        writeState(tx, id, s)
+      })
+    } catch (error) {
+      if (attempt >= 4 || !isTransientTransactionLock(error)) throw error
+      await new Promise(resolve => setTimeout(resolve, 40 * (2 ** attempt) + Math.random() * 100))
     }
-    writeState(tx, id, s)
-  })
+  }
+}
+
+function isTransientTransactionLock(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const candidate = error as { code?: unknown; message?: unknown; details?: unknown }
+  const message = [candidate.message, candidate.details].filter(value => typeof value === 'string').join(' ')
+  return (candidate.code === 10 || candidate.code === 'aborted' || candidate.code === 'ABORTED') && /transaction lock timeout/i.test(message)
 }
 
 function finish(s: ScoringState, correct: boolean) {
@@ -298,6 +315,15 @@ export const fowlWordsScoringAction = onCall({ secrets: [typesafeApiKey] }, asyn
       if (correct) { s.history.push(event); finish(s, true) } else advance(s, event)
     })
   } else {
+    // Timer transitions are host-owned. Every client has a local countdown,
+    // but allowing every participant to submit the same tick creates a
+    // transaction stampede against the shared round state (especially in the
+    // local emulator). Non-host clients can safely wait for the host's write.
+    if (action === 'tick') {
+      const game = await gameRef(id).get()
+      if (!game.exists) throw new HttpsError('not-found', 'Game not found')
+      if (game.data()?.hostId !== uid) return { ok: true }
+    }
     await mutate(id, round, uid, (s, g) => {
       if (action === 'word-vote') {
         if (s.phase !== 'word-selection' || s.guesser === uid || Date.now() < s.selectionOpensAt || Date.now() >= s.deadline) fail('Word voting is closed')

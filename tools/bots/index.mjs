@@ -383,9 +383,15 @@ class Bot {
   }
 
   listen(onUpdate) {
-    this.scoringInterval = setInterval(() => {
+    const tick = () => {
       if (this.latestRound?.scoringVersion === 1) this.handleUpdate().catch(err => this.reporter.event('error', { botName: this.name, message: err.message }))
-    }, 1000)
+    }
+    // Keep swarm timer ticks from arriving as one synchronized burst.
+    const staggerMs = 150 + ((this.index * 83) % 700)
+    this.scoringStartTimeout = setTimeout(() => {
+      tick()
+      this.scoringInterval = setInterval(tick, 1000)
+    }, staggerMs)
     this.unsubscribes.push(onSnapshot(doc(this.db, 'games', this.gameId), (snap) => {
       this.latestGame = snap.exists() ? { id: snap.id, ...snap.data() } : null
       this.attachRoundListener()
@@ -484,7 +490,7 @@ class Bot {
     const call = (action, extra = {}) => this.call('fowlWordsScoringAction', { gameId: this.gameId, roundNum: v.roundNum, action, expectedAttempt: v.attempt, ...extra })
     const now = Date.now()
     const expired = v.processing ? now >= v.claimExpiresAt : v.phase === 'deduplication' ? now >= v.phaseClaimExpiresAt : v.deadline && now >= v.deadline
-    if (v.phase !== 'scored' && expired) {
+    if (v.phase !== 'scored' && expired && this.latestGame?.hostId === this.uid) {
       await this.once(`scoring:tick:${v.roundNum}:${v.phase}:${v.attempt}:${v.deadline}:${v.claimExpiresAt}:${v.phaseClaimExpiresAt}`, () => call('tick'))
       return
     }
@@ -675,6 +681,7 @@ class Bot {
   }
 
   async stop() {
+    clearTimeout(this.scoringStartTimeout)
     clearInterval(this.scoringInterval)
     if (this.roundViewUnsubscribe) this.roundViewUnsubscribe()
     for (const unsubscribe of this.unsubscribes) unsubscribe()

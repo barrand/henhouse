@@ -73,7 +73,7 @@ export default function GameHeader({ game, players, currentPlayer, round: _round
               )}
             </div>
             <div className="flex items-center gap-3">
-              {isHost && (
+              {isHost && game.scoringEngineVersion === 1 && (
                 <button onClick={() => setShowSettings(true)} className="min-h-11 text-sm underline">Settings</button>
               )}
               {isHost && (
@@ -95,8 +95,8 @@ export default function GameHeader({ game, players, currentPlayer, round: _round
         )}
       </div>
 
-      {game.pendingScoringRules && <p className="bg-tertiary-container text-on-tertiary-container px-4 py-2 text-sm" role="status">Next round: {game.pendingScoringRules.mode === 'classic' ? 'Classic' : 'Best Clues First'} · updated rules</p>}
-      {game.scoringChangedRound === game.currentRound && <p className="bg-primary-fixed text-on-primary-fixed px-4 py-2 text-sm" role="status">Round {game.currentRound}: {game.scoringRules?.mode === 'best-clues-first' ? 'Best Clues First' : 'Classic'} settings are active.</p>}
+      {game.scoringEngineVersion === 1 && game.pendingScoringRules && <p className="bg-tertiary-container text-on-tertiary-container px-4 py-2 text-sm" role="status">Next round: {game.pendingScoringRules.mode === 'classic' ? 'Classic' : 'Best Clues First'} · updated rules</p>}
+      {game.scoringEngineVersion === 1 && game.scoringChangedRound === game.currentRound && <p className="bg-primary-fixed text-on-primary-fixed px-4 py-2 text-sm" role="status">Round {game.currentRound}: {game.scoringRules?.mode === 'best-clues-first' ? 'Best Clues First' : 'Classic'} settings are active.</p>}
       {showSettings && <ScoringSettings game={game} onClose={() => setShowSettings(false)} />}
 
       {showLeaderboard && (
