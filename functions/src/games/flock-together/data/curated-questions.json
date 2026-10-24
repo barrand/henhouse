@@ -1,0 +1,283 @@
+[
+  {
+    "text": "What is something people need to stop bragging about?",
+    "type": "multiple_choice",
+    "options": [
+      "Money",
+      "How busy they are",
+      "Social media followers"
+    ]
+  },
+  {
+    "text": "Is cereal a soup?",
+    "type": "multiple_choice",
+    "options": [
+      "Yes",
+      "No"
+    ]
+  },
+  {
+    "text": "What would you bring to a deserted island?",
+    "type": "multiple_choice",
+    "options": [
+      "A book",
+      "Knife",
+      "Lighter"
+    ]
+  },
+  {
+    "text": "Name something nobody looks cool doing",
+    "type": "multiple_choice",
+    "options": [
+      "Eating a banana",
+      "Running for the bus",
+      "Applying sunscreen"
+    ]
+  },
+  {
+    "text": "What is the most overrated food?",
+    "type": "multiple_choice",
+    "options": [
+      "Avocado Toast",
+      "Sushi",
+      "Truffle Fries"
+    ]
+  },
+  {
+    "text": "What is the worst thing to step on barefoot?",
+    "type": "multiple_choice",
+    "options": [
+      "Lego",
+      "Glass shard",
+      "Dog poop"
+    ]
+  },
+  {
+    "text": "What is the worst fashion trend of all time?",
+    "type": "multiple_choice",
+    "options": [
+      "Bell bottoms",
+      "Mullets",
+      "Crocs"
+    ]
+  },
+  {
+    "text": "What is the most overrated fast food chain?",
+    "type": "multiple_choice",
+    "options": [
+      "McDonald's",
+      "Starbucks",
+      "Subway"
+    ]
+  },
+  {
+    "text": "What fictional character would be the worst coworker?",
+    "type": "multiple_choice",
+    "options": [
+      "The Joker",
+      "Michael Scott",
+      "Darth Vader"
+    ]
+  },
+  {
+    "text": "Name something people argue about in the car",
+    "type": "open"
+  },
+  {
+    "text": "What is the best fast food restaurant?",
+    "type": "open"
+  },
+  {
+    "text": "If you could live in any fictional world, which one?",
+    "type": "multiple_choice",
+    "options": [
+      "Marvel Universe",
+      "Middle-earth",
+      "Star Wars",
+      "Pokemon World"
+    ]
+  },
+  {
+    "text": "What age does someone become 'old'?",
+    "type": "multiple_choice",
+    "options": [
+      "50",
+      "65",
+      "75"
+    ]
+  },
+  {
+    "text": "What is the best Girl Scout cookie?",
+    "type": "multiple_choice",
+    "options": [
+      "Thin Mints",
+      "Samoas",
+      "Tagalongs",
+      "Do-si-dos"
+    ]
+  },
+  {
+    "text": "Leaving voicemails:",
+    "type": "multiple_choice",
+    "options": [
+      "Thoughtful",
+      "Waste Of Time"
+    ]
+  },
+  {
+    "text": "Who in this room would survive the longest in a horror movie?",
+    "type": "open"
+  },
+  {
+    "text": "Would you rather fight one horse-sized duck or a hundred duck-sized horses?",
+    "type": "multiple_choice",
+    "options": [
+      "Fight One Horse-sized Duck",
+      "A Hundred Duck-sized Horses"
+    ]
+  },
+  {
+    "text": "Would you rather live without music or without movies?",
+    "type": "multiple_choice",
+    "options": [
+      "Without Music",
+      "Without Movies"
+    ]
+  },
+  {
+    "text": "Would you rather have unlimited money or unlimited time?",
+    "type": "multiple_choice",
+    "options": [
+      "Unlimited Money",
+      "Unlimited Time"
+    ]
+  },
+  {
+    "text": "Would you rather your bed always feel sandy or your shower always run ice cold?",
+    "type": "multiple_choice",
+    "options": [
+      "Your Bed Always Feel Sandy",
+      "Your Shower Always Run Ice Cold"
+    ]
+  },
+  {
+    "text": "If you were abducted, who would you choose?",
+    "type": "multiple_choice",
+    "options": [
+      "Aliens",
+      "Pirates",
+      "Ghosts",
+      "Vampires"
+    ]
+  },
+  {
+    "text": "You can only eat one cuisine forever?",
+    "type": "multiple_choice",
+    "options": [
+      "Mexican",
+      "Italian",
+      "Japanese",
+      "Indian"
+    ]
+  },
+  {
+    "text": "Pick your useless superpower:",
+    "type": "multiple_choice",
+    "options": [
+      "Talk To Ants",
+      "Glow In The Dark",
+      "Taste Colors",
+      "Summon A Single Pigeon"
+    ]
+  },
+  {
+    "text": "Pick one costume to work every day:",
+    "type": "multiple_choice",
+    "options": [
+      "Hot Dog Suit",
+      "Banana Suit",
+      "Inflatable Dinosaur",
+      "Chicken Suit"
+    ]
+  },
+  {
+    "text": "Best zombie apocalypse weapon?",
+    "type": "multiple_choice",
+    "options": [
+      "Baseball Bat",
+      "Crowbar",
+      "Garden Hoe",
+      "Fire Poker"
+    ]
+  },
+  {
+    "text": "Your car horn is replaced with one sound?",
+    "type": "multiple_choice",
+    "options": [
+      "Baby Crying",
+      "Kazoo Solo",
+      "Laugh Track",
+      "Wah-wah"
+    ]
+  },
+  {
+    "text": "Worst face tatoo?",
+    "type": "multiple_choice",
+    "options": [
+      "Forehead Target",
+      "Giant Mole",
+      "Barcode",
+      "Permanent Unibrow"
+    ]
+  },
+  {
+    "text": "Pick your worst way to travel:",
+    "type": "multiple_choice",
+    "options": [
+      "Pogo Stick",
+      "Unicycle",
+      "Roller Skates Uphill",
+      "Tandem With Stranger"
+    ]
+  },
+  {
+    "text": "Which fast food mascot would win in a fight?",
+    "type": "multiple_choice",
+    "options": [
+      "The Burger King",
+      "Ronald McDonald",
+      "Jack In The Box",
+      "Colonel Sanders"
+    ]
+  },
+  {
+    "text": "Worst movie to be trapped in for a week?",
+    "type": "multiple_choice",
+    "options": [
+      "Jurassic Park",
+      "The Hunger Games",
+      "Titanic",
+      "A Quiet Place"
+    ]
+  },
+  {
+    "text": "What is the best free thing in life?",
+    "type": "open"
+  },
+  {
+    "text": "What is the scariest animal?",
+    "type": "open"
+  },
+  {
+    "text": "What is the best breakfast food?",
+    "type": "open"
+  },
+  {
+    "text": "What is the best Thanksgiving side dish?",
+    "type": "open"
+  },
+  {
+    "text": "What is the most overrated luxury car maker?",
+    "type": "open"
+  }
+]

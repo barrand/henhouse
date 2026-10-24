@@ -195,6 +195,10 @@ button[class*="rounded-"]:not(:disabled):active { transform: translate(3px, 3px)
 .game-header .flex > div { min-width: 0; }
 .game-header .flex > span:first-child { font-family: var(--font-mono); }
 .action-dock { background: var(--color-ink); border-top: 3px solid var(--color-cream); padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+
+[data-action-screen]:has(.bottom-action-dock) {
+  padding-bottom: calc(var(--bottom-action-height, 0px) + 1.5rem);
+}
 [class*="backdrop-blur"] { backdrop-filter: none; }
 /* Keep gameplay readable on large screens without stretching answer rows. */
 #root > .min-h-screen > :is(main.flex-1, div.flex-1.px-4),

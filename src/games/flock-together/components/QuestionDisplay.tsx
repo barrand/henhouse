@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import type { GameData, RoundData, PlayerData } from '../types'
 import { submitAnswer, skipQuestion, forceEndRound } from '../service'
+import BottomActionDock from '../../../shared/BottomActionDock'
 
 interface Props {
   game: GameData
@@ -121,8 +122,15 @@ export default function QuestionDisplay({
     ? Math.max(0, (timeLeft / game.settings.secondsPerRound) * 100)
     : 100
 
+  const stopWaiting = isHost && !expired && answeredIds.size > 0 && (
+    <button onClick={handleEndRound} className="w-full border-2 border-secondary text-secondary min-h-12 px-4 py-2 rounded-xl font-body font-semibold transition-all">
+      {confirmEndRound ? 'Tap again to stop waiting' : 'Stop Waiting · Host only'}
+    </button>
+  )
+  const isFreeText = round.type !== 'multiple_choice' || !round.options || round.options.length < 2
+
   return (
-    <div className="flex-1 flex flex-col px-4 py-6">
+    <div data-action-screen className="flex-1 flex flex-col px-4 py-6">
       <div className="text-center mb-4">
         <p className="text-xs font-label uppercase tracking-widest text-secondary mb-1">Round timer</p>
         <p className={`font-headline text-3xl font-bold tabular-nums ${expired ? 'text-timer' : 'text-timer'}`}>
@@ -149,15 +157,6 @@ export default function QuestionDisplay({
           </p>
         )}
       </div>
-
-      {isHost && !expired && (
-        <button
-          onClick={handleSkip}
-          className="mt-2 text-sm text-on-surface-variant underline hover:text-on-surface-variant self-center font-body"
-        >
-          Skip question
-        </button>
-      )}
 
       <div className="mt-6 space-y-3">
         {expired && !submitted ? (
@@ -200,6 +199,7 @@ export default function QuestionDisplay({
               maxLength={100}
               autoFocus
             />
+          <BottomActionDock>
             <button
               onClick={() => handleSubmit()}
               disabled={!answer.trim() || submitting}
@@ -207,6 +207,9 @@ export default function QuestionDisplay({
             >
               {submitting ? 'Clucking in...' : 'CLUCK IN'}
             </button>
+            {stopWaiting}
+            {isHost && <button onClick={handleSkip} className="w-full min-h-11 text-sm text-on-surface-variant underline font-body">Skip question</button>}
+          </BottomActionDock>
           </>
           )
         ) : (
@@ -263,23 +266,14 @@ export default function QuestionDisplay({
         </ul>
       </div>
 
-      {isHost && !expired && answeredIds.size > 0 && (
-        <div className="mt-4 space-y-2">
-          <button
-            onClick={handleEndRound}
-            className="w-full border-2 border-secondary text-secondary h-12 rounded-xl font-body font-semibold tracking-wide hover:bg-secondary-fixed/20 active:scale-95 transition-all flex items-center justify-center gap-2"
-          >
-            <span>{confirmEndRound ? 'Tap again to stop waiting' : 'Stop Waiting'}</span>
-            {!confirmEndRound && (
-              <span className="font-label text-[11px] font-bold uppercase tracking-[0.2em] opacity-70">
-                · Host only
-              </span>
-            )}
-          </button>
-          <p className="mt-2 text-center text-xs text-on-surface-variant font-body">
+      {isHost && !expired && (submitted || !isFreeText) && (
+        <BottomActionDock>
+          {stopWaiting}
+          {stopWaiting && <p className="mt-2 text-center text-xs text-on-surface-variant font-body">
             Stop waiting and score answers — anyone who hasn&apos;t answered yet gets none.
-          </p>
-        </div>
+          </p>}
+          <button onClick={handleSkip} className="w-full min-h-11 text-sm text-on-surface-variant underline font-body">Skip question</button>
+        </BottomActionDock>
       )}
     </div>
   )

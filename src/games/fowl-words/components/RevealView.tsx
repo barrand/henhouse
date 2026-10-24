@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, type KeyboardEvent, type PointerEvent } fr
 import type { GameData, PlayerData, RoundData } from '../types'
 import { submitGuess, recoverGuess, unlockFirst, advanceRound, submitCluePeerLoveVote, submitCluePeerBooVote } from '../service'
 import PointCounter from './PointCounter'
+import BottomActionDock from '../../../shared/BottomActionDock'
 import { animateThumbBtn } from './thumbVoteFx'
 import { spawnHeartFloat, spawnBooFloat, pulseCardLove, shakeCardBoo, pulseCardUnlock } from './reactionFx'
 import {
@@ -206,7 +207,7 @@ export default function RevealView({
       ]
 
   return (
-    <main className="flex-1 flex flex-col px-4 py-4">
+    <main data-action-screen className="flex-1 flex flex-col px-4 py-4">
       <div className="max-w-md w-full mx-auto space-y-3">
         {!isGuesser && (
           <button
@@ -282,6 +283,14 @@ export default function RevealView({
                 ? `Every clue matched — ${guesserPlayer?.name} is unlocking the first one`
                 : GIVER_REVEAL_HINT}
             </p>
+            {round.guessAttempts?.length > 0 && (
+              <div className="mt-2 rounded-xl border border-outline-variant/60 bg-surface-container-low px-3 py-2">
+                <p className="font-label text-[11px] uppercase tracking-wider text-waiting font-bold">Wrong so far</p>
+                <p className="mt-0.5 text-sm text-on-surface-variant font-body">
+                  {round.guessAttempts.join(', ')}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -302,13 +311,13 @@ export default function RevealView({
               </p>
             )}
             {isGuesser && (
-              <button
+              <BottomActionDock><button
                 onClick={handleUnlockFirst}
                 disabled={unlocking}
                 className="w-full bg-tertiary-container text-on-tertiary-container h-12 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:opacity-50 transition-all"
               >
                 {unlocking ? 'Unlocking…' : 'Unlock first clue → 5 pts'}
-              </button>
+              </button></BottomActionDock>
             )}
             {!isGuesser && (
               <div className="space-y-2">
@@ -316,12 +325,12 @@ export default function RevealView({
                   Waiting for {guesserPlayer?.name} to unlock…
                 </p>
                 {isHost && (
-                  <button
+                  <BottomActionDock><button
                     onClick={() => advanceRound(game.id).catch(() => {})}
                     className="text-xs text-on-surface-variant underline hover:text-on-surface-variant font-body"
                   >
                     Skip this round
-                  </button>
+                  </button></BottomActionDock>
                 )}
               </div>
             )}
@@ -492,7 +501,7 @@ export default function RevealView({
         )}
 
         {isGuesser && !allDuplicates && (
-          <div className="sticky bottom-0 bg-background pt-2 pb-1 -mx-4 px-4">
+          <BottomActionDock>
             <div className="bg-surface-container-lowest rounded-2xl border-2 border-outline-variant px-3 py-2.5 space-y-2 shadow-sticker">
               {round.guessAttempts?.length > 0 && (
                 <p className="text-xs text-on-surface-variant font-body truncate">
@@ -533,22 +542,16 @@ export default function RevealView({
               </div>
               {error && <p className="text-center text-error text-xs font-body">{error}</p>}
             </div>
-          </div>
+          </BottomActionDock>
         )}
 
         {!isGuesser && !allDuplicates && (
           <div className="text-center space-y-2 mt-2">
-            {round.guessAttempts?.length > 0 && (
-              <div className="space-y-1">
-                <p className="font-label text-[11px] uppercase tracking-wider text-waiting font-bold">Wrong so far</p>
-                <p className="text-sm text-on-surface-variant font-body">{round.guessAttempts.join(', ')}</p>
-              </div>
-            )}
             <p className="text-on-surface-variant text-sm animate-pulse font-body">Watching {guesserPlayer?.name} think…</p>
             {isHost && (
-              <button onClick={() => advanceRound(game.id).catch(() => {})} className="text-xs text-on-surface-variant underline hover:text-on-surface-variant font-body">
+              <BottomActionDock><button onClick={() => advanceRound(game.id).catch(() => {})} className="w-full min-h-12 text-sm text-on-surface-variant underline hover:text-on-surface-variant font-body">
                 Skip this round
-              </button>
+              </button></BottomActionDock>
             )}
           </div>
         )}

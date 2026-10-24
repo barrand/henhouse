@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import BottomActionDock from '../../../shared/BottomActionDock'
 import type { GameData, PlayerData, RoundData } from '../types'
 import { submitWordVote, finalizeWordSelection, beginClueSubmission } from '../service'
 
@@ -126,7 +127,7 @@ export default function WordSelectionView({ game, round, players, currentPlayerI
 
   // Clue-giver view — word cards + voting
   return (
-    <main className="flex-1 flex flex-col px-4 py-6">
+    <main data-action-screen className="flex-1 flex flex-col px-4 py-6">
       <div className="max-w-md w-full mx-auto space-y-5">
         {/* Header */}
         <div className="text-center">
@@ -234,12 +235,12 @@ export default function WordSelectionView({ game, round, players, currentPlayerI
 
         {/* Host skip button */}
         {isHost && !isWordSelected && (
-          <button
+          <BottomActionDock><button
             onClick={() => finalizeWordSelection(game.id, roundNum).catch(() => {})}
             className="w-full bg-surface-container-low border border-outline-variant text-on-surface-variant h-10 rounded-xl font-body text-sm hover:opacity-80 active:scale-[0.98] transition-all"
           >
             Skip stragglers · Pick now
-          </button>
+          </button></BottomActionDock>
         )}
       </div>
     </main>

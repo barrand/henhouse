@@ -799,7 +799,7 @@
     ]
   },
   {
-    "text": "You must wear one costume to work every day:",
+    "text": "Pick one costume to work every day:",
     "type": "multiple_choice",
     "options": [
       "Hot Dog Suit",
@@ -908,7 +908,7 @@
     ]
   },
   {
-    "text": "You must rename yourself after a food — what's your new name?",
+    "text": "Pick a food to rename yourself after:",
     "type": "multiple_choice",
     "options": [
       "Muffin",
@@ -938,7 +938,7 @@
     ]
   },
   {
-    "text": "You have to fight one animal:",
+    "text": "Pick one animal to fight:",
     "type": "multiple_choice",
     "options": [
       "Kangaroo",

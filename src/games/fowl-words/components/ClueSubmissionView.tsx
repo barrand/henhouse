@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, type KeyboardEvent, type PointerEvent } from 'react'
 import type { GameData, PlayerData, RoundData } from '../types'
+import BottomActionDock from '../../../shared/BottomActionDock'
 import { submitClue, forceDedup, advanceRound } from '../service'
 
 interface Props {
@@ -191,7 +192,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
   // GUESSER VIEW: blind, just wait
   if (isGuesser) {
     return (
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-10">
+      <main data-action-screen className="flex-1 flex flex-col items-center justify-center px-6 py-10">
         <div className="max-w-md w-full text-center space-y-6">
           <img src="/images/generated-comic/midnight/hen-blindfold.png" alt="" className="w-28 h-28 mx-auto animate-hen-bob" />
           <h2 className="font-headline text-3xl font-bold text-on-surface">No peeking!</h2>
@@ -200,12 +201,12 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
           </p>
           {giverStatusList}
           {isHost && cluesCount < nonGuesserCount && (
-            <button
+            <BottomActionDock><button
               onClick={handleHostSkip}
               className="text-xs text-on-surface-variant underline hover:text-on-surface-variant font-body"
             >
               {cluesCount === 0 ? 'Skip this round' : 'Not waiting for stragglers · Skip ahead'}
-            </button>
+            </button></BottomActionDock>
           )}
         </div>
       </main>
@@ -214,7 +215,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
 
   // CLUE-GIVER VIEW: secret word + clue input
   return (
-    <main className="flex-1 flex flex-col px-4 py-6">
+    <main data-action-screen className="flex-1 flex flex-col px-4 py-6">
       <div className="max-w-md w-full mx-auto space-y-5">
         <button
           type="button"
@@ -297,14 +298,6 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
                 <p className="mt-2 text-error text-sm font-body">{formatError}</p>
               )}
             </label>
-            <button
-              onClick={handleSubmit}
-              disabled={submitting || !normalizedClue || !!formatError || clueIsPartOfWord}
-              className="w-full bg-action text-on-action h-14 rounded-xl font-body font-bold tracking-wide hover:opacity-90 active:scale-[0.98] disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 transition-all"
-            >
-              {submitting ? 'Checking clue…' : 'Lock it in'}
-            </button>
-            {error && <p className="text-center text-error text-sm font-body">{error}</p>}
             <p className="text-xs text-on-surface-variant text-center font-body">
               One real word. No emoji or words mashed together.
             </p>
@@ -321,6 +314,13 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
 
         {!isGuesser && giverStatusList}
 
+        {(!myClueSubmitted || (isHost && cluesCount < nonGuesserCount)) && <BottomActionDock>
+          {!myClueSubmitted && <button
+            onClick={handleSubmit}
+            disabled={submitting || !normalizedClue || !!formatError || clueIsPartOfWord}
+            className="w-full bg-action text-on-action h-14 rounded-xl font-body font-bold tracking-wide disabled:opacity-50 transition-all"
+          >{submitting ? 'Checking clue…' : 'Lock it in'}</button>}
+          {error && <p role="alert" className="text-error text-sm text-center">{error}</p>}
         {isHost && cluesCount < nonGuesserCount && (
           <div className="text-center">
             <button
@@ -331,6 +331,7 @@ export default function ClueSubmissionView({ game, round, players, currentPlayer
             </button>
           </div>
         )}
+        </BottomActionDock>}
       </div>
     </main>
   )

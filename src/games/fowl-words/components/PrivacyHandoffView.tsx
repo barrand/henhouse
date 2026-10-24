@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import BottomActionDock from '../../../shared/BottomActionDock'
 import type { GameData, RoundData } from '../types'
 import { skipWordSelectionPrivacyHandoff } from '../service'
 
@@ -55,7 +56,7 @@ export default function PrivacyHandoffView({ game, round, guesserName, isHost, o
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 py-10 bg-surface linen-texture">
+    <main data-action-screen className="min-h-screen flex items-center justify-center px-6 py-10 bg-surface linen-texture">
       <div className="max-w-md w-full text-center space-y-5">
         <h1 className="font-headline text-4xl font-bold text-on-surface tracking-tight">
           {guesserName}, close your eyes.
@@ -63,6 +64,7 @@ export default function PrivacyHandoffView({ game, round, guesserName, isHost, o
         <p className="font-headline text-2xl font-bold text-primary">No peeking.</p>
         <p className="font-mono text-5xl font-bold text-timer tabular-nums">{timeLeft}</p>
         {isHost && (
+          <BottomActionDock>
           <button
             type="button"
             onClick={handleSkip}
@@ -71,6 +73,7 @@ export default function PrivacyHandoffView({ game, round, guesserName, isHost, o
           >
             {skipping ? 'Starting vote…' : 'Skip'}
           </button>
+          </BottomActionDock>
         )}
       </div>
     </main>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import BottomActionDock from '../../../shared/BottomActionDock'
 import type { GameData, PlayerData, RoundData } from '../types'
 import { advanceRound, submitGuesserMostHelpfulVote, submitGuesserBooVote } from '../service'
 import { animateThumbBtn } from './thumbVoteFx'
@@ -163,7 +164,7 @@ export default function RoundResultView({
   }
 
   return (
-    <main className="flex-1 flex flex-col px-4 py-4">
+    <main data-action-screen className="flex-1 flex flex-col px-4 py-4">
       <div className="max-w-md w-full mx-auto space-y-4">
         <div className="text-center space-y-2">
           {round.isCorrect ? (
@@ -427,6 +428,7 @@ export default function RoundResultView({
           </ul>
         </div>
 
+        <BottomActionDock>
         {isHost ? (
           <button
             onClick={handleAdvance}
@@ -442,6 +444,7 @@ export default function RoundResultView({
         )}
 
         {error && <p className="text-center text-error text-sm font-body">{error}</p>}
+        </BottomActionDock>
       </div>
     </main>
   )

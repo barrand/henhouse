@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import BottomActionDock from '../../../shared/BottomActionDock'
 import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
 import { flockRematch } from '../service'
@@ -33,7 +34,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
   const isTie = winners.length > 1
 
   return (
-    <div className="min-h-screen bg-surface linen-texture px-4 py-8">
+    <div data-action-screen className="min-h-screen bg-surface linen-texture px-4 py-8">
       <div className="max-w-sm mx-auto space-y-6">
         {isFinal && topScore <= 0 && (
           <div className="text-center space-y-2">
@@ -92,7 +93,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
         </ul>
 
         {isFinal && (
-          <div className="space-y-3">
+          <BottomActionDock>
             {isHost ? (
               <>
                 <button
@@ -123,7 +124,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
                 </button>
               </>
             )}
-          </div>
+          </BottomActionDock>
         )}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import BottomActionDock from '../../../shared/BottomActionDock'
 import type { GameData } from '../types'
 import { recommendedRules, revealCounts, validateRules } from '../scoring'
 import type { ScoringMode, ScoringRules } from '../scoring'
@@ -34,7 +35,7 @@ export default function ScoringSettings({ game, onClose }: { game: GameData; onC
   const field = 'w-full mt-1 rounded-xl bg-surface-container-low border-2 border-outline p-3 text-on-surface'
   const secondary = 'min-h-12 rounded-xl px-4 py-2 border border-outline-variant bg-surface-container-high text-on-surface disabled:opacity-50'
   const numberField = (label: string, key: 'openingPercent' | 'minimumOpening' | 'revealAllBy' | 'hearts' | 'votingSeconds' | 'duplicatePenalty' | 'peerLovePoints' | 'mostHelpfulPoints', min: number, max: number) => <label className="block text-sm text-on-surface-variant">{label}<input type="number" min={min} max={max} value={Number.isFinite(rules[key]) ? rules[key] : ''} onChange={e => update(key, e.target.value === '' ? NaN : Number(e.target.value))} className={field} /></label>
-  return <div className="fixed inset-0 z-50 bg-surface/95 overflow-y-auto p-4 text-on-surface" role="dialog" aria-modal="true" aria-labelledby="scoring-settings-title" onKeyDown={e => {
+  return <div data-action-screen className="fixed inset-0 z-50 bg-surface/95 overflow-y-auto p-4 text-on-surface" role="dialog" aria-modal="true" aria-labelledby="scoring-settings-title" onKeyDown={e => {
     if (e.key !== 'Tab') return
     const focusable = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled])'))
     const first = focusable[0]; const last = focusable[focusable.length - 1]
@@ -63,8 +64,11 @@ export default function ScoringSettings({ game, onClose }: { game: GameData; onC
         {rules.mode === 'classic' && <>{numberField('Peer love points per heart', 'peerLovePoints', 0, 10)}{numberField('Most Helpful points (shared)', 'mostHelpfulPoints', 0, 20)}{[0, 1, 2].map(i => <label key={i} className="text-sm text-on-surface-variant">FAST place {i + 1}<input type="number" min="0" max="10" className={field} value={Number.isFinite(rules.fastPrizes[i]) ? rules.fastPrizes[i] : ''} onChange={e => update('fastPrizes', Array.from({ length: 3 }, (_, j) => i === j ? Number(e.target.value) : rules.fastPrizes[j] ?? 0))} /></label>)}</>}
       </div>}
       <p className="rounded-xl bg-primary-fixed text-on-primary-fixed p-3" aria-live="polite">{game.status === 'lobby' ? 'Applies to round 1' : `Applies to round ${game.currentRound + 1}`}. This round’s points stay fixed.</p>
+      <BottomActionDock>
+      <button onClick={onClose} disabled={busy} className={secondary}>Close settings</button>
       {error && <p className="text-error" role="alert">{error}</p>}
       <div className="flex flex-wrap gap-3"><button onClick={() => save()} disabled={busy} className="min-h-12 rounded-xl bg-action text-on-action px-5 font-bold disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100">{busy ? 'Saving…' : game.status === 'lobby' ? 'Save settings' : 'Save for next round'}</button><button className={secondary} disabled={busy} onClick={() => setRules(recommendedRules(rules.mode))}>Reset to recommended</button>{game.pendingScoringRules && <button className={secondary} disabled={busy} onClick={() => save(true)}>Cancel pending changes</button>}</div>
+      </BottomActionDock>
     </div>
   </div>
 }

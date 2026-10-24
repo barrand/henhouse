@@ -5,6 +5,7 @@ import type { BaseGameData, PlayerData as SharedPlayerData, QuestionType } from 
 export interface GameData extends BaseGameData {
   categories: string[]
   includePatrioticQuestions: boolean
+  curatedQuestions?: boolean
 }
 
 export interface PlayerData extends SharedPlayerData {

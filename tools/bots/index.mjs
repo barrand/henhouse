@@ -253,6 +253,11 @@ function sanitizeRound(round) {
     base.question = round.question
     base.type = round.type
     base.options = round.options
+    base.groupSource = round.groupSource
+    if (round.status === 'scored') {
+      base.answerGroups = round.answerGroups
+      base.playerAnswers = round.playerAnswers
+    }
   }
   if (round.statement) {
     base.kind = round.kind

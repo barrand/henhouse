@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import BottomActionDock from '../../../shared/BottomActionDock'
 import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
 import { fowlWordsRematch } from '../service'
@@ -32,7 +33,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
   const isTie = isFinal && topScore > 0 && sorted.filter((p) => p.score === topScore).length > 1
 
   return (
-    <div className="min-h-screen bg-surface linen-texture px-4 py-8 font-body">
+    <div data-action-screen className="min-h-screen bg-surface linen-texture px-4 py-8 font-body">
       <div className="max-w-sm mx-auto space-y-6">
         {isFinal && !winner && (
           <div className="text-center space-y-2">
@@ -81,16 +82,20 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
             return (
               <li
                 key={player.id}
-                className={`px-4 py-3 flex items-center justify-between ${
+                className={`grid grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-2 px-4 py-3 ${
                   isWinner ? 'bg-primary-fixed/30' : ''
                 }`}
               >
-                <span className="flex flex-wrap min-w-0 items-center gap-2 font-medium text-on-surface break-words">
-                  <span className="text-on-surface-variant w-5 tabular-nums">{i + 1}.</span>
-                  {player.name}
-                  {isWinner && <span className="text-xs text-primary font-bold">CHAMPION</span>}
-                </span>
-                <span className="font-headline font-bold tabular-nums text-on-surface text-lg">
+                <span className="text-on-surface-variant tabular-nums">{i + 1}.</span>
+                <div className="flex min-w-0 items-center gap-2 font-medium text-on-surface">
+                  <span className="truncate">{player.name}</span>
+                  {isWinner && (
+                    <span className="inline-flex shrink-0 items-center rounded-md border-2 border-primary px-1.5 py-0.5 text-[10px] font-label font-bold uppercase leading-none tracking-[0.08em] text-primary">
+                      Champion
+                    </span>
+                  )}
+                </div>
+                <span className="font-headline font-bold tabular-nums text-on-surface text-lg text-right">
                   {player.score}
                 </span>
               </li>
@@ -99,7 +104,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
         </ul>
 
         {isFinal && (
-          <div className="space-y-3">
+          <BottomActionDock>
             {isHost ? (
               <>
                 <button
@@ -130,7 +135,7 @@ export default function Scoreboard({ game, players, isHost, isFinal }: Props) {
                 </button>
               </>
             )}
-          </div>
+          </BottomActionDock>
         )}
       </div>
     </div>

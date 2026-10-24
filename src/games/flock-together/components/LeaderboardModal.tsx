@@ -16,7 +16,7 @@ export default function LeaderboardModal({ players, currentPlayerId, onClose }: 
         className="relative w-full max-w-sm bg-surface-container-lowest sticker-card rounded-t-2xl p-6 pb-8 max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-4">
+        <div className="sticky -top-6 z-10 -mx-6 -mt-6 px-6 py-4 bg-surface-container-lowest flex justify-between items-center mb-4 border-b border-outline-variant/50">
           <div className="flex items-center gap-2">
             <img src="/images/generated-comic/midnight/hen-magnifying.png" alt="" className="w-10 h-10 animate-hen-bob" />
             <h2 className="font-headline text-xl font-bold text-on-surface">STANDINGS</h2>

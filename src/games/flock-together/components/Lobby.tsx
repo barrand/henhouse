@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
+import BottomActionDock from '../../../shared/BottomActionDock'
 import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
-import { startGame, updateCategories, resetQuestionCooldowns, submitCustomQuestion, onCustomQuestionsUpdate } from '../service'
+import { startGame, updateCategories, resetQuestionCooldowns, submitCustomQuestion, onCustomQuestionsUpdate, setCuratedQuestions } from '../service'
+import curatedQuestionData from '../../../../functions/src/games/flock-together/data/curated-questions.json'
 import CategoryInput from './CategoryInput'
 import QuestionSubmission from './QuestionSubmission'
+
+const curatedQuestions: { text: string; options?: string[] }[] = curatedQuestionData
 
 interface Props {
   game: GameData
@@ -17,6 +21,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
   const [starting, setStarting] = useState(false)
   const [error, setError] = useState('')
   const [customQuestions, setCustomQuestions] = useState<string[]>([])
+  const [updatingCurated, setUpdatingCurated] = useState(false)
 
   useEffect(() => {
     if (!game.id) return
@@ -25,6 +30,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
   }, [game.id])
 
   const handleStart = async () => {
+    if (updatingCurated) return
     if (players.length < 3) return setError('Need at least 3 players')
     setError('')
     setStarting(true)
@@ -33,6 +39,18 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
     } catch (err: any) {
       setError(err.message ?? 'Failed to start game')
       setStarting(false)
+    }
+  }
+
+  const handleCuratedToggle = async () => {
+    setUpdatingCurated(true)
+    setError('')
+    try {
+      await setCuratedQuestions(game.id, !game.curatedQuestions)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to change question set')
+    } finally {
+      setUpdatingCurated(false)
     }
   }
 
@@ -78,7 +96,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
   return (
     <div className="min-h-screen bg-surface linen-texture font-body text-on-surface relative overflow-hidden">
 
-      <main className="max-w-md mx-auto px-6 pt-4 pb-32 relative z-10">
+      <main data-action-screen className="max-w-md mx-auto px-6 pt-4 pb-6 relative z-10">
         {/* Header + Room Code */}
         <div className="text-center mb-8">
           <button
@@ -108,7 +126,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
         </div>
 
         {/* Patriotic Edition Banner */}
-        {game.includePatrioticQuestions && (
+        {game.includePatrioticQuestions && !game.curatedQuestions && (
           <div className="mb-6 bg-surface-container-lowest border border-outline-variant rounded-xl p-4 text-center">
             <p className="font-headline text-lg font-bold text-on-surface">Patriotic Edition is ON</p>
             <p className="text-on-surface-variant text-sm font-body mt-1">250th anniversary questions every other round</p>
@@ -147,6 +165,50 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
           </div>
         </section>
 
+        {/* Question selection is visible and editable only by the host. */}
+        {isHost && (
+          <section className="mb-8 rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-4 shadow-sm">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h3 id="curated-questions-label" className="font-headline text-lg font-semibold text-primary">Curated questions</h3>
+                <p id="curated-questions-description" className="mt-1 text-sm text-on-surface-variant">
+                  {curatedQuestions.length > 10
+                    ? `${curatedQuestions.length} handpicked questions. Each game draws ten in a fresh order.`
+                    : `${curatedQuestions.length} handpicked questions, played in order.`}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={!!game.curatedQuestions}
+                aria-labelledby="curated-questions-label"
+                aria-describedby="curated-questions-description"
+                disabled={starting || updatingCurated}
+                onClick={handleCuratedToggle}
+                className={`flex h-11 w-16 shrink-0 items-center rounded-full border-2 p-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50 ${game.curatedQuestions ? 'border-primary bg-primary' : 'border-outline bg-surface-container-high'}`}
+              >
+                <span className={`h-7 w-7 rounded-full transition-transform ${game.curatedQuestions ? 'translate-x-5 bg-on-primary' : 'bg-outline'}`} />
+              </button>
+            </div>
+            <p className="mt-3 text-sm text-on-surface-variant" aria-live="polite">
+              {updatingCurated ? 'Saving question set...' : game.curatedQuestions ? 'Curated set on. Only these questions will be played.' : 'Off. Play from the standard question pool.'}
+            </p>
+            <details className="mt-3 border-t border-outline-variant/60 pt-3">
+              <summary className="cursor-pointer text-sm font-semibold text-on-surface">Preview the curated set</summary>
+              <ol className="mt-3 list-decimal space-y-3 pl-5 text-sm text-on-surface">
+                {curatedQuestions.map((question) => (
+                  <li key={question.text}>
+                    <p>{question.text}</p>
+                    <p className="mt-1 text-xs text-on-surface-variant">
+                      {question.options?.join(' · ') ?? "Answer with a player's name."}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          </section>
+        )}
+
         {/* Host Tools */}
         {isHost && (
           <section className="mb-8">
@@ -161,33 +223,32 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
         )}
 
         {/* Bonus Categories */}
-        <section className="mb-8">
+        {!game.curatedQuestions && <section className="mb-8">
           {game.aiExperiment && game.aiExperiment.mode !== 'legacy' ? <p className="text-sm text-on-surface-variant">Jev playtest uses preset or manually submitted questions. AI-generated categories require the normal game.</p> : <CategoryInput
             categories={game.categories}
             editable={isHost}
             onAdd={handleAddCategory}
             onRemove={handleRemoveCategory}
           />}
-        </section>
+        </section>}
 
         {/* Submit Question */}
-        <section className="mb-12">
+        {!game.curatedQuestions && <section className="mb-12">
           <QuestionSubmission
             onSubmit={handleSubmitQuestion}
             submittedQuestions={customQuestions}
           />
-        </section>
+        </section>}
 
         {error && <p className="text-center text-error text-sm mb-4">{error}</p>}
-      </main>
 
       {/* Fixed Bottom Action */}
       {isHost ? (
-        <div className="fixed bottom-0 left-0 right-0 p-6 action-dock z-40">
+        <BottomActionDock>
           <div className="max-w-md mx-auto">
             <button
               onClick={handleStart}
-              disabled={starting || players.length < 3}
+              disabled={starting || updatingCurated || players.length < 3}
               className="w-full bg-action text-on-action h-16 rounded-xl font-headline font-bold text-lg shadow-sticker flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 transition-transform duration-200"
             >
               <span>{buttonLabel}</span>
@@ -196,14 +257,15 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
               )}
             </button>
           </div>
-        </div>
+        </BottomActionDock>
       ) : (
-        <div className="fixed bottom-0 left-0 right-0 p-6 action-dock z-40">
+        <BottomActionDock>
           <div className="max-w-md mx-auto text-center">
             <p className="text-on-surface-variant animate-pulse">Waiting for host to start...</p>
           </div>
-        </div>
+        </BottomActionDock>
       )}
+      </main>
     </div>
   )
 }

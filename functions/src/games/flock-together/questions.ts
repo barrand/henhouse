@@ -16,26 +16,67 @@ type PresetQuestion = {
 
 const COOLDOWN_MS = 48 * 60 * 60 * 1000 // 48 hours
 
+const CURATED_GAME_SIZE = 10
+const CURATED_OPEN_QUESTION_TARGET = 6
+
+function shuffle<T>(items: T[]): T[] {
+  const shuffled = [...items]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
+export function orderCuratedQuestions<T extends { type?: string }>(questions: T[]): T[] {
+  if (questions.length <= CURATED_GAME_SIZE) return [...questions]
+
+  // The curated mode demonstrates matching free-form answers, so make a ten-round
+  // game start with a 6/4 open-to-choice mix whenever the bank can support it.
+  // Shuffle within each group to keep every game feeling fresh, then shuffle the
+  // remaining questions for later rounds or future larger game sizes.
+  const openQuestions = shuffle(questions.filter((question) => question.type !== 'multiple_choice'))
+  const choiceQuestions = shuffle(questions.filter((question) => question.type === 'multiple_choice'))
+  const featuredOpenCount = Math.min(CURATED_OPEN_QUESTION_TARGET, openQuestions.length)
+  const featuredChoiceCount = Math.min(CURATED_GAME_SIZE - featuredOpenCount, choiceQuestions.length)
+  const featured = [
+    ...openQuestions.slice(0, featuredOpenCount),
+    ...choiceQuestions.slice(0, featuredChoiceCount),
+  ]
+  const remaining = shuffle([
+    ...openQuestions.slice(featuredOpenCount),
+    ...choiceQuestions.slice(featuredChoiceCount),
+  ])
+
+  return [...featured, ...remaining]
+}
+
 export function questionKey(text: string): string {
   return createHash('md5').update(text.trim().toLowerCase()).digest('hex').slice(0, 16)
 }
 
-export async function seedQuestionPool(gameId: string, includePatrioticQuestions: boolean = false) {
+export async function seedQuestionPool(gameId: string, includePatrioticQuestions: boolean = false, curatedQuestions: boolean = false) {
   const db = getDb()
 
-  const questions = (await import('./data/questions.json')).default as PresetQuestion[]
+  const questions = (curatedQuestions
+    ? (await import('./data/curated-questions.json')).default
+    : (await import('./data/questions.json')).default) as PresetQuestion[]
 
   // Filter out patriotic questions if not enabled
-  const filtered = includePatrioticQuestions
-    ? questions
-    : questions.filter((q) => q.source !== 'patriotic')
+  // A larger curated bank supplies a different ten-question game each time.
+  // Keep a ten-question playlist's deliberate order for existing small packs.
+  const filtered = curatedQuestions
+    ? orderCuratedQuestions(questions)
+    : includePatrioticQuestions ? questions : questions.filter((q) => q.source !== 'patriotic')
 
   const BATCH_SIZE = 400
   for (let i = 0; i < filtered.length; i += BATCH_SIZE) {
     const batch = db.batch()
     const chunk = filtered.slice(i, i + BATCH_SIZE)
-    for (const q of chunk) {
-      const ref = db.collection('games').doc(gameId).collection('questionPool').doc()
+    for (const [index, q] of chunk.entries()) {
+      // Stable ids make a failed start safe to retry without duplicating the curated set.
+      const pool = db.collection('games').doc(gameId).collection('questionPool')
+      const ref = curatedQuestions ? pool.doc(`curated-${i + index}`) : pool.doc()
       const type = q.type ?? 'open'
       const source = q.source ?? 'preset'
       batch.set(ref, {
@@ -48,6 +89,7 @@ export async function seedQuestionPool(gameId: string, includePatrioticQuestions
         submittedBy: null,
         category: null,
         questionKey: questionKey(q.text),
+        ...(curatedQuestions ? { curatedOrder: i + index } : {}),
       })
     }
     await batch.commit()
@@ -107,9 +149,11 @@ export async function drawQuestion(
   gameId: string,
   recentTags: string[] = [],
   preferPatrioticQuestion: boolean = false,
+  curatedQuestions: boolean = false,
 ): Promise<DrawnQuestion | null> {
   const db = getDb()
   const poolRef = db.collection('games').doc(gameId).collection('questionPool')
+  if (curatedQuestions) return drawCuratedQuestion(poolRef)
   const cooldowns = await fetchActiveCooldowns(db)
 
   let chosen = await weightedDraw(poolRef, recentTags, cooldowns, preferPatrioticQuestion)
@@ -126,6 +170,27 @@ export async function drawQuestion(
   await resetBatch.commit()
 
   return weightedDraw(poolRef, recentTags, cooldowns, preferPatrioticQuestion)
+}
+
+async function drawCuratedQuestion(poolRef: FirebaseFirestore.CollectionReference): Promise<DrawnQuestion | null> {
+  // Curated games have their own ordered playlist. Custom submissions, tag spacing,
+  // and global cooldowns must never change this deliberately chosen sequence.
+  const snap = await poolRef.get()
+  const chosen = snap.docs
+    .filter((doc) => !doc.data().used && Number.isInteger(doc.data().curatedOrder))
+    .sort((a, b) => a.data().curatedOrder - b.data().curatedOrder)[0]
+  if (!chosen) return null
+  const data = chosen.data()
+  await chosen.ref.update({ used: true })
+  return {
+    text: data.text,
+    source: data.source,
+    tag: data.tag ?? null,
+    submittedBy: null,
+    poolDocId: chosen.id,
+    type: data.type === 'multiple_choice' ? 'multiple_choice' : 'open',
+    options: data.type === 'multiple_choice' ? data.options : null,
+  }
 }
 
 function isTagOnCooldown(tag: string | null, recentTags: string[]): boolean {
@@ -155,6 +220,7 @@ async function weightedDraw(
       .get()
     if (!snap.empty) {
       const available = snap.docs.filter((d) => {
+        if (Number.isInteger(d.data().curatedOrder)) return false
         const key = d.data().questionKey as string | undefined
         return !key || !cooldowns.has(key)
       })

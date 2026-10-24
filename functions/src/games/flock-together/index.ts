@@ -14,6 +14,8 @@ import { scoreJevRound } from './jevScoring'
 const db = admin.firestore()
 const TOTAL_ROUNDS = 10
 
+export { flockSetCuratedQuestions } from './curatedMode'
+
 function shouldDrawPatrioticQuestion(roundNum: number, includePatrioticQuestions: boolean): boolean {
   return includePatrioticQuestions && roundNum % 2 === 1
 }
@@ -56,6 +58,7 @@ export const flockCreateGame = onCall(async (request) => {
     playerIds: [uid],
     settings: { totalRounds: TOTAL_ROUNDS, secondsPerRound: 45, autoAdvanceSeconds: 10 },
     includePatrioticQuestions,
+    curatedQuestions: false,
     aiExperiment,
   })
 
@@ -111,6 +114,7 @@ export const flockRematch = onCall(async (request) => {
     playerIds: game.playerIds,
     settings: { ...(game.settings ?? {}), totalRounds: TOTAL_ROUNDS },
     includePatrioticQuestions: game.includePatrioticQuestions ?? false,
+    curatedQuestions: game.curatedQuestions ?? false,
     aiExperiment,
   })
 
@@ -138,71 +142,80 @@ export const flockStartGame = onCall(async (request) => {
 
   const { gameId } = request.data as { gameId: string }
   const gameRef = db.collection('games').doc(gameId)
-  const gameSnap = await gameRef.get()
-
-  if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
-  const game = gameSnap.data()!
-  if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can start')
-  if (game.status !== 'lobby') throw new HttpsError('failed-precondition', 'Game already started')
-  if (game.aiExperiment?.mode !== undefined && game.aiExperiment.mode !== 'legacy' && game.categories?.length) throw new HttpsError('failed-precondition', 'AI categories are unavailable in Jev playtest rooms. Use preset or manually submitted questions.')
-
-  // Seed the question pool with the current patriotic setting
-  await seedQuestionPool(gameId, game.includePatrioticQuestions ?? false)
-
-  if (game.categories?.length > 0) {
-    try {
-      const aiQuestions = await generateQuestionsFromCategories(game.categories)
-      for (const q of aiQuestions) {
-        const type = q.type === 'multiple_choice' ? 'multiple_choice' : 'open'
-        await gameRef.collection('questionPool').add({
-          text: q.text,
-          source: 'ai-generated',
-          tag: null,
-          type,
-          options: type === 'multiple_choice' ? q.options ?? null : null,
-          used: false,
-          submittedBy: null,
-          category: q.category,
-          questionKey: questionKey(q.text),
-        })
-      }
-    } catch (err) {
-      console.error('AI question generation failed, continuing with preset bank:', err)
-    }
-  }
-
-  const question = await drawQuestion(
-    gameId,
-    [],
-    shouldDrawPatrioticQuestion(1, game.includePatrioticQuestions ?? false),
-  )
-  if (!question) throw new HttpsError('internal', 'No questions available in pool')
-
-  const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
-
-  const eligiblePlayerIds = [...game.playerIds]
-
-  await gameRef.collection('rounds').doc('1').set({
-    question: question.text,
-    source: question.source,
-    tag: question.tag ?? null,
-    submittedBy: question.submittedBy ?? null,
-    questionPoolId: question.poolDocId,
-    type: question.type,
-    options: question.options,
-    status: 'answering',
-    deadline: Timestamp.fromDate(deadline),
-    answerCount: 0,
-    answeredPlayerIds: [],
-    answerGroups: [],
-    flockAnswer: [],
-    results: {},
-    pointsThisRound: {},
-    eligiblePlayerIds,
-    eligiblePlayerCount: eligiblePlayerIds.length,
+  const game = await db.runTransaction(async (tx) => {
+    const gameSnap = await tx.get(gameRef)
+    if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
+    const game = gameSnap.data()!
+    if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can start')
+    if (game.status !== 'lobby' || (game.questionSelectionLockedUntil ?? 0) > Date.now()) throw new HttpsError('failed-precondition', 'Game already starting or started')
+    if (!game.curatedQuestions && game.aiExperiment?.mode !== undefined && game.aiExperiment.mode !== 'legacy' && game.categories?.length) throw new HttpsError('failed-precondition', 'AI categories are unavailable in Jev playtest rooms. Use preset or manually submitted questions.')
+    // Freeze question selection while seeding; the lease permits recovery after a timeout.
+    tx.update(gameRef, { questionSelectionLockedUntil: Date.now() + 120_000 })
+    return game
   })
 
-  await gameRef.update({ status: 'playing', currentRound: 1 })
+  try {
+    // Seed only the selected question set.
+    await seedQuestionPool(gameId, game.includePatrioticQuestions ?? false, game.curatedQuestions ?? false)
+
+    if (!game.curatedQuestions && game.categories?.length > 0) {
+      try {
+        const aiQuestions = await generateQuestionsFromCategories(game.categories)
+        for (const q of aiQuestions) {
+          const type = q.type === 'multiple_choice' ? 'multiple_choice' : 'open'
+          await gameRef.collection('questionPool').add({
+            text: q.text,
+            source: 'ai-generated',
+            tag: null,
+            type,
+            options: type === 'multiple_choice' ? q.options ?? null : null,
+            used: false,
+            submittedBy: null,
+            category: q.category,
+            questionKey: questionKey(q.text),
+          })
+        }
+      } catch (err) {
+        console.error('AI question generation failed, continuing with preset bank:', err)
+      }
+    }
+
+    const question = await drawQuestion(
+      gameId,
+      [],
+      shouldDrawPatrioticQuestion(1, game.includePatrioticQuestions ?? false),
+      game.curatedQuestions ?? false,
+    )
+    if (!question) throw new HttpsError('internal', 'No questions available in pool')
+
+    const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
+
+    const eligiblePlayerIds = [...game.playerIds]
+
+    await gameRef.collection('rounds').doc('1').set({
+      question: question.text,
+      source: question.source,
+      tag: question.tag ?? null,
+      submittedBy: question.submittedBy ?? null,
+      questionPoolId: question.poolDocId,
+      type: question.type,
+      options: question.options,
+      status: 'answering',
+      deadline: Timestamp.fromDate(deadline),
+      answerCount: 0,
+      answeredPlayerIds: [],
+      answerGroups: [],
+      flockAnswer: [],
+      results: {},
+      pointsThisRound: {},
+      eligiblePlayerIds,
+      eligiblePlayerCount: eligiblePlayerIds.length,
+    })
+
+    await gameRef.update({ status: 'playing', currentRound: 1 })
+  } finally {
+    await gameRef.update({ questionSelectionLockedUntil: FieldValue.delete() })
+  }
 })
 
 // -- SUBMIT ANSWER --
@@ -314,6 +327,7 @@ export const skipQuestion = onCall(async (request) => {
     gameId,
     recentTags,
     shouldDrawPatrioticQuestion(roundNum, game.includePatrioticQuestions ?? false),
+    game.curatedQuestions ?? false,
   )
   if (!newQuestion) {
     if(game.aiExperiment?.mode==='jev') await roundRef.update({status:'answering'})
@@ -642,6 +656,7 @@ async function doAdvanceRound(gameId: string) {
       gameId,
       recentTags,
       shouldDrawPatrioticQuestion(nextRound, game.includePatrioticQuestions ?? false),
+      game.curatedQuestions ?? false,
     )
     if (!question) {
       await gameRef.update({ status: 'finished', advanceInProgress: FieldValue.delete() })

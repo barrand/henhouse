@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import BottomActionDock from '../../../shared/BottomActionDock'
 import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
 import { startGame } from '../service'
@@ -37,7 +38,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
 
   return (
     <div className="min-h-screen bg-surface linen-texture font-body text-on-surface relative overflow-hidden">
-      <main className="max-w-md mx-auto px-6 pt-6 pb-24 relative z-10">
+      <main data-action-screen className="max-w-md mx-auto px-6 pt-6 pb-24 relative z-10">
         {/* Title + Room Code */}
         <div className="text-center mb-6">
           <button
@@ -124,6 +125,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
         </section>
 
         {/* Start Button */}
+        <BottomActionDock>
         {isHost ? (
           <button
             onClick={handleStart}
@@ -139,6 +141,7 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
         )}
 
         {error && <p className="text-center text-error text-sm mt-3 font-body">{error}</p>}
+        </BottomActionDock>
       </main>
     </div>
   )

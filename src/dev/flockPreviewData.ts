@@ -71,6 +71,7 @@ export type FlockPreviewScreen =
   | 'question-timeout'
   | 'reveal-loading'
   | 'reveal-flock'
+  | 'reveal-mc'
   | 'reveal-no-flock'
   | 'leaderboard'
   | 'game-over-winner'
@@ -87,6 +88,7 @@ export const FLOCK_PREVIEW_SCREENS: { id: FlockPreviewScreen; label: string }[] 
   { id: 'question-timeout', label: 'Question (timeout)' },
   { id: 'reveal-loading', label: 'Reveal (loading)' },
   { id: 'reveal-flock', label: 'Reveal (flock wins)' },
+  { id: 'reveal-mc', label: 'Reveal (4 choices)' },
   { id: 'reveal-no-flock', label: 'Reveal (no flock)' },
   { id: 'leaderboard', label: 'Standings modal' },
   { id: 'game-over-winner', label: 'Game over (winner)' },
@@ -204,6 +206,7 @@ export function getFlockPreviewScenario(
         currentPlayerId: asPlayerId,
       }
 
+    case 'reveal-mc':
     case 'reveal-flock': {
       const flockIds = ['p1', 'p2', 'p4', 'p7']
       const results = Object.fromEntries(
@@ -229,11 +232,23 @@ export function getFlockPreviewScenario(
         p9: 'Snacks',
         p10: 'Drinks',
       }
+      const isMultipleChoice = screen === 'reveal-mc'
+      if (isMultipleChoice) {
+        const choices: Record<string, string> = { Gift: 'Pizza', Phone: 'Burgers', Drinks: 'Sushi', Snacks: 'Tacos' }
+        for (const [id, answer] of Object.entries(playerAnswers)) {
+          playerAnswers[id] = choices[answer] ?? answer
+        }
+      }
       return {
         game: baseGame(),
         round: baseRound({
           status: 'scored',
-          flockAnswer: ['Gift'],
+          ...(isMultipleChoice ? {
+            type: 'multiple_choice',
+            question: 'Pick the best party food',
+            options: ['Pizza', 'Tacos', 'Sushi', 'Burgers'],
+          } : {}),
+          flockAnswer: [isMultipleChoice ? 'Pizza' : 'Gift'],
           results,
           pointsThisRound,
           playerAnswers,
