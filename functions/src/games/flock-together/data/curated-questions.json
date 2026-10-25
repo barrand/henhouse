@@ -45,12 +45,7 @@
   },
   {
     "text": "What is the worst thing to step on barefoot?",
-    "type": "multiple_choice",
-    "options": [
-      "Lego",
-      "Glass shard",
-      "Dog poop"
-    ]
+    "type": "open"
   },
   {
     "text": "What is the worst fashion trend of all time?",
@@ -171,14 +166,8 @@
     ]
   },
   {
-    "text": "You can only eat one cuisine forever?",
-    "type": "multiple_choice",
-    "options": [
-      "Mexican",
-      "Italian",
-      "Japanese",
-      "Indian"
-    ]
+    "text": "If you could only eat one cuisine for the rest of your life, what would you choose?",
+    "type": "open"
   },
   {
     "text": "Pick your useless superpower:",
