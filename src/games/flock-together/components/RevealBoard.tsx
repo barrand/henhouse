@@ -95,14 +95,9 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
 
   const renderNames = (ids: string[]) => (
     <div className="flex flex-wrap gap-1.5 pt-2">
-      {[...ids].sort((a, b) => {
-        if (a === currentPlayerId) return -1
-        if (b === currentPlayerId) return 1
-        return playerNameById(a).localeCompare(playerNameById(b))
-      }).map((id) => (
-        <span key={id} className={`px-2 py-1 rounded-lg text-xs font-body break-words ${id === currentPlayerId ? 'bg-primary text-on-primary font-bold ring-2 ring-primary-fixed shadow-sticker' : 'bg-surface-container-high text-on-surface'}`}>
-          {id === currentPlayerId && <span className="font-label text-[10px] tracking-wide mr-1">YOU</span>}
-          {playerNameById(id)}
+      {ids.map((id) => (
+        <span key={id} className={`px-2 py-1 rounded-lg text-xs font-body break-words ${id === currentPlayerId ? 'bg-success text-on-success font-bold' : 'bg-surface-container-high text-on-surface'}`}>
+          {playerNameById(id)}{id === currentPlayerId && ' ← you'}
         </span>
       ))}
     </div>

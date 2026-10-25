@@ -116,6 +116,7 @@ export default function Game() {
         players={players}
         isHost={isHost}
         isFinal
+        currentPlayerId={currentPlayer?.id ?? null}
       />
     )
   }

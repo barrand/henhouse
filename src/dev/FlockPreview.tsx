@@ -108,6 +108,7 @@ export default function FlockPreview() {
             players={scenario.players}
             isHost={scenario.isHost}
             isFinal
+            currentPlayerId={currentPlayer?.id ?? null}
           />
         )}
 
