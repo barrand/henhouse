@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import type { GameData, RoundData, PlayerData } from '../types'
 import { buildClusters } from '../answerClusters'
 import BottomActionDock from '../../../shared/BottomActionDock'
@@ -23,6 +24,18 @@ function pointLabel(points: number) {
 }
 
 export default function RevealBoard({ game, round, players, isHost, currentPlayerId }: Props) {
+  const advanceRequested = useRef(false)
+  const [advancing, setAdvancing] = useState(false)
+  const [advanceError, setAdvanceError] = useState('')
+  const [takingLonger, setTakingLonger] = useState(false)
+  const isAdvancing = advancing || game.advanceInProgress === Number(round.id)
+
+  useEffect(() => {
+    if (!isAdvancing) return
+    const timer = setTimeout(() => setTakingLonger(true), 8000)
+    return () => clearTimeout(timer)
+  }, [isAdvancing])
+
   const playerNameById = (id: string) => players.find((p) => p.id === id)?.name ?? id
 
   if (round.status === 'revealing') {
@@ -86,10 +99,20 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
   })()
 
   const handleAdvance = async () => {
+    if (advanceRequested.current || isAdvancing) return
+    advanceRequested.current = true
+    setAdvancing(true)
+    setTakingLonger(false)
+    setAdvanceError('')
     try {
       await advanceRound(game.id)
+      // Keep feedback visible until the round listener receives the new round.
     } catch (err) {
       console.error('Failed to advance:', err)
+      advanceRequested.current = false
+      setAdvancing(false)
+      setTakingLonger(false)
+      setAdvanceError('Couldn’t start the next screen. Please try again.')
     }
   }
 
@@ -205,11 +228,18 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
       <BottomActionDock>
         <div className="max-w-md mx-auto text-center">
           {isHost ? (
-            <button onClick={handleAdvance} className="w-full bg-action text-on-action h-14 rounded-xl font-body font-semibold tracking-wide shadow-sticker hover:opacity-90 active:scale-95 transition-all">
-              {isLastRound ? 'SEE FINAL STANDINGS' : 'NEXT ROUND'}
-            </button>
+            <>
+              <button onClick={handleAdvance} disabled={isAdvancing} aria-busy={isAdvancing} className="w-full bg-action text-on-action h-14 rounded-xl font-body font-semibold tracking-wide shadow-sticker hover:opacity-90 active:scale-95 disabled:opacity-70 disabled:cursor-wait disabled:active:scale-100 transition-all flex items-center justify-center gap-3">
+                {isAdvancing && <span aria-hidden="true" className="w-5 h-5 rounded-full border-2 border-current border-t-transparent animate-spin motion-reduce:animate-none" />}
+                {isAdvancing ? (isLastRound ? 'Opening final standings…' : 'Starting next round…') : (isLastRound ? 'SEE FINAL STANDINGS' : 'NEXT ROUND')}
+              </button>
+              <p role="status" className="text-sm text-on-surface-variant mt-2">
+                {isAdvancing ? (takingLonger ? 'Taking a little longer. Your request is still in progress.' : 'Getting the flock ready…') : ''}
+              </p>
+              {advanceError && <p role="alert" className="text-sm text-error mt-2">{advanceError}</p>}
+            </>
           ) : (
-            <p className="text-sm text-on-surface-variant font-body">Waiting for the host to {isLastRound ? 'show final standings' : 'start the next round'}</p>
+            <p role="status" className="text-sm text-on-surface-variant font-body">{isAdvancing ? (isLastRound ? 'Opening final standings…' : 'Starting next round…') : `Waiting for the host to ${isLastRound ? 'show final standings' : 'start the next round'}`}</p>
           )}
         </div>
       </BottomActionDock>

@@ -619,6 +619,9 @@ async function triggerScoring(gameId: string, roundNum: number) {
 }
 
 async function doAdvanceRound(gameId: string) {
+  const startedAt = Date.now()
+  let phase = 'claim'
+  const timings: Record<string, number> = {}
   const gameRef = db.collection('games').doc(gameId)
   const claimed = await db.runTransaction(async (tx) => {
     const gameSnap = await tx.get(gameRef)
@@ -633,9 +636,11 @@ async function doAdvanceRound(gameId: string) {
     tx.update(gameRef, { advanceInProgress: currentRound })
     return true
   })
+  timings.claimMs = Date.now() - startedAt
   if (!claimed) return
 
   try {
+    phase = 'read-game'
     const gameSnap = await gameRef.get()
     const game = gameSnap.data()!
 
@@ -645,19 +650,25 @@ async function doAdvanceRound(gameId: string) {
       return
     }
 
-    const recentTags: string[] = []
-    for (let r = Math.max(1, game.currentRound - 4); r <= game.currentRound; r++) {
-      const roundDoc = await gameRef.collection('rounds').doc(String(r)).get()
-      const tag = roundDoc.data()?.tag
-      if (tag) recentTags.push(tag)
-    }
+    phase = 'recent-rounds'
+    const historyStartedAt = Date.now()
+    const recentRoundNumbers = Array.from(
+      { length: Math.min(5, game.currentRound) },
+      (_, index) => Math.max(1, game.currentRound - 4) + index,
+    )
+    const recentRounds = await Promise.all(recentRoundNumbers.map((r) => gameRef.collection('rounds').doc(String(r)).get()))
+    const recentTags = recentRounds.map((doc) => doc.data()?.tag).filter((tag): tag is string => typeof tag === 'string' && !!tag)
+    timings.historyMs = Date.now() - historyStartedAt
 
+    phase = 'draw-question'
+    const drawStartedAt = Date.now()
     const question = await drawQuestion(
       gameId,
       recentTags,
       shouldDrawPatrioticQuestion(nextRound, game.includePatrioticQuestions ?? false),
       game.curatedQuestions ?? false,
     )
+    timings.drawMs = Date.now() - drawStartedAt
     if (!question) {
       await gameRef.update({ status: 'finished', advanceInProgress: FieldValue.delete() })
       return
@@ -667,6 +678,8 @@ async function doAdvanceRound(gameId: string) {
 
     const eligiblePlayerIds = [...(game.playerIds ?? [])]
 
+    phase = 'publish-round'
+    const publishStartedAt = Date.now()
     await gameRef.collection('rounds').doc(String(nextRound)).set({
       question: question.text,
       source: question.source,
@@ -691,9 +704,13 @@ async function doAdvanceRound(gameId: string) {
       currentRound: nextRound,
       advanceInProgress: FieldValue.delete(),
     })
+    timings.publishMs = Date.now() - publishStartedAt
   } catch (err) {
+    console.error('Flock advance round failed', { gameId, phase, ...timings, totalMs: Date.now() - startedAt })
     await gameRef.update({ advanceInProgress: FieldValue.delete() }).catch(() => {})
     throw err
+  } finally {
+    console.info('Flock advance round timing', { gameId, phase, ...timings, totalMs: Date.now() - startedAt })
   }
 }
 

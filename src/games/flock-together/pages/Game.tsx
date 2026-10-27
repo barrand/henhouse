@@ -168,6 +168,7 @@ export default function Game() {
 
       {(round?.status === 'revealing' || round?.status === 'scored') && (
         <RevealBoard
+          key={`${game.id}:${round.id}`}
           game={game}
           round={round}
           players={eligiblePlayers}

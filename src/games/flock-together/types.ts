@@ -6,6 +6,7 @@ export interface GameData extends BaseGameData {
   categories: string[]
   includePatrioticQuestions: boolean
   curatedQuestions?: boolean
+  advanceInProgress?: number
 }
 
 export interface PlayerData extends SharedPlayerData {

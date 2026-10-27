@@ -212,7 +212,7 @@ async function weightedDraw(
   const buckets: Record<string, FirebaseFirestore.QueryDocumentSnapshot[]> = {}
 
   // Fetch unused questions per source and filter out those still on 48hr cooldown
-  for (const source of sources) {
+  await Promise.all([...sources, 'patriotic'].map(async (source) => {
     const snap = await poolRef
       .where('used', '==', false)
       .where('source', '==', source)
@@ -226,21 +226,7 @@ async function weightedDraw(
       })
       if (available.length > 0) buckets[source] = available
     }
-  }
-
-  // Also fetch patriotic questions separately (not in SOURCE_WEIGHTS)
-  const patrioticSnap = await poolRef
-    .where('used', '==', false)
-    .where('source', '==', 'patriotic')
-    .limit(50)
-    .get()
-  if (!patrioticSnap.empty) {
-    const available = patrioticSnap.docs.filter((d) => {
-      const key = d.data().questionKey as string | undefined
-      return !key || !cooldowns.has(key)
-    })
-    if (available.length > 0) buckets['patriotic'] = available
-  }
+  }))
 
   let candidateDocs: FirebaseFirestore.QueryDocumentSnapshot[]
 
@@ -252,7 +238,7 @@ async function weightedDraw(
   } else {
     // Either this is a normal round, or patriotic questions are exhausted/on cooldown.
     // Fall back to a weighted draw across all non-patriotic sources.
-    const fallbackSources = Object.keys(buckets).filter((s) => s !== 'patriotic')
+    const fallbackSources = sources.filter((source) => buckets[source])
     if (fallbackSources.length === 0) return null
 
     const weightedPool: string[] = []
