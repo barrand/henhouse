@@ -1,73 +1,70 @@
-# React + TypeScript + Vite
+# Henhouse
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Henhouse is a mobile party game collection for groups playing together in a browser. Players join a room with a short code, so nobody needs to install an app.
 
-Currently, two official plugins are available:
+The production game is available at [chickenparty.web.app](https://chickenparty.web.app).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Games
 
-## React Compiler
+- **Flock Together** — Answer a question and score by matching the majority.
+- **Fowl Words** — Give one-word clues, remove duplicates, and guess the secret word.
+- **Truth or Turd** — Answer fast trivia questions and compare your score with the group.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Technology
 
-## Expanding the ESLint configuration
+- React, TypeScript, Vite, and Tailwind CSS
+- Firebase Authentication, Firestore, Cloud Functions, and Hosting
+- Server-authoritative game state and scoring
+- Optional Jev-powered semantic decisions for experimental gameplay
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Local development
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Install dependencies from the project root:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm --prefix functions install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+For the browser app only:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+On Windows, run the local app and Firebase emulators from PowerShell:
+
+```powershell
+npm run dev:local
+```
+
+Create a room in the browser, then add automated players from another terminal:
+
+```bash
+npm run bots -- --code ABCD --count 5
+```
+
+Replace `ABCD` with the room code and `5` with the number of bots.
+
+## Verification
+
+```bash
+npm run build
+npm --prefix functions run build
+npm --prefix functions test
+npm run lint
+```
+
+The local bot test artifacts are written to `bot-runs/`. The Jev validation harness is available with `npm run validate:jev`; see [`tools/jev-validation/README.md`](tools/jev-validation/README.md) for its offline and live modes.
+
+## Deployment
+
+The production Firebase project is `flock-together-game` and the Hosting site is `chickenparty`.
+
+Deploy the application with:
+
+```bash
+npx -y firebase-tools@latest deploy --project flock-together-game
+```
+
+See [`AGENTS.md`](AGENTS.md) for game development conventions, Firebase details, and the process for adding new games.
