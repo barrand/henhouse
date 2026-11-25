@@ -23,11 +23,11 @@ describe('Jev playtest grouping',()=>{
     expect(await groupAnswersWithJev('q',['a','a'],service as never)).toEqual([['a']])
     expect(service.compareFlockBatch).not.toHaveBeenCalled()
   })
-  it('sends the question and round answers to Jev and scores contextual shorthand as one group', async () => {
+  it('passes only the question and pair data and groups shorthand accepted by Jev', async () => {
     const question = 'What is the best Thanksgiving side dish?'
     const roundAnswers = ['mashed', 'mashed potatoes', 'mashed sweet potatoes', 'stuffing']
-    const systemOne = vi.fn(({ state }: { state: { pairs: AnswerPairInput[]; roundAnswers: string[] } }) => {
-      expect(state.roundAnswers).toEqual(roundAnswers)
+    const systemOne = vi.fn(({ state }: { state: { pairs: AnswerPairInput[] } }) => {
+      expect(Object.keys(state)).toEqual(['pairs'])
       const answers = Object.fromEntries(state.pairs.map(({ id, question: pairQuestion, left, right }) => {
         expect(pairQuestion).toBe(question)
         const same = left === 'mashed' && right === 'mashed potatoes'
