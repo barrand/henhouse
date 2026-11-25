@@ -211,7 +211,7 @@ export function FowlBoard({ round, now, name, width, height, guesser, identity }
           {reveal.word && <p className="display-secret">{round.word}</p>}
           {reveal.word && round.correct && <p className="text-info font-bold">Solved on attempt {round.attempt}</p>}
         </div>
-        <Hen art={!reveal.word ? 'hen-thinking' : round.correct ? 'hen-winner' : round.clues.length ? 'hen-confused' : 'hen-embarrassed'}
+        <Hen art={!reveal.word ? 'hen-thinking' : round.correct ? 'hen-winner-v2' : round.clues.length ? 'hen-confused' : 'hen-embarrassed'}
           motion={reveal.wordFresh && round.correct ? 'celebrate' : 'still'} />
       </div>
       {reveal.landed && <ClueDebrief clues={round.clues} name={name} width={width} height={height} identity={identity} />}

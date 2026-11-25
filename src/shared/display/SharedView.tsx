@@ -142,7 +142,7 @@ function Room({ code }: { code: string }) {
             <img src="/images/generated-comic/flock-icon-midnight.png" alt="" className="display-hen animate-hen-bob" />}
           <p className="text-on-surface-variant">Waiting for the host to start</p>
         </section> : finished ? <section className="display-panel display-finish">
-          <Hen art="hen-winner" motion="pop" />
+          <Hen art="hen-winner-v2" motion="pop" />
           <div>
             <h2 className="display-question">{winnerTitle}</h2>
             {winners.length > 0 && <p className="display-secret">{winners[0].score} points</p>}
