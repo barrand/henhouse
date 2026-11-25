@@ -6,15 +6,17 @@ import { jevOperationEnabled } from '../../shared/aiExperiment'
 import { normalizeAnswer } from '../../shared/normalizeAnswer'
 import { getRoundEligiblePlayerIds } from '../../shared/roundEligibility'
 import { scoreRoundAnswers } from './scoring'
+import { publishFlockScore } from './publishScore'
 
 // A new invocation may reclaim an expired reveal; late results cannot commit.
-export async function scoreJevRound(gameId: string, roundNum: number) {
+export async function scoreJevRound(gameId: string, roundNum: number, expectedDeadline?: number) {
   const db=admin.firestore(), gameRef=db.doc(`games/${gameId}`), roundRef=gameRef.collection('rounds').doc(String(roundNum))
   const claim=randomUUID()
   const claimed=await db.runTransaction(async tx=>{
     const [g,r]=await Promise.all([tx.get(gameRef),tx.get(roundRef)])
     const game=g.data(), round=r.data()
     if(!game || !round || game.status!=='playing' || game.currentRound!==roundNum) return false
+    if(expectedDeadline !== undefined && round.deadline.toMillis() !== expectedDeadline) return false
     if(round.status!=='answering' && !(round.status==='revealing' && (round.scoringExpiresAt?.toMillis?.()??Infinity)<=Date.now())) return false
     tx.update(roundRef,{status:'revealing',scoringClaim:claim,scoringExpiresAt:Timestamp.fromMillis(Date.now()+10_000)})
     return true
@@ -45,7 +47,6 @@ export async function scoreJevRound(gameId: string, roundNum: number) {
     const [currentGame,currentRound]=await Promise.all([tx.get(gameRef),tx.get(roundRef)])
     const current=currentRound.data()
     if(currentGame.data()?.status!=='playing' || currentGame.data()?.currentRound!==roundNum || current?.status!=='revealing' || current.scoringClaim!==claim || current.scoringExpiresAt.toMillis()<=Date.now()) return
-    tx.update(roundRef,{status:'scored',answerGroups:groups.map(g=>JSON.stringify(g)),flockAnswer:representative?[raw[representative]]:[],results:scored.results,pointsThisRound:scored.pointsThisRound,playerAnswers:raw,commentary:'',groupSource:source,scoringClaim:FieldValue.delete(),scoringExpiresAt:FieldValue.delete()})
-    for(const [pid,pts] of Object.entries(scored.pointsThisRound)) if(pts) tx.update(gameRef.collection('players').doc(pid),{score:FieldValue.increment(pts)})
+    await publishFlockScore(tx,roundRef,current,{answerGroups:groups.map(g=>JSON.stringify(g)),flockAnswer:representative?[raw[representative]]:[],results:scored.results,pointsThisRound:scored.pointsThisRound,playerAnswers:raw,commentary:'',groupSource:source,scoringClaim:FieldValue.delete(),scoringExpiresAt:FieldValue.delete()})
   })
 }

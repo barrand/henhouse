@@ -17,6 +17,10 @@ import GuessView from '../components/GuessView'
 import RoundResultView from '../components/RoundResultView'
 import Scoreboard from '../components/Scoreboard'
 import ScoringRound from '../components/ScoringRound'
+import DebriefIntro from '../components/DebriefIntro'
+import { usePresentationClock } from '@shared/presentationClock'
+import { fowlReveal } from '@shared/revealTimeline'
+import { FOWL_DEBRIEF_MS } from '../../../../functions/src/shared/sharedViewModel'
 
 export default function Game() {
   const { code } = useParams<{ code: string }>()
@@ -27,7 +31,15 @@ export default function Game() {
   const [completedHandoffKey, setCompletedHandoffKey] = useState<string | null>(null)
 
   const { game, players, loading: gameLoading } = useGame(gameId)
-  const round = useRound(gameId, game?.currentRound ?? null)
+  const subscribedRound = useRound(gameId, game?.currentRound ?? null)
+  const round = subscribedRound?.id === String(game?.currentRound) ? subscribedRound : null
+  const revealAt = round?.engine?.revealAt ?? round?.revealAt ?? 0
+  const now = usePresentationClock(Boolean(revealAt), 80, revealAt + FOWL_DEBRIEF_MS + 750)
+  const reveal = fowlReveal(revealAt, now)
+  const scored = (round?.engine?.phase ?? round?.status) === 'scored'
+  const before = round?.engine?.scoresBefore ?? round?.scoresBefore
+  const displayPlayers = before && (!scored || !reveal.landed)
+    ? players.map(player => ({ ...player, score: before[player.id] ?? player.score })) : players
   const currentPlayer = useCurrentPlayer(players, uid)
   const isHost = useIsHost(game?.hostId, uid)
   const eligiblePlayers = getEligiblePlayers(round, players)
@@ -124,6 +136,12 @@ export default function Game() {
   if (game.status === 'abandoned') return null
 
   const isGuesser = game.currentGuesser === uid
+  const guesserName = players.find(player => player.id === game.currentGuesser)?.name ?? 'The guesser'
+  const intro = round && scored && !reveal.landed ? <DebriefIntro
+    word={reveal.word ? (round.engine?.secretWord ?? round.secretWord) : ''}
+    correct={round.engine?.correct ?? Boolean(round.isCorrect)}
+    hasClues={(round.engine?.groups ?? round.clueGroups).length > 0}
+    guesser={guesserName} fresh={reveal.wordFresh} /> : null
   const wordSelectionStartsAt = round?.wordSelectionStartsAt
     ? round.wordSelectionStartsAt.seconds * 1000 + Math.floor(round.wordSelectionStartsAt.nanoseconds / 1_000_000)
     : null
@@ -137,7 +155,7 @@ export default function Game() {
   if (round && isWaitingForNextRound) {
     return (
       <div className="min-h-screen flex flex-col bg-surface linen-texture">
-        <GameHeader game={game} players={players} round={round} currentPlayer={currentPlayer} isHost={isHost} />
+        <GameHeader game={game} players={displayPlayers} round={round} currentPlayer={currentPlayer} isHost={isHost} />
         <main className="flex-1 flex items-center justify-center px-6 py-10">
           <div className="max-w-md text-center space-y-4">
             <img src="/images/generated-comic/midnight/hen-thinking.png" alt="" className="w-24 h-24 mx-auto animate-hen-bob" />
@@ -153,13 +171,12 @@ export default function Game() {
 
   if (round?.scoringVersion === 1) {
     return <div className="min-h-screen flex flex-col bg-surface linen-texture text-on-surface">
-      <GameHeader game={game} players={players} round={round} currentPlayer={currentPlayer} isHost={isHost} />
-      {round.engine ? <ScoringRound game={game} view={round.engine} players={players} uid={uid ?? ''} isHost={isHost} /> : <p className="p-6 text-center text-on-surface-variant">Loading this round…</p>}
+      <GameHeader game={game} players={displayPlayers} round={round} currentPlayer={currentPlayer} isHost={isHost} />
+      {intro ?? (round.engine ? <ScoringRound game={game} view={round.engine} players={displayPlayers} uid={uid ?? ''} isHost={isHost} /> : <p className="p-6 text-center text-on-surface-variant">Loading this round…</p>)}
     </div>
   }
 
   if (round && isPrivacyHandoff) {
-    const guesserName = players.find((player) => player.id === game.currentGuesser)?.name ?? 'Guesser'
     return (
       <PrivacyHandoffView
         game={game}
@@ -173,7 +190,7 @@ export default function Game() {
 
   return (
     <div className="min-h-screen flex flex-col bg-surface linen-texture">
-      <GameHeader game={game} players={players} round={round} currentPlayer={currentPlayer} isHost={isHost} />
+      <GameHeader game={game} players={displayPlayers} round={round} currentPlayer={currentPlayer} isHost={isHost} />
 
       {(round?.status === 'word-selection' || round?.status === 'word-selected') && (
         <WordSelectionView
@@ -222,7 +239,7 @@ export default function Game() {
         />
       )}
 
-      {round?.status === 'scored' && (
+      {round?.status === 'scored' && (intro ?? (
         <RoundResultView
           game={game}
           round={round}
@@ -230,7 +247,7 @@ export default function Game() {
           isHost={isHost}
           currentPlayerId={uid}
         />
-      )}
+      ))}
     </div>
   )
 }

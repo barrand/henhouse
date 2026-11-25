@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import type { GameData, PlayerData } from '../types'
 import { startGame } from '../service'
 import ScoringSettings from './ScoringSettings'
+import SharedViewLink from '@shared/SharedViewLink'
 
 interface Props {
   game: GameData
@@ -65,6 +66,8 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
             </button>
           </div>
         </div>
+
+        {isHost && <div className="mb-5"><SharedViewLink code={game.code} /></div>}
 
         {game.includePatrioticQuestions && (
           <div className="mb-6 bg-surface-container-lowest border border-outline-variant rounded-xl p-4 text-center">

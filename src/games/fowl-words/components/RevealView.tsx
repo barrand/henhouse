@@ -5,6 +5,7 @@ import PointCounter from './PointCounter'
 import BottomActionDock from '../../../shared/BottomActionDock'
 import { animateThumbBtn } from './thumbVoteFx'
 import { spawnHeartFloat, spawnBooFloat, pulseCardLove, shakeCardBoo, pulseCardUnlock } from './reactionFx'
+import { useClueReactions } from './useClueReactions'
 import {
   GIVER_REVEAL_HINT,
   effectivePeerLoveVotes,
@@ -47,6 +48,7 @@ export default function RevealView({
   const guessRef = useRef(guess)
   const autoSubmittedRef = useRef(false)
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const reactionRoot = useRef<HTMLElement>(null)
   const unlockAnimKeyRef = useRef<string | null>(null)
 
   useEffect(() => { guessRef.current = guess }, [guess])
@@ -107,6 +109,9 @@ export default function RevealView({
   const peerBooVotes = effectivePeerBooVotes(round.cluePeerBooVotes, round.clueThumbsDownVotes)
   const myLoves = myLovedGroups(peerLoveVotes, currentPlayer?.id)
   const myBooVote = currentPlayer ? (peerBooVotes[currentPlayer.id] ?? null) : null
+  const { markLocal } = useClueReactions([...visibleSet].map(idx => ({
+    id: String(idx), loves: countGroupPeerLoves(peerLoveVotes, idx), boos: countGroupPeerBoos(peerBooVotes, idx),
+  })), reactionRoot, game.id + ':' + round.id)
 
   const handleGuess = async () => {
     if (!guess.trim()) return setError('Take a guess')
@@ -134,6 +139,7 @@ export default function RevealView({
     const isAdding = !myLoves.has(groupIdx)
     animateThumbBtn(e.currentTarget, 'up')
     if (isAdding) {
+      markLocal(String(groupIdx), 'love')
       spawnHeartFloat(e.currentTarget)
       const card = cardRefs.current[groupIdx]
       if (card) pulseCardLove(card)
@@ -152,6 +158,7 @@ export default function RevealView({
     const isAdding = myBooVote !== groupIdx
     animateThumbBtn(e.currentTarget, 'down')
     if (isAdding) {
+      markLocal(String(groupIdx), 'boo')
       spawnBooFloat(e.currentTarget)
       const card = cardRefs.current[groupIdx]
       if (card) shakeCardBoo(card)
@@ -207,7 +214,7 @@ export default function RevealView({
       ]
 
   return (
-    <main data-action-screen className="flex-1 flex flex-col px-4 py-4">
+    <main ref={reactionRoot} data-action-screen className="flex-1 flex flex-col px-4 py-4">
       <div className="max-w-md w-full mx-auto space-y-3">
         {!isGuesser && (
           <button
@@ -356,6 +363,7 @@ export default function RevealView({
                   return (
                     <div
                       key={idx}
+                      data-reaction={idx}
                       className={`relative bg-surface-container-lowest rounded-xl border px-2 py-1.5 transition-all ${
                         justUnlocked
                           ? 'border-tertiary shadow-sticker'
@@ -390,6 +398,7 @@ export default function RevealView({
                 return (
                   <div
                     key={idx}
+                    data-reaction={idx}
                     ref={(el) => { cardRefs.current[idx] = el }}
                     className={`relative flex flex-col bg-surface-container-lowest rounded-xl border-2 shadow-sm px-2.5 py-1.5 ${CARD_VOTE_TRANSITION} ${clueCardBorderClass({
                       isMyLoved,

@@ -28,6 +28,21 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    function isSharedViewer(gameId) {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/games/$(gameId)/sharedViewers/$(request.auth.uid));
+    }
+
+    match /games/{gameId}/shared/game {
+      allow get: if isSharedViewer(gameId);
+      allow list, write: if false;
+    }
+
+    match /games/{gameId}/sharedRounds/{roundNum} {
+      allow get: if isSharedViewer(gameId);
+      allow list, write: if false;
+    }
+
     match /games/{gameId}/rounds/{roundNum}/private/{document} {
       allow read, write: if false;
     }
@@ -36,6 +51,18 @@ service cloud.firestore {
       allow read: if request.auth.uid == playerId
         && request.auth.uid in get(/databases/$(database)/documents/games/$(gameId)).data.playerIds;
       allow write: if false;
+    }
+
+    match /games/{gameId}/rounds/{roundNum}/reactionCounts/{shard} {
+      allow read: if isSharedViewer(gameId) || (request.auth != null
+        && request.auth.uid in get(/databases/$(database)/documents/games/$(gameId)).data.playerIds);
+      allow write: if false;
+    }
+
+    match /games/{gameId}/rounds/{roundNum}/privateReactions/{playerId} {
+      allow get: if request.auth.uid == playerId
+        && request.auth.uid in get(/databases/$(database)/documents/games/$(gameId)).data.playerIds;
+      allow list, write: if false;
     }
 
     match /aiShadowJobs/{jobId} {
@@ -64,8 +91,9 @@ service cloud.firestore {
       allow create: if request.auth.uid == playerId
         && get(/databases/$(database)/documents/games/$(gameId)/rounds/$(roundNum)).data.status == "answering"
         && !exists(/databases/$(database)/documents/games/$(gameId)/rounds/$(roundNum)/answers/$(playerId));
-      allow read: if request.auth.uid == playerId
-        || get(/databases/$(database)/documents/games/$(gameId)/rounds/$(roundNum)).data.status != "answering";
+      allow read: if request.auth != null && (request.auth.uid == playerId
+        || (request.auth.uid in get(/databases/$(database)/documents/games/$(gameId)).data.playerIds
+          && get(/databases/$(database)/documents/games/$(gameId)/rounds/$(roundNum)).data.status != "answering"));
       allow update, delete: if false;
     }
 

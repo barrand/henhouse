@@ -6,6 +6,7 @@ import { startGame, updateCategories, resetQuestionCooldowns, submitCustomQuesti
 import curatedQuestionData from '../../../../functions/src/games/flock-together/data/curated-questions.json'
 import CategoryInput from './CategoryInput'
 import QuestionSubmission from './QuestionSubmission'
+import SharedViewLink from '@shared/SharedViewLink'
 
 const curatedQuestions: { text: string; options?: string[] }[] = curatedQuestionData
 
@@ -124,6 +125,8 @@ export default function Lobby({ game, players, isHost, currentPlayer }: Props) {
             </button>
           </div>
         </div>
+
+        {isHost && <div className="mb-5"><SharedViewLink code={game.code} /></div>}
 
         {/* Patriotic Edition Banner */}
         {game.includePatrioticQuestions && !game.curatedQuestions && (

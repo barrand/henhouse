@@ -38,4 +38,8 @@ export interface RoundData {
   pointsThisRound: Record<string, number>
   playerAnswers?: Record<string, string>
   commentary?: string
+  questionInstance?: string
+  revealAt?: number
+  scoresBefore?: Record<string, number>
+  scoresAfter?: Record<string, number>
 }

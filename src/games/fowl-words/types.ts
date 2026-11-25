@@ -66,6 +66,8 @@ export interface RoundData {
   isCorrect?: boolean                   // round result
   tentativePoints: Record<string, number>  // server-computed, not yet final
   pointsThisRound: Record<string, number>  // final scores (written at 'scored')
+  revealAt?: number
+  scoresBefore?: Record<string, number>
   cluePeerLoveVotes?: Record<string, Record<string, true>>
   cluePeerBooVotes?: Record<string, number>
   guesserMostHelpfulVote?: number | null

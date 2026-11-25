@@ -156,7 +156,7 @@
     ]
   },
   {
-    "text": "If you were abducted, who would you choose?",
+    "text": "Which would be the best group to abduct you?",
     "type": "multiple_choice",
     "options": [
       "Aliens",
@@ -250,10 +250,6 @@
     ]
   },
   {
-    "text": "What is the best free thing in life?",
-    "type": "open"
-  },
-  {
     "text": "What is the scariest animal?",
     "type": "open"
   },
@@ -286,19 +282,7 @@
     "type": "open"
   },
   {
-    "text": "Who here would spend an entire weekend automating a five-minute task?",
-    "type": "open"
-  },
-  {
-    "text": "Which fictional character would you trust to fix your computer?",
-    "type": "open"
-  },
-  {
     "text": "Which fictional invention do you most wish someone would actually build?",
-    "type": "open"
-  },
-  {
-    "text": "What everyday activity should award experience points?",
     "type": "open"
   },
   {
@@ -306,11 +290,55 @@
     "type": "open"
   },
   {
-    "text": "What hobby is most likely to turn into buying equipment you barely use?",
+    "text": "What’s the best thing to put on a baked potato?",
     "type": "open"
   },
   {
-    "text": "What subscription do you regretfully pay for every month?",
+    "text": "Name a food that tastes better the next day.",
+    "type": "open"
+  },
+  {
+    "text": "What’s the most disappointing thing to find in your trick-or-treat bag?",
+    "type": "open"
+  },
+  {
+    "text": "Name something people eat at a baseball game.",
+    "type": "open"
+  },
+  {
+    "text": "What’s the worst food to spill in your car?",
+    "type": "open"
+  },
+  {
+    "text": "Name a place you’d hate to get locked in overnight.",
+    "type": "open"
+  },
+  {
+    "text": "What’s the worst place to realize your phone is dead?",
+    "type": "open"
+  },
+  {
+    "text": "Name a place you’d never want to run into your boss.",
+    "type": "open"
+  },
+  {
+    "text": "What’s the worst thing to forget when you go camping?",
+    "type": "open"
+  },
+  {
+    "text": "What’s the first thing you do when you get home?",
+    "type": "open"
+  },
+  {
+    "text": "Name something you pretend to understand.",
+    "type": "open"
+  },
+  {
+    "text": "Name something you’d buy first if you won the lottery.",
+    "type": "open"
+  },
+  {
+    "text": "If chickens ran a restaurant, what would be on the menu?",
     "type": "open"
   }
 ]

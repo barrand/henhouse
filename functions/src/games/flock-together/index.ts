@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import * as admin from 'firebase-admin'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
@@ -10,6 +11,9 @@ import { getRoundEligiblePlayerIds, isRoundEligible } from '../../shared/roundEl
 import { experimentForCreation, requireExperimentRematch } from '../../shared/aiExperiment'
 import { typesafeApiKey } from '../../shared/secrets'
 import { scoreJevRound } from './jevScoring'
+import { publishFlockScore } from './publishScore'
+import { scoreMap } from '../../shared/sharedViewProjection'
+import { FLOCK_REVEAL_MS } from '../../shared/sharedViewModel'
 
 const db = admin.firestore()
 const TOTAL_ROUNDS = 10
@@ -194,6 +198,8 @@ export const flockStartGame = onCall(async (request) => {
 
     await gameRef.collection('rounds').doc('1').set({
       question: question.text,
+      questionInstance: randomUUID(),
+      scoresBefore: scoreMap(await gameRef.collection('players').get()),
       source: question.source,
       tag: question.tag ?? null,
       submittedBy: question.submittedBy ?? null,
@@ -258,15 +264,16 @@ export const submitAnswer = onCall({ secrets: [typesafeApiKey] }, async (request
       text: trimmed,
       submittedAt: FieldValue.serverTimestamp(),
     }
-    if (game.aiExperiment?.mode === 'jev') {
-      await db.runTransaction(async tx => {
-        const [g,r,a]=await Promise.all([tx.get(gameRef),tx.get(roundRef),tx.get(answerRef)])
-        if(a.exists) return
-        const live=r.data()
-        if(g.data()?.status!=='playing' || g.data()?.currentRound!==roundNum || live?.status!=='answering' || live.question!==roundData.question || live.questionPoolId!==roundData.questionPoolId || live.deadline.toMillis()<Date.now() || !isRoundEligible(live,g.data()!,uid)) throw new HttpsError('failed-precondition','Round no longer accepts answers')
-        tx.create(answerRef,answerData)
-      })
-    } else await answerRef.create(answerData)
+    await db.runTransaction(async tx => {
+      const [freshGame, freshRound, saved] = await Promise.all([tx.get(gameRef), tx.get(roundRef), tx.get(answerRef)])
+      const liveGame = freshGame.data()
+      const live = freshRound.data()
+      if (liveGame?.status !== 'playing' || liveGame.currentRound !== roundNum || live?.status !== 'answering'
+        || !sameQuestion(live, roundData) || live.deadline.toMillis() < Date.now() || !isRoundEligible(live, liveGame, uid)) {
+        throw new HttpsError('failed-precondition', 'Round no longer accepts answers')
+      }
+      if (!saved.exists) tx.create(answerRef, answerData)
+    })
   } catch (err: unknown) {
     const code = typeof err === 'object' && err !== null && 'code' in err
       ? (err as { code?: unknown }).code
@@ -275,11 +282,9 @@ export const submitAnswer = onCall({ secrets: [typesafeApiKey] }, async (request
   }
 
   const eligiblePlayerIds = getRoundEligiblePlayerIds(roundData, game)
-  const answerState = await syncRoundAnswerState(roundRef, eligiblePlayerIds)
-  const playerCount = eligiblePlayerIds.length
-
-  if (answerState.count >= playerCount) {
-    await triggerScoring(gameId, roundNum)
+  const completed = await syncRoundAnswerState(roundRef, eligiblePlayerIds, roundData)
+  if (completed) {
+    await triggerScoring(gameId, roundNum, roundData)
   }
 })
 
@@ -302,59 +307,65 @@ export const skipQuestion = onCall(async (request) => {
   if (roundSnap.data()!.status !== 'answering') {
     throw new HttpsError('failed-precondition', 'Can only skip during the answering phase')
   }
-  if (game.aiExperiment?.mode === 'jev') {
-    await db.runTransaction(async tx=>{
-      const current=await tx.get(roundRef)
-      if(current.data()?.status!=='answering' || current.data()?.questionPoolId!==roundSnap.data()!.questionPoolId) throw new HttpsError('failed-precondition','Round already changed')
-      tx.update(roundRef,{status:'skipped'})
-    })
-  }
-
-  const recentTags: string[] = []
-  for (let r = Math.max(1, roundNum - 4); r <= roundNum; r++) {
-    const roundDoc = await gameRef.collection('rounds').doc(String(r)).get()
-    const tag = roundDoc.data()?.tag
-    if (tag) recentTags.push(tag)
-  }
-
-  const answersSnap = await roundRef.collection('answers').get()
-  const delBatch = db.batch()
-  answersSnap.docs.forEach((doc) => delBatch.delete(doc.ref))
-  await delBatch.commit()
-
-  // Skipped questions are intentionally left as "used" — they count against the 48hr cooldown
-  const newQuestion = await drawQuestion(
-    gameId,
-    recentTags,
-    shouldDrawPatrioticQuestion(roundNum, game.includePatrioticQuestions ?? false),
-    game.curatedQuestions ?? false,
-  )
-  if (!newQuestion) {
-    if(game.aiExperiment?.mode==='jev') await roundRef.update({status:'answering'})
-    throw new HttpsError('internal', 'No more questions available')
-  }
-
-  const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
-
-  await roundRef.update({
-    question: newQuestion.text,
-    source: newQuestion.source,
-    tag: newQuestion.tag ?? null,
-    submittedBy: newQuestion.submittedBy ?? null,
-    questionPoolId: newQuestion.poolDocId,
-    type: newQuestion.type,
-    options: newQuestion.options,
-    status: 'answering',
-    deadline: Timestamp.fromDate(deadline),
-    answerCount: 0,
-    answeredPlayerIds: [],
-    answerGroups: [],
-    flockAnswer: [],
-    results: {},
-    pointsThisRound: {},
-    playerAnswers: {},
-    commentary: FieldValue.delete(),
+  await db.runTransaction(async tx => {
+    const current = (await tx.get(roundRef)).data()
+    if (current?.status !== 'answering' || !sameQuestion(current, roundSnap.data()!)) {
+      throw new HttpsError('failed-precondition', 'Round already changed')
+    }
+    tx.update(roundRef, { status: 'skipped' })
   })
+
+  try {
+    const recentTags: string[] = []
+    for (let r = Math.max(1, roundNum - 4); r <= roundNum; r++) {
+      const roundDoc = await gameRef.collection('rounds').doc(String(r)).get()
+      const tag = roundDoc.data()?.tag
+      if (tag) recentTags.push(tag)
+    }
+
+    const answersSnap = await roundRef.collection('answers').get()
+    // Skipped questions remain used for the cooldown.
+    const newQuestion = await drawQuestion(
+      gameId,
+      recentTags,
+      shouldDrawPatrioticQuestion(roundNum, game.includePatrioticQuestions ?? false),
+      game.curatedQuestions ?? false,
+    )
+    if (!newQuestion) throw new HttpsError('internal', 'No more questions available')
+
+    const deadline = new Date(Date.now() + game.settings.secondsPerRound * 1000)
+    const replace = db.batch()
+    answersSnap.docs.forEach(answer => replace.delete(answer.ref))
+    replace.update(roundRef, {
+      question: newQuestion.text,
+      questionInstance: randomUUID(),
+      source: newQuestion.source,
+      tag: newQuestion.tag ?? null,
+      submittedBy: newQuestion.submittedBy ?? null,
+      questionPoolId: newQuestion.poolDocId,
+      type: newQuestion.type,
+      options: newQuestion.options,
+      status: 'answering',
+      deadline: Timestamp.fromDate(deadline),
+      answerCount: 0,
+      answeredPlayerIds: [],
+      answerGroups: [],
+      flockAnswer: [],
+      results: {},
+      pointsThisRound: {},
+      playerAnswers: {},
+      commentary: FieldValue.delete(),
+    })
+    await replace.commit()
+  } catch (err) {
+    await db.runTransaction(async tx => {
+      const current = (await tx.get(roundRef)).data()
+      if (current?.status === 'skipped' && sameQuestion(current, roundSnap.data()!)) {
+        tx.update(roundRef, { status: 'answering' })
+      }
+    }).catch(() => {})
+    throw err
+  }
 })
 
 // -- UPDATE CATEGORIES (host-only) --
@@ -476,35 +487,47 @@ export const forceEndRound = onCall({ secrets: [typesafeApiKey] }, async (reques
   const roundSnap = await roundRef.get()
 
   if (!roundSnap.exists) return
-  if (gameSnap.data()!.aiExperiment?.mode === 'jev') { await scoreJevRound(gameId,roundNum); return }
+  if (gameSnap.data()!.aiExperiment?.mode === 'jev') { await scoreJevRound(gameId, roundNum, roundSnap.data()!.deadline.toMillis()); return }
   if (roundSnap.data()!.status !== 'answering') return
 
-  await triggerScoring(gameId, roundNum)
+  await triggerScoring(gameId, roundNum, roundSnap.data()!)
 })
 
 // -- INTERNAL HELPERS --
 
-async function syncRoundAnswerState(roundRef: FirebaseFirestore.DocumentReference, eligiblePlayerIds?: string[]) {
-  const answersSnap = await roundRef.collection('answers').get()
-  const eligibleSet = eligiblePlayerIds ? new Set(eligiblePlayerIds) : null
-  const answeredPlayerIds = answersSnap.docs
-    .map((doc) => doc.id)
-    .filter((id) => !eligibleSet || eligibleSet.has(id))
-  await roundRef.update({
-    answerCount: answeredPlayerIds.length,
-    answeredPlayerIds,
-  })
-  return { count: answeredPlayerIds.length, answeredPlayerIds }
+function sameQuestion(a: FirebaseFirestore.DocumentData, b: FirebaseFirestore.DocumentData) {
+  return a.questionInstance === b.questionInstance && a.deadline.toMillis() === b.deadline.toMillis()
 }
 
-async function triggerScoring(gameId: string, roundNum: number) {
+async function syncRoundAnswerState(roundRef: FirebaseFirestore.DocumentReference, eligiblePlayerIds: string[], expected: FirebaseFirestore.DocumentData) {
+  const answersSnap = await roundRef.collection('answers').get()
+  const eligible = new Set(eligiblePlayerIds)
+  const answeredPlayerIds = answersSnap.docs.map(doc => doc.id).filter(id => eligible.has(id))
+  const count = answeredPlayerIds.length
+  // A burst of submissions often observes the same total. Let one write it
+  // and let the others see the newer snapshot without locking the round.
+  for (let attempt = 0; ; attempt++) {
+    const snapshot = await roundRef.get()
+    const live = snapshot.data()
+    if (live?.status !== 'answering' || !sameQuestion(live, expected) || count <= (live.answerCount ?? 0)) return false
+    try {
+      await roundRef.update({ answerCount: count, answeredPlayerIds }, { lastUpdateTime: snapshot.updateTime! })
+      return count >= eligible.size
+    } catch (error) {
+      const code = (error as { code?: number }).code
+      if (code !== 9 || attempt >= 4) throw error
+    }
+  }
+}
+
+async function triggerScoring(gameId: string, roundNum: number, expected: FirebaseFirestore.DocumentData) {
   const experimentGame = await db.doc(`games/${gameId}`).get()
-  if (experimentGame.data()?.aiExperiment?.mode === 'jev') { await scoreJevRound(gameId,roundNum); return }
+  if (experimentGame.data()?.aiExperiment?.mode === 'jev') { await scoreJevRound(gameId, roundNum, expected.deadline.toMillis()); return }
   const roundRef = db.collection('games').doc(gameId).collection('rounds').doc(String(roundNum))
 
   const claimed = await db.runTransaction(async (tx) => {
-    const snap = await tx.get(roundRef)
-    if (snap.data()?.status !== 'answering') return false
+    const live = (await tx.get(roundRef)).data()
+    if (live?.status !== 'answering' || !sameQuestion(live, expected)) return false
     tx.update(roundRef, { status: 'revealing' })
     return true
   })
@@ -596,26 +619,17 @@ async function triggerScoring(gameId: string, roundNum: number) {
     commentary,
   }))
 
-  await roundRef.update({
-    status: 'scored',
-    answerGroups: groups.map((g) => JSON.stringify(g)),
-    flockAnswer: flockDisplayAnswer,
-    results: scoring.results,
-    pointsThisRound: scoring.pointsThisRound,
-    playerAnswers: rawAnswers,
-    commentary,
+  await db.runTransaction(async tx => {
+    const [currentGame, currentRound] = await Promise.all([tx.get(gameSnap.ref), tx.get(roundRef)])
+    const live = currentRound.data()
+    if (currentGame.data()?.status !== 'playing' || currentGame.data()?.currentRound !== roundNum
+      || live?.status !== 'revealing' || !sameQuestion(live, roundData)) return
+    await publishFlockScore(tx, roundRef, live, {
+      answerGroups: groups.map(group => JSON.stringify(group)), flockAnswer: flockDisplayAnswer,
+      results: scoring.results, pointsThisRound: scoring.pointsThisRound,
+      playerAnswers: rawAnswers, commentary,
+    })
   })
-
-  const batch = db.batch()
-
-  for (const [playerId, pts] of Object.entries(scoring.pointsThisRound)) {
-    if (pts !== 0) {
-      const playerRef = db.collection('games').doc(gameId).collection('players').doc(playerId)
-      batch.update(playerRef, { score: FieldValue.increment(pts) })
-    }
-  }
-
-  await batch.commit()
 }
 
 async function doAdvanceRound(gameId: string) {
@@ -633,6 +647,10 @@ async function doAdvanceRound(gameId: string) {
     const roundRef = gameRef.collection('rounds').doc(String(currentRound))
     const roundSnap = await tx.get(roundRef)
     if (!roundSnap.exists || roundSnap.data()?.status !== 'scored') return false
+    const revealAt = roundSnap.data()?.revealAt ?? 0
+    if (revealAt && Date.now() < revealAt + FLOCK_REVEAL_MS) {
+      throw new HttpsError('failed-precondition', 'Wait for the reveal to finish.')
+    }
     tx.update(gameRef, { advanceInProgress: currentRound })
     return true
   })
@@ -682,6 +700,8 @@ async function doAdvanceRound(gameId: string) {
     const publishStartedAt = Date.now()
     await gameRef.collection('rounds').doc(String(nextRound)).set({
       question: question.text,
+      questionInstance: randomUUID(),
+      scoresBefore: scoreMap(await gameRef.collection('players').get()),
       source: question.source,
       tag: question.tag ?? null,
       submittedBy: question.submittedBy ?? null,

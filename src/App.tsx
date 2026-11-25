@@ -5,6 +5,7 @@ import Home from './pages/Home'
 const FlockGame = lazy(() => import('@flock/pages/Game'))
 const FowlWordsGame = lazy(() => import('@fowl-words/pages/Game'))
 const TruthOrTurdGame = lazy(() => import('@truth-or-turd/pages/Game'))
+const SharedView = lazy(() => import('./shared/display/SharedView'))
 const FlockPreview = import.meta.env.DEV
   ? lazy(() => import('./dev/FlockPreview'))
   : null
@@ -24,6 +25,7 @@ export default function App() {
       <Route path="/" element={<Home experimental />} />
       <Route path="/gemini" element={<Home />} />
       <Route path="/jev" element={<Home experimental />} />
+      <Route path="/shared/:code?" element={<Suspense fallback={<Loading />}><SharedView /></Suspense>} />
       {FlockPreview && (
         <>
           <Route

@@ -31,6 +31,7 @@ export const jevLiveContractCheck = onCall({ secrets: [typesafeApiKey] }, async 
 })
 
 export * from './shared/jevShadow'
+export * from './shared/sharedView'
 // ── Shared: Join Game ─────────────────────────────────────────────────────────
 // joinGame is shared across all games — it looks up the room, adds the player,
 // and returns gameType so the frontend routes to the correct game module.

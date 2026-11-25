@@ -4,7 +4,8 @@ import { httpsCallable } from 'firebase/functions'
 import { functions, db, auth } from '../../lib/firebase'
 import type { ScoringRules, ScoringView } from './scoring'
 import type { RoundData, GameData, PlayerData } from './types'
-import { doc, onSnapshot } from 'firebase/firestore'
+import { collection, doc, onSnapshot } from 'firebase/firestore'
+import { applyReactionCounts, combineReactionCounts, type ReactionCounts } from '@shared/reactionCounts'
 
 // -- Fowl Words Callable Functions --
 
@@ -145,20 +146,51 @@ export async function fowlWordsAbandonGame(gameId: string) {
 
 export function onRoundUpdate(gameId: string, roundNum: number, callback: (data: RoundData | null) => void) {
   let stopView: (() => void) | undefined
+  let stopCounts: (() => void) | undefined
+  let stopBallot: (() => void) | undefined
   let publicRound: RoundData | null = null
   let view: ScoringView | undefined
-  const emit = () => callback(publicRound ? { ...publicRound, ...(view ? { engine: view } : {}) } : null)
-  const stop = onSnapshot(doc(db, 'games', gameId, 'rounds', String(roundNum)), snap => {
+  let counts: ReactionCounts | undefined
+  let ballot: { loves: string[]; boo: string | null } | undefined
+  const roundRef = doc(db, 'games', gameId, 'rounds', String(roundNum))
+  const emit = () => {
+    let engine = view
+    if (view?.reactionFeed && (view.phase === 'reveal' || view.phase === 'guess')) {
+      engine = {
+        ...view,
+        ...(counts ? { groups: applyReactionCounts(view.groups, counts) } : {}),
+        ...(ballot ? { ownLove: ballot.loves, ownBoo: ballot.boo } : {}),
+      }
+    }
+    callback(publicRound ? { ...publicRound, ...(engine ? { engine } : {}) } : null)
+  }
+  const stop = onSnapshot(roundRef, snap => {
     publicRound = snap.exists() ? { id: snap.id, ...snap.data() } as RoundData : null
     if (publicRound?.scoringVersion === 1 && !stopView && auth.currentUser) {
-      stopView = onSnapshot(doc(db, 'games', gameId, 'rounds', String(roundNum), 'views', auth.currentUser.uid), own => {
+      const uid = auth.currentUser.uid
+      stopView = onSnapshot(doc(roundRef, 'views', uid), own => {
         view = own.data()?.engine as ScoringView | undefined
+        if (view?.reactionFeed && (view.phase === 'reveal' || view.phase === 'guess') && !stopCounts) {
+          stopCounts = onSnapshot(collection(roundRef, 'reactionCounts'), shards => {
+            counts = combineReactionCounts(shards.docs.map(shard => shard.data()))
+            emit()
+          })
+          stopBallot = onSnapshot(doc(roundRef, 'privateReactions', uid), ownBallot => {
+            ballot = ownBallot.data() as typeof ballot
+            emit()
+          })
+        } else if (view?.phase === 'scored') {
+          stopCounts?.()
+          stopBallot?.()
+          stopCounts = undefined
+          stopBallot = undefined
+        }
         emit()
       })
     }
     emit()
   })
-  return () => { stop(); stopView?.() }
+  return () => { stop(); stopView?.(); stopCounts?.(); stopBallot?.() }
 }
 
 export async function scoringCapabilities() {

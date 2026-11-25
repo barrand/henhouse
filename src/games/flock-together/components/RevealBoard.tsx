@@ -3,6 +3,7 @@ import type { GameData, RoundData, PlayerData } from '../types'
 import { buildClusters } from '../answerClusters'
 import BottomActionDock from '../../../shared/BottomActionDock'
 import { advanceRound } from '../service'
+import { flockReveal } from '@shared/revealTimeline'
 
 interface Props {
   game: GameData
@@ -10,6 +11,7 @@ interface Props {
   players: PlayerData[]
   isHost: boolean
   currentPlayerId: string | null
+  now?: number
 }
 
 function ordinal(rank: number) {
@@ -23,7 +25,7 @@ function pointLabel(points: number) {
   return `${points > 0 ? '+' : points < 0 ? '−' : ''}${Math.abs(points)} ${Math.abs(points) === 1 ? 'point' : 'points'}`
 }
 
-export default function RevealBoard({ game, round, players, isHost, currentPlayerId }: Props) {
+export default function RevealBoard({ game, round, players, isHost, currentPlayerId, now = Date.now() }: Props) {
   const advanceRequested = useRef(false)
   const [advancing, setAdvancing] = useState(false)
   const [advanceError, setAdvanceError] = useState('')
@@ -58,6 +60,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
   const yourPoints = currentPlayerId ? (round.pointsThisRound?.[currentPlayerId] ?? 0) : 0
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
   const { clusters, noAnswerIds } = buildClusters(round, currentPlayerId)
+  const reveal = flockReveal(clusters, round.revealAt ?? 0, now)
   const yourCluster = clusters.find((cluster) => currentPlayerId && cluster.playerIds.includes(currentPlayerId))
   const answeredCount = clusters.reduce((sum, cluster) => sum + cluster.playerIds.length, 0)
   const participantCount = answeredCount + noAnswerIds.length
@@ -116,10 +119,10 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
     }
   }
 
-  const renderNames = (ids: string[]) => (
+  const renderNames = (ids: string[], winning = false) => (
     <div className="flex flex-wrap gap-1.5 pt-2">
       {ids.map((id) => (
-        <span key={id} className={`px-2 py-1 rounded-lg text-xs font-body break-words ${id === currentPlayerId ? 'bg-success text-on-success font-bold' : 'bg-surface-container-high text-on-surface'}`}>
+        <span key={id} className={`px-2 py-1 rounded-lg text-xs font-body break-words ${winning ? 'bg-on-primary-fixed/10 text-on-primary-fixed' : id === currentPlayerId ? 'bg-primary text-on-primary font-bold' : 'bg-surface-container-high text-info'} ${id === currentPlayerId ? 'font-bold' : ''}`}>
           {playerNameById(id)}{id === currentPlayerId && ' ← you'}
         </span>
       ))}
@@ -130,17 +133,17 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
     <div data-action-screen className="flex-1 px-4 pt-6 pb-6 space-y-5 font-body">
       <p className="text-sm text-on-surface-variant leading-relaxed break-words">{round.question}</p>
 
-      {hero && (
-        <section aria-label="Your round result" className={`rounded-2xl border-2 p-5 ${isWin ? 'bg-success-fixed border-success text-on-success-fixed' : 'bg-surface-container-low border-outline-variant/60 text-on-surface'}`}>
+      {hero && reveal.landed && (
+        <section aria-label="Your round result" className={`rounded-2xl border-2 p-5 ${isWin ? 'bg-primary-fixed border-primary text-on-primary-fixed' : 'bg-surface-container-low border-outline-variant/60 text-on-surface'}`}>
           <div className="flex items-start gap-3">
             <div className="min-w-0 flex-1">
-              <p className={`font-label text-[11px] uppercase tracking-widest font-bold ${isWin ? 'text-on-success-fixed-variant' : 'text-on-surface-variant'}`}>Your round</p>
+              <p className={`font-label text-[11px] uppercase tracking-widest font-bold ${isWin ? 'text-on-primary-fixed-variant' : 'text-on-surface-variant'}`}>Your round</p>
               <h2 className="font-headline text-2xl font-bold mt-2 leading-tight">{hero.title}</h2>
             </div>
             <img src={`/images/generated-comic/midnight/${hero.image}`} alt="" className={`w-16 h-16 shrink-0 ${isWin ? 'animate-hen-celebrate' : ''}`} />
           </div>
-          <p className={`text-sm leading-relaxed mt-3 ${isWin ? 'text-on-success-fixed-variant' : 'text-on-surface-variant'}`}>{hero.context}</p>
-          <div className={`flex flex-wrap justify-between items-baseline gap-2 mt-4 pt-3 border-t ${isWin ? 'border-on-success-fixed-variant/50' : 'border-outline-variant/50'}`}>
+          <p className={`text-sm leading-relaxed mt-3 ${isWin ? 'text-on-primary-fixed-variant' : 'text-on-surface-variant'}`}>{hero.context}</p>
+          <div className={`flex flex-wrap justify-between items-baseline gap-2 mt-4 pt-3 border-t ${isWin ? 'border-on-primary-fixed-variant/50' : 'border-outline-variant/50'}`}>
             <p className="text-lg font-bold tabular-nums">{pointLabel(yourPoints)}</p>
             {currentPlayer && <p className="text-sm tabular-nums">{currentPlayer.score} {currentPlayer.score === 1 ? 'point' : 'points'} total</p>}
           </div>
@@ -150,33 +153,35 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
       <section aria-label="Round answers" className="space-y-3">
         <div className="flex flex-wrap justify-between items-baseline gap-2">
           <h3 className="font-headline text-lg font-semibold text-on-surface">How everyone answered</h3>
-          <p className="text-xs text-on-surface-variant">{noAnswerIds.length ? `${answeredCount} answered · ${noAnswerIds.length} missed` : `${participantCount} players`}</p>
+          {reveal.landed && <p className="text-xs text-on-surface-variant">{noAnswerIds.length ? `${answeredCount} answered · ${noAnswerIds.length} missed` : `${participantCount} players`}</p>}
         </div>
 
         {clusters.map((cluster) => {
+          if (!reveal.visible(cluster.id)) return null
           const isYours = cluster.playerIds.includes(currentPlayerId ?? '')
+          const isFlock = cluster.type === 'flock'
           const otherVariations = cluster.variations.filter((answer) => answer !== cluster.answer)
           return (
-            <article key={`${cluster.type}:${cluster.answer}`} className={`rounded-2xl bg-surface-container-low border-2 p-4 ${isYours ? 'border-success' : 'border-outline-variant/60'}`}>
+            <article key={cluster.id} className={`rounded-2xl border p-4 ${isFlock ? 'bg-primary-fixed border-primary text-on-primary-fixed' : 'bg-surface-container-high text-on-surface border-outline-variant/60'} ${reveal.fresh(cluster.id) ? (cluster.type === 'rotten' ? 'animate-card-shake' : 'animate-hen-pop') : ''}`}>
               {(isYours || cluster.type === 'flock' || cluster.type === 'rotten') && (
                 <div className="flex flex-wrap gap-x-3 gap-y-1 font-label text-[11px] uppercase tracking-wide font-bold mb-2">
-                  {isYours && <span className="text-success">Your answer</span>}
-                  {cluster.type === 'flock' && <span className="text-on-surface-variant">The flock · +1 each</span>}
+                  {isYours && <span className={isFlock ? 'text-on-primary-fixed-variant' : 'text-primary'}>Your answer</span>}
+                  {isFlock && <span className="text-on-primary-fixed-variant">The flock · +1 each</span>}
                   {cluster.type === 'rotten' && <span className="text-on-surface-variant">Lone answer · −1</span>}
                 </div>
               )}
               <div className="flex justify-between items-baseline gap-3">
-                <p className="font-mono text-base font-bold text-on-surface break-words min-w-0">{cluster.answer}</p>
-                <p className="text-sm text-on-surface-variant shrink-0 tabular-nums" aria-label={`${cluster.playerIds.length} ${cluster.playerIds.length === 1 ? 'player' : 'players'}`}>{cluster.playerIds.length}</p>
+                <p className="font-headline text-xl font-bold break-words min-w-0">{cluster.answer}</p>
+                <p className={`font-mono text-sm shrink-0 tabular-nums ${isFlock ? 'text-on-primary-fixed' : 'text-on-surface'}`} aria-label={`${cluster.playerIds.length} ${cluster.playerIds.length === 1 ? 'player' : 'players'}`}>{cluster.playerIds.length}</p>
               </div>
               <div className="h-1 mt-3 bg-on-surface/10 rounded-full overflow-hidden" aria-hidden="true">
-                <div className={`h-full rounded-full ${isYours ? 'bg-success' : 'bg-on-surface-variant'}`} style={{ width: `${participantCount ? cluster.playerIds.length / participantCount * 100 : 0}%` }} />
+                <div className={`h-full rounded-full ${isFlock ? 'bg-on-primary-fixed' : 'bg-secondary'}`} style={{ width: `${participantCount ? cluster.playerIds.length / participantCount * 100 : 0}%` }} />
               </div>
-              {renderNames(cluster.playerIds)}
+              {renderNames(cluster.playerIds, isFlock)}
               {round.type !== 'multiple_choice' && otherVariations.length > 0 && (
                 <details className="mt-2">
-                  <summary className="text-sm text-on-surface-variant cursor-pointer min-h-11 content-center w-fit">Answer variations</summary>
-                  <ul className="text-sm text-on-surface-variant font-mono space-y-1 pt-2">
+                  <summary className={`text-sm cursor-pointer min-h-11 content-center w-fit ${isFlock ? 'text-on-primary-fixed-variant' : 'text-on-surface-variant'}`}>Answer variations</summary>
+                  <ul className={`text-sm font-body space-y-1 pt-2 ${isFlock ? 'text-on-primary-fixed-variant' : 'text-on-surface-variant'}`}>
                     {otherVariations.map((answer) => <li key={answer} className="break-words">{answer}</li>)}
                   </ul>
                 </details>
@@ -185,10 +190,10 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
           )
         })}
 
-        {noAnswerIds.length > 0 && (
-          <article className={`rounded-2xl border-2 bg-surface-container-low p-4 ${yourResult === 'no-answer' ? 'border-success' : 'border-outline-variant/60'}`}>
+        {reveal.landed && noAnswerIds.length > 0 && (
+          <article className={`rounded-2xl border-2 bg-surface-container-low p-4 ${yourResult === 'no-answer' ? 'border-primary' : 'border-outline-variant/60'}`}>
             <div className="flex justify-between gap-3 text-sm">
-              <p className={yourResult === 'no-answer' ? 'text-success font-bold' : 'text-on-surface-variant'}>{yourResult === 'no-answer' ? 'You didn’t answer' : 'No answer'}</p>
+              <p className={yourResult === 'no-answer' ? 'text-primary font-bold' : 'text-on-surface-variant'}>{yourResult === 'no-answer' ? 'You didn’t answer' : 'No answer'}</p>
               <span className="text-on-surface-variant tabular-nums">{noAnswerIds.length}</span>
             </div>
             <details className="mt-2">
@@ -199,7 +204,9 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
         )}
       </section>
 
-      <section aria-label="Standings" className="border-t border-outline-variant/50 pt-4">
+      {!reveal.landed && <p role="status" className="text-on-surface-variant">The flock is being revealed…</p>}
+
+      {reveal.landed && <section aria-label="Standings" className="border-t border-outline-variant/50 pt-4">
         {currentPlayer && yourRank !== null && (
           <div className="mb-3">
             <p className="text-xs text-on-surface-variant">Your standing</p>
@@ -213,19 +220,19 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
               const earned = round.pointsThisRound?.[player.id] ?? 0
               const isYou = player.id === currentPlayerId
               return (
-                <li key={player.id} className={`px-3 py-3 flex items-center gap-2 ${isYou ? 'bg-success/10' : ''}`}>
+                <li key={player.id} className={`px-3 py-3 flex items-center gap-2 ${isYou ? 'bg-primary/10' : ''}`}>
                   <span className="text-on-surface-variant w-7 tabular-nums shrink-0 text-sm">{rankOf(player.score)}.</span>
-                  <span className="font-medium text-on-surface flex-1 min-w-0 break-words">{player.name}{isYou && <span className="text-success"> ← you</span>}</span>
-                  <span className={`text-xs font-bold tabular-nums shrink-0 ${earned > 0 ? 'text-success' : earned < 0 ? 'text-secondary' : 'text-on-surface-variant'}`}>{pointLabel(earned)}</span>
+                  <span className="font-medium text-on-surface flex-1 min-w-0 break-words">{player.name}{isYou && <span className="text-primary"> ← you</span>}</span>
+                  <span className={`text-xs font-bold tabular-nums shrink-0 ${earned > 0 ? 'text-primary' : earned < 0 ? 'text-secondary' : 'text-on-surface-variant'}`}>{pointLabel(earned)}</span>
                   <span className="font-headline text-lg font-bold tabular-nums text-on-surface w-8 text-right shrink-0">{player.score}</span>
                 </li>
               )
             })}
           </ul>
         </details>
-      </section>
+      </section>}
 
-      <BottomActionDock>
+      {reveal.landed && <BottomActionDock>
         <div className="max-w-md mx-auto text-center">
           {isHost ? (
             <>
@@ -242,7 +249,7 @@ export default function RevealBoard({ game, round, players, isHost, currentPlaye
             <p role="status" className="text-sm text-on-surface-variant font-body">{isAdvancing ? (isLastRound ? 'Opening final standings…' : 'Starting next round…') : `Waiting for the host to ${isLastRound ? 'show final standings' : 'start the next round'}`}</p>
           )}
         </div>
-      </BottomActionDock>
+      </BottomActionDock>}
     </div>
   )
 }

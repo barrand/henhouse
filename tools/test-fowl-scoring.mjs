@@ -146,7 +146,10 @@ try {
     const pending=run(r,r.host.uid,'guess',{expectedAttempt:1,text:'crater'})
     for(let i=0;i<100&&!(await read(r)).claim;i++)await new Promise(resolve=>setTimeout(resolve,10))
     assert.ok((await read(r)).claim)
-    await write(r,{'claim.expires':Date.now()-1});await run(r,r.players[1],'tick')
+    await write(r, {'claim.expires': Date.now() - 1})
+    await run(r, r.players[1], 'tick')
+    assert.equal((await read(r)).attempt, 1)
+    await run(r, r.host.uid, 'tick')
     release();answerGate=undefined;await pending
     assert.equal((await read(r)).attempt,2);assert.equal((await read(r)).history[0].kind,'timeout')
     assert.equal((await db.doc(`games/${r.id}/players/${r.host.uid}`).get()).data().score,0)
@@ -171,6 +174,29 @@ try {
     assert.equal((await read(empty)).phase,'scored')
     const small=await room('best-clues-first',2);await submit(small,['lava'])
     assert.equal((await read(small)).phase,'reveal');assert.equal((await read(small)).shown.length,1)
+  })
+  await check('a 40-player Classic room accepts simultaneous reactions and scores them at debrief', async () => {
+    const r = await room('classic', 40)
+    const author = r.players[1]
+    const clueId = 'embers-group'
+    const round = r.state.parent.parent
+    await write(r, {
+      phase: 'reveal', deadline: Date.now() + 60_000, secretWord: 'volcano',
+      clues: [{ id: 'embers-clue', text: 'embers', author, at: 1 }],
+      groups: [{ id: clueId, texts: ['embers'], authorIds: [author], duplicate: false }],
+      queue: [clueId], shown: [clueId], newlyShown: [clueId], schedule: [1, 1, 1, 1],
+    })
+    const voters = r.players.slice(2)
+    await Promise.all(voters.map(uid => run(r, uid, 'love', { clueId })))
+    const shards = await round.collection('reactionCounts').get()
+    assert.equal(shards.docs.reduce((count, shard) => count + (shard.data().loves?.[clueId] ?? 0), 0), voters.length)
+    await rejected(getDoc(doc(r.host.fs, round.collection('privateReactions').doc(voters[0]).path)), 'permission-denied')
+    await run(r, voters[0], 'love', { clueId })
+    await run(r, r.host.uid, 'guess', { expectedAttempt: 1, text: 'volcano' })
+    const result = (await round.collection('views').doc(r.host.uid).get()).data().engine
+    assert.equal(result.phase, 'scored')
+    assert.equal(result.groups[0].loves, voters.length - 1)
+    assert.equal(result.breakdown[author].find(part => part.kind === 'love')?.points, voters.length - 1)
   })
   await check('50-player rooms use the same relative schedule and private projections',async()=>{
     const r=await room('best-clues-first',50)
@@ -200,9 +226,9 @@ try {
     await run(r,r.host.uid,'guess',{expectedAttempt:1,text:'extremelylongwronganswer'})
     assert.equal((await read(r)).attempt,2);assert.equal((await read(r)).history[0].kind,'guess')
     await write(r,{deadline:Date.now()-1})
-    await Promise.all([run(r,r.players[1],'tick'),run(r,r.players[2],'tick')])
+    await Promise.all([run(r,r.host.uid,'tick'),run(r,r.players[2],'tick')])
     assert.equal((await read(r)).attempt,3)
-    for(let i=0;i<2;i++){await write(r,{deadline:Date.now()-1});await run(r,r.players[1],'tick')}
+    for(let i=0;i<2;i++){await write(r,{deadline:Date.now()-1});await run(r,r.host.uid,'tick')}
     const final=await read(r);assert.equal(final.phase,'scored');assert.equal(final.correct,false)
     await run(r,r.host.uid,'tick')
     for(const id of r.players.slice(-2))assert.equal((await db.doc(`games/${r.id}/players/${id}`).get()).data().score,-1)

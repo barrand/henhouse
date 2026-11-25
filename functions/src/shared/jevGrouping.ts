@@ -38,7 +38,7 @@ export async function groupAnswersWithJev(question: string, answers: string[], s
     while(cursor<batches.length) {
       if(controller.signal.aborted || Date.now()>=deadline) throw new Error('Grouping deadline exceeded')
       const batch=batches[cursor++]
-      decisions.push(...await service.compareFlockBatch(batch,deadline-Date.now(),controller.signal))
+      decisions.push(...await service.compareFlockBatch(batch,deadline-Date.now(),controller.signal,canonical))
     }
   })
   let timer: ReturnType<typeof setTimeout> | undefined

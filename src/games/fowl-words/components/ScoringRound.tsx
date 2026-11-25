@@ -3,6 +3,7 @@ import type { GameData, PlayerData } from '../types'
 import type { ScoringView } from '../scoring'
 import { advanceRound, scoringAction } from '../service'
 import BottomActionDock from '../../../shared/BottomActionDock'
+import { animateClueReaction, useClueReactions } from './useClueReactions'
 
 const primary = 'min-h-12 rounded-xl px-5 py-3 bg-action text-on-action font-headline font-bold disabled:bg-primary-container disabled:text-on-primary-container disabled:opacity-100 active:scale-[0.98] transition-all'
 const secondary = 'min-h-12 rounded-xl px-4 py-3 bg-surface-container-high border border-outline-variant text-on-surface disabled:opacity-50'
@@ -18,14 +19,18 @@ export default function ScoringRound({ game, view: v, players, uid, isHost }: {
   const [confirmGiveUp, setConfirmGiveUp] = useState(false)
   const [peek, setPeek] = useState(false)
   const lastTick = useRef(0)
+  const reactionRoot = useRef<HTMLElement>(null)
   const [tickError, setTickError] = useState('')
   const countdown = Math.max(0, Math.ceil((v.deadline - now) / 1000))
+  const handoff = v.phase === 'word-selection' && now < v.selectionOpensAt
   const name = (id: string) => players.find(p => p.id === id)?.name ?? 'Player'
   const mode = v.rules.mode === 'classic' ? 'Classic' : 'Best Clues First'
   const enteringClues = v.phase === 'clue-submission'
   const selectedWordIndex = v.phase === 'word-selected' && v.secretWord
     ? v.wordOptions.findIndex(word => word.toLowerCase() === v.secretWord.toLowerCase())
     : -1
+  const visibleReactions = v.groups.filter(group => group.shown || v.phase === 'scored')
+  const { markLocal } = useClueReactions(visibleReactions, reactionRoot, game.id + ':' + v.roundNum)
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 500); return () => clearInterval(timer) }, [])
   useEffect(() => { setText(''); setConfirmGiveUp(false); setPeek(false); setError(''); window.scrollTo(0, 0) }, [v.attempt, v.roundNum, enteringClues])
   useEffect(() => {
@@ -47,32 +52,47 @@ export default function ScoringRound({ game, view: v, players, uid, isHost }: {
     try { await advanceRound(game.id) } catch (e) { setError(e instanceof Error ? e.message : 'Could not advance') }
     finally { setBusy(false) }
   }
+  function reactTo(event: React.MouseEvent<HTMLButtonElement>, action: 'love' | 'boo' | 'helpful', clueId: string, active: boolean) {
+    const card = event.currentTarget.closest<HTMLElement>('[data-reaction]')
+    if (!active && card) {
+      markLocal(clueId, action)
+      animateClueReaction(card, action)
+    }
+    void act(action, { clueId })
+  }
   const status = <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-on-surface-variant mb-4"><span>{mode} · {v.phase === 'scored' ? 'Round complete' : 'Rules fixed for this round'}</span>{v.deadline > 0 && <span role="timer" className="text-timer font-mono font-bold" aria-label={`${countdown} seconds remaining`}>{countdown}s</span>}</div>
   const art = (file: string) => <img src={`/images/generated-comic/midnight/${file}.png`} alt="" className="w-24 h-24 mx-auto animate-hen-bob" />
   const secret = v.secretWord && <button type="button" className="w-full rounded-2xl bg-primary-fixed text-on-primary-fixed p-4 mb-4 touch-none select-none" onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); setPeek(true) }} onPointerUp={() => setPeek(false)} onPointerCancel={() => setPeek(false)} onLostPointerCapture={() => setPeek(false)} onBlur={() => setPeek(false)} onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setPeek(true) } }} onKeyUp={() => setPeek(false)} aria-pressed={peek}>{peek ? <span className="font-headline text-3xl font-bold break-words">{v.secretWord}</span> : 'Hold to see the secret word'}</button>
-  const groupCards = (results = false) => <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">{v.groups.map(g => <div key={g.id} className={`min-w-0 rounded-2xl border p-3 space-y-2 ${g.newlyShown && !results ? 'border-primary bg-primary-container text-on-primary-container animate-hen-pop' : 'border-outline-variant bg-surface-container-lowest'}`}>
+  const groupCards = (results = false) => <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">{v.groups.map(g => <div key={g.id} data-reaction={g.shown ? g.id : undefined} className={`min-w-0 rounded-2xl border p-3 space-y-2 ${g.newlyShown && !results ? 'border-primary bg-primary-container text-on-primary-container animate-hen-pop' : 'border-outline-variant bg-surface-container-lowest'}`}>
     <p className="font-mono font-bold text-lg break-words [overflow-wrap:anywhere]">{g.text}</p>
     <p className="text-xs">{g.mine ? 'Your clue · ' : ''}{g.shown ? 'Shown' : 'Unshown'}{g.duplicate ? ' · Duplicate' : ''}</p>
     {results && <p className="text-sm text-on-surface-variant break-words">{g.authors.map(name).join(', ')}</p>}
     <div className="flex flex-wrap gap-2 text-sm">{(v.rules.mode === 'classic' || results) && <span>❤️ {g.loves}{results && v.rules.mode === 'best-clues-first' ? ' backing' : ''}</span>}<span>👎 {g.boos}</span>{g.helpful && <span>⭐ Most Helpful</span>}</div>
     {!results && !v.guesser && g.shown && !g.mine && <div className="flex flex-wrap gap-2">
-      {v.rules.mode === 'classic' && <button type="button" disabled={busy || countdown === 0} onClick={() => act('love', { clueId: g.id })} aria-pressed={v.ownLove.includes(g.id)} className={`${secondary} text-sm`}>❤️ {v.ownLove.includes(g.id) ? 'Loved' : 'Peer love'}</button>}
-      <button type="button" disabled={busy || countdown === 0} onClick={() => act('boo', { clueId: g.id })} aria-pressed={v.ownBoo === g.id} className={`${secondary} text-sm`}>👎 Boo</button>
+      {v.rules.mode === 'classic' && <button type="button" disabled={busy || countdown === 0} onClick={event => reactTo(event, 'love', g.id, v.ownLove.includes(g.id))} aria-pressed={v.ownLove.includes(g.id)} className={`${secondary} text-sm`}>❤️ {v.ownLove.includes(g.id) ? 'Loved' : 'Peer love'}</button>}
+      <button type="button" disabled={busy || countdown === 0} onClick={event => reactTo(event, 'boo', g.id, v.ownBoo === g.id)} aria-pressed={v.ownBoo === g.id} className={`${secondary} text-sm`}>👎 Boo</button>
     </div>}
     {results && v.guesser && g.shown && <div className="flex flex-wrap gap-2">{v.correct && <button type="button" className={`${secondary} text-sm`} disabled={busy} aria-pressed={g.helpful} onClick={() => act('helpful', { clueId: g.id })}>⭐ Most Helpful{v.rules.mostHelpfulPoints ? ` +${Math.max(1, Math.floor(v.rules.mostHelpfulPoints / g.authors.length))}` : ''}</button>}<button type="button" className={`${secondary} text-sm`} disabled={busy} aria-pressed={v.ownBoo === g.id} onClick={() => act('boo', { clueId: g.id })}>👎 Boo</button></div>}
   </div>)}</div>
-  const resultCards = <div className="grid grid-cols-2 gap-2">{v.groups.map(g => <div key={g.id} className={`relative flex flex-col min-w-0 rounded-xl border-2 shadow-sm px-2.5 py-2 ${g.duplicate ? 'border-error/40 bg-surface-container' : g.shown && v.correct ? 'border-primary/60 bg-surface-container-lowest' : 'border-outline-variant bg-surface-container-lowest'}`}>
+  const resultCards = <div className="grid grid-cols-2 gap-2">{[...v.groups].sort((a, b) => b.loves - a.loves).map(g => <div key={g.id} data-reaction={g.id} className={`relative flex flex-col min-w-0 rounded-xl border-2 shadow-sm px-2.5 py-2 ${g.duplicate ? 'border-error/40 bg-surface-container' : g.shown && v.correct ? 'border-primary/60 bg-surface-container-lowest' : 'border-outline-variant bg-surface-container-lowest'}`}>
     <p className={`font-mono font-bold text-lg leading-tight text-center line-clamp-2 min-h-11 flex items-center justify-center ${g.duplicate ? 'text-error line-through' : 'text-on-surface'}`}>{g.text}</p>
-    <p className="text-xs text-on-surface-variant font-medium text-center leading-snug min-h-4 truncate">{g.authors.map(name).join(', ') || '—'}{g.duplicate && <span className="text-error font-bold uppercase text-[11px] tracking-wide"> · dup</span>}</p>
-    <div className="flex items-center justify-center gap-2 min-h-8 mt-1 text-sm"><span>❤️ {g.loves}</span><span>👎 {g.boos}</span>{g.helpful && <span>⭐</span>}</div>
+    <p className="text-xs text-on-surface-variant font-medium text-center leading-snug min-h-4 wrap-anywhere">{g.authors.map(name).join(', ') || '—'}{g.duplicate && <span className="text-error font-bold uppercase text-[11px] tracking-wide"> · dup</span>}</p>
+    <div className="flex flex-wrap items-center justify-center gap-2 min-h-8 mt-1 text-sm"><span>❤️ {g.loves}</span><span>👎 {g.boos}</span>{g.helpful && <span data-helpful title="Most Helpful">⭐</span>}</div>
     <div className="flex flex-wrap gap-1.5 mt-1">
-      {v.guesser && v.correct && g.shown && <button type="button" className={`${secondary} clue-action text-xs`} disabled={busy} aria-pressed={g.helpful} onClick={() => act('helpful', { clueId: g.id })}>⭐ {g.helpful ? 'Helpful' : 'Most helpful'}</button>}
-      {((v.guesser && g.shown) || (!v.guesser && g.shown && !g.mine)) && <button type="button" className={`${secondary} clue-action text-xs`} disabled={busy} aria-pressed={v.ownBoo === g.id} onClick={() => act('boo', { clueId: g.id })}>👎 Boo</button>}
+      {v.guesser && v.correct && g.shown && <button type="button" className={`${secondary} clue-action text-xs`} disabled={busy} aria-pressed={g.helpful} onClick={event => reactTo(event, 'helpful', g.id, g.helpful)}>⭐ Most Helpful</button>}
+      {v.guesser && g.shown && <button type="button" className={`${secondary} clue-action text-xs`} disabled={busy} aria-pressed={v.ownBoo === g.id} onClick={event => reactTo(event, 'boo', g.id, v.ownBoo === g.id)}>👎 Boo</button>}
     </div>
   </div>)}</div>
 
   if (!v.participating) return <main className="p-6 text-center">You’ll join the next round.</main>
-  return <main data-action-screen className="w-full max-w-5xl mx-auto px-4 py-6 space-y-4">
+  if (handoff) return <main className="w-full max-w-md mx-auto space-y-4 px-5 py-8 text-center">
+    {art('hen-blindfold')}
+    <h2 className="font-headline text-3xl font-bold">{name(game.currentGuesser ?? '')}, close your eyes!</h2>
+    <p className="font-mono text-timer">{Math.max(1, Math.ceil((v.selectionOpensAt - now) / 1000))}s</p>
+    {isHost && <button type="button" className={secondary} disabled={busy} onClick={() => void act('skip-handoff')}>Skip handoff</button>}
+    {error && <p role="alert" className="text-error">{error}</p>}
+  </main>
+  return <main ref={reactionRoot} data-action-screen className="w-full max-w-5xl mx-auto px-4 py-6 space-y-4">
     {status}
     {error && <p role="alert" className="text-error">{error}</p>}
     {tickError && <p role="status" className="text-on-surface-variant">{tickError}</p>}
@@ -137,7 +157,7 @@ export default function ScoringRound({ game, view: v, players, uid, isHost }: {
       {!v.guesser && <p className="text-sm text-on-surface-variant">Your points if solved now: {v.tentative[uid] ?? 0}{v.rules.mode === 'classic' && v.rules.mostHelpfulPoints > 0 ? ' · Most Helpful can add a bonus after a win.' : ''}</p>}
     </>}
     {v.phase === 'scored' && <>
-      <div className="text-center space-y-2">{art(v.correct ? (v.attempt === 1 ? 'hen-excited' : 'hen-winner') : v.groups.length === 0 ? 'hen-embarrassed' : 'hen-confused')}<h2 className={`font-headline text-4xl font-bold tracking-tight ${v.correct ? 'text-success' : 'text-waiting'}`}>{v.correct ? 'NAILED IT!' : v.groups.length === 0 ? 'NO CLUES' : 'NO LUCK'}</h2><p className="text-on-surface-variant text-sm">{v.correct ? `${name(game.currentGuesser ?? '')} got` : v.groups.length === 0 ? 'Nobody submitted a clue in time.' : `${name(game.currentGuesser ?? '')} ran out of guesses.`} {v.correct && <span className="font-headline text-2xl font-bold text-primary">{v.secretWord}</span>}</p>{!v.correct && v.secretWord && <p className="font-label text-[11px] uppercase tracking-[0.2em] text-on-primary-fixed-variant font-bold bg-primary-fixed rounded-2xl px-4 py-3 mt-2"><span className="block">The word was</span><span className="block font-headline text-3xl text-on-primary-fixed tracking-tight mt-1">{v.secretWord}</span></p>}{v.history.length > 0 && <div className="flex flex-wrap justify-center gap-x-3 gap-y-1">{v.history.filter(h => h.text).map((h, i) => <span key={i} className="text-sm text-on-surface-variant"><span className="text-on-surface-variant text-[11px]">{i + 1}.</span> <span className="font-bold text-on-surface">{h.text}</span></span>)}</div>}</div>
+      <div className="text-center space-y-2">{art(v.correct ? (v.attempt === 1 ? 'hen-excited' : 'hen-winner-v2') : v.groups.length === 0 ? 'hen-embarrassed' : 'hen-confused')}<h2 className={`font-headline text-4xl font-bold tracking-tight ${v.correct ? 'text-success' : 'text-waiting'}`}>{v.correct ? 'NAILED IT!' : v.groups.length === 0 ? 'NO CLUES' : 'NO LUCK'}</h2><p className="text-on-surface-variant text-sm">{v.correct ? `${name(game.currentGuesser ?? '')} got` : v.groups.length === 0 ? 'Nobody submitted a clue in time.' : `${name(game.currentGuesser ?? '')} ran out of guesses.`} {v.correct && <span className="font-headline text-2xl font-bold text-primary">{v.secretWord}</span>}</p>{!v.correct && v.secretWord && <p className="font-label text-[11px] uppercase tracking-[0.2em] text-on-primary-fixed-variant font-bold bg-primary-fixed rounded-2xl px-4 py-3 mt-2"><span className="block">The word was</span><span className="block font-headline text-3xl text-on-primary-fixed tracking-tight mt-1">{v.secretWord}</span></p>}{v.history.length > 0 && <div className="flex flex-wrap justify-center gap-x-3 gap-y-1">{v.history.filter(h => h.text).map((h, i) => <span key={i} className="text-sm text-on-surface-variant"><span className="text-on-surface-variant text-[11px]">{i + 1}.</span> <span className="font-bold text-on-surface">{h.text}</span></span>)}</div>}</div>
       {v.groups.length > 0 && <><h3 className="font-label text-[11px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">What everyone wrote</h3>{resultCards}</>}
       <section><h3 className="font-label text-[11px] uppercase tracking-[0.2em] text-secondary font-bold mb-2 px-1">Standings</h3><ul className="bg-surface-container-lowest rounded-2xl border border-outline-variant divide-y divide-outline-variant overflow-hidden">{[...players].sort((a, b) => b.score - a.score).map((p, i) => <li key={p.id} className={`px-3 py-2 flex items-center gap-2 ${p.id === uid ? 'bg-secondary-fixed/20' : ''}`}><span className="text-on-surface-variant w-5 text-sm">{i + 1}.</span><span className="flex-1 font-medium truncate">{p.name}{p.id === uid && ' ← you'}</span><span className={`text-xs font-bold ${v.scores[p.id] > 0 ? 'text-primary' : v.scores[p.id] < 0 ? 'text-error' : 'text-on-surface-variant'}`}>{v.scores[p.id] ? `${v.scores[p.id] > 0 ? '+' : ''}${v.scores[p.id]}` : ''}</span><span className="font-headline text-lg font-bold tabular-nums w-8 text-right">{p.score}</span></li>)}</ul></section>
       <BottomActionDock>{isHost ? <button type="button" onClick={advance} className={`${primary} w-full`} disabled={busy}>{game.currentRound >= game.settings.totalRounds ? 'See final scores →' : 'Next round →'}</button> : <p className="text-center text-on-surface-variant">Waiting for the host to continue.</p>}{error && <p role="alert" className="text-error">{error}</p>}</BottomActionDock>

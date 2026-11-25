@@ -82,7 +82,7 @@ export default function RevealView({ game, round, players, isHost, currentPlayer
   const hero = (() => {
     if (yourResult === 'correct') {
       return {
-        img: '/images/generated-comic/midnight/truth-or-turd-correct.png',
+        img: '/images/generated-comic/midnight/truth-or-turd-correct-v2.png',
         title: 'You nailed it!',
         detail: `You picked ${yourAnswer ? answerText(yourAnswer) : 'correctly'}.`,
         points: '+1 pt',
@@ -94,7 +94,7 @@ export default function RevealView({ game, round, players, isHost, currentPlayer
     }
     if (yourResult === 'incorrect') {
       return {
-        img: '/images/generated-comic/midnight/truth-or-turd-wrong.png',
+        img: '/images/generated-comic/midnight/truth-or-turd-wrong-v2.png',
         title: 'You stepped in it',
         detail: `You picked ${yourAnswer ? answerText(yourAnswer) : 'the wrong side'}. Correct was ${correctAnswerText}.`,
         points: null,

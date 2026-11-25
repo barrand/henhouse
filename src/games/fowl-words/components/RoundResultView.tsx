@@ -6,6 +6,7 @@ import { animateThumbBtn } from './thumbVoteFx'
 import { playMostHelpfulAwardFx, playBooAwardFx, stampMostHelpful } from './reactionFx'
 import { computeRoundPointBreakdown } from './pointBreakdown'
 import { PointBreakdownChips } from './PointBreakdownChips'
+import { useClueReactions } from './useClueReactions'
 import {
   PeerLoveChip,
   PeerBooChip,
@@ -44,6 +45,7 @@ export default function RoundResultView({
   const [pendingBooIdx, setPendingBooIdx] = useState<number | null>(null)
   const mostHelpfulBadgeRefs = useRef<Record<number, HTMLElement | null>>({})
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  const reactionRoot = useRef<HTMLElement>(null)
   const pendingStarBadgeAnimRef = useRef<number | null>(null)
 
   const guesserPlayer = players.find((p) => p.id === game.currentGuesser)
@@ -63,6 +65,10 @@ export default function RoundResultView({
   const peerBooVotes = effectivePeerBooVotes(round.cluePeerBooVotes, round.clueThumbsDownVotes)
   const serverMostHelpful = effectiveMostHelpfulVote(round.guesserMostHelpfulVote, round.guesserStarVote)
   const serverGuesserBoo = effectiveGuesserBoo(round.guesserBooVote, round.guesserThumbsDownVote)
+  const { markLocal } = useClueReactions(round.clueGroups.map((_, idx) => ({
+    id: String(idx), loves: countGroupPeerLoves(peerLoveVotes, idx),
+    boos: countGroupPeerBoos(peerBooVotes, idx) + Number(serverGuesserBoo === idx), helpful: serverMostHelpful === idx,
+  })), reactionRoot, game.id + ':' + round.id)
 
   const activeMostHelpfulIdx =
     pendingStarIdx !== null ? pendingStarIdx : serverMostHelpful
@@ -109,6 +115,7 @@ export default function RoundResultView({
     const current = pendingStarIdx !== null ? pendingStarIdx : serverMostHelpful
     const isAdding = current !== idx
     if (isAdding) {
+      markLocal(String(idx), 'helpful')
       playMostHelpfulAwardFx(e.currentTarget, cardRefs.current[idx])
       pendingStarBadgeAnimRef.current = idx
     } else {
@@ -127,6 +134,7 @@ export default function RoundResultView({
     const current = pendingBooIdx !== null ? pendingBooIdx : serverGuesserBoo
     const isAdding = current !== idx
     if (isAdding) {
+      markLocal(String(idx), 'boo')
       playBooAwardFx(e.currentTarget, cardRefs.current[idx])
     } else {
       animateThumbBtn(e.currentTarget, 'down')
@@ -144,7 +152,7 @@ export default function RoundResultView({
   const clueGroupDisplayOrder = [
     ...round.clueGroups.map((_, i) => i).filter((i) => visibleSet.has(i)),
     ...round.clueGroups.map((_, i) => i).filter((i) => !visibleSet.has(i)),
-  ]
+  ].sort((a, b) => countGroupPeerLoves(peerLoveVotes, b) - countGroupPeerLoves(peerLoveVotes, a))
   const playerName = (id: string) => players.find((p) => p.id === id)?.name ?? '?'
 
   const renderAuthorNames = (playerIds: string[], isYours: boolean) => {
@@ -164,13 +172,13 @@ export default function RoundResultView({
   }
 
   return (
-    <main data-action-screen className="flex-1 flex flex-col px-4 py-4">
+    <main ref={reactionRoot} data-action-screen className="flex-1 flex flex-col px-4 py-4">
       <div className="max-w-md w-full mx-auto space-y-4">
         <div className="text-center space-y-2">
           {round.isCorrect ? (
             <>
               <img
-                src={round.currentAttempt === 1 ? '/images/generated-comic/midnight/hen-excited.png' : '/images/generated-comic/midnight/hen-winner.png'}
+                src={round.currentAttempt === 1 ? '/images/generated-comic/midnight/hen-excited.png' : '/images/generated-comic/midnight/hen-winner-v2.png'}
                 alt=""
                 className={`w-28 h-28 mx-auto ${round.currentAttempt === 1 ? 'animate-hen-celebrate' : 'animate-hen-pop'}`}
               />
@@ -270,6 +278,7 @@ export default function RoundResultView({
                 return (
                   <div
                     key={idx}
+                    data-reaction={idx}
                     ref={(el) => { cardRefs.current[idx] = el }}
                     className={`relative flex flex-col h-full bg-surface-container-lowest rounded-xl border-2 shadow-sm px-2.5 py-1.5 ${CARD_VOTE_TRANSITION} ${clueCardBorderClass({
                       hiddenDuplicate: group.isDuplicate && !isVisible,
@@ -288,8 +297,8 @@ export default function RoundResultView({
                       {displayText}
                     </p>
 
-                    <div className="flex flex-wrap items-center justify-center gap-1 mb-1 min-w-0 w-full px-0.5 shrink-0">
-                      <span className="text-xs text-on-surface-variant font-medium font-body truncate min-w-0 leading-snug max-w-full">
+                    <div className="text-center mb-1 min-w-0 w-full px-0.5 shrink-0">
+                      <span className="text-xs text-on-surface-variant font-medium font-body wrap-anywhere leading-snug">
                         {renderAuthorNames(group.playerIds, isYours)}
                         {group.isDuplicate && isYours && (
                           <span className="text-error font-bold"> · -1</span>
@@ -298,12 +307,14 @@ export default function RoundResultView({
                           <span className="text-error font-bold uppercase text-[11px] tracking-wide"> · dup</span>
                         )}
                       </span>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-center gap-1 mb-1 min-h-7 min-w-0 w-full px-0.5 shrink-0">
                       <PeerLoveChip count={loveCount} />
                       <PeerBooChip count={booCount} />
                       {showUsedBadge && <ScoreChip>+{attemptPts}</ScoreChip>}
                       {gotFastBonus && <ScoreChip icon="⚡">+{fastBonusMap[yourId]}</ScoreChip>}
                       {isMostHelpful && (
-                        <span ref={(el) => { mostHelpfulBadgeRefs.current[idx] = el }}>
+                        <span data-helpful ref={(el) => { mostHelpfulBadgeRefs.current[idx] = el }}>
                           <ScoreChip icon="⭐">
                             +{mvpPts}{group.playerIds.length > 1 ? ' each' : ''}
                           </ScoreChip>

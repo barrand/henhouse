@@ -12,6 +12,8 @@ import QuestionDisplay from '../components/QuestionDisplay'
 import RevealBoard from '../components/RevealBoard'
 import Scoreboard from '../components/Scoreboard'
 import { forceEndRound } from '../service'
+import { usePresentationClock } from '@shared/presentationClock'
+import { FLOCK_REVEAL_MS } from '../../../../functions/src/shared/sharedViewModel'
 
 export default function Game() {
   const { code } = useParams<{ code: string }>()
@@ -21,10 +23,16 @@ export default function Game() {
   const [lookupError, setLookupError] = useState('')
 
   const { game, players, loading: gameLoading } = useGame(gameId)
-  const round = useRound(gameId, game?.currentRound ?? null)
-  const currentPlayer = useCurrentPlayer(players, uid)
+  const subscribedRound = useRound(gameId, game?.currentRound ?? null)
+  const round = subscribedRound?.id === String(game?.currentRound) ? subscribedRound : null
+  const now = usePresentationClock(Boolean(round?.revealAt), 80, round?.revealAt && round.revealAt + FLOCK_REVEAL_MS + 750)
+  const landed = round?.status === 'scored' && (!round.revealAt || now >= round.revealAt + FLOCK_REVEAL_MS)
+  const scores = landed ? round.scoresAfter : round?.scoresBefore
+  const displayPlayers = scores ? players.map(player => ({ ...player, score: scores[player.id] ?? player.score })) : players
+  const currentPlayer = useCurrentPlayer(displayPlayers, uid)
   const isHost = useIsHost(game?.hostId, uid)
   const eligiblePlayers = getEligiblePlayers(round, players)
+  const displayEligible = getEligiblePlayers(round, displayPlayers)
   const isWaitingForNextRound = isCurrentPlayerWaiting(round, uid)
   useEffect(() => {
     if (!gameId || !isHost || game?.aiExperiment?.mode !== 'jev' || round?.status !== 'revealing') return
@@ -128,7 +136,7 @@ export default function Game() {
       <div className="min-h-screen flex flex-col bg-surface linen-texture">
         <GameHeader
           game={game}
-          players={players}
+          players={displayPlayers}
           currentPlayer={currentPlayer}
           round={round}
           isHost={isHost}
@@ -150,7 +158,7 @@ export default function Game() {
     <div className="min-h-screen flex flex-col bg-surface linen-texture">
       <GameHeader
         game={game}
-        players={players}
+        players={displayPlayers}
         currentPlayer={currentPlayer}
         round={round}
         isHost={isHost}
@@ -158,6 +166,7 @@ export default function Game() {
 
       {round?.status === 'answering' && (
         <QuestionDisplay
+          key={round.questionInstance ?? round.deadline.seconds}
           game={game}
           round={round}
           isHost={isHost}
@@ -168,12 +177,13 @@ export default function Game() {
 
       {(round?.status === 'revealing' || round?.status === 'scored') && (
         <RevealBoard
-          key={`${game.id}:${round.id}`}
+          key={`${game.id}:${round.id}:${round.questionInstance ?? ''}`}
           game={game}
           round={round}
-          players={eligiblePlayers}
+          players={displayEligible}
           isHost={isHost}
           currentPlayerId={uid}
+          now={now}
         />
       )}
     </div>

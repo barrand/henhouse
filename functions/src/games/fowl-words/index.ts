@@ -35,6 +35,7 @@ import { acceptsJevClue } from '../../shared/jevPolicy'
 import { classifyFowlWordsClue as legacyClueClassifier } from '../../shared/gemini'
 import { startScoringRound } from './scoringEngine'
 import { recommendedRules } from './rules'
+import { scoreMap } from '../../shared/sharedViewProjection'
 export { fowlWordsScoringCapabilities, fowlWordsUpdateScoring, fowlWordsScoringAction } from './scoringEngine'
 
 const db = admin.firestore
@@ -238,6 +239,7 @@ export const fowlWordsStartGame = onCall(async (request) => {
   const eligiblePlayerIds = [...game.playerIds]
   const batch = firestore.batch()
   batch.set(gameRef.collection('rounds').doc('1'), {
+    scoresBefore: scoreMap(await gameRef.collection('players').get()),
     secretWord: '',
     wordOptions,
     wordVotes: {},

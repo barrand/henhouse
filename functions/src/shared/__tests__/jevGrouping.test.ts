@@ -23,6 +23,25 @@ describe('Jev playtest grouping',()=>{
     expect(await groupAnswersWithJev('q',['a','a'],service as never)).toEqual([['a']])
     expect(service.compareFlockBatch).not.toHaveBeenCalled()
   })
+  it('sends the question and round answers to Jev and scores contextual shorthand as one group', async () => {
+    const question = 'What is the best Thanksgiving side dish?'
+    const roundAnswers = ['mashed', 'mashed potatoes', 'mashed sweet potatoes', 'stuffing']
+    const systemOne = vi.fn(({ state }: { state: { pairs: AnswerPairInput[]; roundAnswers: string[] } }) => {
+      expect(state.roundAnswers).toEqual(roundAnswers)
+      const answers = Object.fromEntries(state.pairs.map(({ id, question: pairQuestion, left, right }) => {
+        expect(pairQuestion).toBe(question)
+        const same = left === 'mashed' && right === 'mashed potatoes'
+        return [id, { type: 'choice', choice: same ? 'same' : 'different', confidence: .95,
+          probabilities: { same: same ? .95 : .05, different: same ? .05 : .95 } }]
+      }))
+      return { withResponse: async () => ({ data: { model: 'jev-1.13.0', usage: { input_tokens: 1, output_tokens: 1 }, answers } }) }
+    })
+    const service = new DecisionService(() => ({ systemOne }) as never)
+    expect(await groupAnswersWithJev(question, roundAnswers, service)).toEqual([
+      ['mashed sweet potatoes'], ['mashed', 'mashed potatoes'], ['stuffing'],
+    ])
+    expect(systemOne).toHaveBeenCalledOnce()
+  })
   it('compares every pair with batches <=16 and concurrency <=4 at 40 players',async()=>{
     let active=0,peak=0;const seen:string[]=[]
     const service={compareFlockBatch:async(inputs:AnswerPairInput[])=>{

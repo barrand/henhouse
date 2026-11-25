@@ -61,8 +61,8 @@ export default function Scoreboard({ game, players, isHost, isFinal, currentPlay
           <div className="text-center space-y-2">
             <p className="font-headline text-3xl font-bold text-on-surface">GAME OVER!</p>
             <div className="flex justify-center gap-2">
-              <img src="/images/generated-comic/midnight/hen-winner.png" alt="" className="w-16 h-16" />
-              <img src="/images/generated-comic/midnight/hen-winner.png" alt="" className="w-16 h-16" />
+              <img src="/images/generated-comic/midnight/hen-winner-v2.png" alt="" className="w-16 h-16" />
+              <img src="/images/generated-comic/midnight/hen-winner-v2.png" alt="" className="w-16 h-16" />
             </div>
             <p className="font-headline text-xl font-bold text-on-surface">
               Shared victory at {topScore} points!
@@ -76,7 +76,7 @@ export default function Scoreboard({ game, players, isHost, isFinal, currentPlay
         {isFinal && winner && !isTie && (
           <div className="text-center space-y-2">
             <p className="font-headline text-3xl font-bold text-on-surface">GAME OVER!</p>
-            <img src="/images/generated-comic/midnight/hen-winner.png" alt="" className="w-36 h-36 mx-auto animate-hen-celebrate" />
+            <img src="/images/generated-comic/midnight/hen-winner-v2.png" alt="" className="w-36 h-36 mx-auto animate-hen-celebrate" />
             <p className="font-headline text-2xl font-bold text-primary">
               {winner.name} RULES THE ROOST!
             </p>

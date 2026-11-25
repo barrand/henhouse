@@ -12,6 +12,7 @@
 //                                     scored
 
 import * as admin from 'firebase-admin'
+import { HttpsError } from 'firebase-functions/v2/https'
 import { Timestamp, FieldValue } from 'firebase-admin/firestore'
 import { createHash } from 'node:crypto'
 import { detectDuplicateClues, deterministicGuess, experimentalGuessLocal, evaluateGuess } from '../../shared/gemini'
@@ -33,6 +34,8 @@ import {
 import { applyPeerLoveVotes, effectivePeerLoveVotesFromRound } from './peerLove'
 import { addFowlWordCooldownWrites } from './cooldowns'
 import type { ClueGroup } from './types'
+import { FOWL_DEBRIEF_MS } from '../../shared/sharedViewModel'
+import { writeLegacyFowlResult } from '../../shared/sharedViewProjection'
 
 const db = admin.firestore
 const SECONDS_PER_CLUE_SUBMISSION = 60
@@ -219,17 +222,14 @@ export async function runDeduplication(gameId: string, roundNum: number): Promis
   // Fast-path: no clues submitted — jump straight to scored
   if (clueGroups.length === 0) {
     console.log('[runDeduplication] No clue groups — fast-pathing to scored')
-    await roundRef.update({
-      status: 'scored',
-      clueGroups: [],
-      visibleGroupIndexes: [],
-      currentAttempt: 1,
-      maxAttempts: 1,
-      isCorrect: false,
-      guesserAnswer: '',
-      guessAttempts: [],
-      pointsThisRound: {},
-      eliminationReason: result.reason,
+    await firestore.runTransaction(async tx => {
+      const live = (await tx.get(roundRef)).data()
+      if (live?.status !== 'deduplication') return
+      writeLegacyFowlResult(tx, roundRef, live, {
+        clueGroups: [], visibleGroupIndexes: [], currentAttempt: 1, maxAttempts: 1,
+        isCorrect: false, guesserAnswer: '', guessAttempts: [], pointsThisRound: {},
+        eliminationReason: result.reason,
+      })
     })
     return
   }
@@ -304,8 +304,7 @@ async function commitScoredGuess(
       .filter(([, points]) => points !== 0)
       .map(([playerId]) => firestore.collection('games').doc(gameId).collection('players').doc(playerId))
     await Promise.all(playerRefs.map((playerRef) => tx.get(playerRef)))
-    tx.update(roundRef, {
-      status: 'scored',
+    writeLegacyFowlResult(tx, roundRef, latest, {
       isCorrect,
       guesserAnswer: guess.trim(),
       pointsThisRound: scores,
@@ -526,8 +525,7 @@ export async function recoverExpiredGuess(gameId: string, roundNum: number): Pro
         .filter(([, points]) => points !== 0)
         .map(([playerId]) => firestore.collection('games').doc(gameId).collection('players').doc(playerId))
       await Promise.all(playerRefs.map((playerRef) => tx.get(playerRef)))
-      tx.update(roundRef, {
-        status: 'scored',
+      writeLegacyFowlResult(tx, roundRef, data, {
         isCorrect: false,
         pointsThisRound: scores,
         tentativePoints: scores,
@@ -617,12 +615,13 @@ export async function skipToNextAttempt(gameId: string, roundNum: number): Promi
     if (nextUnlockIdx < 0) {
       // Nothing to unlock — end the round with zero scores
       const scores = computeRoundScores(clueGroups, visibleGroupIndexes, guesserId, false, currentAttempt, clueTimestamps, giverCount)
-      await roundRef.update({
-        status: 'scored',
-        isCorrect: false,
-        pointsThisRound: scores,
-        tentativePoints: scores,
-        attemptInProgress: false,
+      await firestore.runTransaction(async tx => {
+        const live = (await tx.get(roundRef)).data()
+        if (!live?.attemptInProgress || live.currentAttempt !== currentAttempt
+          || (live.status !== 'reveal' && live.status !== 'guess')) return
+        writeLegacyFowlResult(tx, roundRef, live, {
+          isCorrect: false, pointsThisRound: scores, tentativePoints: scores, attemptInProgress: false,
+        })
       })
       return
     }
@@ -663,6 +662,10 @@ export async function advanceToNextRound(gameId: string): Promise<void> {
     const roundRef = gameRef.collection('rounds').doc(String(currentRound))
     const roundSnap = await tx.get(roundRef)
     if (!roundSnap.exists || roundSnap.data()?.status !== 'scored') return false
+    const revealAt = roundSnap.data()?.revealAt ?? 0
+    if (revealAt && Date.now() < revealAt + FOWL_DEBRIEF_MS) {
+      throw new HttpsError('failed-precondition', 'Wait for the reveal to finish.')
+    }
     tx.update(gameRef, { advanceInProgress: currentRound })
     return true
   })
@@ -710,6 +713,7 @@ export async function advanceToNextRound(gameId: string): Promise<void> {
 
     const batch = firestore.batch()
     batch.set(gameRef.collection('rounds').doc(String(nextRoundNum)), {
+      scoresBefore: await fetchPlayerScores(gameId),
       secretWord: '',           // set after word selection
       wordOptions,
       wordVotes: {},

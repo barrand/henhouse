@@ -1,4 +1,5 @@
 import type { PointPart, ScoringGroup, ScoringRules } from './rules'
+import { REVEAL_LEAD_MS } from '../../shared/sharedViewModel'
 
 export type ScoringPhase = 'word-selection' | 'word-selected' | 'clue-submission' | 'clue-voting' | 'deduplication' | 'reveal' | 'guess' | 'scored'
 export interface BoardClue { id: string; text: string; author: string; at: number }
@@ -13,6 +14,7 @@ export interface ScoringState {
   history: AttemptEvent[]; scores: Record<string, number>; breakdown: Record<string, PointPart[]>;
   correct: boolean; playerScores: Record<string, number>; claim?: { id: string; expires: number; attempt: number };
   phaseClaim?: { id: string; expires: number }; finishedAt?: number;
+  reactionFeed?: boolean;
 }
 
 export interface ScoringView {
@@ -28,6 +30,8 @@ export interface ScoringView {
   history: AttemptEvent[]; correct: boolean; scores: Record<string, number>;
   tentative: Record<string, number>; breakdown: Record<string, PointPart[]>;
   processing: boolean; claimExpiresAt: number; phaseClaimExpiresAt: number;
+  revealAt?: number; scoresBefore?: Record<string, number>;
+  reactionFeed?: boolean;
 }
 
 export function projectScoringView(s: ScoringState, uid: string, tentative: Record<string, number>): ScoringView {
@@ -66,5 +70,8 @@ export function projectScoringView(s: ScoringState, uid: string, tentative: Reco
     tentative: scored ? tentative : { [uid]: tentative[uid] ?? 0 },
     breakdown: scored ? s.breakdown : {}, processing: !!s.claim,
     claimExpiresAt: s.claim?.expires ?? 0, phaseClaimExpiresAt: s.phaseClaim?.expires ?? 0,
+    revealAt: scored && s.finishedAt ? s.finishedAt + REVEAL_LEAD_MS : 0,
+    scoresBefore: s.playerScores,
+    reactionFeed: !!s.reactionFeed,
   }
 }

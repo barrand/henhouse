@@ -44,13 +44,14 @@ function burstGoldParticles(btn: HTMLElement) {
   }
 }
 
-export function spawnHeartFloat(sourceEl: HTMLElement) {
+export function spawnHeartFloat(sourceEl: HTMLElement, scale = 1) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const r = sourceEl.getBoundingClientRect()
   const el = document.createElement('span')
+  el.setAttribute('aria-hidden', 'true')
   el.textContent = '❤️'
   el.style.cssText = [
-    'position:fixed', 'font-size:18px', 'pointer-events:none', 'z-index:9999',
+    'position:fixed', 'font-size:' + 18 * scale + 'px', 'pointer-events:none', 'z-index:9999',
     `left:${r.left + r.width / 2}px`, `top:${r.top}px`, 'transform:translate(-50%,0)',
   ].join(';')
   el.classList.add('animate-heart-float')
@@ -61,13 +62,14 @@ export function spawnHeartFloat(sourceEl: HTMLElement) {
   setTimeout(cleanup, 1100)
 }
 
-export function spawnBooFloat(sourceEl: HTMLElement) {
+export function spawnBooFloat(sourceEl: HTMLElement, scale = 1) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   const r = sourceEl.getBoundingClientRect()
   const el = document.createElement('span')
+  el.setAttribute('aria-hidden', 'true')
   el.textContent = 'boo!'
   el.style.cssText = [
-    'position:fixed', 'font-size:13px', 'font-weight:800', 'letter-spacing:0.04em',
+    'position:fixed', 'font-size:' + 13 * scale + 'px', 'font-weight:800', 'letter-spacing:0.04em',
     'text-transform:lowercase', 'color:var(--color-lilac)',
     'pointer-events:none', 'z-index:9999',
     `left:${r.left + r.width / 2}px`, `top:${r.top}px`, 'transform:translate(-50%,0)',

@@ -17,6 +17,9 @@ import { evaluatePlaytestGuess, JEV_PLAYTEST_GUESS_THRESHOLD, JEV_PLAYTEST_VERSI
 import { addFowlWordCooldownWrites } from './cooldowns'
 import { typesafeApiKey } from '../../shared/secrets'
 import { enqueueFowlWordsShadow } from '../../shared/jevShadow'
+import { displayRoundRef, fowlRevealAt, versionedFowlDisplay } from '../../shared/sharedViewProjection'
+import { FOWL_DEBRIEF_MS } from '../../shared/sharedViewModel'
+import { foldLiveBallots, isLiveGuess, writeLiveReaction } from './liveReactions'
 
 type Game = admin.firestore.DocumentData
 const firestore = () => admin.firestore()
@@ -49,6 +52,7 @@ function writeState(tx: admin.firestore.Transaction, id: string, s: ScoringState
   })
   const tentative = scores(s, s.phase === 'scored' ? s.correct : true).scores
   for (const uid of s.eligible) tx.set(ref.collection('views').doc(uid), { engine: projectScoringView(s, uid, tentative) })
+  tx.set(displayRoundRef(ref), versionedFowlDisplay(s))
 }
 
 async function mutate(id: string, round: number, uid: string, change: (s: ScoringState, game: Game, tx: admin.firestore.Transaction) => void) {
@@ -64,6 +68,9 @@ async function mutate(id: string, round: number, uid: string, change: (s: Scorin
         const s = ss.data() as ScoringState
         if (game.gameType !== 'fowl-words' || game.scoringEngineVersion !== 1 || game.status !== 'playing' || game.currentRound !== round) fail('This round is no longer active')
         if (!s.eligible.includes(uid)) throw new HttpsError('permission-denied', 'You will join next round')
+        if (s.reactionFeed && isLiveGuess(s.phase)) {
+          foldLiveBallots(s, await tx.get(ss.ref.parent.parent!.collection('privateReactions')))
+        }
         const previous = { ...s.scores }
         change(s, game, tx)
         if (s.phase === 'scored') {
@@ -133,6 +140,8 @@ export async function startScoringRound(id: string, uid: string, deck?: string[]
     const previous = first ? null : await tx.get(stateRef(id, g.currentRound))
     const legacyPrevious = !first && !previous?.exists ? await tx.get(ref.collection('rounds').doc(String(g.currentRound))) : null
     if (!first && (g.status !== 'playing' || (previous?.data()?.phase ?? legacyPrevious?.data()?.status) !== 'scored')) fail('Finish this round first')
+    const revealAt = fowlRevealAt(previous?.data()?.finishedAt) || legacyPrevious?.data()?.revealAt || 0
+    if (revealAt && Date.now() < revealAt + FOWL_DEBRIEF_MS) fail('Wait for the reveal to finish.')
     const next = first ? 1 : g.currentRound + 1
     if (next > g.settings.totalRounds) { tx.update(ref, { status: 'finished' }); return }
     const deckRef = ref.collection('private').doc('deck')
@@ -152,6 +161,7 @@ export async function startScoringRound(id: string, uid: string, deck?: string[]
       clues: [], rankingVotes: {}, love: {}, boo: {}, helpful: null, groups: [], queue: [], schedule: [],
       attempt: 1, maxAttempts: rules.payouts.length, shown: [], newlyShown: [], history: [],
       scores: {}, breakdown: {}, correct: false,
+      reactionFeed: true,
       playerScores: Object.fromEntries(players.docs.map(p => [p.id, p.data().score ?? 0])),
     }
     tx.set(deckRef, { words: remaining })
@@ -243,14 +253,31 @@ export const fowlWordsUpdateScoring = onCall(async request => {
   })
 })
 
-type Action = 'word-vote' | 'tick' | 'clue' | 'rank' | 'guess' | 'skip' | 'give-up' | 'love' | 'boo' | 'helpful'
+type Action = 'word-vote' | 'skip-handoff' | 'tick' | 'clue' | 'rank' | 'guess' | 'skip' | 'give-up' | 'love' | 'boo' | 'helpful'
 export const fowlWordsScoringAction = onCall({ secrets: [typesafeApiKey] }, async request => {
   const uid = request.auth?.uid
   if (!uid) throw new HttpsError('unauthenticated', 'Sign in first')
   const { gameId: id, roundNum: round, action, expectedAttempt, text, clueId, index } = request.data as {
     gameId: string; roundNum: number; action: Action; expectedAttempt?: number; text?: string; clueId?: string; index?: number
   }
-  if (typeof id !== 'string' || !Number.isInteger(round) || round < 1 || !['word-vote','tick','clue','rank','guess','skip','give-up','love','boo','helpful'].includes(action)) throw new HttpsError('invalid-argument', 'Invalid round action')
+  if (typeof id !== 'string' || !Number.isInteger(round) || round < 1 || !['word-vote','skip-handoff','tick','clue','rank','guess','skip','give-up','love','boo','helpful'].includes(action)) throw new HttpsError('invalid-argument', 'Invalid round action')
+
+  if (action === 'love' || action === 'boo') {
+    const saved = await firestore().runTransaction(async tx => {
+      const ref = stateRef(id, round)
+      const [gs, ss] = await Promise.all([tx.get(gameRef(id)), tx.get(ref)])
+      const g = gs.data()
+      const s = ss.data() as ScoringState | undefined
+      if (!s?.reactionFeed || !isLiveGuess(s.phase)) return false
+      if (g?.gameType !== 'fowl-words' || g.status !== 'playing' || g.currentRound !== round || g.scoringEngineVersion !== 1) {
+        fail('This round is no longer active')
+      }
+      if (!s.eligible.includes(uid)) throw new HttpsError('permission-denied', 'You will join next round')
+      await writeLiveReaction(tx, ref.parent.parent!, s, uid, action, clueId)
+      return true
+    })
+    if (saved) return { ok: true }
+  }
 
   if (action === 'clue') {
     const [gs, ss] = await Promise.all([gameRef(id).get(), stateRef(id, round).get()])
@@ -325,7 +352,15 @@ export const fowlWordsScoringAction = onCall({ secrets: [typesafeApiKey] }, asyn
       if (game.data()?.hostId !== uid) return { ok: true }
     }
     await mutate(id, round, uid, (s, g) => {
-      if (action === 'word-vote') {
+      if (action === 'skip-handoff') {
+        if (g.hostId !== uid) throw new HttpsError('permission-denied', 'Only the host can skip the handoff')
+        const now = Date.now()
+        if (s.phase === 'word-selection' && now < s.selectionOpensAt) {
+          const votingTime = s.deadline - s.selectionOpensAt
+          s.selectionOpensAt = now
+          s.deadline = now + votingTime
+        }
+      } else if (action === 'word-vote') {
         if (s.phase !== 'word-selection' || s.guesser === uid || Date.now() < s.selectionOpensAt || Date.now() >= s.deadline) fail('Word voting is closed')
         if (!Number.isInteger(index) || index! < 0 || index! >= s.wordOptions.length) throw new HttpsError('invalid-argument', 'Choose a word')
         s.wordVotes[uid] = index!

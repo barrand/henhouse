@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/usePlayer'
 import { flockCreateGame } from '@flock/service'
 import { fowlWordsCreateGame } from '@fowl-words/service'
@@ -166,6 +166,10 @@ export default function Home({ experimental = false }: { experimental?: boolean 
           </div>
         </section>
 
+        <Link to="/shared" className="flex min-h-12 w-fit items-center rounded-xl border border-outline-variant/60 bg-surface-container-low px-4 font-bold text-info hover:bg-surface-container-high">
+          Open Shared View
+        </Link>
+
         {/* Or divider */}
         <div className="flex items-center gap-4 py-1">
           <div className="h-px flex-1 bg-outline-variant/40" />
@@ -228,7 +232,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
           >
             <div className="flex items-start justify-between mb-3">
               <div className="tile-art w-16 h-16 rounded-2xl bg-deep flex items-center justify-center">
-                <img src="/images/generated-comic/midnight/truth-or-turd-icon.png" alt="" className="w-14 h-14 object-contain" />
+                <img src="/images/generated-comic/midnight/truth-or-turd-icon-v2.png" alt="" className="w-14 h-14 object-contain" />
               </div>
               <span className="tile-number">03</span>
             </div>
