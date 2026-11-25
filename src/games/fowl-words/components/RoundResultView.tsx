@@ -270,7 +270,6 @@ export default function RoundResultView({
                 const isGuesserBoo = activeGuesserBooIdx === idx
                 const canGuesserVote = isCurrentGuesser && isVisible && !isYours
                 const canAwardMostHelpful = canGuesserVote && round.isCorrect
-                const showPassiveMostHelpful = !canAwardMostHelpful && isMostHelpful
                 const showPassiveGuesserBoo = !canGuesserVote && isGuesserBoo
 
                 const showUsedBadge = isVisible && round.isCorrect && isYours
@@ -313,7 +312,7 @@ export default function RoundResultView({
                       <PeerBooChip count={booCount} />
                       {showUsedBadge && <ScoreChip>+{attemptPts}</ScoreChip>}
                       {gotFastBonus && <ScoreChip icon="⚡">+{fastBonusMap[yourId]}</ScoreChip>}
-                      {isMostHelpful && (
+                      {isMostHelpful && !canAwardMostHelpful && (
                         <span data-helpful ref={(el) => { mostHelpfulBadgeRefs.current[idx] = el }}>
                           <ScoreChip icon="⭐">
                             +{mvpPts}{group.playerIds.length > 1 ? ' each' : ''}
@@ -326,6 +325,7 @@ export default function RoundResultView({
                       {round.isCorrect ? (
                         <>
                           {canAwardMostHelpful ? (
+                            <div className="flex-1 min-w-0" data-helpful={isMostHelpful || undefined} ref={(el) => { if (isMostHelpful) mostHelpfulBadgeRefs.current[idx] = el }}>
                             <MostHelpfulCell
                               active={isMostHelpful}
                               perAuthor={mvpPts}
@@ -335,12 +335,7 @@ export default function RoundResultView({
                               title={`Most Helpful +${mvpPts}${group.playerIds.length > 1 ? ' each' : ''}`}
                               onClick={(e) => handleMostHelpfulVote(idx, e)}
                             />
-                          ) : showPassiveMostHelpful ? (
-                            <MostHelpfulCell
-                              active={isMostHelpful}
-                              perAuthor={mvpPts}
-                              authorCount={group.playerIds.length}
-                            />
+                            </div>
                           ) : (
                             <div className="flex-1" aria-hidden="true" />
                           )}

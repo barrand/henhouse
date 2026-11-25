@@ -160,7 +160,7 @@ export function booVoteBtnClass(active: boolean, opts?: { wide?: boolean; intera
 }
 
 export function starVoteBtnClass(active: boolean, interactive = true) {
-  return `flex-1 h-9 flex flex-col items-center justify-center gap-0 rounded-lg font-label shrink-0 ${CARD_VOTE_TRANSITION} ${
+  return `flex-1 w-full min-w-0 h-9 flex flex-row items-center justify-center gap-1 rounded-lg font-label shrink-0 ${CARD_VOTE_TRANSITION} ${
     interactive ? 'active:scale-[0.97]' : ''
   } ${active ? 'bg-primary/15 ring-1 ring-inset ring-primary/50' : 'bg-surface-container-low'}`
 }
