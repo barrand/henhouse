@@ -8,7 +8,7 @@ It Was You! is a party game for **four or more players**, with **35 as a load-te
 
 | Area | What exists and how to reuse it |
 |---|---|
-| Rooms and rematch | All three games use shared room codes, anonymous Firebase identity, the `joinGame` callable, and game/player subscriptions. Reuse [room-code helpers](../functions/src/shared/roomCodes.ts) and the [shared client service](../src/shared/gameService.ts). Preserve the existing UID on rejoin and the `rematchCode` redirect contract. The current join writes membership and the player document separately. Add an It Was You! branch to make admission and player creation atomic. Rooms use the same uncapped admission policy as the existing games. |
+| Rooms and rematch | All three games use shared room codes, anonymous Firebase identity, the `joinGame` callable, and game/player subscriptions. Reuse [room-code helpers](../functions/src/shared/roomCodes.ts) and the [shared client service](../src/shared/gameService.ts). Preserve the existing UID on rejoin and the `rematchCode` redirect contract. The current join writes membership and the player document separately. Add an It Was You! branch to make admission and player creation atomic. Rooms use the same uncapped admission policy as the existing games. Duplicate names get a stable numbered suffix on phones and TV. |
 | Connectivity | [Presence](../src/lib/presence.ts) uses Realtime Database and the [shared trigger](../functions/src/index.ts) transfers hosting on disconnect and returns it to the original host on reconnect. Use the existing transport and handoff. Register only after confirming membership, and keep a disposable presence subscription that stops updating the old room on exit or rematch. The current helper does not retain its unsubscribe callback. Follow [Fowl Words' resume pattern](../src/games/fowl-words/hooks/useGame.ts), also refreshing the current round and own private view after backgrounding or reconnect. |
 | Shared View | [The display service](../functions/src/shared/sharedView.ts) authorizes TV viewers and projects a separate sanitized feed for Flock Together and Fowl Words. Extend the existing display types and projector, `/shared/:code`, [Shared View shell](../src/shared/display/SharedView.tsx), `SharedViewLink`, standings, fullscreen, and reconnect feedback. Add one board for this game's phases. Use the same room and answer identifiers when subscribing and rendering so data from the previous answer can never flash on the TV. |
 | Voting at party scale | Fowl Words' word selection has useful tap-to-vote UI, but its legacy `wordVotes` map contains player IDs. Adapt [Fowl Words live reactions](../functions/src/games/fowl-words/liveReactions.ts) instead for storage: an own-readable ballot and sharded count deltas that carry no voter identities. Its [scoring engine](../functions/src/games/fowl-words/scoringEngine.ts) also provides a precedent for private player views and folding ballots during authoritative scoring. Keep the new game's tally and scoring in its own module. |
@@ -57,3 +57,14 @@ It Was You! is a party game for **four or more players**, with **35 as a load-te
 - **Phones and TV:** Play one four-player phone-only round and one six-player round with the TV. Background a phone mid-phase, disconnect the host during voting, restore a saved vote, and follow a rematch on both phone and TV. Check readability from across the room and avoid flashing stale content during reconnect.
 - **35 players:** Extend the existing [bot harness](bot-swarm-test-harness.md) with scripted answers and votes so this scenario needs no Gemini key. Exercise a 35-player join burst and successful admission above 35, changes near the deadline, real-time counts, and writer rotation. Compare frozen counts and score deltas with committed votes. Run the frontend build, Functions build and tests, and both existing Shared View regressions.
 - **Live playtest:** Explain the rules once. Watch for answers being read aloud, players making a case, and votes changing after someone speaks up. If the clock frequently cuts off good debate, adjust the fixed window before adding settings.
+
+### Run the multiplayer regression locally
+
+```powershell
+npm --prefix functions run build
+npx firebase emulators:exec --only auth,firestore,functions,database --project demo-it-was-you "node tools/test-it-was-you.mjs"
+```
+
+The browser game uses the existing local development setup. For a host-led load test, create an It Was You! room and run `npm run bots -- --code ABCD --count 35`. This game uses scripted bot answers and votes and does not require a Gemini key.
+
+A release needs Hosting, Functions, and Firestore rules together so the new client and its private views use the same contract.

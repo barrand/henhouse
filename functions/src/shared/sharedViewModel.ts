@@ -1,3 +1,5 @@
+import type { DisplayRound as ItWasYouDisplayRound } from '../games/it-was-you/model'
+
 export const FLOCK_REVEAL_MS = 5000
 export const FOWL_DEBRIEF_MS = 1400
 export const REVEAL_LEAD_MS = 1100
@@ -5,7 +7,7 @@ export const REVEAL_LEAD_MS = 1100
 export type Scores = Record<string, number>
 
 export interface DisplayGame {
-  kind: 'flock-together' | 'fowl-words'
+  kind: 'flock-together' | 'fowl-words' | 'it-was-you'
   status: 'lobby' | 'playing' | 'finished' | 'abandoned'
   round: number
   totalRounds: number
@@ -72,4 +74,4 @@ export interface FowlDisplayRound {
   points: Scores
 }
 
-export type DisplayRound = FlockDisplayRound | FowlDisplayRound
+export type DisplayRound = FlockDisplayRound | FowlDisplayRound | ItWasYouDisplayRound

@@ -83,6 +83,7 @@ export const flockRematch = onCall(async (request) => {
   const { gameId } = request.data as { gameId: string }
   const gameRef = db.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
 
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
@@ -148,6 +149,7 @@ export const flockStartGame = onCall(async (request) => {
   const gameRef = db.collection('games').doc(gameId)
   const game = await db.runTransaction(async (tx) => {
     const gameSnap = await tx.get(gameRef)
+    if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
     if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
     const game = gameSnap.data()!
     if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can start')
@@ -296,6 +298,7 @@ export const skipQuestion = onCall(async (request) => {
   const { gameId } = request.data as { gameId: string }
   const gameRef = db.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
   const game = gameSnap.data()!
 
   if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can skip')
@@ -466,6 +469,7 @@ export const flockAdvanceRound = onCall(async (request) => {
 
   const { gameId } = request.data as { gameId: string }
   const gameSnap = await db.collection('games').doc(gameId).get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   if (gameSnap.data()!.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can advance')
 
@@ -479,6 +483,7 @@ export const forceEndRound = onCall({ secrets: [typesafeApiKey] }, async (reques
 
   const { gameId } = request.data as { gameId: string }
   const gameSnap = await db.collection('games').doc(gameId).get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   if (gameSnap.data()!.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can end round')
 
@@ -742,6 +747,7 @@ export const flockAbandonGame = onCall(async (request) => {
   const { gameId } = request.data as { gameId: string }
   const gameRef = db.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
 
   const game = gameSnap.data()!

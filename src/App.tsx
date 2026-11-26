@@ -6,6 +6,7 @@ import RoomSyncStatus from './shared/RoomSyncStatus'
 const FlockGame = lazy(() => import('@flock/pages/Game'))
 const FowlWordsGame = lazy(() => import('@fowl-words/pages/Game'))
 const TruthOrTurdGame = lazy(() => import('@truth-or-turd/pages/Game'))
+const ItWasYouGame = lazy(() => import('@it-was-you/pages/Game'))
 const SharedView = lazy(() => import('./shared/display/SharedView'))
 const FlockPreview = import.meta.env.DEV
   ? lazy(() => import('./dev/FlockPreview'))
@@ -95,6 +96,7 @@ function GameRoutes() {
           </Suspense>
         }
       />
+      <Route path="/it-was-you/:code" element={<Suspense fallback={<Loading />}><ItWasYouGame /></Suspense>} />
       {/* Legacy route for backwards compatibility */}
       <Route
         path="/game/:code"

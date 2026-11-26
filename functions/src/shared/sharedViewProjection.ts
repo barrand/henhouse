@@ -7,7 +7,7 @@ import { REVEAL_LEAD_MS, type DisplayGame, type FlockDisplayRound, type FowlDisp
 
 export function gameDisplay(game: DocumentData): DisplayGame | null {
   const kind = game.gameType ?? 'flock-together'
-  if (kind !== 'flock-together' && kind !== 'fowl-words') return null
+  if (kind !== 'flock-together' && kind !== 'fowl-words' && kind !== 'it-was-you') return null
   return {
     kind, status: game.status, round: game.currentRound ?? 0,
     totalRounds: game.settings?.totalRounds ?? 0,

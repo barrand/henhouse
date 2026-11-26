@@ -1,5 +1,6 @@
+import { HttpsError } from 'firebase-functions/v2/https'
 import * as admin from 'firebase-admin'
-import { FieldValue } from 'firebase-admin/firestore'
+import { FieldValue, type Transaction } from 'firebase-admin/firestore'
 
 function getDb() {
   return admin.firestore()
@@ -13,6 +14,7 @@ function getDb() {
 export async function claimRoomCode(
   gameId: string,
   gameType: string,
+  onClaim?: (transaction: Transaction, code: string) => void | Promise<void>,
 ): Promise<string> {
   const db = getDb()
   const roomWords = (await import('../data/roomWords.json')).default as string[]
@@ -26,6 +28,7 @@ export async function claimRoomCode(
       await db.runTransaction(async (tx) => {
         const roomSnap = await tx.get(roomRef)
         if (roomSnap.exists && roomSnap.data()?.active) throw new Error('taken')
+        await onClaim?.(tx, candidate)
         tx.set(roomRef, {
           gameId,
           gameType,
@@ -36,6 +39,7 @@ export async function claimRoomCode(
       code = candidate
       break
     } catch (err: any) {
+      if (err instanceof HttpsError) throw err
       if (err?.message === 'taken') attempts++
       else { console.error('Room claim error:', err); attempts++ }
     }

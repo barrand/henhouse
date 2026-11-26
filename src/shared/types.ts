@@ -9,7 +9,7 @@ export interface BaseGameData {
   aiExperiment?: { mode: 'legacy' | 'shadow' | 'jev'; model: string; configVersion: string }
   id: string
   code: string
-  gameType: 'flock-together' | 'fowl-words' | 'truth-or-turd'
+  gameType: 'flock-together' | 'fowl-words' | 'truth-or-turd' | 'it-was-you'
   hostId: string
   originalHostId: string
   status: 'lobby' | 'playing' | 'finished' | 'abandoned'

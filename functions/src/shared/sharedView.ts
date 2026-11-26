@@ -1,3 +1,5 @@
+import { itWasYouDisplay } from '../games/it-was-you/display'
+import type { Round as ItWasYouRound } from '../games/it-was-you/model'
 import { getFirestore, type DocumentReference, type Transaction } from 'firebase-admin/firestore'
 import { onDocumentWritten } from 'firebase-functions/v2/firestore'
 import { HttpsError, onCall } from 'firebase-functions/v2/https'
@@ -9,6 +11,7 @@ async function readRound(tx: Transaction, ref: DocumentReference, kind: DisplayG
   const round = (await tx.get(ref)).data()
   if (!round) return null
   if (kind === 'flock-together') return flockDisplay(round, eligible)
+  if (kind === 'it-was-you') return itWasYouDisplay(round as ItWasYouRound)
   if (round.scoringVersion !== 1) return legacyFowlDisplay(round, eligible)
   const state = (await tx.get(ref.collection('private').doc('state'))).data() as ScoringState | undefined
   return state ? versionedFowlDisplay(state) : null
@@ -27,7 +30,7 @@ export const openSharedView = onCall(async request => {
     const game = (await tx.get(gameRef)).data()
     if (!game || game.status === 'abandoned') throw new HttpsError('not-found', 'This room is closed.')
     const summary = gameDisplay(game)
-    if (!summary) throw new HttpsError('failed-precondition', 'Shared View is available for Flock Together and Fowl Words.')
+    if (!summary) throw new HttpsError('failed-precondition', 'Shared View is available for Flock Together, Fowl Words, and It Was You!')
     const roundRef = summary.status === 'playing' ? gameRef.collection('rounds').doc(String(summary.round)) : null
     const round = roundRef && await readRound(tx, roundRef, summary.kind, game.playerIds?.length ?? 0)
     // Backfill active rooms created before the display feed existed.

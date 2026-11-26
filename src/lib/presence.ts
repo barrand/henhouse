@@ -2,39 +2,32 @@ import { ref, onValue, onDisconnect, set, serverTimestamp } from 'firebase/datab
 import { rtdb } from './firebase'
 import { getUid } from './auth'
 
-let currentGameId: string | null = null
-
 export function setupPresence(gameId: string) {
-  const uid = getUid()
-  const statusRef = ref(rtdb, `status/${gameId}/${uid}`)
-  const connectedRef = ref(rtdb, '.info/connected')
+  const statusRef = ref(rtdb, `status/${gameId}/${getUid()}`)
+  const disconnect = onDisconnect(statusRef)
+  let active = true
 
-  if (currentGameId) {
-    cleanupPresence(currentGameId)
+  function report(error: unknown) {
+    console.warn('Could not update room presence:', error)
   }
-  currentGameId = gameId
 
-  onValue(connectedRef, (snap) => {
-    if (snap.val() === true) {
-      onDisconnect(statusRef).set({
-        connected: false,
-        lastSeen: serverTimestamp(),
+  const stop = onValue(ref(rtdb, '.info/connected'), snapshot => {
+    if (!active || snapshot.val() !== true) return
+    void disconnect.set({ connected: false, lastSeen: serverTimestamp() })
+      .then(() => {
+        if (active) return set(statusRef, { connected: true, lastSeen: serverTimestamp() })
       })
-
-      set(statusRef, {
-        connected: true,
-        lastSeen: serverTimestamp(),
-      })
-    }
+      .catch(report)
   })
-}
 
-export function cleanupPresence(gameId: string) {
-  const uid = getUid()
-  const statusRef = ref(rtdb, `status/${gameId}/${uid}`)
-  set(statusRef, {
-    connected: false,
-    lastSeen: serverTimestamp(),
-  })
-  currentGameId = null
+  return () => {
+    active = false
+    stop()
+    // Queue the offline write before canceling the server-side disconnect.
+    const offline = set(statusRef, { connected: false, lastSeen: serverTimestamp() })
+    void offline.catch(report)
+    // Queue cancellation now so a replacement subscription can register after it,
+    // including when React re-runs the effect for the same room.
+    void disconnect.cancel().catch(report)
+  }
 }

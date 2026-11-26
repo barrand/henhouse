@@ -20,7 +20,8 @@
       "@shared/*": ["src/shared/*"],
       "@flock/*": ["src/games/flock-together/*"],
       "@fowl-words/*": ["src/games/fowl-words/*"],
-      "@truth-or-turd/*": ["src/games/truth-or-turd/*"]
+      "@truth-or-turd/*": ["src/games/truth-or-turd/*"],
+      "@it-was-you/*": ["src/games/it-was-you/*"]
     },
 
     /* Linting */

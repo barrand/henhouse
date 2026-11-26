@@ -11,6 +11,7 @@ export default defineConfig({
       '@flock': path.resolve(__dirname, './src/games/flock-together'),
       '@fowl-words': path.resolve(__dirname, './src/games/fowl-words'),
       '@truth-or-turd': path.resolve(__dirname, './src/games/truth-or-turd'),
+      '@it-was-you': path.resolve(__dirname, './src/games/it-was-you'),
     },
   },
 })

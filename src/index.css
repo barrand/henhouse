@@ -393,3 +393,6 @@ button[class*="rounded-"]:not(:disabled):active { transform: translate(3px, 3px)
   }
   button:hover, button:active { transform: none !important; }
 }
+
+/* Keep Firebase's local emulator banner from blocking fixed game controls. */
+.firebase-emulator-warning { pointer-events: none; }

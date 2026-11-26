@@ -168,3 +168,5 @@
 @media (prefers-reduced-motion: reduce) {
   .display-egg-filled { animation: none; }
 }
+
+.display-layout-single { grid-template-areas: 'main'; grid-template-columns: minmax(0, 1fr); }

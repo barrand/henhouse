@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/usePlayer'
 import { flockCreateGame } from '@flock/service'
 import { fowlWordsCreateGame } from '@fowl-words/service'
 import { truthOrTurdCreateGame } from '@truth-or-turd/service'
+import { createGame as itWasYouCreateGame } from '@it-was-you/service'
 import { joinGame } from '@shared/gameService'
 
 function errorMessage(err: unknown, fallback: string) {
@@ -19,6 +20,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
   const [creatingFlock, setCreatingFlock] = useState(false)
   const [creatingFowlWords, setCreatingFowlWords] = useState(false)
   const [creatingTruthOrTurd, setCreatingTruthOrTurd] = useState(false)
+  const [creatingItWasYou, setCreatingItWasYou] = useState(false)
   const [joining, setJoining] = useState(false)
 
   const saveName = (n: string) => {
@@ -68,6 +70,20 @@ export default function Home({ experimental = false }: { experimental?: boolean 
     }
   }
 
+  const handleCreateItWasYou = async () => {
+    if (!name.trim()) return setError('Enter your name first')
+    setError('')
+    setCreatingItWasYou(true)
+    try {
+      const { data } = await itWasYouCreateGame({ playerName: name.trim() })
+      navigate('/it-was-you/' + data.code)
+    } catch (err: unknown) {
+      setError(errorMessage(err, 'Failed to create game'))
+    } finally {
+      setCreatingItWasYou(false)
+    }
+  }
+
   const handleJoin = async () => {
     if (!name.trim()) return setError('Enter your name first')
     if (!roomCode.trim()) return setError('Enter a room code')
@@ -76,12 +92,12 @@ export default function Home({ experimental = false }: { experimental?: boolean 
     try {
       const result = await joinGame(roomCode.trim(), name.trim())
       const upperCode = roomCode.trim().toUpperCase()
-      const route =
-        result.gameType === 'fowl-words'
-          ? `/fowl-words/${upperCode}`
-          : result.gameType === 'truth-or-turd'
-          ? `/truth-or-turd/${upperCode}`
-          : `/flock/${upperCode}`
+      const gameRoutes: Record<string, string> = {
+        'fowl-words': 'fowl-words',
+        'truth-or-turd': 'truth-or-turd',
+        'it-was-you': 'it-was-you',
+      }
+      const route = '/' + (gameRoutes[result.gameType] ?? 'flock') + '/' + upperCode
       navigate(route)
     } catch (err: unknown) {
       setError(errorMessage(err, 'Failed to join game'))
@@ -178,12 +194,12 @@ export default function Home({ experimental = false }: { experimental?: boolean 
         </div>
 
         {/* Create Section: Game Tiles */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Flock Together Tile */}
           <button
             type="button"
             onClick={handleCreateFlock}
-            disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd}
+            disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd || creatingItWasYou}
             className="game-tile group rounded-2xl border-2 border-outline-variant bg-surface-container-lowest p-5 text-left shadow-sticker hover:border-primary hover:bg-surface-container-high active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
@@ -205,7 +221,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
           <button
             type="button"
             onClick={handleCreateFowlWords}
-            disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd}
+            disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd || creatingItWasYou}
             className="game-tile group rounded-2xl border-2 border-outline-variant bg-surface-container-lowest p-5 text-left shadow-sticker hover:border-primary hover:bg-surface-container-high active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
@@ -227,7 +243,7 @@ export default function Home({ experimental = false }: { experimental?: boolean 
           <button
             type="button"
             onClick={handleCreateTruthOrTurd}
-            disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd}
+            disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd || creatingItWasYou}
             className="game-tile group rounded-2xl border-2 border-outline-variant bg-surface-container-lowest p-5 text-left shadow-sticker hover:border-primary hover:bg-surface-container-high active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <div className="flex items-start justify-between mb-3">
@@ -242,6 +258,24 @@ export default function Home({ experimental = false }: { experimental?: boolean 
             </p>
             <div className="tile-action bg-action text-on-action h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
               {creatingTruthOrTurd ? 'CREATING…' : 'CREATE'}
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCreateItWasYou}
+            disabled={creatingFlock || creatingFowlWords || creatingTruthOrTurd || creatingItWasYou}
+            className="game-tile group rounded-2xl border-2 border-outline-variant bg-surface-container-lowest p-5 text-left shadow-sticker hover:border-primary hover:bg-surface-container-high active:scale-[0.98] transition-all disabled:opacity-50"
+          >
+            <div className="tile-art mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-deep">
+              <img src="/images/generated-comic/midnight/hen-magnifying.png" alt="" className="h-14 w-14 object-contain" />
+            </div>
+            <h3 className="font-headline text-xl font-bold text-on-surface mb-1">It Was You!</h3>
+            <p className="text-on-surface-variant text-sm font-body leading-snug mb-4">
+              Write something funny. Guess which friend wrote it. Get the room on your side.
+            </p>
+            <div className="tile-action bg-action text-on-action h-12 rounded-xl flex items-center justify-center font-headline font-bold text-sm tracking-wide group-hover:opacity-90 transition-opacity">
+              {creatingItWasYou ? 'CREATING…' : 'CREATE'}
             </div>
           </button>
         </div>

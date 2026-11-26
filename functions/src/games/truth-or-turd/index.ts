@@ -175,6 +175,7 @@ export const truthOrTurdRematch = onCall(async (request) => {
   const { gameId } = request.data as { gameId: string }
   const gameRef = db.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
 
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
@@ -229,6 +230,7 @@ export const truthOrTurdStartGame = onCall(async (request) => {
   const { gameId } = request.data as { gameId: string }
   const gameRef = db.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
 
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
@@ -296,6 +298,7 @@ export const truthOrTurdForceReveal = onCall(async (request) => {
   const { gameId } = request.data as { gameId: string }
   const gameRef = db.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
   if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can reveal')
@@ -323,6 +326,7 @@ export const truthOrTurdAdvanceRound = onCall(async (request) => {
 
   const { gameId } = request.data as { gameId: string }
   const gameSnap = await db.collection('games').doc(gameId).get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   if (gameSnap.data()!.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can advance')
 
@@ -337,6 +341,7 @@ export const truthOrTurdAbandonGame = onCall(async (request) => {
   const { gameId } = request.data as { gameId: string }
   const gameRef = db.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
   if (game.hostId !== uid) throw new HttpsError('permission-denied', 'Only host can end the game')

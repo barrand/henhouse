@@ -233,11 +233,11 @@ function sanitizeRound(round) {
   if (!round) return null
   const base = {
     id: round.id,
-    status: round.status,
+    status: round.status ?? round.phase,
     currentAttempt: round.currentAttempt,
     maxAttempts: round.maxAttempts,
-    answerCount: round.answerCount,
-    eligiblePlayerCount: round.eligiblePlayerCount,
+    answerCount: round.answerCount ?? round.submitted,
+    eligiblePlayerCount: round.eligiblePlayerCount ?? round.eligiblePlayerIds?.length,
     visibleGroupIndexes: round.visibleGroupIndexes,
     clueGroupCount: round.clueGroups?.length,
     guessAttempts: round.guessAttempts,
@@ -438,6 +438,25 @@ class Bot {
     if (game.gameType === 'fowl-words') await this.handleFowlWords(game, round)
     if (game.gameType === 'flock-together') await this.handleFlockTogether(game, round)
     if (game.gameType === 'truth-or-turd') await this.handleTruthOrTurd(game, round)
+    if (game.gameType === 'it-was-you') await this.handleItWasYou(game, round)
+  }
+
+  async handleItWasYou(game, round) {
+    const { currentRound: roundNum } = game
+    const { revision } = round
+    const act = (action, fields) => this.call('itWasYouRoundAction', { gameId: this.gameId, roundNum, revision, action, ...fields })
+    if (round.phase === 'writing' && round.writerIds.includes(this.uid) && Date.now() < round.deadline) {
+      await this.once('it-was-you:write:' + roundNum, async () => {
+        const text = await this.makeItWasYouAnswer(round.prompt, roundNum)
+        await act('submit', { text })
+        this.reporter.event('bot-action', { botName: this.name, action: `submitted answer "${text}"`, roundNum })
+      })
+    }
+    if (round.phase === 'voting' && round.eligiblePlayerIds.includes(this.uid) && Date.now() < round.deadline) {
+      const candidateId = round.candidateIds[this.index % round.candidateIds.length]
+      await this.once('it-was-you:vote:' + roundNum + ':' + round.answer.id, () =>
+        act('vote', { answerId: round.answer.id, candidateId }))
+    }
   }
 
   async handleFowlWords(game, round) {
@@ -656,6 +675,30 @@ class Bot {
     return sanitizeModelOutput(await this.gemini.generateText('flock-answer', prompt)).slice(0, 100)
   }
 
+  async makeItWasYouAnswer(question, roundNum) {
+    // Bots share this registry so concurrent generations cannot submit identical answers.
+    this.gemini.itWasYouAnswers ??= new Map()
+    const key = `${this.gameId}:${roundNum}:${question}`
+    if (!this.gemini.itWasYouAnswers.has(key)) this.gemini.itWasYouAnswers.set(key, new Set())
+    const used = this.gemini.itWasYouAnswers.get(key)
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const prompt = [
+        'Answer this party-game question as a funny, creative human player.',
+        `Question: ${question}`,
+        `Your player number is ${this.index + 1}; think of a distinct idea from the other players.`,
+        used.size ? `Avoid these answers already chosen: ${[...used].join(' | ')}` : '',
+        'Give one concise, original answer that directly fits the question, at most 140 characters. Return only the answer.',
+      ].join('\n')
+      const answer = sanitizeModelOutput(await this.gemini.generateText('it-was-you-answer', prompt)).slice(0, 140)
+      const normalized = answer.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim()
+      if (normalized && !used.has(normalized)) {
+        used.add(normalized)
+        return answer
+      }
+    }
+    throw new Error('Could not generate a unique It Was You answer')
+  }
+
   async once(key, action) {
     if (this.actions.has(key)) return
     this.actions.add(key)
@@ -739,10 +782,11 @@ class Swarm {
       return
     }
     if (round && roundMatchesGame(game, round)) {
-      const phaseKey = `${game.currentRound}:${round.status}:${round.currentAttempt ?? ''}`
+      const phase = round.status ?? round.phase
+      const phaseKey = `${game.currentRound}:${phase}:${round.currentAttempt ?? round.revision ?? ''}`
       if (phaseKey !== this.lastPhaseKey) {
         this.lastPhaseKey = phaseKey
-        this.reporter.event('phase-change', { roundNum: game.currentRound, status: round.status, attempt: round.currentAttempt })
+        this.reporter.event('phase-change', { roundNum: game.currentRound, status: phase, attempt: round.currentAttempt })
         this.reporter.snapshot('phase-change', game, round, players)
       }
     }
@@ -781,11 +825,14 @@ async function main() {
   loadEnvFile(path.join(rootDir, 'functions/.env'))
   const args = parseArgs(process.argv.slice(2))
   const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) throw new Error('GEMINI_API_KEY must be set in the environment or functions/.env')
   const config = firebaseConfigFromEnv()
   const runDir = makeRunDir()
   const reporter = new Reporter(runDir)
-  const gemini = new GeminiClient({ apiKey, model: args.model, reporter })
+  const gemini = apiKey ? new GeminiClient({ apiKey, model: args.model, reporter }) : {
+    async generateText() {
+      throw new Error('GEMINI_API_KEY is required for AI answers. Scripted games can run without it.')
+    },
+  }
   reporter.event('status', { message: `Writing artifacts to ${path.relative(rootDir, runDir)}` })
   reporter.event('status', { message: `Using local emulators at ${args.host}: Auth 9099, Firestore 8080, Functions 5001, RTDB 9000` })
   const swarm = new Swarm({ args, config, gemini, reporter })

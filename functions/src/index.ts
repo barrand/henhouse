@@ -52,6 +52,41 @@ export const joinGame = onCall(async (request) => {
 
   const { gameId, gameType } = roomSnap.data()!
   const gameRef = db.collection('games').doc(gameId)
+  if (gameType === 'it-was-you') {
+    return db.runTransaction(async tx => {
+      const room = (await tx.get(roomSnap.ref)).data()
+      if (!room?.active || room.gameId !== gameId) {
+        throw new HttpsError('not-found', 'Room not found')
+      }
+
+      const game = (await tx.get(gameRef)).data()
+      if (!game) throw new HttpsError('not-found', 'Game not found')
+      if (game.status === 'finished') throw new HttpsError('failed-precondition', 'This game has already ended')
+      if (game.status === 'abandoned') throw new HttpsError('failed-precondition', 'This game was abandoned')
+
+      const playerRef = gameRef.collection('players').doc(uid)
+      const player = await tx.get(playerRef)
+      let uniqueName = playerName.trim()
+      if (!player.exists) {
+        const baseName = uniqueName
+        for (let suffix = 2; ; suffix++) {
+          const matches = await tx.get(gameRef.collection('players').where('nameKey', '==', uniqueName.toLowerCase()).limit(1))
+          if (matches.empty) break
+          uniqueName = baseName + ' (' + suffix + ')'
+        }
+      }
+      if (!game.playerIds.includes(uid)) {
+        tx.update(gameRef, { playerIds: FieldValue.arrayUnion(uid) })
+      }
+      if (!player.exists) {
+        tx.create(playerRef, {
+          name: uniqueName, nameKey: uniqueName.toLowerCase(), score: 0, connected: true, writingOpportunities: 0,
+        })
+      }
+      return { gameId, gameType }
+    })
+  }
+
   const gameSnap = await gameRef.get()
 
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
@@ -96,31 +131,27 @@ export const onPresenceChange = onValueWritten(
     const { gameId, playerId } = event.params
     const data = event.data.after.val() as { connected: boolean } | null
 
-    if (!data) return
+    if (!data || typeof data.connected !== 'boolean') return
+
+    const gameRef = db.collection('games').doc(gameId)
 
     try {
-      await db
-        .collection('games')
-        .doc(gameId)
-        .collection('players')
-        .doc(playerId)
-        .set({ connected: data.connected }, { merge: true })
+      const before = (await gameRef.get()).data()
+      if (!before || (before.gameType === 'it-was-you' && !before.playerIds.includes(playerId))) return
 
-      const gameSnap = await db.collection('games').doc(gameId).get()
-      if (!gameSnap.exists) return
+      await gameRef.collection('players').doc(playerId).set({ connected: data.connected }, { merge: true })
 
-      const gameData = gameSnap.data()!
+      const game = (await gameRef.get()).data()
+      if (!game) return
 
-      if (!data.connected && gameData.hostId === playerId) {
-        const playersSnap = await db.collection('games').doc(gameId).collection('players').get()
-        const connectedPlayers = playersSnap.docs.filter((d) => d.data().connected && d.id !== playerId)
-        if (connectedPlayers.length > 0) {
-          await db.collection('games').doc(gameId).update({ hostId: connectedPlayers[0].id })
-        }
+      if (!data.connected && game.hostId === playerId) {
+        const players = await gameRef.collection('players').get()
+        const replacement = players.docs.find(player => player.id !== playerId && player.data().connected)
+        if (replacement) await gameRef.update({ hostId: replacement.id })
       }
 
-      if (data.connected && gameData.originalHostId === playerId && gameData.hostId !== playerId) {
-        await db.collection('games').doc(gameId).update({ hostId: playerId })
+      if (data.connected && game.originalHostId === playerId && game.hostId !== playerId) {
+        await gameRef.update({ hostId: playerId })
       }
     } catch (err) {
       console.error('Presence sync failed:', err)
@@ -136,3 +167,5 @@ export * from './games/fowl-words/index'
 
 // ── Truth or Turd ─────────────────────────────────────────────────────────────
 export * from './games/truth-or-turd/index'
+
+export * from './games/it-was-you/index'

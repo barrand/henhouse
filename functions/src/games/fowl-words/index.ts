@@ -139,6 +139,7 @@ export const fowlWordsRematch = onCall(async (request) => {
   const firestore = db()
   const gameRef = firestore.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
 
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
@@ -203,6 +204,7 @@ export const fowlWordsStartGame = onCall(async (request) => {
   const firestore = db()
   const gameRef = firestore.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
 
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
   const game = gameSnap.data()!
@@ -455,6 +457,7 @@ export const fowlWordsAdvanceRound = onCall(async (request) => {
   const { gameId } = request.data as { gameId: string }
   const firestore = db()
   const gameSnap = await firestore.collection('games').doc(gameId).get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
   if (gameSnap.data()!.hostId !== uid) {
     throw new HttpsError('permission-denied', 'Only host can advance')
   }
@@ -877,6 +880,7 @@ export const fowlWordsAbandonGame = onCall(async (request) => {
   const firestore = db()
   const gameRef = firestore.collection('games').doc(gameId)
   const gameSnap = await gameRef.get()
+  if (gameSnap.data()?.gameType === 'it-was-you') throw new HttpsError('failed-precondition', 'Wrong game type')
   if (!gameSnap.exists) throw new HttpsError('not-found', 'Game not found')
 
   const game = gameSnap.data()!

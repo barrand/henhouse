@@ -83,5 +83,5 @@ export function useDisplayRoom(code: string, uid: string | null, retry: number) 
 
   const displayRound = liveFowl && counts?.round === roundNumber
     ? { ...round, clues: applyReactionCounts(round.clues, counts.data) } : round
-  return { game, players, round: displayRound, error, online }
+  return { gameId, game, players, round: displayRound, error, online }
 }
