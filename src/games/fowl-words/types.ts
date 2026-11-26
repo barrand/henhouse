@@ -36,6 +36,7 @@ export interface ClueGroup {
 
 export interface RoundData {
   scoringVersion?: number
+  revision?: number
   engine?: ScoringView
   id: string
   secretWord: string       // empty string during word-selection, set when finalized

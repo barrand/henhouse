@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore'
 import { db, functions } from '../lib/firebase'
 import type { BaseGameData, PlayerData } from './types'
+import { watchRoomCollection, watchRoomDocument } from './roomSync'
 
 // -- Shared Callable Functions --
 
@@ -23,14 +24,14 @@ export async function joinGame(code: string, playerName: string) {
 // -- Shared Real-time Listeners --
 
 export function onGameUpdate<T extends BaseGameData>(gameId: string, callback: (data: T | null) => void) {
-  return onSnapshot(doc(db, 'games', gameId), (snap) => {
+  return watchRoomDocument<T>(doc(db, 'games', gameId), { feed: 'game', gameId }, (snap) => {
     callback(snap.exists() ? ({ id: snap.id, ...snap.data() } as T) : null)
-  })
+  }, game => ({ phase: game.status, round: game.currentRound }))
 }
 
 export function onPlayersUpdate(gameId: string, callback: (players: PlayerData[]) => void) {
   const playersRef = collection(db, 'games', gameId, 'players')
-  return onSnapshot(playersRef, (snap) => {
+  return watchRoomCollection(playersRef, { feed: 'players', gameId }, (snap) => {
     const players = snap.docs.map((d) => ({ id: d.id, ...d.data() } as PlayerData))
     callback(players)
   })

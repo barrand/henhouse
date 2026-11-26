@@ -4,7 +4,8 @@ import { httpsCallable } from 'firebase/functions'
 import { functions, db, auth } from '../../lib/firebase'
 import type { ScoringRules, ScoringView } from './scoring'
 import type { RoundData, GameData, PlayerData } from './types'
-import { collection, doc, onSnapshot } from 'firebase/firestore'
+import { collection, doc } from 'firebase/firestore'
+import { watchRoomCollection, watchRoomDocument } from '@shared/roomSync'
 import { applyReactionCounts, combineReactionCounts, type ReactionCounts } from '@shared/reactionCounts'
 
 // -- Fowl Words Callable Functions --
@@ -145,37 +146,59 @@ export async function fowlWordsAbandonGame(gameId: string) {
 }
 
 export function onRoundUpdate(gameId: string, roundNum: number, callback: (data: RoundData | null) => void) {
-  let stopView: (() => void) | undefined
+  let stopView: ReturnType<typeof watchRoomDocument> | undefined
   let stopCounts: (() => void) | undefined
   let stopBallot: (() => void) | undefined
   let publicRound: RoundData | null = null
   let view: ScoringView | undefined
   let counts: ReactionCounts | undefined
   let ballot: { loves: string[]; boo: string | null } | undefined
+  let viewRetry: ReturnType<typeof setTimeout> | undefined
+  let retriedView = false
   const roundRef = doc(db, 'games', gameId, 'rounds', String(roundNum))
+  const scope = { gameId, round: roundNum }
+  const uid = auth.currentUser?.uid
+  const needsView = () => publicRound?.scoringVersion === 1 && uid
+    && (!publicRound.eligiblePlayerIds?.length || publicRound.eligiblePlayerIds.includes(uid))
   const emit = () => {
     let engine = view
-    if (view?.reactionFeed && (view.phase === 'reveal' || view.phase === 'guess')) {
+    if (needsView() && (!view || view.phase !== publicRound?.status || view.attempt !== publicRound.currentAttempt)) {
+      // Both documents are written together, but their listeners can deliver in either order.
+      if (!retriedView && viewRetry === undefined) {
+        viewRetry = setTimeout(() => {
+          viewRetry = undefined
+          retriedView = true
+          stopView?.restart()
+          callback(publicRound)
+        }, 3000)
+      }
+      if (!retriedView) return
+      engine = undefined
+    } else {
+      clearTimeout(viewRetry)
+      viewRetry = undefined
+      retriedView = false
+    }
+    if (engine?.reactionFeed && (engine.phase === 'reveal' || engine.phase === 'guess')) {
       engine = {
-        ...view,
-        ...(counts ? { groups: applyReactionCounts(view.groups, counts) } : {}),
+        ...engine,
+        ...(counts ? { groups: applyReactionCounts(engine.groups, counts) } : {}),
         ...(ballot ? { ownLove: ballot.loves, ownBoo: ballot.boo } : {}),
       }
     }
     callback(publicRound ? { ...publicRound, ...(engine ? { engine } : {}) } : null)
   }
-  const stop = onSnapshot(roundRef, snap => {
+  const stop = watchRoomDocument<RoundData>(roundRef, { ...scope, feed: 'round' }, snap => {
     publicRound = snap.exists() ? { id: snap.id, ...snap.data() } as RoundData : null
-    if (publicRound?.scoringVersion === 1 && !stopView && auth.currentUser) {
-      const uid = auth.currentUser.uid
-      stopView = onSnapshot(doc(roundRef, 'views', uid), own => {
+    if (uid && needsView() && !stopView) {
+      stopView = watchRoomDocument<{ engine?: ScoringView }>(doc(roundRef, 'views', uid), { ...scope, feed: 'player-view' }, own => {
         view = own.data()?.engine as ScoringView | undefined
         if (view?.reactionFeed && (view.phase === 'reveal' || view.phase === 'guess') && !stopCounts) {
-          stopCounts = onSnapshot(collection(roundRef, 'reactionCounts'), shards => {
+          stopCounts = watchRoomCollection(collection(roundRef, 'reactionCounts'), { ...scope, feed: 'reactions' }, shards => {
             counts = combineReactionCounts(shards.docs.map(shard => shard.data()))
             emit()
           })
-          stopBallot = onSnapshot(doc(roundRef, 'privateReactions', uid), ownBallot => {
+          stopBallot = watchRoomDocument(doc(roundRef, 'privateReactions', uid), { ...scope, feed: 'ballot' }, ownBallot => {
             ballot = ownBallot.data() as typeof ballot
             emit()
           })
@@ -186,11 +209,17 @@ export function onRoundUpdate(gameId: string, roundNum: number, callback: (data:
           stopBallot = undefined
         }
         emit()
-      })
+      }, data => ({ phase: data.engine?.phase, attempt: data.engine?.attempt }))
     }
     emit()
-  })
-  return () => { stop(); stopView?.(); stopCounts?.(); stopBallot?.() }
+  }, round => ({ phase: round.status, attempt: round.currentAttempt, revision: round.revision }))
+  return () => {
+    clearTimeout(viewRetry)
+    stop()
+    stopView?.()
+    stopCounts?.()
+    stopBallot?.()
+  }
 }
 
 export async function scoringCapabilities() {

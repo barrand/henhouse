@@ -25,6 +25,7 @@ Each game should provide:
 - `types.ts` for game, player, round, result, and phase types.
 - `service.ts` for callable wrappers and Firestore listeners.
 - `hooks/useGame.ts` for game/player/round subscriptions.
+- Use `useRoomId`, `useRoomState`, and `useRoundState` from `src/shared/` to look up rooms and subscribe to game state. Route game-specific Firestore subscriptions through `watchRoomDocument` or `watchRoomCollection` in `src/shared/roomSync.ts` to get automatic reconnection and diagnostics.
 - `pages/Game.tsx` for room lookup, presence, rematch redirects, abandoned-game redirects, late-join handling, and phase routing.
 - Components for lobby, header, active round, reveal/result, and final scoreboard.
 

@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '../../../lib/firebase'
+import { useRoomId } from '@shared/useRoomId'
 import { useAuth, useCurrentPlayer, useIsHost } from '../../../hooks/usePlayer'
 import { setupPresence } from '../../../lib/presence'
 import { getEligiblePlayers, isCurrentPlayerWaiting } from '@shared/roundEligibility'
@@ -16,34 +15,17 @@ export default function Game() {
   const { code } = useParams<{ code: string }>()
   const { uid, loading: authLoading } = useAuth()
   const navigate = useNavigate()
-  const [gameId, setGameId] = useState<string | null>(null)
-  const [lookupError, setLookupError] = useState('')
+  const { gameId, lookupError } = useRoomId(code, uid)
 
   const { game, players, loading: gameLoading } = useGame(gameId)
-  const round = useRound(gameId, game?.currentRound ?? null)
+  const round = useRound(gameId, game?.status === 'playing' ? game.currentRound : null)
   const currentPlayer = useCurrentPlayer(players, uid)
   const isHost = useIsHost(game?.hostId, uid)
   const eligiblePlayers = getEligiblePlayers(round, players)
   const isWaitingForNextRound = isCurrentPlayerWaiting(round, uid)
 
   useEffect(() => {
-    if (!code) return
-    const upperCode = code.toUpperCase()
-
-    async function lookupGame() {
-      const roomRef = doc(db, 'rooms', upperCode)
-      const roomSnap = await getDoc(roomRef)
-      if (roomSnap.exists() && roomSnap.data().active) {
-        setGameId(roomSnap.data().gameId)
-      } else {
-        setLookupError('Room not found')
-      }
-    }
-    lookupGame()
-  }, [code])
-
-  useEffect(() => {
-    if (gameId && uid) setupPresence(gameId)
+    if (gameId && uid) return setupPresence(gameId)
   }, [gameId, uid])
 
   useEffect(() => {
@@ -67,7 +49,7 @@ export default function Game() {
     window.scrollTo(0, 0)
   }, [game?.status, round?.status, isWaitingForNextRound, lookupError])
 
-  if (authLoading || gameLoading) {
+  if (!lookupError && (authLoading || gameLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface linen-texture">
         <p className="text-lg text-on-surface-variant font-body">Loading...</p>

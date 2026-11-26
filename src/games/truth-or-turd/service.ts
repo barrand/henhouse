@@ -1,5 +1,6 @@
 import { httpsCallable } from 'firebase/functions'
-import { doc, onSnapshot } from 'firebase/firestore'
+import { doc } from 'firebase/firestore'
+import { watchRoomDocument } from '@shared/roomSync'
 import { db, functions } from '../../lib/firebase'
 import { onGameUpdate as sharedOnGameUpdate, onPlayersUpdate as sharedOnPlayersUpdate } from '@shared/gameService'
 import type { GameData, PlayerData, RoundData, TruthOrTurdSubmittedAnswer } from './types'
@@ -53,7 +54,7 @@ export function onPlayersUpdate(gameId: string, callback: (players: PlayerData[]
 }
 
 export function onRoundUpdate(gameId: string, roundNum: number, callback: (data: RoundData | null) => void) {
-  return onSnapshot(doc(db, 'games', gameId, 'rounds', String(roundNum)), (snap) => {
+  return watchRoomDocument<RoundData>(doc(db, 'games', gameId, 'rounds', String(roundNum)), { feed: 'round', gameId, round: roundNum }, (snap) => {
     callback(snap.exists() ? ({ id: snap.id, ...snap.data() } as RoundData) : null)
-  })
+  }, round => ({ phase: round.status }))
 }

@@ -5,6 +5,7 @@ import { functions } from '../../lib/firebase'
 import type { RoundData, GameData, PlayerData } from './types'
 import { doc, onSnapshot, collection, query, where } from 'firebase/firestore'
 import { db } from '../../lib/firebase'
+import { watchRoomDocument } from '@shared/roomSync'
 
 // -- Flock Callable Functions --
 
@@ -88,9 +89,9 @@ export function onPlayersUpdate(gameId: string, callback: (players: PlayerData[]
 }
 
 export function onRoundUpdate(gameId: string, roundNum: number, callback: (data: RoundData | null) => void) {
-  return onSnapshot(doc(db, 'games', gameId, 'rounds', String(roundNum)), (snap) => {
+  return watchRoomDocument<RoundData>(doc(db, 'games', gameId, 'rounds', String(roundNum)), { feed: 'round', gameId, round: roundNum }, (snap) => {
     callback(snap.exists() ? ({ id: snap.id, ...snap.data() } as RoundData) : null)
-  })
+  }, round => ({ phase: round.status, questionInstance: round.questionInstance }))
 }
 
 const flockAbandonGameFn = httpsCallable<{ gameId: string }, void>(functions, 'flockAbandonGame')

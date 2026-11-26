@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '../../../lib/firebase'
+import { useRoomId } from '@shared/useRoomId'
 import { useAuth, useCurrentPlayer, useIsHost } from '../../../hooks/usePlayer'
 import { useGame, useRound } from '../hooks/useGame'
 import { setupPresence } from '../../../lib/presence'
@@ -26,13 +25,11 @@ export default function Game() {
   const { code } = useParams<{ code: string }>()
   const { uid, loading: authLoading } = useAuth()
   const navigate = useNavigate()
-  const [gameId, setGameId] = useState<string | null>(null)
-  const [lookupError, setLookupError] = useState('')
+  const { gameId, lookupError } = useRoomId(code, uid)
   const [completedHandoffKey, setCompletedHandoffKey] = useState<string | null>(null)
 
   const { game, players, loading: gameLoading } = useGame(gameId)
-  const subscribedRound = useRound(gameId, game?.currentRound ?? null)
-  const round = subscribedRound?.id === String(game?.currentRound) ? subscribedRound : null
+  const round = useRound(gameId, game?.status === 'playing' ? game.currentRound : null)
   const revealAt = round?.engine?.revealAt ?? round?.revealAt ?? 0
   const now = usePresentationClock(Boolean(revealAt), 80, revealAt + FOWL_DEBRIEF_MS + 750)
   const reveal = fowlReveal(revealAt, now)
@@ -46,25 +43,7 @@ export default function Game() {
   const isWaitingForNextRound = isCurrentPlayerWaiting(round, uid)
 
   useEffect(() => {
-    if (!code) return
-    const upperCode = code.toUpperCase()
-
-    async function lookupGame() {
-      const roomRef = doc(db, 'rooms', upperCode)
-      const roomSnap = await getDoc(roomRef)
-      if (roomSnap.exists() && roomSnap.data().active) {
-        setGameId(roomSnap.data().gameId)
-      } else {
-        setLookupError('Room not found')
-      }
-    }
-    lookupGame()
-  }, [code])
-
-  useEffect(() => {
-    if (gameId && uid) {
-      setupPresence(gameId)
-    }
+    if (gameId && uid) return setupPresence(gameId)
   }, [gameId, uid])
 
   // Auto-redirect on rematch
@@ -93,7 +72,7 @@ export default function Game() {
     window.scrollTo(0, 0)
   }, [game?.status, round?.status, isWaitingForNextRound, lookupError])
 
-  if (authLoading || gameLoading) {
+  if (!lookupError && (authLoading || gameLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface linen-texture">
         <p className="text-lg text-on-surface-variant font-body">Loading...</p>

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { collection, doc, onSnapshot } from 'firebase/firestore'
+import { collection, doc } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from '../../lib/firebase'
 import type { DisplayGame, DisplayRound } from '../../../functions/src/shared/sharedViewModel'
 import { applyReactionCounts, combineReactionCounts, type ReactionCounts } from '../reactionCounts'
+import { watchRoomCollection, watchRoomDocument } from '../roomSync'
 
 export interface DisplayPlayer {
   id: string
@@ -46,15 +47,17 @@ export function useDisplayRoom(code: string, uid: string | null, retry: number) 
       if (cancelled) return
       setGameId(data.gameId)
       setError('')
-      stops.push(onSnapshot(doc(db, 'games', data.gameId, 'shared', 'game'), snapshot => {
-        if (snapshot.exists()) setGame(snapshot.data() as DisplayGame)
-      }, failed))
-      stops.push(onSnapshot(collection(db, 'games', data.gameId, 'players'), snapshot => {
+      stops.push(watchRoomDocument<DisplayGame>(doc(db, 'games', data.gameId, 'shared', 'game'),
+        { feed: 'shared-game', gameId: data.gameId }, snapshot => {
+          setGame(snapshot.exists() ? snapshot.data() as DisplayGame : null)
+        }, game => ({ phase: game.status, round: game.round })))
+      stops.push(watchRoomCollection(collection(db, 'games', data.gameId, 'players'),
+        { feed: 'shared-players', gameId: data.gameId }, snapshot => {
         setPlayers(snapshot.docs.flatMap(player => {
           const { name, score } = player.data()
           return typeof name === 'string' && name.trim() ? [{ id: player.id, name, score: score ?? 0 }] : []
         }))
-      }, failed))
+      }))
     }, failed)
     return () => {
       cancelled = true
@@ -64,16 +67,18 @@ export function useDisplayRoom(code: string, uid: string | null, retry: number) 
 
   useEffect(() => {
     if (!gameId || !roundNumber) return
-    return onSnapshot(doc(db, 'games', gameId, 'sharedRounds', String(roundNumber)), snapshot => {
-      if (snapshot.exists()) setEntry({ round: roundNumber, data: snapshot.data() as DisplayRound })
-    }, err => setError(err.message))
+    return watchRoomDocument<DisplayRound>(doc(db, 'games', gameId, 'sharedRounds', String(roundNumber)),
+      { feed: 'shared-round', gameId, round: roundNumber }, snapshot => {
+        setEntry(snapshot.exists() ? { round: roundNumber, data: snapshot.data() as DisplayRound } : null)
+      }, round => ({ phase: round.phase }))
   }, [gameId, roundNumber])
 
   useEffect(() => {
     if (!gameId || !roundNumber || !liveFowl) return
-    return onSnapshot(collection(db, 'games', gameId, 'rounds', String(roundNumber), 'reactionCounts'), shards => {
+    return watchRoomCollection(collection(db, 'games', gameId, 'rounds', String(roundNumber), 'reactionCounts'),
+      { feed: 'reactions', gameId, round: roundNumber }, shards => {
       setCounts({ round: roundNumber, data: combineReactionCounts(shards.docs.map(shard => shard.data())) })
-    }, err => setError(err.message))
+    })
   }, [gameId, roundNumber, liveFowl])
 
   const displayRound = liveFowl && counts?.round === roundNumber

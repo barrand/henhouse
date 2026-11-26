@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
+import RoomSyncStatus from './shared/RoomSyncStatus'
 
 const FlockGame = lazy(() => import('@flock/pages/Game'))
 const FowlWordsGame = lazy(() => import('@fowl-words/pages/Game'))
@@ -20,6 +21,10 @@ const Loading = () => (
 )
 
 export default function App() {
+  return <><GameRoutes /><RoomSyncStatus /></>
+}
+
+function GameRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Home experimental />} />
